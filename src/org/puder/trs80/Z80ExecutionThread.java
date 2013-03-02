@@ -1,6 +1,6 @@
 package org.puder.trs80;
 
-import android.graphics.Rect;
+import android.content.Context;
 
 public class Z80ExecutionThread extends Thread {
 
@@ -10,38 +10,34 @@ public class Z80ExecutionThread extends Thread {
 
     public native void setRunning(boolean run);
 
-    private native void bootTRS80(int entryAddr);
+    private native void bootTRS80(int entryAddr, byte[] mem, byte[] screen);
 
-    private Memory mem;
-    private int    entryAddr;
+    private Context      context;
+    private RenderThread renderer;
 
-    private Screen screen;
+    private Memory       mem;
+    private byte[]       memBuffer;
+    private byte[]       screenBuffer;
+    private int          entryAddr;
 
-    public Z80ExecutionThread(Screen screen, Memory mem, int entryAddr) {
-        this.screen = screen;
+    public Z80ExecutionThread(RenderThread renderer, Memory mem, int entryAddr) {
         this.mem = mem;
+        this.memBuffer = mem.getMemBuffer();
+        this.screenBuffer = mem.getScreenBuffer();
         this.entryAddr = entryAddr;
+        this.renderer = renderer;
     }
 
-    public void pokeRAM(int addr, byte b) {
-        mem.poke(addr, b);
-        if (addr >= 0x3c00 && addr <= 0x3fff) {
-            Rect dirtyRect = screen.computeBounds(addr);
-            screen.postInvalidateDelayed(30, dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
-        }
+    public boolean isRendering() {
+        return renderer.isRendering();
     }
 
-    public byte peekRAM(int addr) {
-        return mem.peek(addr);
-    }
-
-    public byte[] getMem() {
-        return mem.getRawMem();
+    public void updateScreen() {
+        renderer.triggerScreenUpdate();
     }
 
     @Override
     public void run() {
-        bootTRS80(entryAddr);
+        bootTRS80(entryAddr, memBuffer, screenBuffer);
     }
-
 }

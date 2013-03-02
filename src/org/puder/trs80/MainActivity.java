@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mem = new Memory();
+        mem = new Memory(64 * 1024, 0x3c00, 0x3fff);
         int entryAddr = CMD.loadCmdFile("defense.cmd", mem);
         rootView = new Screen(this, mem, entryAddr);
         setContentView(rootView);
