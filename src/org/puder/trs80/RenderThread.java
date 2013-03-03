@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
@@ -22,7 +23,6 @@ public class RenderThread extends Thread {
     private SurfaceHolder    surfaceHolder;
     private Context          context;
     private byte[]           screenBuffer;
-    private Object           lock          = new Object();
 
     public RenderThread(Context context, SurfaceHolder holder, Memory mem) {
         this.context = context;
@@ -40,20 +40,19 @@ public class RenderThread extends Thread {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while (run) {
+            isRendering = false;
             try {
-                synchronized (lock) {
-                    isRendering = false;
-                    lock.wait();
-                    isRendering = true;
-                }
+                this.wait();
             } catch (InterruptedException e) {
                 return;
             }
+            isRendering = true;
             Canvas c = surfaceHolder.lockCanvas(null);
             if (c == null) {
-                return;
+                Log.d("Z80", "Canvas is null");
+                continue;
             }
             int i = 0;
             for (int row = 0; row < SCREEN_HEIGHT; row++) {
@@ -69,10 +68,8 @@ public class RenderThread extends Thread {
         }
     }
 
-    public void triggerScreenUpdate() {
-        synchronized (lock) {
-            lock.notify();
-        }
+    public synchronized void triggerScreenUpdate() {
+        this.notify();
     }
 
     private void generateFontInformation() {

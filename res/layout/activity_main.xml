@@ -1,14 +1,59 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:keyboard="http://schemas.android.com/apk/res/org.puder.trs80"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
 
-    <TextView
+    <org.puder.trs80.Screen
+        android:id="@+id/screen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_world" />
+        android:layout_alignParentBottom="true" >
+
+        <org.puder.trs80.Key
+            android:id="@+id/key_A"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            keyboard:address="0x3840"
+            keyboard:label="En"
+            keyboard:mask="1" />
+
+        <org.puder.trs80.Key
+            android:id="@+id/key_B"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            keyboard:address="0x3840"
+            keyboard:label="Cl"
+            keyboard:mask="2" />
+
+        <org.puder.trs80.Key
+            android:id="@+id/key_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            keyboard:address="0x3810"
+            keyboard:label="1"
+            keyboard:mask="2" />
+
+        <org.puder.trs80.Key
+            android:id="@+id/key_LEFT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            keyboard:address="0x3840"
+            keyboard:label="L"
+            keyboard:mask="0x20" />
+
+        <org.puder.trs80.Key
+            android:id="@+id/key_RIGHT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            keyboard:address="0x3840"
+            keyboard:label="R"
+            keyboard:mask="0x40" />
+    </LinearLayout>
 
 </RelativeLayout>

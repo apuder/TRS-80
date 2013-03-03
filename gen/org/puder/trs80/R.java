@@ -9,13 +9,43 @@ package org.puder.trs80;
 
 public final class R {
     public static final class attr {
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int address=0x7f010001;
+        /** <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int label=0x7f010000;
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int mask=0x7f010002;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
         public static final int trs80font=0x7f020001;
     }
     public static final class id {
-        public static final int menu_settings=0x7f070000;
+        public static final int key_1=0x7f070003;
+        public static final int key_A=0x7f070001;
+        public static final int key_B=0x7f070002;
+        public static final int key_LEFT=0x7f070004;
+        public static final int key_RIGHT=0x7f070005;
+        public static final int menu_settings=0x7f070006;
+        public static final int screen=0x7f070000;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -56,4 +86,65 @@ public final class R {
          */
         public static final int AppTheme=0x7f050001;
     }
+    public static final class styleable {
+        /** Attributes that can be used with a Keyboard.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #Keyboard_address org.puder.trs80:address}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_label org.puder.trs80:label}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_mask org.puder.trs80:mask}</code></td><td></td></tr>
+           </table>
+           @see #Keyboard_address
+           @see #Keyboard_label
+           @see #Keyboard_mask
+         */
+        public static final int[] Keyboard = {
+            0x7f010000, 0x7f010001, 0x7f010002
+        };
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#address}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:address
+        */
+        public static final int Keyboard_address = 1;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#label}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:label
+        */
+        public static final int Keyboard_label = 0;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#mask}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:mask
+        */
+        public static final int Keyboard_mask = 2;
+    };
 }

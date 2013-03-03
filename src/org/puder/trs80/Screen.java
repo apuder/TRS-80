@@ -1,17 +1,23 @@
 package org.puder.trs80;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
+    private Context            context;
     private Z80ExecutionThread threadZ80;
     private RenderThread       threadRender;
 
-    public Screen(Context context, Memory mem, int entryAddr) {
-        super(context);
+    public Screen(Context context, AttributeSet attr) {
+        super(context, attr);
+        this.context = context;
         getHolder().addCallback(this);
+    }
+
+    public void setContext(Memory mem, int entryAddr) {
         threadRender = new RenderThread(context, getHolder(), mem);
         threadZ80 = new Z80ExecutionThread(threadRender, mem, entryAddr);
     }
@@ -52,5 +58,12 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
 
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = 16 * 64;
+        int height = 24 * 16;
+        setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
     }
 }

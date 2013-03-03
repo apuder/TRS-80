@@ -3,21 +3,18 @@ package org.puder.trs80;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
-import android.view.View;
 
 public class MainActivity extends Activity {
-
-    private Memory mem;
-
-    private View   rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mem = new Memory(64 * 1024, 0x3c00, 0x3fff);
+        Memory mem = new Memory(64 * 1024, 0x3c00, 0x3fff);
+        TRS80Application.setMemory(mem);
         int entryAddr = CMD.loadCmdFile("defense.cmd", mem);
-        rootView = new Screen(this, mem, entryAddr);
-        setContentView(rootView);
+        setContentView(R.layout.activity_main);
+        Screen screen = (Screen) findViewById(R.id.screen);
+        screen.setContext(mem, entryAddr);
     }
 
     @Override

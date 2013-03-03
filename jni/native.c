@@ -88,9 +88,11 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
         Z80Execute(&ctx);
         instructionsSinceLastScreenAccess++;
         if (instructionsSinceLastScreenAccess > 2000) {
+	        //__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: PC=0x%x, islsa=%d, swu=%d", ctx.PC, instructionsSinceLastScreenAccess, screenWasUpdated);
         	if (screenWasUpdated) {
         		jboolean isRendering = (*env)->CallBooleanMethod(env, obj, isRenderingMethodId);
         		if (!isRendering) {
+        	       // __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: !isRendering");
         			memcpy(screenBuffer, memBuffer + 0x3c00, 0x3fff - 0x3c00 + 1);
         			(*env)->CallVoidMethod(env, obj, updateScreenMethodId);
         			screenWasUpdated = 0;
