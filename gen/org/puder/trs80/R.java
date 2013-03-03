@@ -33,18 +33,74 @@ theme attribute (in the form
 containing a value of this type.
          */
         public static final int mask=0x7f010002;
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int size=0x7f010003;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
         public static final int trs80font=0x7f020001;
     }
     public static final class id {
-        public static final int key_1=0x7f070003;
-        public static final int key_A=0x7f070001;
-        public static final int key_B=0x7f070002;
-        public static final int key_LEFT=0x7f070004;
-        public static final int key_RIGHT=0x7f070005;
-        public static final int menu_settings=0x7f070006;
+        public static final int key_0=0x7f07000a;
+        public static final int key_1=0x7f070001;
+        public static final int key_2=0x7f070002;
+        public static final int key_3=0x7f070003;
+        public static final int key_4=0x7f070004;
+        public static final int key_5=0x7f070005;
+        public static final int key_6=0x7f070006;
+        public static final int key_7=0x7f070007;
+        public static final int key_8=0x7f070008;
+        public static final int key_9=0x7f070009;
+        public static final int key_A=0x7f07001d;
+        public static final int key_AT=0x7f070019;
+        public static final int key_B=0x7f07002e;
+        public static final int key_BREAK=0x7f07000d;
+        public static final int key_C=0x7f07002c;
+        public static final int key_CLEAR=0x7f070028;
+        public static final int key_COLON=0x7f07000b;
+        public static final int key_COMMA=0x7f070031;
+        public static final int key_D=0x7f07001f;
+        public static final int key_DOT=0x7f070032;
+        public static final int key_DOWN=0x7f07001c;
+        public static final int key_E=0x7f070011;
+        public static final int key_ENTER=0x7f070027;
+        public static final int key_F=0x7f070020;
+        public static final int key_G=0x7f070021;
+        public static final int key_H=0x7f070022;
+        public static final int key_I=0x7f070016;
+        public static final int key_J=0x7f070023;
+        public static final int key_K=0x7f070024;
+        public static final int key_L=0x7f070025;
+        public static final int key_LEFT=0x7f07001a;
+        public static final int key_M=0x7f070030;
+        public static final int key_MINUS=0x7f07000c;
+        public static final int key_N=0x7f07002f;
+        public static final int key_O=0x7f070017;
+        public static final int key_P=0x7f070018;
+        public static final int key_Q=0x7f07000f;
+        public static final int key_R=0x7f070012;
+        public static final int key_RIGHT=0x7f07001b;
+        public static final int key_S=0x7f07001e;
+        public static final int key_SEMICOLON=0x7f070026;
+        public static final int key_SHIFT1=0x7f070029;
+        public static final int key_SHIFT2=0x7f070034;
+        public static final int key_SLASH=0x7f070033;
+        public static final int key_SPACE=0x7f070035;
+        public static final int key_T=0x7f070013;
+        public static final int key_U=0x7f070015;
+        public static final int key_UP=0x7f07000e;
+        public static final int key_V=0x7f07002d;
+        public static final int key_W=0x7f070010;
+        public static final int key_X=0x7f07002b;
+        public static final int key_Y=0x7f070014;
+        public static final int key_Z=0x7f07002a;
+        public static final int menu_settings=0x7f070036;
         public static final int screen=0x7f070000;
     }
     public static final class layout {
@@ -96,13 +152,15 @@ containing a value of this type.
            <tr><td><code>{@link #Keyboard_address org.puder.trs80:address}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_label org.puder.trs80:label}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_mask org.puder.trs80:mask}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_size org.puder.trs80:size}</code></td><td></td></tr>
            </table>
            @see #Keyboard_address
            @see #Keyboard_label
            @see #Keyboard_mask
+           @see #Keyboard_size
          */
         public static final int[] Keyboard = {
-            0x7f010000, 0x7f010001, 0x7f010002
+            0x7f010000, 0x7f010001, 0x7f010002, 0x7f010003
         };
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#address}
@@ -146,5 +204,19 @@ containing a value of this type.
           @attr name android:mask
         */
         public static final int Keyboard_mask = 2;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#size}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:size
+        */
+        public static final int Keyboard_size = 3;
     };
 }
