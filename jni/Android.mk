@@ -1,8 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog  
-LOCAL_MODULE := z80
-LOCAL_CFLAGS := -fsigned-char  
+LOCAL_MODULE := trs80emu
+LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."'
 LOCAL_SRC_FILES := native.c \
 	debug.c \
 	trs_chars.c \
@@ -20,7 +20,6 @@ LOCAL_SRC_FILES := native.c \
 	trs_uart.c \
 	main.c \
 	trs_io.c \
-	trs_xinterface.c \
 	trs_keyboard.c \
 	z80.c \
 	trs_cassette.c \

@@ -73,6 +73,7 @@
 #include <asm/io.h>
 #endif
 
+#undef HAVE_OSS
 #if HAVE_OSS
 #include <sys/ioctl.h>
 #include <fcntl.h>

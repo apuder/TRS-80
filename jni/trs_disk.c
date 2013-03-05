@@ -42,6 +42,7 @@
 
 #include "crc.c"
 
+#undef __linux
 #if __linux
 #include <sys/types.h>
 #include <fcntl.h>

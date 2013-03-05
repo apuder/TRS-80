@@ -27,8 +27,10 @@
 
 #include "z80.h"
 #include "trs.h"
+#if 0
 #include <X11/keysym.h>
 #include <X11/X.h>
+#endif
 #include <unistd.h>
 
 /*
