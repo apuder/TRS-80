@@ -16,6 +16,7 @@ static jbyte* screenBuffer;
 static int instructionsSinceLastScreenAccess;
 static int screenWasUpdated;
 
+#if 0
 static byte context_mem_read_callback(int param, ushort address)
 {
     return memBuffer[address];
@@ -41,6 +42,7 @@ static void context_io_write_callback(int param, ushort address, byte data)
 {
     __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: PW %04x %02x", address, data);
 }
+#endif
 
 
 void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, jint entryAddr, jbyteArray mem, jbyteArray screen)
@@ -73,6 +75,7 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
         return;
     }
 
+#if 0
     Z80Context ctx;
     Z80RESET(&ctx);
     ctx.PC = entryAddr;
@@ -108,7 +111,8 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
         	ctx.tstates -= 120;
         }
     }
-    
+#endif
+
     (*env)->ReleaseByteArrayElements(env, mem, memBuffer, JNI_COMMIT);
     (*env)->ReleaseByteArrayElements(env, mem, screenBuffer, JNI_COMMIT);
 }

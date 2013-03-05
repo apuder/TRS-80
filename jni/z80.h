@@ -1,166 +1,248 @@
-/* =============================================================================
- *  libz80 - Z80 emulation library
- * =============================================================================
+/*
+ * Copyright (C) 1992 Clarendon Hill Software.
  *
- * (C) Gabriel Gambetta (gabriel.gambetta@gmail.com) 2000 - 2012
+ * Permission is granted to any individual or institution to use, copy,
+ * or redistribute this software, provided this copyright notice is retained. 
  *
- * Version 2.1.0
+ * This software is provided "as is" without any expressed or implied
+ * warranty.  If this software brings on any sort of damage -- physical,
+ * monetary, emotional, or brain -- too bad.  You've got no one to blame
+ * but yourself. 
  *
- * -----------------------------------------------------------------------------
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * The software may be modified for your own purposes, but modified versions
+ * must retain this notice.
  */
 
-#ifndef _Z80_H_
-#define _Z80_H_
+/*
+   Modified by Timothy Mann, 1996 and later
+   $Id: z80.h,v 1.16 2009/06/15 23:45:56 mann Exp $
+*/
 
-#include "stdio.h"
+#ifndef _Z80_H
+#define _Z80_H
 
-typedef unsigned short ushort;
-typedef unsigned char byte;
+#include "config.h"
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/time.h>
 
+#ifndef TRUE
+#define TRUE	(1)
+#define FALSE	(0)
+#endif
 
-/** Function type to emulate data read. */
-typedef byte (*Z80DataIn) 	(int param, ushort address);
+typedef unsigned int Uint;      /* 4 bytes */
+typedef unsigned short Ushort;  /* 2 bytes */
+typedef unsigned char Uchar;    /* 1 byte */
 
+#if __WORDSIZE == 32
+typedef unsigned long long tstate_t;
+#define TSTATE_T_MID (((unsigned long long) -1LL)/2ULL)
+#define TSTATE_T_LEN "llu"
+#else
+typedef unsigned long tstate_t;
+#define TSTATE_T_MID (((unsigned long) -1L)/2UL)
+#define TSTATE_T_LEN "lu"
+#endif
 
-/** Function type to emulate data write. */
-typedef void (*Z80DataOut)	(int param, ushort address, byte data);
-
-
-/** 
- * A Z80 register set.
- * An union is used since we want independent access to the high and low bytes of the 16-bit registers.
- */
-typedef union 
+struct twobyte
 {
-	/** Word registers. */
-	struct
-	{
-		ushort AF, BC, DE, HL, IX, IY, SP;
-	} wr;
-	
-	/** Byte registers. Note that SP can't be accesed partially. */
-	struct
-	{
-		byte F, A, C, B, E, D, L, H, IXl, IXh, IYl, IYh;
-	} br;
-} Z80Regs;
+#ifdef big_endian
+    Uchar high, low;
+#else
+    Uchar low, high;
+#endif
+};
 
-
-/** The Z80 flags */
-typedef enum
+struct fourbyte
 {
-	F_C  =   1,	/**< Carry */
-	F_N  =   2, /**< Sub / Add */
-	F_PV =   4, /**< Parity / Overflow */
-	F_3  =   8, /**< Reserved */
-	F_H  =  16, /**< Half carry */
-	F_5  =  32, /**< Reserved */
-	F_Z  =  64, /**< Zero */
-	F_S  = 128  /**< Sign */
-} Z80Flags;
+#ifdef big_endian
+    Uchar byte3, byte2, byte1, byte0;
+#else
+    Uchar byte0, byte1, byte2, byte3;
+#endif
+};
 
-
-/** A Z80 execution context. */
-typedef struct
+/* for implementing registers which can be seen as bytes or words: */
+typedef union
 {
-	Z80Regs	R1;		/**< Main register set (R) */
-	Z80Regs R2;		/**< Alternate register set (R') */
-	ushort	PC;		/**< Program counter */
-	byte	R;		/**< Refresh */
-	byte	I;
-	byte	IFF1;	/**< Interrupt Flipflop 1 */
-	byte	IFF2;	/**< Interrupt Flipflop 2 */
-	byte	IM;		/**< Instruction mode */
-	
-	Z80DataIn	memRead;
-	Z80DataOut	memWrite;
-	int			memParam;
-	
-	Z80DataIn	ioRead;
-	Z80DataOut	ioWrite;
-	int			ioParam;
-	
-	byte		halted;
-	unsigned	tstates;
+    struct twobyte byte;
+    Ushort word;
+} wordregister;
 
-	/* Below are implementation details which may change without
-	 * warning; they should not be relied upon by any user of this
-	 * library.
-	 */
+struct z80_state_struct
+{
+    wordregister af;
+    wordregister bc;
+    wordregister de;
+    wordregister hl;
+    wordregister ix;
+    wordregister iy;
+    wordregister sp;
+    wordregister pc;
 
-	/* If true, an NMI has been requested. */
+    wordregister af_prime;
+    wordregister bc_prime;
+    wordregister de_prime;
+    wordregister hl_prime;
 
-	byte nmi_req;
+    Uchar i;	/* interrupt-page address register */
+    /* Uchar r; */  /* no memory-refresh register, just fetch random values */
 
-	/* If true, a maskable interrupt has been requested. */
+    Uchar iff1, iff2;
+    Uchar interrupt_mode;
 
-	byte int_req;
+    /* To signal a maskable interrupt, set irq TRUE.  The CPU does not
+     * turn off irq; the external device must turn it off when
+     * appropriately tickled by some IO port or memory address that it
+     * decodes.  INT is level triggered, so Z-80 code must tickle the
+     * device before reenabling interrupts.
+     *
+     * There is no support as yet for fetching an interrupt vector or
+     * RST instruction from the interrupting device, as this gets
+     * rather complex when there can be more than one device with an
+     * interrupt pending.  So you'd better use interrupt_mode 1 only
+     * (which is what the TRS-80 does).
+     */
+    int irq;
 
-	/* If true, defer checking maskable interrupts for one
-	 * instruction.  This is used to keep an interrupt from happening
-	 * immediately after an IE instruction. */
+    /* To signal a nonmaskable interrupt, set nmi to TRUE.  The CPU
+     * does not turn off nmi; the external device must turn it off
+     * when tickled (or after a timeout).  NMI is edge triggered, so
+     * it has to be turned off and back on again before it can cause
+     * another interrupt.  nmi_seen remembers that an edge has been seen,
+     * so turn off both nmi and nmi_seen when the interrupt is acknowledged.
+     */
+    int nmi, nmi_seen;
 
-	byte defer_int;
+    /* Speed control.  0 = full speed */
+    int delay;
 
-	/* When a maskable interrupt has been requested, the interrupt
-	 * vector.  For interrupt mode 1, it's the opcode to execute.  For
-	 * interrupt mode 2, it's the LSB of the interrupt vector address.
-	 * Not used for interrupt mode 0.
-	 */
+    /* Cyclic T-state counter */
+    tstate_t t_count;
 
-	byte int_vector;
+    /* Clock in MHz = T-states per microsecond */
+    float clockMHz;
 
-	/* If true, then execute the opcode in int_vector. */
+    /* Simple event scheduler.  If nonzero, when t_count passes sched,
+     * trs_do_event() is called and sched is set to zero. */
+    tstate_t sched;
+};
 
-	byte exec_int_vector;
+#define Z80_ADDRESS_LIMIT	(1 << 16)
 
-} Z80Context;
-
-
-/** Execute the next instruction. */
-void Z80Execute (Z80Context* ctx);
-
-/** Execute enough instructions to use at least tstates cycles.
- * Returns the number of tstates actually executed.  Note: Resets
- * ctx->tstates.*/
-unsigned Z80ExecuteTStates(Z80Context* ctx, unsigned tstates);
-
-/** Decode the next instruction to be executed.
- * dump and decode can be NULL if such information is not needed
- *
- * @param dump A buffer which receives the hex dump
- * @param decode A buffer which receives the decoded instruction
+/*
+ * Register accessors:
  */
-void Z80Debug (Z80Context* ctx, char* dump, char* decode);
 
-/** Resets the processor. */
-void Z80RESET (Z80Context* ctx);
+#define REG_A	(z80_state.af.byte.high)
+#define REG_F	(z80_state.af.byte.low)
+#define REG_B	(z80_state.bc.byte.high)
+#define REG_C	(z80_state.bc.byte.low)
+#define REG_D	(z80_state.de.byte.high)
+#define REG_E	(z80_state.de.byte.low)
+#define REG_H	(z80_state.hl.byte.high)
+#define REG_L	(z80_state.hl.byte.low)
+#define REG_IX_HIGH	(z80_state.ix.byte.high)
+#define REG_IX_LOW	(z80_state.ix.byte.low)
+#define REG_IY_HIGH	(z80_state.iy.byte.high)
+#define REG_IY_LOW	(z80_state.iy.byte.low)
 
-/** Generates a hardware interrupt.
- * Some interrupt modes read a value from the data bus; this value must be provided in this function call, even
- * if the processor ignores that value in the current interrupt mode.
+#define REG_SP	(z80_state.sp.word)
+#define REG_PC	(z80_state.pc.word)
+
+#define REG_AF	(z80_state.af.word)
+#define REG_BC	(z80_state.bc.word)
+#define REG_DE	(z80_state.de.word)
+#define REG_HL	(z80_state.hl.word)
+
+#define REG_AF_PRIME	(z80_state.af_prime.word)
+#define REG_BC_PRIME	(z80_state.bc_prime.word)
+#define REG_DE_PRIME	(z80_state.de_prime.word)
+#define REG_HL_PRIME	(z80_state.hl_prime.word)
+
+#define REG_IX	(z80_state.ix.word)
+#define REG_IY	(z80_state.iy.word)
+
+#define REG_I	(z80_state.i)
+
+#define HIGH(p) (((struct twobyte *)(p))->high)
+#define LOW(p) (((struct twobyte *)(p))->low)
+
+#define T_COUNT(n) (z80_state.t_count += (n))
+
+/*
+ * Flag accessors:
  *
- * @param value The value to read from the data bus
+ * Flags are:
+ *
+ *	7   6   5   4   3   2   1   0
+ *	S   Z   -   H   -  P/V  N   C
+ *	
+ *	C	Carry
+ *	N	Subtract
+ *	P/V	Parity/Overflow
+ *	H	Half-carry
+ *	Z	Zero
+ *	S	Sign
  */
-void Z80INT (Z80Context* ctx, byte value);
 
+#define CARRY_MASK		(0x1)
+#define SUBTRACT_MASK		(0x2)
+#define PARITY_MASK		(0x4)
+#define OVERFLOW_MASK		(0x4)
+#define UNDOC3_MASK             (0x8)
+#define HALF_CARRY_MASK		(0x10)
+#define UNDOC5_MASK             (0x20)
+#define ZERO_MASK		(0x40)
+#define	SIGN_MASK		(0x80)
+#define ALL_FLAGS_MASK		(CARRY_MASK | SUBTRACT_MASK | OVERFLOW_MASK | \
+				 HALF_CARRY_MASK | ZERO_MASK | SIGN_MASK)
 
-/** Generates a non-maskable interrupt. */
-void Z80NMI (Z80Context* ctx);
+#define SET_SIGN()		(REG_F |= SIGN_MASK)
+#define CLEAR_SIGN()		(REG_F &= (~SIGN_MASK))
+#define SET_ZERO()		(REG_F |= ZERO_MASK)
+#define CLEAR_ZERO()		(REG_F &= (~ZERO_MASK))
+#define SET_HALF_CARRY()       	(REG_F |= HALF_CARRY_MASK)
+#define CLEAR_HALF_CARRY()	(REG_F &= (~HALF_CARRY_MASK))
+#define SET_OVERFLOW()		(REG_F |= OVERFLOW_MASK)
+#define CLEAR_OVERFLOW()	(REG_F &= (~OVERFLOW_MASK))
+#define SET_PARITY()		(REG_F |= PARITY_MASK)
+#define CLEAR_PARITY()		(REG_F &= (~PARITY_MASK))
+#define SET_SUBTRACT()		(REG_F |= SUBTRACT_MASK)
+#define CLEAR_SUBTRACT()	(REG_F &= (~SUBTRACT_MASK))
+#define SET_CARRY()		(REG_F |= CARRY_MASK)
+#define CLEAR_CARRY()		(REG_F &= (~CARRY_MASK))
 
+#define SIGN_FLAG		(REG_F & SIGN_MASK)
+#define ZERO_FLAG		(REG_F & ZERO_MASK)
+#define HALF_CARRY_FLAG		(REG_F & HALF_CARRY_MASK)
+#define OVERFLOW_FLAG		(REG_F & OVERFLOW_MASK)
+#define PARITY_FLAG		(REG_F & PARITY_MASK)
+#define SUBTRACT_FLAG		(REG_F & SUBTRACT_MASK)
+#define CARRY_FLAG		(REG_F & CARRY_MASK)
+
+extern struct z80_state_struct z80_state;
+
+extern void z80_reset(void);
+extern int z80_run(int continuous);
+extern void mem_init(void);
+extern int mem_read(int address);
+extern void mem_write(int address, int value);
+extern void mem_write_rom(int address, int value);
+extern int mem_read_word(int address);
+extern void mem_write_word(int address, int value);
+Uchar *mem_pointer(int address, int writing);
+extern int mem_block_transfer(Ushort dest, Ushort source, int direction,
+			      Ushort count);
+extern int load_hex(); /* returns highest address loaded + 1 */
+extern void debug(const char *fmt, ...);
+extern void error(const char *fmt, ...);
+extern void fatal(const char *fmt, ...);
+extern void z80_out(int port, int value);
+extern int z80_in(int port);
+extern int disassemble(unsigned short pc);
+extern void debug_init(void);
+extern void debug_shell(void);
 
 #endif
