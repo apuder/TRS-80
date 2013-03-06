@@ -18,25 +18,6 @@
 
 extern char trs_char_data[][MAXCHARS][TRS_CHAR_HEIGHT];
 
-int trs_parse_command_line(int argc, char **argv, int *debug)
-{
-	NOT_IMPLEMENTED();
-#if 0
-      trs_emtsafe = True;
-      *debug = False;
-      trs_autodelay = True;
-      trs_model = 3;
-    trs_disk_dir = strdup(value.addr);
-      grafyx_set_microlabs(False);
-      trs_disk_doubler = TRSDISK_BOTH;
-      trs_disk_truedam = False;
-    cassette_default_sample_rate = strtol(value.addr, NULL, 0);
-      title = strdup(value.addr);
-      trs_uart_name = strdup(value.addr);
-      trs_uart_switches = strtol(value.addr, NULL, 0);
-      trs_kb_bracket(False);
-#endif
-}
 
 int trs_screen_batched = 0;
 

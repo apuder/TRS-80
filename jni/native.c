@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <android/log.h>
-#include "z80.h"
+#include "trs.h"
 
 #define DEBUG_TAG "Z80"
 
@@ -75,6 +75,7 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
         return;
     }
 
+    android_main(0, NULL);
 #if 0
     Z80Context ctx;
     Z80RESET(&ctx);

@@ -26,6 +26,10 @@
 #include "trs_disk.h"
 #include "load_cmd.h"
 
+#include "trs_iodefs.h"
+#include "trs_uart.h"
+#include "trs_imp_exp.h"
+
 int trs_model = 1;
 int trs_paused = 1;
 int trs_autodelay = 0;
@@ -101,7 +105,11 @@ void trs_load_compiled_rom(int size, unsigned char rom[])
     }
 }
 
+#ifdef ANDROID
+int android_main(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
     int debug = FALSE;
 
@@ -116,11 +124,26 @@ int main(int argc, char *argv[])
 
     check_endian();
 
+#ifdef ANDROID
+    trs_emtsafe = 1;
+    trs_autodelay = 1;
+    trs_model = 3;
+    trs_disk_dir = "/sdcard/trs80/disks";
+    grafyx_set_microlabs(0);
+    trs_disk_doubler = TRSDISK_BOTH;
+    trs_disk_truedam = 0;
+    cassette_default_sample_rate = 0;
+    trs_uart_name = "UART";
+    trs_uart_switches = 0;
+    trs_kb_bracket(0);
+#else
     argc = trs_parse_command_line(argc, argv, &debug);
     if (argc > 1) {
       fprintf(stderr, "%s: erroneous argument %s\n", program_name, argv[1]);
       exit(1);
     }
+#endif
+
     mem_init();
     trs_screen_init();
     trs_timer_init();
@@ -134,8 +157,10 @@ int main(int argc, char *argv[])
     printf("Entering debugger.\n");
     debug_init();
     debug_shell();
-#endif
     printf("Quitting.\n");
     exit(0);
+#else
+    return 0;
+#endif
 }
 
