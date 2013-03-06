@@ -488,7 +488,9 @@ void do_emt_misc()
     trs_exit();
     break;
   case 2:
+#ifndef ANDROID
     trs_debug();
+#endif
     break;
   case 3:
     trs_reset(0);

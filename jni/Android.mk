@@ -2,9 +2,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog  
 LOCAL_MODULE := trs80emu
-LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."'
+LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."' -DANDROID
 LOCAL_SRC_FILES := native.c \
-	debug.c \
 	trs_chars.c \
 	trs_printer.c \
 	trs_disk.c \
@@ -23,5 +22,6 @@ LOCAL_SRC_FILES := native.c \
 	trs_keyboard.c \
 	z80.c \
 	trs_cassette.c \
-	trs_memory.c
+	trs_memory.c \
+	trs_ui.c
 include $(BUILD_SHARED_LIBRARY)

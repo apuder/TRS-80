@@ -2137,7 +2137,9 @@ static void do_CB_instruction()
 	break;
 
       default:
+#ifndef ANDROID
 	disassemble(REG_PC - 2);
+#endif
 	error("unsupported instruction");
     }
 }
@@ -2561,7 +2563,7 @@ static void do_indexed_instruction(Ushort *ixp)
 	HIGH(ixp) = REG_E;  T_COUNT(8);
 	break;
       case 0x64:	/* ld ixh, ixh */
-	HIGH(ixp) = HIGH(ixp);  T_COUNT(8);
+	/*HIGH(ixp) = HIGH(ixp);*/  T_COUNT(8);
 	break;
       case 0x65:	/* ld ixh, ixl */
 	HIGH(ixp) = LOW(ixp);  T_COUNT(8);
@@ -2585,7 +2587,7 @@ static void do_indexed_instruction(Ushort *ixp)
 	LOW(ixp) = HIGH(ixp);  T_COUNT(8);
 	break;
       case 0x6D:	/* ld ixl, ixl */
-	LOW(ixp) = LOW(ixp);  T_COUNT(8);
+	/*LOW(ixp) = LOW(ixp);*/  T_COUNT(8);
 	break;
       case 0x26:	/* ld ixh, value */
 	HIGH(ixp) = mem_read(REG_PC++);  T_COUNT(11);
@@ -2968,7 +2970,9 @@ static int do_ED_instruction()
 	break;
 
       default:
+#ifndef ANDROID
 	disassemble(REG_PC - 2);
+#endif
 	error("unsupported instruction");
     }
 
@@ -3673,7 +3677,7 @@ int z80_run(int continuous)
 	    break;
 	    
 	  case 0x7F:	/* ld a, a */
-	    REG_A = REG_A;  T_COUNT(4);
+	    /*REG_A = REG_A;*/  T_COUNT(4);
 	    break;
 	  case 0x78:	/* ld a, b */
 	    REG_A = REG_B;  T_COUNT(4);
@@ -3697,7 +3701,7 @@ int z80_run(int continuous)
 	    REG_B = REG_A;  T_COUNT(4);
 	    break;
 	  case 0x40:	/* ld b, b */
-	    REG_B = REG_B;  T_COUNT(4);
+	    /*REG_B = REG_B;*/  T_COUNT(4);
 	    break;
 	  case 0x41:	/* ld b, c */
 	    REG_B = REG_C;  T_COUNT(4);
@@ -3721,7 +3725,7 @@ int z80_run(int continuous)
 	    REG_C = REG_B;  T_COUNT(4);
 	    break;
 	  case 0x49:	/* ld c, c */
-	    REG_C = REG_C;  T_COUNT(4);
+	    /*REG_C = REG_C;*/  T_COUNT(4);
 	    break;
 	  case 0x4A:	/* ld c, d */
 	    REG_C = REG_D;  T_COUNT(4);
@@ -3745,7 +3749,7 @@ int z80_run(int continuous)
 	    REG_D = REG_C;  T_COUNT(4);
 	    break;
 	  case 0x52:	/* ld d, d */
-	    REG_D = REG_D;  T_COUNT(4);
+	    /*REG_D = REG_D;*/  T_COUNT(4);
 	    break;
 	  case 0x53:	/* ld d, e */
 	    REG_D = REG_E;  T_COUNT(4);
@@ -3769,7 +3773,7 @@ int z80_run(int continuous)
 	    REG_E = REG_D;  T_COUNT(4);
 	    break;
 	  case 0x5B:	/* ld e, e */
-	    REG_E = REG_E;  T_COUNT(4);
+	    /*REG_E = REG_E;*/  T_COUNT(4);
 	    break;
 	  case 0x5C:	/* ld e, h */
 	    REG_E = REG_H;  T_COUNT(4);
@@ -3793,7 +3797,7 @@ int z80_run(int continuous)
 	    REG_H = REG_E;  T_COUNT(4);
 	    break;
 	  case 0x64:	/* ld h, h */
-	    REG_H = REG_H;  T_COUNT(4);
+	    /*REG_H = REG_H;*/  T_COUNT(4);
 	    break;
 	  case 0x65:	/* ld h, l */
 	    REG_H = REG_L;  T_COUNT(4);
@@ -3817,7 +3821,7 @@ int z80_run(int continuous)
 	    REG_L = REG_H;  T_COUNT(4);
 	    break;
 	  case 0x6D:	/* ld l, l */
-	    REG_L = REG_L;  T_COUNT(4);
+	    /*REG_L = REG_L;*/  T_COUNT(4);
 	    break;
 	    
 	  case 0x02:	/* ld (bc), a */

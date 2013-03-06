@@ -130,9 +130,11 @@ int main(int argc, char *argv[])
       /* Run continuously until exit or request to enter debugger */
       z80_run(TRUE);
     }
+#ifndef ANDROID
     printf("Entering debugger.\n");
     debug_init();
     debug_shell();
+#endif
     printf("Quitting.\n");
     exit(0);
 }
