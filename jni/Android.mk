@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
-LOCAL_LDLIBS := -llog  
-LOCAL_MODULE := trs80emu
+LOCAL_LDLIBS := -llog
+LOCAL_MODULE := xtrs
 LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."' -DANDROID
 LOCAL_SRC_FILES := native.c \
 	trs_chars.c \

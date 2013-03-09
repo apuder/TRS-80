@@ -5,7 +5,7 @@ import android.content.Context;
 public class Z80ExecutionThread extends Thread {
 
     static {
-        System.loadLibrary("z80");
+        System.loadLibrary("xtrs");
     }
 
     public native void setRunning(boolean run);
@@ -38,6 +38,12 @@ public class Z80ExecutionThread extends Thread {
 
     @Override
     public void run() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         bootTRS80(entryAddr, memBuffer, screenBuffer);
     }
 }

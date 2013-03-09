@@ -106,7 +106,7 @@ void trs_load_compiled_rom(int size, unsigned char rom[])
 }
 
 #ifdef ANDROID
-int android_main(int argc, char *argv[])
+int android_main(Ushort entryAddr)
 #else
 int main(int argc, char *argv[])
 #endif
@@ -115,12 +115,16 @@ int main(int argc, char *argv[])
 
     /* program_name must be set first because the error
      * printing routines use it. */
+#ifdef ANDROID
+    program_name = "xtrs";
+#else
     program_name = strrchr(argv[0], '/');
     if (program_name == NULL) {
       program_name = argv[0];
     } else {
       program_name++;
     }
+#endif
 
     check_endian();
 
@@ -149,6 +153,9 @@ int main(int argc, char *argv[])
     trs_timer_init();
 
     trs_reset(1);
+#ifdef ANDROID
+    z80_state.pc.word = entryAddr;
+#endif
     if (!debug) {
       /* Run continuously until exit or request to enter debugger */
       z80_run(TRUE);

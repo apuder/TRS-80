@@ -10,7 +10,6 @@ static JNIEnv* env;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jboolean isRunning = 0;
-static jbyte* memBuffer;
 static jbyte* screenBuffer;
 
 static int instructionsSinceLastScreenAccess;
@@ -44,6 +43,9 @@ static void context_io_write_callback(int param, ushort address, byte data)
 }
 #endif
 
+int android_main(Ushort entryAddr);
+
+extern Uchar memory[0x20001];
 
 void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, jint entryAddr, jbyteArray mem, jbyteArray screen)
 {
@@ -63,11 +65,12 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
     }
 
     jboolean isCopy;
-    memBuffer = (*env)->GetByteArrayElements(env, mem, &isCopy);
-    if (isCopy) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: didn't get copy of array");
-        return;
+    jbyte* memBuffer = (*env)->GetByteArrayElements(env, mem, &isCopy);
+    int i;
+    for (i = 0; i < 0x20000; i++) {
+    	memory[i] = memBuffer[i];
     }
+    (*env)->ReleaseByteArrayElements(env, mem, memBuffer, JNI_COMMIT);
 
     screenBuffer = (*env)->GetByteArrayElements(env, screen, &isCopy);
     if (isCopy) {
@@ -75,7 +78,7 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
         return;
     }
 
-    android_main(0, NULL);
+    android_main(entryAddr);
 #if 0
     Z80Context ctx;
     Z80RESET(&ctx);

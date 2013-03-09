@@ -4293,7 +4293,9 @@ int z80_run(int continuous)
 	    break;
 	    
 	  default:
+#ifndef ANDROID
 	    disassemble(REG_PC - 1);
+#endif
 	    error("unsupported instruction");
 	}
 

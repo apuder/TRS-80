@@ -23,7 +23,6 @@ int trs_screen_batched = 0;
 
 void trs_screen_batch()
 {
-	NOT_IMPLEMENTED();
 #if BATCH
   /* Defer screen updates until trs_screen_unbatch, then redraw screen
      if anything changed.  Unfortunately, this seems to slow things
@@ -38,7 +37,6 @@ void trs_screen_batch()
 
 void trs_screen_unbatch()
 {
-	NOT_IMPLEMENTED();
 #if BATCH
   if (trs_screen_batched > 1) {
     trs_screen_batched = 0;
@@ -61,7 +59,6 @@ void trs_show_help()
 /* exits if something really bad happens */
 void trs_screen_init()
 {
-	NOT_IMPLEMENTED();
 }
 
 
@@ -82,7 +79,6 @@ inline void trs_x_flush()
  */ 
 void trs_get_event(int wait)
 {
-	NOT_IMPLEMENTED();
 }
 
 void trs_screen_expanded(int flag)
@@ -161,7 +157,6 @@ int grafyx_read_data()
 
 void grafyx_write_mode(int value)
 {
-	NOT_IMPLEMENTED();
 }
 
 void grafyx_write_xoffset(int value)
@@ -181,19 +176,16 @@ void grafyx_write_overlay(int value)
 
 int grafyx_get_microlabs()
 {
-	NOT_IMPLEMENTED();
   return 0;
 }
 
 void grafyx_set_microlabs(int on_off)
 {
-	NOT_IMPLEMENTED();
 }
 
 /* Model III MicroLabs support */
 void grafyx_m3_reset()
 {
-	NOT_IMPLEMENTED();
 }
 
 void grafyx_m3_write_mode(int value)

@@ -9,7 +9,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Memory mem = new Memory(64 * 1024, 0x3c00, 0x3fff);
+        Memory mem = new Memory(0x20000, 0x3c00, 0x3fff);
         TRS80Application.setMemory(mem);
         int entryAddr = CMD.loadCmdFile("defense.cmd", mem);
         setContentView(R.layout.activity_main);
