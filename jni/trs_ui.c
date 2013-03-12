@@ -1,6 +1,7 @@
 
+#include <jni.h>
 #include <android/log.h>
-
+#include <stdlib.h>
 
 #include "trs_iodefs.h"
 #include "trs.h"
@@ -8,6 +9,8 @@
 #include "trs_disk.h"
 #include "trs_uart.h"
 #include "trs_imp_exp.h"
+
+#include "atrs.h"
 
 
 #define DEBUG_TAG "TRS80"
@@ -17,6 +20,13 @@
     exit(-1);
 
 extern char trs_char_data[][MAXCHARS][TRS_CHAR_HEIGHT];
+
+
+unsigned char grafyx_microlabs = 0;
+unsigned char grafyx_x = 0, grafyx_y = 0, grafyx_mode = 0;
+unsigned char grafyx_enable = 0;
+unsigned char grafyx_overlay = 0;
+unsigned char grafyx_xoffset = 0, grafyx_yoffset = 0;
 
 
 int trs_screen_batched = 0;
@@ -120,7 +130,9 @@ void trs_screen_refresh()
 
 void trs_screen_write_char(int position, int char_index)
 {
-	NOT_IMPLEMENTED();
+	trs_screen[position] = char_index;
+	instructionsSinceLastScreenAccess = 0;
+	screenWasUpdated = 1;
 }
 
  /* Copy lines 1 through col_chars-1 to lines 0 through col_chars-2.
@@ -195,14 +207,33 @@ void grafyx_m3_write_mode(int value)
 
 int grafyx_m3_write_byte(int position, int byte)
 {
-	NOT_IMPLEMENTED();
-    return 0;
+#if 0
+	  if (grafyx_microlabs && (grafyx_mode & G3_COORD)) {
+	    int x = (position % 64);
+	    int y = (position / 64) * 12 + grafyx_y;
+	    grafyx_write_byte(x, y, byte);
+	    return 1;
+	  } else {
+#endif
+	    return 0;
+#if 0
+	  }
+#endif
 }
 
 unsigned char grafyx_m3_read_byte(int position)
 {
-	NOT_IMPLEMENTED();
-	return 0;
+#if 0
+	  if (grafyx_microlabs && (grafyx_mode & G3_COORD)) {
+	    int x = (position % 64);
+	    int y = (position / 64) * 12 + grafyx_y;
+	    return grafyx_unscaled[y][x];
+	  } else {
+#endif
+	    return trs_screen[position];
+#if 0
+	  }
+#endif
 }
 
 int grafyx_m3_active()

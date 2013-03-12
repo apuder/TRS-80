@@ -30,6 +30,10 @@
 #include "trs_uart.h"
 #include "trs_imp_exp.h"
 
+#ifdef ANDROID
+#include "atrs.h"
+#endif
+
 int trs_model = 1;
 int trs_paused = 1;
 int trs_autodelay = 0;
@@ -155,6 +159,8 @@ int main(int argc, char *argv[])
     trs_reset(1);
 #ifdef ANDROID
     z80_state.pc.word = entryAddr;
+    instructionsSinceLastScreenAccess = 0;
+    screenWasUpdated = 0;
 #endif
     if (!debug) {
       /* Run continuously until exit or request to enter debugger */
