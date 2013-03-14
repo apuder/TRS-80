@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     trs_emtsafe = 1;
     trs_autodelay = 1;
     trs_model = 3;
-    trs_disk_dir = "/sdcard/trs80/disks";
+    trs_disk_dir = "/sdcard";
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;

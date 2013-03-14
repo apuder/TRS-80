@@ -24,18 +24,13 @@ int screenWasUpdated;
 void check_for_screen_updates()
 {
     instructionsSinceLastScreenAccess++;
-    if (instructionsSinceLastScreenAccess > 2000) {
-	       // __android_log_print(ANDROID_LOG_DEBUG, "TRS80", "NDK: instructionsSinceLastScreenAccess > 2000");
+    if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
     	if (screenWasUpdated) {
     		jboolean isRendering = (*env)->CallBooleanMethod(env, obj, isRenderingMethodId);
     		if (!isRendering) {
-    	       // __android_log_print(ANDROID_LOG_DEBUG, "TRS80", "NDK: !isRendering");
     			memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
     			(*env)->CallVoidMethod(env, obj, updateScreenMethodId);
     			screenWasUpdated = 0;
-    		}
-    		else {
-    	        //__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: skipping screen update");
     		}
     	}
         instructionsSinceLastScreenAccess = 0;

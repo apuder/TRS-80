@@ -21,12 +21,27 @@
 
 extern char trs_char_data[][MAXCHARS][TRS_CHAR_HEIGHT];
 
+static int screen_chars = 1024;
+static int row_chars = 64;
+static int col_chars = 16;
+static int resize = 0;
+static int top_margin = 0;
+static int left_margin = 0;
+static int border_width = 2;
+
+static int hrg_enable = 0;
 
 unsigned char grafyx_microlabs = 0;
 unsigned char grafyx_x = 0, grafyx_y = 0, grafyx_mode = 0;
 unsigned char grafyx_enable = 0;
 unsigned char grafyx_overlay = 0;
 unsigned char grafyx_xoffset = 0, grafyx_yoffset = 0;
+
+/* Port 0xFF (grafyx_m3_mode) bits */
+#define G3_COORD    0x80
+#define G3_ENABLE   0x40
+#define G3_COMMAND  0x20
+#define G3_YLOW(v)  (((v)&0x1e)>>1)
 
 
 int trs_screen_batched = 0;
@@ -137,7 +152,32 @@ void trs_screen_write_char(int position, int char_index)
     Doesn't need to clear line col_chars-1. */
 void trs_screen_scroll()
 {
-	NOT_IMPLEMENTED();
+	  int i = 0;
+
+	  for (i = row_chars; i < screen_chars; i++)
+	    trs_screen[i-row_chars] = trs_screen[i];
+
+	  if (trs_screen_batched) {
+	    trs_screen_batched++;
+	    return;
+	  }
+	  if (grafyx_enable) {
+	    if (grafyx_overlay) {
+	      trs_screen_refresh();
+	    }
+	  } else if (hrg_enable) {
+	    trs_screen_refresh();
+	  } else {
+#ifdef ANDROID
+		  screenWasUpdated = 1;
+		  instructionsSinceLastScreenAccess = SCREEN_UPDATE_THRESHOLD;
+#else
+	    XCopyArea(display,window,window,gc,
+	              left_margin,cur_char_height+top_margin,
+	              (cur_char_width*row_chars),(cur_char_height*col_chars),
+	              left_margin,top_margin);
+#endif
+	  }
 }
 
 void grafyx_write_byte(int x, int y, char byte)
@@ -236,8 +276,7 @@ unsigned char grafyx_m3_read_byte(int position)
 
 int grafyx_m3_active()
 {
-	NOT_IMPLEMENTED();
-  return 0;
+	return (trs_model == 3 && grafyx_microlabs && (grafyx_mode & G3_COORD));
 }
 
 /* Switch HRG on (1) or off (0). */

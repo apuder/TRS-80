@@ -7,7 +7,7 @@ public class Model3 extends Hardware {
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int sizeROM = memory.loadROM("model3.rom");
         setROMSize(sizeROM);
-        int entryAddr = memory.loadCmdFile("defense.cmd");
+        int entryAddr = 0;//memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
     }
 
