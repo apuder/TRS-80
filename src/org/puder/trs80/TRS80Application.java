@@ -5,8 +5,8 @@ import android.content.Context;
 
 public class TRS80Application extends Application {
 
-    private static Context context;
-    private static Memory  memory;
+    private static Context  context;
+    private static Hardware hardware;
 
     public void onCreate() {
         super.onCreate();
@@ -17,11 +17,11 @@ public class TRS80Application extends Application {
         return context;
     }
 
-    public static void setMemory(Memory mem) {
-        memory = mem;
+    public static void setHardware(Hardware theHardware) {
+        hardware = theHardware;
     }
 
-    public static Memory getMemory() {
-        return memory;
+    public static Hardware getHardwar() {
+        return hardware;
     }
 }

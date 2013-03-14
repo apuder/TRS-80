@@ -4,10 +4,6 @@ import android.content.Context;
 
 public class Z80ExecutionThread extends Thread {
 
-    static {
-        System.loadLibrary("xtrs");
-    }
-
     public native void setRunning(boolean run);
 
     private native void bootTRS80(int entryAddr, byte[] mem, byte[] screen);
@@ -15,16 +11,7 @@ public class Z80ExecutionThread extends Thread {
     private Context      context;
     private RenderThread renderer;
 
-    private Memory       mem;
-    private byte[]       memBuffer;
-    private byte[]       screenBuffer;
-    private int          entryAddr;
-
-    public Z80ExecutionThread(RenderThread renderer, Memory mem, int entryAddr) {
-        this.mem = mem;
-        this.memBuffer = mem.getMemBuffer();
-        this.screenBuffer = mem.getScreenBuffer();
-        this.entryAddr = entryAddr;
+    public Z80ExecutionThread(RenderThread renderer) {
         this.renderer = renderer;
     }
 
@@ -44,6 +31,11 @@ public class Z80ExecutionThread extends Thread {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        Hardware hardware = TRS80Application.getHardwar();
+        byte[] memBuffer = hardware.getMemoryBuffer();
+        byte[] screenBuffer = hardware.getScreenBuffer();
+        int entryAddr = hardware.getEntryAddress();
+
         bootTRS80(entryAddr, memBuffer, screenBuffer);
     }
 }

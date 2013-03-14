@@ -9,12 +9,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Memory mem = new Memory(0x20000, 0x3c00, 0x3fff);
-        TRS80Application.setMemory(mem);
-        int entryAddr = CMD.loadCmdFile("defense.cmd", mem);
+        Hardware hardware = new Model3();
+        TRS80Application.setHardware(hardware);
         setContentView(R.layout.activity_main);
         Screen screen = (Screen) findViewById(R.id.screen);
-        screen.setContext(mem, entryAddr);
+        screen.createThreads();
     }
 
     @Override

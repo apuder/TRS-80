@@ -24,10 +24,10 @@ public class RenderThread extends Thread {
     private Context          context;
     private byte[]           screenBuffer;
 
-    public RenderThread(Context context, SurfaceHolder holder, Memory mem) {
+    public RenderThread(Context context, SurfaceHolder holder) {
         this.context = context;
         this.surfaceHolder = holder;
-        this.screenBuffer = mem.getScreenBuffer();
+        this.screenBuffer = TRS80Application.getHardwar().getScreenBuffer();
         generateFontInformation();
     }
 

@@ -93,7 +93,6 @@ void trs_get_event(int wait)
 
 void trs_screen_expanded(int flag)
 {
-	NOT_IMPLEMENTED();
 }
 
 void trs_screen_inverse(int flag)
@@ -103,7 +102,6 @@ void trs_screen_inverse(int flag)
 
 void trs_screen_alternate(int flag)
 {
-	NOT_IMPLEMENTED();
 }
 
 void trs_screen_80x24(int flag)

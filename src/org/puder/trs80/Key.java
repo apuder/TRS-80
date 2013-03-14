@@ -30,8 +30,9 @@ public class Key extends View {
         address = ta.getInteger(R.styleable.Keyboard_address, -1);
         mask = (byte) ta.getInteger(R.styleable.Keyboard_mask, -1);
         size = ta.getInteger(R.styleable.Keyboard_size, 1);
+        ta.recycle();
         paint = new Paint();
-        memBuffer = TRS80Application.getMemory().getMemBuffer();
+        memBuffer = TRS80Application.getHardwar().getMemoryBuffer();
         this.setOnTouchListener(new OnTouchListener() {
 
             @Override

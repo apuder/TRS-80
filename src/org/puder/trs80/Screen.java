@@ -17,9 +17,9 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
         getHolder().addCallback(this);
     }
 
-    public void setContext(Memory mem, int entryAddr) {
-        threadRender = new RenderThread(context, getHolder(), mem);
-        threadZ80 = new Z80ExecutionThread(threadRender, mem, entryAddr);
+    public void createThreads() {
+        threadRender = new RenderThread(context, getHolder());
+        threadZ80 = new Z80ExecutionThread(threadRender);
     }
 
     @Override

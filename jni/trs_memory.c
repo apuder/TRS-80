@@ -47,7 +47,11 @@
 /* Interrupt latch register in EI (Model 1) */
 #define TRS_INTLATCH(addr) (((addr)&~3) == 0x37e0)
 
+#ifdef ANDROID
+#include "atrs.h"
+#else
 Uchar memory[0x20001]; /* +1 so strings from mem_pointer are NUL-terminated */
+#endif
 Uchar *rom;
 int trs_rom_size;
 Uchar *video;
@@ -225,7 +229,11 @@ int mem_read(int address)
 	if (address >= VIDEO_START) {
 	  return grafyx_m3_read_byte(address - VIDEO_START);
 	}
+#ifdef ANDROID
+	if (address >= KEYBOARD_START) return memory[address];
+#else
 	if (address >= KEYBOARD_START) return trs_kb_mem_read(address);
+#endif
 	return 0xff;
 
       case 0x40: /* Model 4 map 0 */
@@ -237,7 +245,11 @@ int mem_read(int address)
 	if (address >= VIDEO_START) {
 	    return video[address + video_offset];
 	}
+#ifdef ANDROID
+	if (address >= KEYBOARD_START) return memory[address];
+#else
 	if (address >= KEYBOARD_START) return trs_kb_mem_read(address);
+#endif
 	return 0xff;
 
       case 0x54: /* Model 4P map 0, boot ROM in */
