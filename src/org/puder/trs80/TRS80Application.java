@@ -21,7 +21,7 @@ public class TRS80Application extends Application {
         hardware = theHardware;
     }
 
-    public static Hardware getHardwar() {
+    public static Hardware getHardware() {
         return hardware;
     }
 }

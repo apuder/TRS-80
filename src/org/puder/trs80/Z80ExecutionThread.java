@@ -31,7 +31,7 @@ public class Z80ExecutionThread extends Thread {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        Hardware hardware = TRS80Application.getHardwar();
+        Hardware hardware = TRS80Application.getHardware();
         byte[] memBuffer = hardware.getMemoryBuffer();
         byte[] screenBuffer = hardware.getScreenBuffer();
         int entryAddr = hardware.getEntryAddress();

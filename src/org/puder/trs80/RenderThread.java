@@ -27,7 +27,7 @@ public class RenderThread extends Thread {
     public RenderThread(Context context, SurfaceHolder holder) {
         this.context = context;
         this.surfaceHolder = holder;
-        this.screenBuffer = TRS80Application.getHardwar().getScreenBuffer();
+        this.screenBuffer = TRS80Application.getHardware().getScreenBuffer();
         generateFontInformation();
     }
 
