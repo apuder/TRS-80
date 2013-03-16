@@ -12,7 +12,6 @@ LOCAL_SRC_FILES := native.c \
 	trs_hard.c \
 	trs_rom3.c \
 	load_cmd.c \
-	trs_imp_exp.c \
 	trs_rom4p.c \
 	load_hex.c \
 	trs_interrupt.c \

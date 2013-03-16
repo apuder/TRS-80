@@ -42,7 +42,9 @@
 
 #include "z80.h"
 #include "trs.h"
+#ifndef ANDROID
 #include "trs_imp_exp.h"
+#endif
 #include <stdlib.h>  /* for rand() */
 #include <unistd.h>  /* for pause() */
 #include <time.h>    /* for time() */
@@ -2907,6 +2909,7 @@ static int do_ED_instruction()
 	T_COUNT(15);
 	break;
 
+#ifndef ANDROID
       /* Emulator traps -- not real Z-80 instructions */
       case 0x28:        /* emt_system */
 	do_emt_system();
@@ -2972,6 +2975,7 @@ static int do_ED_instruction()
       case 0x3f:	/* emt_closedisk */
 	do_emt_closedisk();
 	break;
+#endif
 
       default:
 #ifndef ANDROID

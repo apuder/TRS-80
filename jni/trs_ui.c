@@ -8,7 +8,6 @@
 #include "z80.h"
 #include "trs_disk.h"
 #include "trs_uart.h"
-#include "trs_imp_exp.h"
 
 #include "atrs.h"
 

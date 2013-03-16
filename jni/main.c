@@ -28,7 +28,6 @@
 
 #include "trs_iodefs.h"
 #include "trs_uart.h"
-#include "trs_imp_exp.h"
 
 #ifdef ANDROID
 #include "atrs.h"
@@ -133,7 +132,6 @@ int main(int argc, char *argv[])
     check_endian();
 
 #ifdef ANDROID
-    trs_emtsafe = 1;
     trs_autodelay = 1;
     trs_model = 3;
     trs_disk_dir = "/sdcard";
