@@ -5,7 +5,9 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,6 +24,7 @@ public class Key extends View {
     private int    size;
     private Paint  paint;
     private byte[] memBuffer;
+    private RectF  rect;
 
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -33,6 +36,7 @@ public class Key extends View {
         ta.recycle();
         paint = new Paint();
         memBuffer = TRS80Application.getHardware().getMemoryBuffer();
+        rect = new RectF();
         this.setOnTouchListener(new OnTouchListener() {
 
             @Override
@@ -51,12 +55,24 @@ public class Key extends View {
     @Override
     public void onDraw(Canvas canvas) {
         paint.setColor(Color.WHITE);
+        paint.setAlpha(80);
         paint.setStyle(Style.FILL);
-        canvas.drawPaint(paint);
+        canvas.drawRoundRect(rect, 10, 10, paint);
 
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(40);
-        canvas.drawText(label, 0, 50, paint);
+        paint.setAlpha(180);
+        paint.setColor(Color.GRAY);
+        paint.setStyle(Style.STROKE);
+        paint.setStrokeWidth(2);
+        canvas.drawRoundRect(rect, 10, 10, paint);
+
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(30);
+        paint.setStyle(Style.FILL);
+        paint.setStrokeWidth(1);
+        paint.setTextAlign(Align.CENTER);
+        int xPos = (int) (rect.right / 2);
+        int yPos = (int) ((rect.bottom / 2) - ((paint.descent() + paint.ascent()) / 2));
+        canvas.drawText(label, xPos, yPos, paint);
     }
 
     @Override
@@ -72,5 +88,6 @@ public class Key extends View {
         int width = 50 * size;
         int height = 50;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
+        rect.set(0, 0, width - 1, height - 1);
     }
 }
