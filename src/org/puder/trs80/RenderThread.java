@@ -1,34 +1,33 @@
 package org.puder.trs80;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    final static private int SCREEN_WIDTH  = 64;
-    final static private int SCREEN_HEIGHT = 16;
+    private int           trsScreenCols;
+    private int           trsScreenRows;
+    private int           trsCharWidth;
+    private int           trsCharHeight;
 
-    final static private int FONT_ROWS     = 8;
-    final static private int FONT_COLS     = 32;
-    private int              pixelByCol;
-    private int              pixelByRow;
-    private Bitmap[]         font          = new Bitmap[FONT_ROWS * FONT_COLS];
+    private Bitmap        font[];
 
-    private boolean          run           = false;
-    private boolean          isRendering   = false;
-    private SurfaceHolder    surfaceHolder;
-    private Context          context;
-    private byte[]           screenBuffer;
+    private boolean       run         = false;
+    private boolean       isRendering = false;
+    private SurfaceHolder surfaceHolder;
+    private byte[]        screenBuffer;
 
-    public RenderThread(Context context, SurfaceHolder holder) {
-        this.context = context;
+    public RenderThread(SurfaceHolder holder) {
         this.surfaceHolder = holder;
-        this.screenBuffer = TRS80Application.getHardware().getScreenBuffer();
-        generateFontInformation();
+        Hardware h = TRS80Application.getHardware();
+        screenBuffer = h.getScreenBuffer();
+        trsScreenCols = h.getScreenCols();
+        trsScreenRows = h.getScreenRows();
+        trsCharWidth = h.getCharWidth();
+        trsCharHeight = h.getCharHeight();
+        font = h.getFont();
     }
 
     public void setRunning(boolean run) {
@@ -55,11 +54,11 @@ public class RenderThread extends Thread {
                 continue;
             }
             int i = 0;
-            for (int row = 0; row < SCREEN_HEIGHT; row++) {
-                for (int col = 0; col < SCREEN_WIDTH; col++) {
+            for (int row = 0; row < trsScreenRows; row++) {
+                for (int col = 0; col < trsScreenCols; col++) {
                     int ch = screenBuffer[i] & 0xff;
-                    int startx = pixelByCol * col;
-                    int starty = pixelByRow * row;
+                    int startx = trsCharWidth * col;
+                    int starty = trsCharHeight * row;
                     c.drawBitmap(font[ch], startx, starty, null);
                     i++;
                 }
@@ -70,25 +69,6 @@ public class RenderThread extends Thread {
 
     public synchronized void triggerScreenUpdate() {
         this.notify();
-    }
-
-    private void generateFontInformation() {
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inScaled = false;
-        Bitmap b = BitmapFactory.decodeResource(context.getResources(), R.drawable.trs80font, opts);
-        final int width = b.getWidth();
-        final int height = b.getHeight();
-
-        pixelByCol = width / FONT_COLS;
-        pixelByRow = height / FONT_ROWS;
-        int i = 0;
-        for (int row = 0; row < FONT_ROWS; row++) {
-            for (int col = 0; col < FONT_COLS; col++) {
-                int startx = pixelByCol * col;
-                int starty = pixelByRow * row;
-                font[i++] = Bitmap.createBitmap(b, startx, starty, pixelByCol, pixelByRow);
-            }
-        }
     }
 
 }

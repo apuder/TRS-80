@@ -1,5 +1,7 @@
 package org.puder.trs80;
 
+import android.graphics.Bitmap;
+
 abstract public class Hardware {
 
     static {
@@ -39,4 +41,18 @@ abstract public class Hardware {
     public int getEntryAddress() {
         return entryAddr;
     }
+
+    abstract public int getScreenCols();
+
+    abstract public int getScreenRows();
+
+    abstract public int getScreenWidth();
+
+    abstract public int getScreenHeight();
+
+    abstract public int getCharWidth();
+
+    abstract public int getCharHeight();
+
+    abstract public Bitmap[] getFont();
 }

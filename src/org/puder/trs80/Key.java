@@ -66,7 +66,7 @@ public class Key extends View {
         canvas.drawRoundRect(rect, 10, 10, paint);
 
         paint.setColor(Color.WHITE);
-        paint.setTextSize(30);
+        paint.setTextSize(20);
         paint.setStyle(Style.FILL);
         paint.setStrokeWidth(1);
         paint.setTextAlign(Align.CENTER);
@@ -85,8 +85,8 @@ public class Key extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = 50 * size;
-        int height = 50;
+        int width = 30 * size;
+        int height = 30;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
         rect.set(0, 0, width - 1, height - 1);
     }

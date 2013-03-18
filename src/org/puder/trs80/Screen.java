@@ -7,18 +7,16 @@ import android.view.SurfaceView;
 
 public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
-    private Context            context;
     private Z80ExecutionThread threadZ80;
     private RenderThread       threadRender;
 
     public Screen(Context context, AttributeSet attr) {
         super(context, attr);
-        this.context = context;
         getHolder().addCallback(this);
     }
 
     public void createThreads() {
-        threadRender = new RenderThread(context, getHolder());
+        threadRender = new RenderThread(getHolder());
         threadZ80 = new Z80ExecutionThread(threadRender);
     }
 
@@ -62,8 +60,8 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = 16 * 64;
-        int height = 24 * 16;
-        setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
+        Hardware h = TRS80Application.getHardware();
+        setMeasuredDimension(h.getScreenWidth() | MeasureSpec.EXACTLY, h.getScreenHeight()
+                | MeasureSpec.EXACTLY);
     }
 }
