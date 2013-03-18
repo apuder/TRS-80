@@ -8,12 +8,12 @@
 
 
 Uchar* memory;
+int isRunning = 0;
 
 static jobject obj;
 static JNIEnv* env;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
-static jboolean isRunning = 0;
 static jbyte* screenBuffer;
 
 

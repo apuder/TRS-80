@@ -5,6 +5,7 @@
 #define SCREEN_UPDATE_THRESHOLD 2000
 
 extern Uchar* memory;
+extern int isRunning;
 extern unsigned char trs_screen[2048];
 extern int instructionsSinceLastScreenAccess;
 extern int screenWasUpdated;

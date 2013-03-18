@@ -3009,6 +3009,9 @@ int z80_run(int continuous)
     do {
 #ifdef ANDROID
       check_for_screen_updates();
+      if (!isRunning) {
+    	  return ret;
+      }
 #endif
 
         /* We need to poll for X events periodically.  That also
