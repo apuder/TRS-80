@@ -7,6 +7,7 @@ public class TRS80Application extends Application {
 
     private static Context  context;
     private static Hardware hardware;
+    private static Keyboard keyboard;
 
     public void onCreate() {
         super.onCreate();
@@ -23,5 +24,13 @@ public class TRS80Application extends Application {
 
     public static Hardware getHardware() {
         return hardware;
+    }
+
+    public static void setKeyboard(Keyboard theKeyboard) {
+        keyboard = theKeyboard;
+    }
+
+    public static Keyboard getKeyboard() {
+        return keyboard;
     }
 }

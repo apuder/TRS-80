@@ -11,6 +11,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Hardware hardware = new Model3(this);
         TRS80Application.setHardware(hardware);
+        Keyboard keyboard = new Keyboard();
+        TRS80Application.setKeyboard(keyboard);
         setContentView(R.layout.activity_main);
         Screen screen = (Screen) findViewById(R.id.screen);
         screen.createThreads();
