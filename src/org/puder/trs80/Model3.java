@@ -80,7 +80,7 @@ public class Model3 extends Hardware {
         String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
-        Typeface tf = Typeface.createFromAsset(context.getAssets(), "fonts/SourceCodePro-Semibold.otf");
+        Typeface tf = TRS80Application.getTypeface();
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
         p.setTextSize(trsCharHeight);

@@ -57,6 +57,7 @@ public class Key extends View {
         }
         isShifted = false;
         paint = new Paint();
+        paint.setTypeface(TRS80Application.getTypeface());
         memBuffer = TRS80Application.getHardware().getMemoryBuffer();
         rect = new RectF();
         this.setOnTouchListener(new OnTouchListener() {

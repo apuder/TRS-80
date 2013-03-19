@@ -2,6 +2,7 @@ package org.puder.trs80;
 
 import android.app.Application;
 import android.content.Context;
+import android.graphics.Typeface;
 
 public class TRS80Application extends Application {
 
@@ -32,5 +33,9 @@ public class TRS80Application extends Application {
 
     public static Keyboard getKeyboard() {
         return keyboard;
+    }
+
+    public static Typeface getTypeface() {
+        return Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono.ttf");
     }
 }

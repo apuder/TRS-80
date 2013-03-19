@@ -126,7 +126,8 @@
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
                 keyboard:label="BREAK"
-                keyboard:mask="4" />
+                keyboard:mask="4"
+                keyboard:size="2" />
         </LinearLayout>
 
         <LinearLayout
@@ -140,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
-                keyboard:label="UP"
+                keyboard:label="\u2191"
                 keyboard:mask="8" />
 
             <org.puder.trs80.Key
@@ -228,7 +229,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 keyboard:address="0x3801"
-                keyboard:label="a"
+                keyboard:label="\u0040"
                 keyboard:mask="1" />
 
             <org.puder.trs80.Key
@@ -236,7 +237,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
-                keyboard:label="LEFT"
+                keyboard:label="\u2190"
                 keyboard:mask="0x20" />
 
             <org.puder.trs80.Key
@@ -244,7 +245,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
-                keyboard:label="RIGHT"
+                keyboard:label="\u2192"
                 keyboard:mask="0x40" />
         </LinearLayout>
 
@@ -259,7 +260,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
-                keyboard:label="DOWN"
+                keyboard:label="\u2193"
                 keyboard:mask="16" />
 
             <org.puder.trs80.Key
@@ -357,7 +358,8 @@
                 android:layout_height="wrap_content"
                 keyboard:address="0x3840"
                 keyboard:label="CLEAR"
-                keyboard:mask="2" />
+                keyboard:mask="2"
+                keyboard:size="2" />
         </LinearLayout>
 
         <LinearLayout
