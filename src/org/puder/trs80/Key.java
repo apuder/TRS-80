@@ -38,6 +38,8 @@ public class Key extends View {
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        this.setBackgroundResource(R.drawable.key_background);
+
         Hardware h = TRS80Application.getHardware();
         keyWidth = h.getKeyWidth();
         keyMargin = h.getKeyMargin();
@@ -93,15 +95,17 @@ public class Key extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
-        paint.setColor(Color.WHITE);
-        paint.setAlpha(isShifted ? 180 : 80);
-        paint.setStyle(Style.FILL);
-        canvas.drawRoundRect(rect, 10, 10, paint);
+        if (isShifted) {
+            paint.setColor(Color.WHITE);
+            paint.setAlpha(70);
+            paint.setStyle(Style.FILL);
+            canvas.drawRoundRect(rect, 10, 10, paint);
+        }
 
         paint.setAlpha(180);
         paint.setColor(Color.GRAY);
         paint.setStyle(Style.STROKE);
-        paint.setStrokeWidth(4);
+        paint.setStrokeWidth(3);
         canvas.drawRoundRect(rect, 10, 10, paint);
 
         paint.setColor(Color.WHITE);
@@ -127,7 +131,7 @@ public class Key extends View {
         int width = keyWidth * size;
         int height = keyWidth;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
-        rect.set(0, 0, width - 1, height - 1);
+        rect.set(1, 1, width - 1, height - 1);
     }
 
     public void shift() {
