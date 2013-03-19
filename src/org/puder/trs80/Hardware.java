@@ -54,5 +54,9 @@ abstract public class Hardware {
 
     abstract public int getCharHeight();
 
+    abstract public int getKeyWidth();
+
+    abstract public int getKeyMargin();
+
     abstract public Bitmap[] getFont();
 }

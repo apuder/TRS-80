@@ -22,6 +22,9 @@ public class Model3 extends Hardware {
     private int      trsCharWidth;
     private int      trsCharHeight;
 
+    private int      keyWidth;
+    private int      keyMargin;
+
     private Bitmap[] font;
 
     public Model3(Activity mainActivity) {
@@ -74,6 +77,12 @@ public class Model3 extends Hardware {
             trsCharHeight = (int) (trsCharWidth * aspectRatio);
             trsScreenHeight = trsCharHeight * trsScreenRows;
         }
+
+        // Compute size of keyboard keys
+        final int MAX_BOXES = 15;
+        int boxWidth = rect.right / MAX_BOXES;
+        keyWidth = (int) (boxWidth * 0.9f);
+        keyMargin = (boxWidth - keyWidth) / 2;
     }
 
     private void generateASCIIFont(Context context) {
@@ -189,6 +198,16 @@ public class Model3 extends Hardware {
     @Override
     public int getCharHeight() {
         return trsCharHeight;
+    }
+
+    @Override
+    public int getKeyWidth() {
+        return keyWidth;
+    }
+
+    @Override
+    public int getKeyMargin() {
+        return keyMargin;
     }
 
 }

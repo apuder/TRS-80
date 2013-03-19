@@ -18,24 +18,30 @@ import android.widget.LinearLayout.LayoutParams;
  */
 public class Key extends View {
 
-    final private static int MARGIN = 5;
+    private String   label;
+    private String   labelShifted;
+    private boolean  isShifted;
+    private boolean  isShiftKey;
 
-    private String           label;
-    private String           labelShifted;
-    private boolean          isShifted;
-    private boolean          isShiftKey;
+    private int      address;
+    private byte     mask;
+    private int      size;
+    private Paint    paint;
+    private byte[]   memBuffer;
+    private RectF    rect;
 
-    private int              address;
-    private byte             mask;
-    private int              size;
-    private Paint            paint;
-    private byte[]           memBuffer;
-    private RectF            rect;
+    private Keyboard keyboard;
 
-    private Keyboard         keyboard;
+    private int      keyWidth;
+    private int      keyMargin;
 
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        Hardware h = TRS80Application.getHardware();
+        keyWidth = h.getKeyWidth();
+        keyMargin = h.getKeyMargin();
+
         keyboard = TRS80Application.getKeyboard();
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
         label = ta.getString(R.styleable.Keyboard_label);
@@ -57,7 +63,7 @@ public class Key extends View {
         }
         isShifted = false;
         paint = new Paint();
-        paint.setTypeface(TRS80Application.getTypeface());
+        paint.setTypeface(TRS80Application.getTypefaceBold());
         memBuffer = TRS80Application.getHardware().getMemoryBuffer();
         rect = new RectF();
         this.setOnTouchListener(new OnTouchListener() {
@@ -95,7 +101,7 @@ public class Key extends View {
         paint.setAlpha(180);
         paint.setColor(Color.GRAY);
         paint.setStyle(Style.STROKE);
-        paint.setStrokeWidth(2);
+        paint.setStrokeWidth(4);
         canvas.drawRoundRect(rect, 10, 10, paint);
 
         paint.setColor(Color.WHITE);
@@ -112,14 +118,14 @@ public class Key extends View {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         LayoutParams params = (LayoutParams) this.getLayoutParams();
-        params.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
+        params.setMargins(keyMargin, keyMargin, keyMargin, keyMargin);
         this.setLayoutParams(params);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = 30 * size;
-        int height = 30;
+        int width = keyWidth * size;
+        int height = keyWidth;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
         rect.set(0, 0, width - 1, height - 1);
     }
