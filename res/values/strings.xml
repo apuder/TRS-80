@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">TRS-80</string>
-    <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    <string name="empty_dir">Directory empty</string>
+    <string name="path">Path</string>
 
 </resources>

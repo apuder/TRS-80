@@ -3,7 +3,7 @@
     xmlns:keyboard="http://schemas.android.com/apk/res/org.puder.trs80"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".EmulatorActivity" >
 
     <RelativeLayout
         android:layout_width="match_parent"

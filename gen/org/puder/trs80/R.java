@@ -43,10 +43,13 @@ containing a value of this type.
         public static final int size=0x7f010003;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
-        public static final int key_background=0x7f020001;
+        public static final int file_icon=0x7f020000;
+        public static final int folder_icon=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int key_background=0x7f020003;
     }
     public static final class id {
+        public static final int icon=0x7f070038;
         public static final int key_0=0x7f07000b;
         public static final int key_1=0x7f070002;
         public static final int key_2=0x7f070003;
@@ -101,19 +104,23 @@ containing a value of this type.
         public static final int key_Y=0x7f070015;
         public static final int key_Z=0x7f07002b;
         public static final int keyboard=0x7f070000;
-        public static final int menu_settings=0x7f070037;
+        public static final int menu_settings=0x7f070039;
+        public static final int path=0x7f070037;
         public static final int screen=0x7f070001;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
+        public static final int file_browser=0x7f030001;
+        public static final int file_browser_item=0x7f030002;
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;
     }
     public static final class string {
         public static final int app_name=0x7f040000;
-        public static final int hello_world=0x7f040001;
-        public static final int menu_settings=0x7f040002;
+        public static final int empty_dir=0x7f040002;
+        public static final int menu_settings=0x7f040001;
+        public static final int path=0x7f040003;
     }
     public static final class style {
         /** 
