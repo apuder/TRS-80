@@ -11,7 +11,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout.LayoutParams;
+import android.view.ViewGroup.MarginLayoutParams;
 
 /**
  * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
@@ -34,6 +34,9 @@ public class Key extends View {
 
     private int      keyWidth;
     private int      keyMargin;
+
+    private int      posX = -1;
+    private int      posY = -1;
 
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -121,8 +124,12 @@ public class Key extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        LayoutParams params = (LayoutParams) this.getLayoutParams();
-        params.setMargins(keyMargin, keyMargin, keyMargin, keyMargin);
+        MarginLayoutParams params = (MarginLayoutParams) this.getLayoutParams();
+        if (posX != -1 && posY != -1) {
+            params.setMargins(posX, posY, 0, 0);
+        } else {
+            params.setMargins(keyMargin, keyMargin, keyMargin, keyMargin);
+        }
         this.setLayoutParams(params);
     }
 
@@ -132,6 +139,11 @@ public class Key extends View {
         int height = keyWidth;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
         rect.set(1, 1, width - 1, height - 1);
+    }
+
+    public void setPosition(int x, int y) {
+        posX = x;
+        posY = y;
     }
 
     public void shift() {
