@@ -7,17 +7,11 @@ import android.view.SurfaceView;
 
 public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
-    private Z80ExecutionThread threadZ80;
-    private RenderThread       threadRender;
+    private RenderThread threadRender;
 
     public Screen(Context context, AttributeSet attr) {
         super(context, attr);
         getHolder().addCallback(this);
-    }
-
-    public void createThreads() {
-        threadRender = new RenderThread(getHolder());
-        threadZ80 = new Z80ExecutionThread(threadRender);
     }
 
     @Override
@@ -28,24 +22,17 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        threadRender = new RenderThread(getHolder());
         threadRender.setRunning(true);
         threadRender.start();
-        threadZ80.setRunning(true);
-        threadZ80.start();
+        TRS80Application.getZ80Thread().setRenderer(threadRender);
+//        threadRender.triggerScreenUpdate();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        TRS80Application.getZ80Thread().setRenderer(null);
         boolean retry = true;
-        threadZ80.setRunning(false);
-        while (retry) {
-            try {
-                threadZ80.join();
-                retry = false;
-            } catch (InterruptedException e) {
-            }
-        }
-
         threadRender.setRunning(false);
         threadRender.interrupt();
         while (retry) {

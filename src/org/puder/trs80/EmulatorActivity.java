@@ -3,6 +3,7 @@ package org.puder.trs80;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
@@ -12,13 +13,24 @@ public class EmulatorActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Hardware hardware = new Model3(this);
-        TRS80Application.setHardware(hardware);
+        TRS80Application.getHardware().computeFontDimensions(getWindow());
         Keyboard keyboard = new Keyboard();
         TRS80Application.setKeyboard(keyboard);
         initView();
-        Screen screen = (Screen) findViewById(R.id.screen);
-        screen.createThreads();
+        Z80ExecutionThread threadZ80 = TRS80Application.getZ80Thread();
+        if (threadZ80 == null) {
+            threadZ80 = new Z80ExecutionThread();
+            TRS80Application.setZ80Thread(threadZ80);
+            threadZ80.setRunning(true);
+            threadZ80.start();
+        }
+        Log.d("TRS80", "EmulatorActivity.onCreate()");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("TRS80", "EmulatorActivity.onDestroy()");
     }
 
     private void initView0() {

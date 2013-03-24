@@ -49,6 +49,7 @@ containing a value of this type.
         public static final int key_background=0x7f020003;
     }
     public static final class id {
+        public static final int button_start_emulator=0x7f07003b;
         public static final int emulator=0x7f070000;
         public static final int icon=0x7f070004;
         public static final int key_0=0x7f07000f;
@@ -106,7 +107,7 @@ containing a value of this type.
         public static final int key_Z=0x7f07002f;
         public static final int keyboard=0x7f070005;
         public static final int keyboard_container=0x7f070002;
-        public static final int menu_settings=0x7f07003b;
+        public static final int menu_settings=0x7f07003c;
         public static final int path=0x7f070003;
         public static final int screen=0x7f070001;
     }
@@ -115,6 +116,7 @@ containing a value of this type.
         public static final int file_browser=0x7f030001;
         public static final int file_browser_item=0x7f030002;
         public static final int keyboard_default=0x7f030003;
+        public static final int main_activity=0x7f030004;
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;

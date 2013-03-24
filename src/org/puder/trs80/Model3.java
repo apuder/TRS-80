@@ -38,16 +38,15 @@ public class Model3 extends Hardware {
         setROMSize(sizeROM);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
-        computeFontDimensions(mainActivity.getWindow());
-        generateGraphicsFont();
-        generateASCIIFont(mainActivity);
+//        computeFontDimensions(mainActivity.getWindow());
     }
 
     public Bitmap[] getFont() {
         return font;
     }
 
-    private void computeFontDimensions(Window window) {
+    @Override
+    public void computeFontDimensions(Window window) {
         Rect rect = new Rect();
         window.getDecorView().getWindowVisibleDisplayFrame(rect);
         int StatusBarHeight = rect.top;
@@ -83,9 +82,12 @@ public class Model3 extends Hardware {
         int boxWidth = rect.right / MAX_BOXES;
         keyWidth = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
+        
+        generateGraphicsFont();
+        generateASCIIFont();
     }
 
-    private void generateASCIIFont(Context context) {
+    private void generateASCIIFont() {
         String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);

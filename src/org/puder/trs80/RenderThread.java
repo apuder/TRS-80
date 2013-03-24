@@ -48,7 +48,7 @@ public class RenderThread extends Thread {
                 return;
             }
             isRendering = true;
-            Canvas c = surfaceHolder.lockCanvas(null);
+            Canvas c = surfaceHolder.lockCanvas();
             if (c == null) {
                 Log.d("Z80", "Canvas is null");
                 continue;
@@ -59,6 +59,10 @@ public class RenderThread extends Thread {
                     int ch = screenBuffer[i] & 0xff;
                     int startx = trsCharWidth * col;
                     int starty = trsCharHeight * row;
+                    if (font[ch] == null) {
+                        Log.d("Z80", "font[" + ch + "] == null");
+                        continue;
+                    }
                     c.drawBitmap(font[ch], startx, starty, null);
                     i++;
                 }

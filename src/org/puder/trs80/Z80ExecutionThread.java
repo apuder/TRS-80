@@ -1,26 +1,29 @@
 package org.puder.trs80;
 
-import android.content.Context;
-
 public class Z80ExecutionThread extends Thread {
 
     public native void setRunning(boolean run);
 
     private native void bootTRS80(int entryAddr, byte[] mem, byte[] screen);
 
-    private Context      context;
     private RenderThread renderer;
 
-    public Z80ExecutionThread(RenderThread renderer) {
+    public Z80ExecutionThread() {
+        this.renderer = null;
+    }
+
+    public void setRenderer(RenderThread renderer) {
         this.renderer = renderer;
     }
 
     public boolean isRendering() {
-        return renderer.isRendering();
+        return (renderer == null) ? true : renderer.isRendering();
     }
 
     public void updateScreen() {
-        renderer.triggerScreenUpdate();
+        if (renderer != null) {
+            renderer.triggerScreenUpdate();
+        }
     }
 
     @Override

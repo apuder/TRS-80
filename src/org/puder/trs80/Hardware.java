@@ -1,6 +1,7 @@
 package org.puder.trs80;
 
 import android.graphics.Bitmap;
+import android.view.Window;
 
 abstract public class Hardware {
 
@@ -41,6 +42,8 @@ abstract public class Hardware {
     public int getEntryAddress() {
         return entryAddr;
     }
+
+    abstract public void computeFontDimensions(Window window);
 
     abstract public int getScreenCols();
 

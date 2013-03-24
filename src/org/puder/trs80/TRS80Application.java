@@ -6,9 +6,11 @@ import android.graphics.Typeface;
 
 public class TRS80Application extends Application {
 
-    private static Context  context;
-    private static Hardware hardware;
-    private static Keyboard keyboard;
+    private static Context            context;
+    private static Hardware           hardware;
+    private static Keyboard           keyboard;
+
+    private static Z80ExecutionThread threadZ80;
 
     public void onCreate() {
         super.onCreate();
@@ -17,6 +19,14 @@ public class TRS80Application extends Application {
 
     public static Context getAppContext() {
         return context;
+    }
+
+    public static void setZ80Thread(Z80ExecutionThread thread) {
+        threadZ80 = thread;
+    }
+
+    public static Z80ExecutionThread getZ80Thread() {
+        return threadZ80;
     }
 
     public static void setHardware(Hardware theHardware) {
