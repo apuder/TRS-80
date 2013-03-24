@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         if (!startingEmulator && threadZ80 != null) {
             Log.d("TRS80", "MainActivity: killing threadZ80");
             boolean retry = true;
-            threadZ80.setRunning(false);
+            XTRS.setRunning(false);
             while (retry) {
                 try {
                     threadZ80.join();

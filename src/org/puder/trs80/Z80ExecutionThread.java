@@ -2,30 +2,6 @@ package org.puder.trs80;
 
 public class Z80ExecutionThread extends Thread {
 
-    public native void setRunning(boolean run);
-
-    private native void bootTRS80(int entryAddr, byte[] mem, byte[] screen);
-
-    private RenderThread renderer;
-
-    public Z80ExecutionThread() {
-        this.renderer = null;
-    }
-
-    public void setRenderer(RenderThread renderer) {
-        this.renderer = renderer;
-    }
-
-    public boolean isRendering() {
-        return (renderer == null) ? true : renderer.isRendering();
-    }
-
-    public void updateScreen() {
-        if (renderer != null) {
-            renderer.triggerScreenUpdate();
-        }
-    }
-
     @Override
     public void run() {
         try {
@@ -39,6 +15,6 @@ public class Z80ExecutionThread extends Thread {
         byte[] screenBuffer = hardware.getScreenBuffer();
         int entryAddr = hardware.getEntryAddress();
 
-        bootTRS80(entryAddr, memBuffer, screenBuffer);
+        XTRS.bootTRS80(entryAddr, memBuffer, screenBuffer);
     }
 }

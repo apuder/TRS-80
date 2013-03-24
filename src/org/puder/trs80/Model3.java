@@ -35,7 +35,7 @@ public class Model3 extends Hardware {
         setMemorySize(48 * 1024);
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int sizeROM = memory.loadROM("model3.rom");
-        setROMSize(sizeROM);
+        XTRS.setROMSize(sizeROM);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
 //        computeFontDimensions(mainActivity.getWindow());

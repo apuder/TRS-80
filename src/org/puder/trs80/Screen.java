@@ -25,13 +25,13 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
         threadRender = new RenderThread(getHolder());
         threadRender.setRunning(true);
         threadRender.start();
-        TRS80Application.getZ80Thread().setRenderer(threadRender);
-//        threadRender.triggerScreenUpdate();
+        XTRS.setRenderer(threadRender);
+        // threadRender.triggerScreenUpdate();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        TRS80Application.getZ80Thread().setRenderer(null);
+        XTRS.setRenderer(null);
         boolean retry = true;
         threadRender.setRunning(false);
         threadRender.interrupt();

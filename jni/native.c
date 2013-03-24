@@ -10,7 +10,7 @@
 Uchar* memory;
 int isRunning = 0;
 
-static jobject obj;
+static jclass clazz;
 static JNIEnv* env;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
@@ -26,10 +26,10 @@ void check_for_screen_updates()
     instructionsSinceLastScreenAccess++;
     if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
     	if (screenWasUpdated) {
-    		jboolean isRendering = (*env)->CallBooleanMethod(env, obj, isRenderingMethodId);
+    		jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazz, isRenderingMethodId);
     		if (!isRendering) {
     			memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-    			(*env)->CallVoidMethod(env, obj, updateScreenMethodId);
+    			(*env)->CallStaticVoidMethod(env, clazz, updateScreenMethodId);
     			screenWasUpdated = 0;
     		}
     	}
@@ -38,24 +38,23 @@ void check_for_screen_updates()
 }
 
 
-void Java_org_puder_trs80_Hardware_setROMSize(JNIEnv* e, jobject this, jint size)
+void Java_org_puder_trs80_XTRS_setROMSize(JNIEnv* e, jclass clazz, jint size)
 {
 	trs_rom_size = size;
 }
 
 
-void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, jint entryAddr, jbyteArray mem, jbyteArray screen)
+void Java_org_puder_trs80_XTRS_bootTRS80(JNIEnv* e, jclass cls, jint entryAddr, jbyteArray mem, jbyteArray screen)
 {
-    obj = this;
     env = e;
-    jclass cls = (*env)->GetObjectClass(env, obj);
-    isRenderingMethodId = (*env)->GetMethodID(env, cls, "isRendering", "()Z");
+    clazz = cls;
+    isRenderingMethodId = (*env)->GetStaticMethodID(env, cls, "isRendering", "()Z");
     if (isRenderingMethodId == 0) {
         __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: isRendering not found");
         return;
     }
 
-    updateScreenMethodId = (*env)->GetMethodID(env, cls, "updateScreen", "()V");
+    updateScreenMethodId = (*env)->GetStaticMethodID(env, cls, "updateScreen", "()V");
     if (updateScreenMethodId == 0) {
         __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK: updateScreen not found");
         return;
@@ -80,7 +79,7 @@ void Java_org_puder_trs80_Z80ExecutionThread_bootTRS80(JNIEnv* e, jobject this, 
     (*env)->ReleaseByteArrayElements(env, mem, screenBuffer, JNI_COMMIT);
 }
 
-void Java_org_puder_trs80_Z80ExecutionThread_setRunning(JNIEnv* e, jobject this, jboolean run)
+void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run)
 {
     isRunning = run;
 }

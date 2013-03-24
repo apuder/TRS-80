@@ -21,7 +21,7 @@ public class EmulatorActivity extends Activity {
         if (threadZ80 == null) {
             threadZ80 = new Z80ExecutionThread();
             TRS80Application.setZ80Thread(threadZ80);
-            threadZ80.setRunning(true);
+            XTRS.setRunning(true);
             threadZ80.start();
         }
         Log.d("TRS80", "EmulatorActivity.onCreate()");

@@ -5,15 +5,9 @@ import android.view.Window;
 
 abstract public class Hardware {
 
-    static {
-        System.loadLibrary("xtrs");
-    }
-
     protected Memory memory;
     protected byte[] screenBuffer;
     private int      entryAddr;
-
-    public native void setROMSize(int size);
 
     protected void setMemorySize(int size) {
         memory = new Memory(size);
