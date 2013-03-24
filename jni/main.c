@@ -29,10 +29,6 @@
 #include "trs_iodefs.h"
 #include "trs_uart.h"
 
-#ifdef ANDROID
-#include "atrs.h"
-#endif
-
 int trs_model = 1;
 int trs_paused = 1;
 int trs_autodelay = 0;
@@ -108,70 +104,43 @@ void trs_load_compiled_rom(int size, unsigned char rom[])
     }
 }
 
-#ifdef ANDROID
-int android_main(Ushort entryAddr)
-#else
+#ifndef ANDROID
 int main(int argc, char *argv[])
-#endif
 {
     int debug = FALSE;
 
     /* program_name must be set first because the error
      * printing routines use it. */
-#ifdef ANDROID
-    program_name = "xtrs";
-#else
     program_name = strrchr(argv[0], '/');
     if (program_name == NULL) {
       program_name = argv[0];
     } else {
       program_name++;
     }
-#endif
 
     check_endian();
 
-#ifdef ANDROID
-    trs_autodelay = 1;
-    trs_model = 3;
-    trs_disk_dir = "/sdcard";
-    grafyx_set_microlabs(0);
-    trs_disk_doubler = TRSDISK_BOTH;
-    trs_disk_truedam = 0;
-    cassette_default_sample_rate = 0;
-    trs_uart_name = "UART";
-    trs_uart_switches = 0;
-    trs_kb_bracket(0);
-#else
     argc = trs_parse_command_line(argc, argv, &debug);
     if (argc > 1) {
       fprintf(stderr, "%s: erroneous argument %s\n", program_name, argv[1]);
       exit(1);
     }
-#endif
 
     mem_init();
     trs_screen_init();
     trs_timer_init();
 
     trs_reset(1);
-#ifdef ANDROID
-    z80_state.pc.word = entryAddr;
-    instructionsSinceLastScreenAccess = 0;
-    screenWasUpdated = 0;
-#endif
     if (!debug) {
       /* Run continuously until exit or request to enter debugger */
       z80_run(TRUE);
     }
-#ifndef ANDROID
     printf("Entering debugger.\n");
     debug_init();
     debug_shell();
     printf("Quitting.\n");
     exit(0);
-#else
     return 0;
-#endif
 }
+#endif
 

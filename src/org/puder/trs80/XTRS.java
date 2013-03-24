@@ -12,7 +12,11 @@ public class XTRS {
 
     public static native void setROMSize(int size);
 
-    public static native void bootTRS80(int entryAddr, byte[] mem, byte[] screen);
+    public static native void init(int entryAddr, byte[] mem, byte[] screen);
+    
+    public static native void cleanup();
+    
+    public static native void run();
 
     public static void setRenderer(RenderThread r) {
         renderer = r;

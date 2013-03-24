@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 
 public class EmulatorActivity extends Activity {
 
+    private Thread cpuThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,13 +19,14 @@ public class EmulatorActivity extends Activity {
         Keyboard keyboard = new Keyboard();
         TRS80Application.setKeyboard(keyboard);
         initView();
-        Z80ExecutionThread threadZ80 = TRS80Application.getZ80Thread();
-        if (threadZ80 == null) {
-            threadZ80 = new Z80ExecutionThread();
-            TRS80Application.setZ80Thread(threadZ80);
-            XTRS.setRunning(true);
-            threadZ80.start();
-        }
+        cpuThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                XTRS.run();
+            }});
+        XTRS.setRunning(true);
+        cpuThread.start();
         Log.d("TRS80", "EmulatorActivity.onCreate()");
     }
 
@@ -31,6 +34,16 @@ public class EmulatorActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         Log.d("TRS80", "EmulatorActivity.onDestroy()");
+        boolean retry = true;
+        XTRS.setRunning(false);
+        while (retry) {
+            try {
+                cpuThread.join();
+                retry = false;
+            } catch (InterruptedException e) {
+            }
+        }
+
     }
 
     private void initView0() {

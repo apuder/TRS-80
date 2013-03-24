@@ -3,12 +3,9 @@ package org.puder.trs80;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 public class MainActivity extends Activity {
-
-    private boolean startingEmulator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,37 +13,20 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main_activity);
         Hardware hardware = new Model3(this);
         TRS80Application.setHardware(hardware);
-        Log.d("TRS80", "MainActivity.onCreate()");
+        byte[] memBuffer = hardware.getMemoryBuffer();
+        byte[] screenBuffer = hardware.getScreenBuffer();
+        int entryAddr = hardware.getEntryAddress();
+        XTRS.init(entryAddr, memBuffer, screenBuffer);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        startingEmulator = false;
+    public void onDestroy() {
+        super.onDestroy();
+        XTRS.cleanup();
     }
 
     public void doStartEmulator(View view) {
-        startingEmulator = true;
         Intent intent = new Intent(this, EmulatorActivity.class);
         startActivity(intent);
     }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Z80ExecutionThread threadZ80 = TRS80Application.getZ80Thread();
-        if (!startingEmulator && threadZ80 != null) {
-            Log.d("TRS80", "MainActivity: killing threadZ80");
-            boolean retry = true;
-            XTRS.setRunning(false);
-            while (retry) {
-                try {
-                    threadZ80.join();
-                    retry = false;
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-    }
-
 }
