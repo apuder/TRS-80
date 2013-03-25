@@ -1,7 +1,6 @@
 package org.puder.trs80;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,7 +31,7 @@ public class Model3 extends Hardware {
         trsScreenRows = 16;
         aspectRatio = 1.5f;
         font = new Bitmap[256];
-        setMemorySize(48 * 1024);
+        setMemorySize(128 * 1024 + 1);
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int sizeROM = memory.loadROM("model3.rom");
         XTRS.setROMSize(sizeROM);

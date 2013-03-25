@@ -39,7 +39,7 @@ static void check_endian()
     }
 }
 
-void init_xtrs(Ushort entryAddr)
+static void init_xtrs(Ushort entryAddr)
 {
     int debug = FALSE;
 
@@ -67,7 +67,7 @@ void init_xtrs(Ushort entryAddr)
 }
 
 
-void check_for_screen_updates()
+static void check_for_screen_updates()
 {
     instructionsSinceLastScreenAccess++;
     if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
@@ -128,7 +128,10 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* e, jclass cls)
 {
 	env = e;
 	clazz = cls;
-    z80_run(TRUE);
+	while (isRunning) {
+		z80_run(0);
+		check_for_screen_updates();
+	}
 }
 
 void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass cls)

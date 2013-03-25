@@ -49,9 +49,6 @@
 #include <unistd.h>  /* for pause() */
 #include <time.h>    /* for time() */
 
-#ifdef ANDROID
-#include "atrs.h"
-#endif
 
 /*
  * Keep Saber quiet.
@@ -3007,12 +3004,6 @@ int z80_run(int continuous)
 
     /* loop to do a z80 instruction */
     do {
-#ifdef ANDROID
-      check_for_screen_updates();
-      if (!isRunning) {
-    	  return ret;
-      }
-#endif
 
         /* We need to poll for X events periodically.  That also
 	   flushes output to the X server. */

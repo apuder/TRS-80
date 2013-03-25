@@ -3,7 +3,6 @@ package org.puder.trs80;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
@@ -19,21 +18,25 @@ public class EmulatorActivity extends Activity {
         Keyboard keyboard = new Keyboard();
         TRS80Application.setKeyboard(keyboard);
         initView();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         cpuThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
                 XTRS.run();
-            }});
+            }
+        });
         XTRS.setRunning(true);
         cpuThread.start();
-        Log.d("TRS80", "EmulatorActivity.onCreate()");
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("TRS80", "EmulatorActivity.onDestroy()");
+    public void onPause() {
+        super.onPause();
         boolean retry = true;
         XTRS.setRunning(false);
         while (retry) {
