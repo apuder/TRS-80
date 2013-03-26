@@ -1,0 +1,32 @@
+<?xml version="1.0"?><svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Pause Button</title>
+ <defs>
+  <linearGradient id="linearGradient3634">
+   <stop stop-color="#004c91" id="stop3636" offset="0"/>
+   <stop stop-color="#00d7ff" id="stop3638" offset="1"/>
+  </linearGradient>
+  <linearGradient id="linearGradient3624">
+   <stop stop-color="#ffffff" offset="0" id="stop3626"/>
+   <stop stop-color="#f1f1f1" offset="1" id="stop3628"/>
+  </linearGradient>
+  <linearGradient id="linearGradient3616">
+   <stop stop-color="#ffff00" id="stop3618" offset="0"/>
+   <stop stop-color="#ffff00" stop-opacity="0" id="stop3620" offset="1"/>
+  </linearGradient>
+  <linearGradient y2="0.527866" x2="1.027314" y1="0.470178" x1="1.027315" id="linearGradient3622" xlink:href="#linearGradient3624"/>
+  <linearGradient gradientUnits="userSpaceOnUse" y2="808.75488" x2="393.03571" y1="796.31158" x1="393.03571" id="linearGradient3640" xlink:href="#linearGradient3634"/>
+  <linearGradient y2="1.015379" x2="0.5" y1="0.632508" x1="0.5" id="linearGradient3648" xlink:href="#linearGradient3634"/>
+ </defs>
+ <metadata id="metadata7">image/svg+xml</metadata>
+ <g>
+  <title>Layer 1</title>
+  <g transform="matrix(22.7091 0 0 22.7091 -10368.4 -16813.6)" id="g3644">
+   <path fill="url(#linearGradient3648)" stroke="#000091" stroke-width="0.99962" stroke-miterlimit="4" id="path3632" d="m499.952362,762.408386c0,11.797119 -9.563477,21.360596 -21.360596,21.360596c-11.79715,0 -21.360626,-9.563477 -21.360626,-21.360596c0,-11.797119 9.563477,-21.360596 21.360626,-21.360596c11.797119,0 21.360596,9.563477 21.360596,21.360596z"/>
+   <path fill="#ffffff" fill-opacity="0.517857" d="m457.922119,761.961975c-0.032196,4.071472 13.676147,-3.283386 19.821411,-3.214294c6.047668,0.067993 21.517883,7.9552 21.517883,2.5c0,-7.536011 -6.851379,-19.384827 -20.446442,-19.464294c-13.595306,-0.079407 -20.822144,11.232056 -20.892853,20.178589z" id="path3642"/>
+  </g>
+  <g id="svg_9">
+   <rect id="svg_5" height="429" width="80" y="285" x="367.737885" stroke-width="0" stroke="#000000" fill="#ffffff"/>
+   <rect id="svg_6" height="429" width="80" y="285" x="552.237885" stroke-width="0" stroke="#000000" fill="#ffffff"/>
+  </g>
+ </g>
+</svg>

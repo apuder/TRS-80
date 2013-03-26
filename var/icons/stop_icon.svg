@@ -1,0 +1,31 @@
+<?xml version="1.0"?><svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Stop Button</title>
+ <defs>
+  <linearGradient id="linearGradient3634">
+   <stop offset="0" id="stop3636" stop-color="#004c91"/>
+   <stop offset="1" id="stop3638" stop-color="#00d7ff"/>
+  </linearGradient>
+  <linearGradient id="linearGradient3624">
+   <stop id="stop3626" offset="0" stop-color="#ffffff"/>
+   <stop id="stop3628" offset="1" stop-color="#f1f1f1"/>
+  </linearGradient>
+  <linearGradient id="linearGradient3616">
+   <stop offset="0" id="stop3618" stop-color="#ffff00"/>
+   <stop offset="1" id="stop3620" stop-opacity="0" stop-color="#ffff00"/>
+  </linearGradient>
+  <linearGradient xlink:href="#linearGradient3624" id="linearGradient3622" x1="1.027315" y1="0.470178" x2="1.027314" y2="0.527866"/>
+  <linearGradient xlink:href="#linearGradient3634" id="linearGradient3640" x1="393.03571" y1="796.31158" x2="393.03571" y2="808.75488" gradientUnits="userSpaceOnUse"/>
+  <linearGradient xlink:href="#linearGradient3634" id="linearGradient3648" x1="0.5" y1="0.632508" x2="0.5" y2="1.015379"/>
+ </defs>
+ <metadata id="metadata7">image/svg+xml</metadata>
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_1">
+   <g id="g3644" transform="matrix(22.7091 0 0 22.7091 -10368.4 -16813.6)">
+    <path d="m499.951996,762.672241c0,11.797974 -9.562988,21.360962 -21.359985,21.360962c-11.796997,0 -21.361023,-9.562988 -21.361023,-21.360962c0,-11.796997 9.564026,-21.360046 21.361023,-21.360046c11.796997,0 21.359985,9.563049 21.359985,21.360046z" id="path3632" stroke-miterlimit="4" stroke-width="0.99962" stroke="#000091" fill="url(#linearGradient3648)"/>
+    <path id="path3642" d="m457.921997,762.226196c-0.031982,4.071045 13.675995,-3.282959 19.821991,-3.213989c6.046997,0.067993 21.516998,7.955017 21.516998,2.5c0,-7.536011 -6.850983,-19.38501 -20.445984,-19.464966c-13.595001,-0.079041 -20.821991,11.231995 -20.893005,20.178955z" fill-opacity="0.517857" fill="#ffffff"/>
+   </g>
+   <rect fill="#ffffff" stroke="#000000" stroke-width="0" x="295.737873" y="291" width="429" height="429" id="svg_5"/>
+  </g>
+ </g>
+</svg>
