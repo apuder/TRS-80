@@ -5,9 +5,31 @@ import android.view.Window;
 
 abstract public class Hardware {
 
+    public enum Model {
+        MODEL1(1), MODEL3(3), MODEL4(4), MODEL4P(5);
+        private int model;
+
+        private Model(int model) {
+            this.model = model;
+        }
+
+        public int getModelValue() {
+            return model;
+        }
+    };
+
+    protected Model  model;
     protected Memory memory;
     protected byte[] screenBuffer;
     private int      entryAddr;
+
+    protected Hardware(Model model) {
+        this.model = model;
+    }
+
+    public Model getModel() {
+        return model;
+    }
 
     protected void setMemorySize(int size) {
         memory = new Memory(size);

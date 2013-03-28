@@ -3,8 +3,11 @@ package org.puder.trs80;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.View;
 import android.view.ViewGroup;
 
 public class EmulatorActivity extends Activity {
@@ -82,4 +85,11 @@ public class EmulatorActivity extends Activity {
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+        Screen screen = (Screen) findViewById(R.id.screen);
+        TRS80Application.setScreenshot(screen.takeScreenshot());
+        setResult(RESULT_OK, null);
+        super.onBackPressed();
+    }
 }

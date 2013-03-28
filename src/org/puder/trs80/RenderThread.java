@@ -53,21 +53,25 @@ public class RenderThread extends Thread {
                 Log.d("Z80", "Canvas is null");
                 continue;
             }
-            int i = 0;
-            for (int row = 0; row < trsScreenRows; row++) {
-                for (int col = 0; col < trsScreenCols; col++) {
-                    int ch = screenBuffer[i] & 0xff;
-                    int startx = trsCharWidth * col;
-                    int starty = trsCharHeight * row;
-                    if (font[ch] == null) {
-                        Log.d("Z80", "font[" + ch + "] == null");
-                        continue;
-                    }
-                    c.drawBitmap(font[ch], startx, starty, null);
-                    i++;
-                }
-            }
+            renderScreen(c);
             surfaceHolder.unlockCanvasAndPost(c);
+        }
+    }
+
+    public void renderScreen(Canvas canvas) {
+        int i = 0;
+        for (int row = 0; row < trsScreenRows; row++) {
+            for (int col = 0; col < trsScreenCols; col++) {
+                int ch = screenBuffer[i] & 0xff;
+                int startx = trsCharWidth * col;
+                int starty = trsCharHeight * row;
+                if (font[ch] == null) {
+                    Log.d("Z80", "font[" + ch + "] == null");
+                    continue;
+                }
+                canvas.drawBitmap(font[ch], startx, starty, null);
+                i++;
+            }
         }
     }
 

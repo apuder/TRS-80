@@ -27,6 +27,7 @@ public class Model3 extends Hardware {
     private Bitmap[] font;
 
     public Model3(Activity mainActivity) {
+        super(Model.MODEL3);
         trsScreenCols = 64;
         trsScreenRows = 16;
         aspectRatio = 1.5f;
@@ -37,7 +38,7 @@ public class Model3 extends Hardware {
         XTRS.setROMSize(sizeROM);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
-//        computeFontDimensions(mainActivity.getWindow());
+        // computeFontDimensions(mainActivity.getWindow());
     }
 
     public Bitmap[] getFont() {
@@ -81,38 +82,40 @@ public class Model3 extends Hardware {
         int boxWidth = rect.right / MAX_BOXES;
         keyWidth = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
-        
+
         generateGraphicsFont();
         generateASCIIFont();
     }
 
     private void generateASCIIFont() {
         String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+        Configuration config = TRS80Application.getCurrentConfiguration();
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
         Typeface tf = TRS80Application.getTypeface();
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
         p.setTextSize(trsCharHeight);
-        p.setColor(Color.GREEN);
+        p.setColor(config.getCharacterColor());
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
         for (int i = 0; i < ascii.length(); i++) {
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(Color.BLACK);
+            c.drawColor(config.getScreenColor());
             c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
             font[i + 32] = b;
         }
     }
 
     private void generateGraphicsFont() {
+        Configuration config = TRS80Application.getCurrentConfiguration();
         Paint p = new Paint();
         for (int i = 128; i <= 191; i++) {
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(Color.BLACK);
-            p.setColor(Color.GREEN);
+            c.drawColor(config.getScreenColor());
+            p.setColor(config.getCharacterColor());
             Rect r = new Rect();
             // Top-left
             if ((i & 1) != 0) {

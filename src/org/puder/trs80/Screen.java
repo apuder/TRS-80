@@ -1,6 +1,9 @@
 package org.puder.trs80;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -50,5 +53,13 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
         Hardware h = TRS80Application.getHardware();
         setMeasuredDimension(h.getScreenWidth() | MeasureSpec.EXACTLY, h.getScreenHeight()
                 | MeasureSpec.EXACTLY);
+    }
+
+    public Bitmap takeScreenshot() {
+        Hardware h = TRS80Application.getHardware();
+        Bitmap screenshot = Bitmap.createBitmap(h.getScreenWidth(), h.getScreenHeight(), Config.RGB_565);
+        Canvas c = new Canvas(screenshot);
+        threadRender.renderScreen(c);
+        return screenshot;
     }
 }

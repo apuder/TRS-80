@@ -107,9 +107,10 @@ containing a value of this type.
         public static final int key_Z=0x7f07002f;
         public static final int keyboard=0x7f070005;
         public static final int keyboard_container=0x7f070002;
-        public static final int menu_settings=0x7f07003c;
+        public static final int menu_settings=0x7f07003d;
         public static final int path=0x7f070003;
         public static final int screen=0x7f070001;
+        public static final int screenshot=0x7f07003c;
     }
     public static final class layout {
         public static final int emulator=0x7f030000;
