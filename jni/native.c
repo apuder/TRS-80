@@ -21,6 +21,7 @@ static jclass clazz;
 static JNIEnv* env;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
+static jmethodID getDiskPathMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
 static jbyteArray screenArray;
@@ -55,7 +56,6 @@ static void cleanup_xtrs() {
 }
 
 static void init_xtrs(jint model, Ushort entryAddr) {
-    cleanup_xtrs();
     int debug = FALSE;
 
     /* program_name must be set first because the error
@@ -64,7 +64,6 @@ static void init_xtrs(jint model, Ushort entryAddr) {
     check_endian();
     trs_model = model;
     trs_autodelay = 1;
-    trs_disk_dir = "/sdcard";
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
@@ -99,6 +98,18 @@ static void check_for_screen_updates() {
     }
 }
 
+char* get_disk_path(int disk) {
+    jstring jpath = (*env)->CallStaticObjectMethod(env, clazz,
+            getDiskPathMethodId, disk);
+    if (jpath == NULL) {
+        return strdup("");
+    }
+    const char* path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    char* str = strdup(path);
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+    return str;
+}
+
 void Java_org_puder_trs80_XTRS_setROMSize(JNIEnv* e, jclass clazz, jint size) {
     trs_rom_size = size;
 }
@@ -107,6 +118,8 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
     env = e;
     clazz = cls;
+
+    cleanup_xtrs();
 
     isRenderingMethodId = (*env)->GetStaticMethodID(env, cls, "isRendering",
             "()Z");
@@ -121,6 +134,14 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model,
     if (updateScreenMethodId == 0) {
         __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
                 "NDK: updateScreen not found");
+        return;
+    }
+
+    getDiskPathMethodId = (*env)->GetStaticMethodID(env, cls, "getDiskPath",
+            "(I)Ljava/lang/String;");
+    if (getDiskPathMethodId == 0) {
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                "NDK: getDiskPath not found");
         return;
     }
 
@@ -156,7 +177,9 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* e, jclass cls) {
     }
 }
 
-void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass cls) {
+void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* e, jclass cls) {
+    env = e;
+    clazz = cls;
     cleanup_xtrs();
 }
 

@@ -1,6 +1,7 @@
 package org.puder.trs80;
 
 import android.graphics.Color;
+import android.os.Environment;
 
 public class Configuration {
 
@@ -16,9 +17,10 @@ public class Configuration {
         description = "Default Configuration";
         screenColor = Color.DKGRAY;
         characterColor = Color.GREEN;
-        diskPath = new String[4];
-        diskPath[0] = "disk3-0";
-        diskPath[1] = "disk3-1";
+        diskPath = new String[8];
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        diskPath[0] = path + "/disk3-0";
+        diskPath[1] = path + "/disk3-1";
     }
 
     public Hardware.Model getModel() {

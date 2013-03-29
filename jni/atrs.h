@@ -10,4 +10,6 @@ extern int instructionsSinceLastScreenAccess;
 extern int screenWasUpdated;
 extern int trs_rom_size;
 
+char* get_disk_path(int disk);
+
 #endif

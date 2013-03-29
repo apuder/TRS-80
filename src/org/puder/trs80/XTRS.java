@@ -15,11 +15,15 @@ public class XTRS {
     public static native void init(int model, int entryAddr, byte[] mem, byte[] screen);
 
     public static native void cleanup();
-    
+
     public static native void run();
 
     public static void setRenderer(RenderThread r) {
         renderer = r;
+    }
+
+    public static String getDiskPath(int disk) {
+        return TRS80Application.getCurrentConfiguration().getDiskPath(disk);
     }
 
     public static boolean isRendering() {

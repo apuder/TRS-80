@@ -42,7 +42,11 @@
 
 #include "crc.c"
 
+#ifdef ANDROID
 #undef __linux
+#include "atrs.h"
+#endif
+
 #if __linux
 #include <sys/types.h>
 #include <fcntl.h>
@@ -749,11 +753,17 @@ trs_disk_change(int drive)
     c = fclose(d->file);
     if (c == EOF) state.status |= TRSDISK_WRITEFLT;
   }
+#ifdef ANDROID
+  char* path = get_disk_path(drive);
+  sprintf(diskname, "%s", path);
+  free(path);
+#else
   if (trs_model == 5) {
     sprintf(diskname, "%s/disk4p-%d", trs_disk_dir, drive);
   } else {
     sprintf(diskname, "%s/disk%d-%d", trs_disk_dir, trs_model, drive);
   }
+#endif
   res = stat(diskname, &st);
   if (res == -1) {
     d->file = NULL;
