@@ -1,0 +1,29 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="General"
+        android:key="conf_key_general">
+        <EditTextPreference
+            android:key="conf_key_name"
+            android:summary="Name of the configuration"
+            android:title="Name"
+            android:defaultValue="" />
+        <ListPreference
+            android:entries="@array/conf_trs_model"
+            android:title="Model"
+            android:key="conf_trs_model"
+            android:entryValues="@array/conf_trs_model_values"
+            android:summary="TRS-80 Model used for this configuration"
+            android:defaultValue="3" />
+
+        <CheckBoxPreference
+            android:key="pref_key_enable_wab"
+            android:summary="Summary pref 1"
+            android:title="Pref 1"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="pref_key_enable_wab_on_boot"
+            android:summary="Summary Pref 2"
+            android:title="Pref 2"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

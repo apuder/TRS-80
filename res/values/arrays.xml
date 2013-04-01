@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="conf_trs_model">
+        <item>Model 1</item>
+        <item>Model 3</item>
+        <item>Model 4</item>
+        <item>Model 4P</item>
+    </string-array>
+    <string-array name="conf_trs_model_values">
+        <item>1</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+</resources>
