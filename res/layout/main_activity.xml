@@ -38,6 +38,7 @@
 
     <ImageView
         android:id="@+id/screenshot"
+        android:onClick="doResumeEmulator"
         android:layout_alignParentBottom="true"
         android:scaleType="fitCenter"
         android:layout_width="match_parent"

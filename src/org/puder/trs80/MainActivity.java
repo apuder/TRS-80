@@ -16,6 +16,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
 
@@ -47,26 +48,30 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
             setContentView(R.layout.no_configurations);
             return;
         }
+
         setContentView(R.layout.main_activity);
-        updateConfigurationNames();
+
         Bitmap screenshot = TRS80Application.getScreenshot();
         if (screenshot != null) {
             ImageView img = (ImageView) findViewById(R.id.screenshot);
             img.setImageBitmap(screenshot);
         }
+
+        Configuration conf = TRS80Application.getCurrentConfiguration();
+        TextView nameLabel = (TextView) findViewById(R.id.current_configuration_name);
+        nameLabel.setText(conf == null ? "-" : conf.getName());
+
+        configurationNames = new String[configurations.length];
+        for (int i = 0; i < configurations.length; i++) {
+            configurationNames[i] = configurations[i].getName();
+        }
+
         ListView list = (ListView) this.findViewById(R.id.list_configurations);
         list.setAdapter(new ArrayAdapter<String>(this, R.layout.configuration_item,
                 configurationNames));
         list.setLongClickable(true);
         list.setOnItemClickListener(this);
         list.setOnItemLongClickListener(this);
-    }
-
-    private void updateConfigurationNames() {
-        configurationNames = new String[configurations.length];
-        for (int i = 0; i < configurations.length; i++) {
-            configurationNames[i] = configurations[i].getName();
-        }
     }
 
     @Override
@@ -106,7 +111,6 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         int entryAddr = hardware.getEntryAddress();
         XTRS.init(conf.getModel().getModelValue(), entryAddr, memBuffer, screenBuffer);
         Intent i = new Intent(this, EmulatorActivity.class);
-        i.putExtra("CONFIG_ID", conf.getId());
         startActivity(i);
     }
 
@@ -123,6 +127,11 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     public void doStart(View view) {
         dialog.dismiss();
         startConfiguration(configurations[selectedPosition]);
+    }
+
+    public void doResumeEmulator(View view) {
+        Intent i = new Intent(this, EmulatorActivity.class);
+        startActivity(i);
     }
 
     public void doDelete(View view) {
