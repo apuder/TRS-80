@@ -10,7 +10,7 @@ public class ConfigurationActivity extends PreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent i = getIntent();
-        String id = i.getExtras().getString("CONFIG_ID");
+        int id = i.getExtras().getInt("CONFIG_ID");
         getPreferenceManager().setSharedPreferencesName("CONFIG_" + id);
         addPreferencesFromResource(R.xml.configuration);
     }

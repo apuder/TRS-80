@@ -4,11 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,19 +19,14 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
 
-    private SharedPreferences globalPrefs;
-    private String            configurations;
-    private String[]          configurationIds;
-    private String[]          configurationNames;
-    private Dialog            dialog;
-    private String            currentId;
-    private Bitmap            screenshot;
+    private Configuration[] configurations;
+    private String[]        configurationNames;
+    private Dialog          dialog;
+    private int             selectedPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        globalPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        configurations = globalPrefs.getString("CONFIGURATIONS", "");
     }
 
     @Override
@@ -50,12 +42,14 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     private void updateView() {
-        if (configurations.equals("")) {
+        configurations = Configuration.getConfigurations();
+        if (configurations.length == 0) {
             setContentView(R.layout.no_configurations);
             return;
         }
         setContentView(R.layout.main_activity);
         updateConfigurationNames();
+        Bitmap screenshot = TRS80Application.getScreenshot();
         if (screenshot != null) {
             ImageView img = (ImageView) findViewById(R.id.screenshot);
             img.setImageBitmap(screenshot);
@@ -69,18 +63,10 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     private void updateConfigurationNames() {
-        configurationIds = configurations.split(",");
-        configurationNames = new String[configurationIds.length];
-        for (int i = 0; i < configurationIds.length; i++) {
-            SharedPreferences config = this.getSharedPreferences("CONFIG_" + configurationIds[i],
-                    MODE_PRIVATE);
-            configurationNames[i] = config.getString("conf_key_name", "unknown");
+        configurationNames = new String[configurations.length];
+        for (int i = 0; i < configurations.length; i++) {
+            configurationNames[i] = configurations[i].getName();
         }
-    }
-
-    public void doStartEmulator(View view) {
-        Intent intent = new Intent(this, EmulatorActivity.class);
-        startActivityForResult(intent, 0);
     }
 
     @Override
@@ -101,27 +87,17 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     private void addConfiguration() {
-        int nextId = globalPrefs.getInt("NEXT_ID", 0);
-        nextId++;
-        Editor e = globalPrefs.edit();
-        e.putInt("NEXT_ID", nextId);
-        if (!configurations.equals("")) {
-            configurations += ",";
-        }
-        configurations += "" + nextId;
-        e.putString("CONFIGURATIONS", configurations);
-        e.commit();
-        editConfiguration(Integer.toString(nextId));
+        Configuration newConfig = Configuration.addConfiguration();
+        editConfiguration(newConfig);
     }
 
-    private void editConfiguration(String id) {
+    private void editConfiguration(Configuration conf) {
         Intent i = new Intent(this, ConfigurationActivity.class);
-        i.putExtra("CONFIG_ID", id);
+        i.putExtra("CONFIG_ID", conf.getId());
         startActivity(i);
     }
 
-    private void startConfiguration(String id) {
-        Configuration conf = new Configuration();
+    private void startConfiguration(Configuration conf) {
         TRS80Application.setCurrentConfiguration(conf);
         Hardware hardware = new Model3(this);
         TRS80Application.setHardware(hardware);
@@ -130,32 +106,23 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         int entryAddr = hardware.getEntryAddress();
         XTRS.init(conf.getModel().getModelValue(), entryAddr, memBuffer, screenBuffer);
         Intent i = new Intent(this, EmulatorActivity.class);
-        i.putExtra("CONFIG_ID", id);
-        startActivityForResult(i, 0);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            screenshot = TRS80Application.getScreenshot();
-        }
+        i.putExtra("CONFIG_ID", conf.getId());
+        startActivity(i);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        startConfiguration(configurationIds[position]);
+        startConfiguration(configurations[position]);
     }
 
     public void doEdit(View view) {
         dialog.dismiss();
-        editConfiguration(currentId);
+        editConfiguration(configurations[selectedPosition]);
     }
 
     public void doStart(View view) {
         dialog.dismiss();
-        startConfiguration(currentId);
+        startConfiguration(configurations[selectedPosition]);
     }
 
     public void doDelete(View view) {
@@ -165,7 +132,7 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        currentId = configurationIds[position];
+        selectedPosition = position;
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
