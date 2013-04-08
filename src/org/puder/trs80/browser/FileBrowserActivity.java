@@ -6,9 +6,8 @@ import java.util.List;
 
 import org.puder.trs80.R;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -47,12 +46,10 @@ public class FileBrowserActivity extends ListActivity {
             getFiles(file);
             return;
         }
-        new AlertDialog.Builder(this).setTitle("File selected")
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int button) {
-                        // do nothing
-                    }
-                }).show();
+        Intent i = getIntent();
+        i.putExtra("PATH", file);
+        setResult(RESULT_OK, i);
+        finish();
     }
 
     private void getFiles(String path) {
@@ -77,5 +74,11 @@ public class FileBrowserActivity extends ListActivity {
         }
         BrowserListViewAdapter fileList = new BrowserListViewAdapter(this, items);
         setListAdapter(fileList);
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED, getIntent());
+        finish();
     }
 }

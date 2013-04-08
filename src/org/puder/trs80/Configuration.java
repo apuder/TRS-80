@@ -15,7 +15,11 @@ public class Configuration {
     static {
         globalPrefs = PreferenceManager.getDefaultSharedPreferences(TRS80Application
                 .getAppContext());
-        String[] configurationIds = globalPrefs.getString("CONFIGURATIONS", "").split(",");
+        String[] configurationIds = new String[0];
+        String configs = globalPrefs.getString("CONFIGURATIONS", null);
+        if (configs != null) {
+            configurationIds = configs.split(",");
+        }
         configurations = new Configuration[configurationIds.length];
         for (int i = 0; i < configurationIds.length; i++) {
             configurations[i] = new Configuration(Integer.parseInt(configurationIds[i]));
@@ -92,6 +96,6 @@ public class Configuration {
     }
 
     public String getName() {
-        return sharedPrefs.getString("conf_key_name", "unknown");
+        return sharedPrefs.getString(ConfigurationActivity.CONF_NAME, "unknown");
     }
 }

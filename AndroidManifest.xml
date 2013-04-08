@@ -27,6 +27,7 @@
         </activity>
         <activity android:name=".ConfigurationActivity" />
         <activity android:name=".EmulatorActivity" />
+        <activity android:name=".browser.FileBrowserActivity" />
         </application>
 
 </manifest>

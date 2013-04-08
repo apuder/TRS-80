@@ -1,29 +1,33 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:title="General"
-        android:key="conf_key_general">
+        android:key="conf_general">
         <EditTextPreference
-            android:key="conf_key_name"
-            android:summary="Name of the configuration"
+            android:key="conf_name"
             android:title="Name"
-            android:defaultValue="" />
+            android:summary="Name of the configuration" />
         <ListPreference
             android:entries="@array/conf_trs_model"
-            android:title="Model"
-            android:key="conf_trs_model"
-            android:entryValues="@array/conf_trs_model_values"
-            android:summary="TRS-80 Model used for this configuration"
-            android:defaultValue="3" />
+            android:title="TRS-80 Model"
+            android:summary="The TRS-80 Model that will be emulated"
+            android:key="conf_model"
+            android:entryValues="@array/conf_trs_model_values" />
 
-        <CheckBoxPreference
-            android:key="pref_key_enable_wab"
-            android:summary="Summary pref 1"
-            android:title="Pref 1"
-            android:defaultValue="false" />
-        <CheckBoxPreference
-            android:key="pref_key_enable_wab_on_boot"
-            android:summary="Summary Pref 2"
-            android:title="Pref 2"
-            android:defaultValue="false" />
+        <Preference
+            android:title="Disk 1"
+            android:summary="File to use for disk 1"
+            android:key="conf_disk1" />
+        <Preference
+            android:title="Disk 2"
+            android:summary="File to use for disk 2"
+            android:key="conf_disk2" />
+        <Preference
+            android:title="Disk 3"
+            android:summary="File to use for disk 3"
+            android:key="conf_disk3" />
+        <Preference
+            android:title="Disk 4"
+            android:summary="File to use for disk 4"
+            android:key="conf_disk4" />
     </PreferenceCategory>
 </PreferenceScreen>
