@@ -54,8 +54,9 @@ containing a value of this type.
     }
     public static final class id {
         public static final int configuration_label=0x7f09003c;
-        public static final int current_configuration=0x7f09003e;
-        public static final int current_configuration_name=0x7f090040;
+        public static final int current_configuration=0x7f09003f;
+        public static final int current_configuration_name=0x7f090041;
+        public static final int divider=0x7f09003e;
         public static final int emulator=0x7f090000;
         public static final int icon=0x7f090004;
         public static final int key_0=0x7f09000f;
@@ -115,10 +116,10 @@ containing a value of this type.
         public static final int keyboard_container=0x7f090002;
         public static final int list_configurations=0x7f09003d;
         public static final int main=0x7f09003b;
-        public static final int menu_add_configuration=0x7f090041;
+        public static final int menu_add_configuration=0x7f090042;
         public static final int path=0x7f090003;
         public static final int screen=0x7f090001;
-        public static final int screenshot=0x7f09003f;
+        public static final int screenshot=0x7f090040;
     }
     public static final class layout {
         public static final int configuration_item=0x7f030000;
