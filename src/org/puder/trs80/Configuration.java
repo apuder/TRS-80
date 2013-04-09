@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 public class Configuration {
@@ -31,7 +30,6 @@ public class Configuration {
     private Hardware.Model           model;
     private int                      screenColor;
     private int                      characterColor;
-    private String[]                 diskPath;
     private int                      keyboardType;
 
     public static Configuration[] getConfigurations() {
@@ -69,10 +67,6 @@ public class Configuration {
         model = Hardware.Model.MODEL3;
         screenColor = Color.DKGRAY;
         characterColor = Color.GREEN;
-        diskPath = new String[8];
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-        diskPath[0] = path + "/disk3-0";
-        diskPath[1] = path + "/disk3-1";
     }
 
     public int getId() {
@@ -92,7 +86,24 @@ public class Configuration {
     }
 
     public String getDiskPath(int disk) {
-        return diskPath[disk];
+        String key;
+        switch (disk) {
+        case 0:
+            key = ConfigurationActivity.CONF_DISK1;
+            break;
+        case 1:
+            key = ConfigurationActivity.CONF_DISK2;
+            break;
+        case 2:
+            key = ConfigurationActivity.CONF_DISK3;
+            break;
+        case 3:
+            key = ConfigurationActivity.CONF_DISK4;
+            break;
+        default:
+            return null;
+        }
+        return sharedPrefs.getString(key, null);
     }
 
     public String getName() {
