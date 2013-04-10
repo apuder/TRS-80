@@ -6,7 +6,7 @@ import android.view.Window;
 abstract public class Hardware {
 
     public enum Model {
-        MODEL1(1), MODEL3(3), MODEL4(4), MODEL4P(5);
+        NONE(0), MODEL1(1), MODEL3(3), MODEL4(4), MODEL4P(5);
         private int model;
 
         private Model(int model) {

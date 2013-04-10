@@ -1,5 +1,7 @@
 package org.puder.trs80;
 
+import org.puder.trs80.Hardware.Model;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
 
@@ -36,11 +39,11 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         updateView();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        XTRS.cleanup();
-    }
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        XTRS.cleanup();
+//    }
 
     private void updateView() {
         configurations = Configuration.getConfigurations();
@@ -103,6 +106,12 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     private void startConfiguration(Configuration conf) {
+        Model model = conf.getModel();
+        if (model != Model.MODEL3) {
+            Toast.makeText(this, "Only Model 3 is supported at this time", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
         TRS80Application.setCurrentConfiguration(conf);
         Hardware hardware = new Model3(this);
         TRS80Application.setHardware(hardware);

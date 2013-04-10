@@ -1,5 +1,7 @@
 package org.puder.trs80;
 
+import org.puder.trs80.Hardware.Model;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -27,7 +29,6 @@ public class Configuration {
 
     private SharedPreferences        sharedPrefs;
     private int                      id;
-    private Hardware.Model           model;
     private int                      screenColor;
     private int                      characterColor;
     private int                      keyboardType;
@@ -64,7 +65,6 @@ public class Configuration {
         sharedPrefs = TRS80Application.getAppContext().getSharedPreferences("CONFIG_" + id,
                 Context.MODE_PRIVATE);
 
-        model = Hardware.Model.MODEL3;
         screenColor = Color.DKGRAY;
         characterColor = Color.GREEN;
     }
@@ -74,7 +74,21 @@ public class Configuration {
     }
 
     public Hardware.Model getModel() {
-        return model;
+        String model = sharedPrefs.getString(ConfigurationActivity.CONF_MODEL, null);
+        if (model == null) {
+            return Model.NONE;
+        }
+        switch (Integer.parseInt(model)) {
+        case 1:
+            return Model.MODEL1;
+        case 3:
+            return Model.MODEL3;
+        case 4:
+            return Model.MODEL4;
+        case 5:
+            return Model.MODEL4P;
+        }
+        return Model.NONE;
     }
 
     public int getScreenColor() {
