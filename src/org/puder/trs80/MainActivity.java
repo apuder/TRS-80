@@ -55,11 +55,11 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         updateView();
     }
 
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        XTRS.cleanup();
-//    }
+    // @Override
+    // public void onDestroy() {
+    // super.onDestroy();
+    // XTRS.cleanup();
+    // }
 
     private void updateView() {
         configurations = Configuration.getConfigurations();
@@ -105,6 +105,9 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         case R.id.menu_add_configuration:
             addConfiguration();
             return true;
+        case R.id.menu_settings:
+            showSettings();
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -113,6 +116,11 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     private void addConfiguration() {
         Configuration newConfig = Configuration.addConfiguration();
         editConfiguration(newConfig);
+    }
+
+    private void showSettings() {
+        Intent i = new Intent(this, SettingsActivity.class);
+        startActivity(i);
     }
 
     private void editConfiguration(Configuration conf) {
