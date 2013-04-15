@@ -55,7 +55,7 @@ static void cleanup_xtrs() {
     emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 }
 
-static void init_xtrs(jint model, Ushort entryAddr) {
+static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     int debug = FALSE;
 
     /* program_name must be set first because the error
@@ -63,6 +63,7 @@ static void init_xtrs(jint model, Ushort entryAddr) {
     program_name = "xtrs";
     check_endian();
     trs_model = model;
+    trs_rom_size = sizeROM;
     trs_autodelay = 1;
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
@@ -110,11 +111,7 @@ char* get_disk_path(int disk) {
     return str;
 }
 
-void Java_org_puder_trs80_XTRS_setROMSize(JNIEnv* e, jclass clazz, jint size) {
-    trs_rom_size = size;
-}
-
-void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model,
+void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model, jint sizeROM,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
     env = e;
     clazz = cls;
@@ -162,7 +159,7 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model,
         return;
     }
 
-    init_xtrs(model, entryAddr);
+    init_xtrs(model, sizeROM, entryAddr);
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* e, jclass cls) {

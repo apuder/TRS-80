@@ -132,17 +132,22 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     private void startConfiguration(Configuration conf) {
         Model model = conf.getModel();
         if (model != Model.MODEL3) {
-            Toast.makeText(this, "Only Model 3 is supported at this time", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Only Model 3 is supported at this time.", Toast.LENGTH_LONG)
                     .show();
             return;
         }
         TRS80Application.setCurrentConfiguration(conf);
-        Hardware hardware = new Model3(this);
+        Hardware hardware = new Model3();
+        int sizeROM = hardware.getSizeROM();
+        if (sizeROM == 0) {
+            Toast.makeText(this, "No valid ROM found. Please use Settings to set ROM.", Toast.LENGTH_LONG).show();
+            return;
+        }
         TRS80Application.setHardware(hardware);
         byte[] memBuffer = hardware.getMemoryBuffer();
         byte[] screenBuffer = hardware.getScreenBuffer();
         int entryAddr = hardware.getEntryAddress();
-        XTRS.init(conf.getModel().getModelValue(), entryAddr, memBuffer, screenBuffer);
+        XTRS.init(conf.getModel().getModelValue(), sizeROM, entryAddr, memBuffer, screenBuffer);
         Intent i = new Intent(this, EmulatorActivity.class);
         startActivity(i);
     }

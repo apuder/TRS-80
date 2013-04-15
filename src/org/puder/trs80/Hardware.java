@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.view.Window;
 
@@ -38,9 +40,11 @@ abstract public class Hardware {
     protected Memory memory;
     protected byte[] screenBuffer;
     private int      entryAddr;
+    private int      sizeROM;
 
     protected Hardware(Model model) {
         this.model = model;
+        sizeROM = 0;
     }
 
     public Model getModel() {
@@ -73,6 +77,20 @@ abstract public class Hardware {
 
     public int getEntryAddress() {
         return entryAddr;
+    }
+
+    public int getSizeROM() {
+        return sizeROM;
+    }
+
+    protected void loadROM(String rom) {
+        SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
+                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String path = prefs.getString(rom, null);
+        if (path == null) {
+            return;
+        }
+        sizeROM = memory.loadROM(path);
     }
 
     abstract public void computeFontDimensions(Window window);

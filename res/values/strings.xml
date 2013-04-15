@@ -7,5 +7,6 @@
     <string name="empty_dir">Directory empty</string>
     <string name="path">Path</string>
     <string name="no_configurations">Use the menu to create a new configuration.</string>
-
+    <string name="configurations">Configurations:</string>
+    <string name="currently_running">Currently running:</string>
 </resources>

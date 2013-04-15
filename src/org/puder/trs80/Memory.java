@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -109,21 +111,30 @@ public class Memory {
     }
 
     public int loadROM(String fileName) {
-        AssetManager assetManager = TRS80Application.getAppContext().getAssets();
+        File f = new File(fileName);
+        if (!f.exists()) {
+            return 0;
+        }
         try {
-            InputStream in = assetManager.open(fileName);
+            InputStream in = new FileInputStream(f);
             int addr = 0;
             while (true) {
                 int b = in.read();
                 if (b == -1) {
                     break;
                 }
+                if (addr >= size) {
+                    // ROM is too large to fit into memory
+                    Log.d(TAG, "ROM file too large");
+                    in.close();
+                    return 0;
+                }
                 poke(addr++, (byte) b);
             }
             in.close();
             return addr;
         } catch (IOException e) {
-            Log.d(TAG, "Error reading CMD file");
+            Log.d(TAG, "Error reading ROM file");
         }
         return 0;
     }

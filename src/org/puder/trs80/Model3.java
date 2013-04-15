@@ -17,6 +17,8 @@
 package org.puder.trs80;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -42,7 +44,7 @@ public class Model3 extends Hardware {
 
     private Bitmap[] font;
 
-    public Model3(Activity mainActivity) {
+    public Model3() {
         super(Model.MODEL3);
         trsScreenCols = 64;
         trsScreenRows = 16;
@@ -50,8 +52,7 @@ public class Model3 extends Hardware {
         font = new Bitmap[256];
         setMemorySize(128 * 1024 + 1);
         setScreenBuffer(0x3fff - 0x3c00 + 1);
-        int sizeROM = memory.loadROM("model3.rom");
-        XTRS.setROMSize(sizeROM);
+        loadROM(SettingsActivity.CONF_ROM_MODEL3);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
         // computeFontDimensions(mainActivity.getWindow());

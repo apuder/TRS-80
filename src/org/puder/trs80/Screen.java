@@ -73,8 +73,8 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
     public Bitmap takeScreenshot() {
         Hardware h = TRS80Application.getHardware();
-        final int screenshotWidth = 300;
-        int screenshotHeight = (int) (300 * ((float) h.getScreenHeight() / (float) h
+        final int screenshotWidth = 400;
+        int screenshotHeight = (int) (screenshotWidth * ((float) h.getScreenHeight() / (float) h
                 .getScreenWidth()));
         float sx = (float) screenshotWidth / h.getScreenWidth();
         float sy = (float) screenshotHeight / h.getScreenHeight();

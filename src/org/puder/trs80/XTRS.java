@@ -26,9 +26,7 @@ public class XTRS {
 
     public static native void setRunning(boolean run);
 
-    public static native void setROMSize(int size);
-
-    public static native void init(int model, int entryAddr, byte[] mem, byte[] screen);
+    public static native void init(int model, int sizeROM, int entryAddr, byte[] mem, byte[] screen);
 
     public static native void cleanup();
 

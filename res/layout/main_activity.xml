@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:text="Configurations:"
+        android:text="@string/configurations"
         android:id="@+id/configuration_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         android:layout_margin="10dp">
 
         <TextView
-            android:text="Current configuration:"
+            android:text="@string/currently_running"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView

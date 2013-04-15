@@ -24,8 +24,11 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 
 public class SettingsActivity extends PreferenceActivity implements OnPreferenceChangeListener {
+
+    public static final String SHARED_PREF_NAME = "Settings";
 
     public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
     public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
@@ -42,7 +45,9 @@ public class SettingsActivity extends PreferenceActivity implements OnPreference
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings);
-        sharedPrefs = this.getPreferenceManager().getSharedPreferences();
+        PreferenceManager mgr = this.getPreferenceManager();
+        mgr.setSharedPreferencesName(SHARED_PREF_NAME);
+        sharedPrefs = mgr.getSharedPreferences();
         Preference.OnPreferenceClickListener listener = new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference pref) {
@@ -89,7 +94,7 @@ public class SettingsActivity extends PreferenceActivity implements OnPreference
             romModel4p.setSummary(val);
         }
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
