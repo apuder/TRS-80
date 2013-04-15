@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013, webappbooster.org
+ * Copyright 2012-2013, Arno Puder
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package org.puder.trs80;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Paint.Align;
 import android.view.Window;
 
 public class Model3 extends Hardware {
