@@ -338,11 +338,7 @@ trs_timer_event(int signo)
       static struct timeval oldtv;
       static int increment = 1;
       static int oldtoofast = 0;
-#if __GNUC__
-      static unsigned long long oldtcount;
-#else
-      static unsigned long oldtcount;
-#endif
+      static tstate_t oldtcount;
       if (!trs_paused /*&& !saved_delay*/) {
 	int toofast = (z80_state.t_count - oldtcount) >
 	  ((tv.tv_sec*1000000 + tv.tv_usec) -
