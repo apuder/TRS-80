@@ -12,4 +12,6 @@ extern int trs_rom_size;
 
 char* get_disk_path(int disk);
 
+void log(const char* msg);
+
 #endif

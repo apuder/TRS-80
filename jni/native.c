@@ -22,6 +22,7 @@ static JNIEnv* env;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
+static jmethodID logMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
 static jbyteArray screenArray;
@@ -142,6 +143,14 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model, jint size
         return;
     }
 
+    logMethodId = (*env)->GetStaticMethodID(env, cls, "log",
+            "(Ljava/lang/String;)V");
+    if (logMethodId == 0) {
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                "NDK: log not found");
+        return;
+    }
+
     jboolean isCopy;
     memoryArray = (*env)->NewGlobalRef(env, mem);
     memory = (Uchar*) (*env)->GetByteArrayElements(env, mem, &isCopy);
@@ -182,4 +191,9 @@ void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* e, jclass cls) {
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
     isRunning = run;
+}
+
+void log(const char* msg) {
+    jstring jmsg = (*env)->NewStringUTF(env, msg);
+    (*env)->CallStaticVoidMethod(env, clazz, logMethodId, jmsg);
 }

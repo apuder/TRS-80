@@ -22,14 +22,17 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class EmulatorActivity extends Activity {
 
-    private Thread cpuThread;
+    private Thread   cpuThread;
+    private TextView logView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        XTRS.setEmulatorActivity(this);
         TRS80Application.getHardware().computeFontDimensions(getWindow());
         Keyboard keyboard = new Keyboard();
         TRS80Application.setKeyboard(keyboard);
@@ -85,6 +88,7 @@ public class EmulatorActivity extends Activity {
 
     private void initView() {
         setContentView(R.layout.emulator);
+        logView = (TextView) findViewById(R.id.log);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
@@ -103,5 +107,14 @@ public class EmulatorActivity extends Activity {
         Screen screen = (Screen) findViewById(R.id.screen);
         TRS80Application.setScreenshot(screen.takeScreenshot());
         super.onBackPressed();
+    }
+
+    public void log(final String msg) {
+        logView.post(new Runnable() {
+
+            @Override
+            public void run() {
+                logView.setText(msg);
+            }});
     }
 }

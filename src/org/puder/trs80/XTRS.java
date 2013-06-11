@@ -22,7 +22,9 @@ public class XTRS {
         System.loadLibrary("xtrs");
     }
 
-    private static RenderThread renderer = null;
+    private static RenderThread     renderer = null;
+
+    private static EmulatorActivity emulator = null;
 
     public static native void setRunning(boolean run);
 
@@ -34,6 +36,10 @@ public class XTRS {
 
     public static void setRenderer(RenderThread r) {
         renderer = r;
+    }
+
+    public static void setEmulatorActivity(EmulatorActivity activity) {
+        emulator = activity;
     }
 
     public static String getDiskPath(int disk) {
@@ -48,5 +54,9 @@ public class XTRS {
         if (renderer != null) {
             renderer.triggerScreenUpdate();
         }
+    }
+
+    public static void log(String msg) {
+        emulator.log(msg);
     }
 }
