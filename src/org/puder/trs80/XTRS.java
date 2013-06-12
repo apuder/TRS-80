@@ -56,7 +56,9 @@ public class XTRS {
         }
     }
 
-    public static void log(String msg) {
-        emulator.log(msg);
+    public static void xlog(String msg) {
+        if (emulator != null) {
+            emulator.log(msg);
+        }
     }
 }

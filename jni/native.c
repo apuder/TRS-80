@@ -17,12 +17,12 @@ int isRunning = 0;
 #define EMULATOR_STATUS_INITIALIZED     1
 static int emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 
-static jclass clazz;
-static JNIEnv* env;
+static JavaVM *jvm;
+static jclass clazzXTRS;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
-static jmethodID logMethodId;
+static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
 static jbyteArray screenArray;
@@ -43,10 +43,17 @@ static void check_endian() {
     }
 }
 
+static JNIEnv* getEnv() {
+    JNIEnv *env;
+    (*jvm)->AttachCurrentThread(jvm, (JNIEnv **) &env, NULL);
+    return env;
+}
+
 static void cleanup_xtrs() {
     if (emulator_status == EMULATOR_STATUS_NOT_INITIALIZED) {
         return;
     }
+    JNIEnv *env = getEnv();
     (*env)->ReleaseByteArrayElements(env, memoryArray, (jbyte*) memory,
             JNI_COMMIT);
     (*env)->DeleteGlobalRef(env, memoryArray);
@@ -88,11 +95,12 @@ static void check_for_screen_updates() {
     instructionsSinceLastScreenAccess++;
     if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
         if (screenWasUpdated) {
-            jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazz,
+            JNIEnv *env = getEnv();
+            jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
                     isRenderingMethodId);
             if (!isRendering) {
                 memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-                (*env)->CallStaticVoidMethod(env, clazz, updateScreenMethodId);
+                (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
                 screenWasUpdated = 0;
             }
         }
@@ -101,7 +109,8 @@ static void check_for_screen_updates() {
 }
 
 char* get_disk_path(int disk) {
-    jstring jpath = (*env)->CallStaticObjectMethod(env, clazz,
+    JNIEnv *env = getEnv();
+    jstring jpath = (*env)->CallStaticObjectMethod(env, clazzXTRS,
             getDiskPathMethodId, disk);
     if (jpath == NULL) {
         return strdup("");
@@ -112,10 +121,15 @@ char* get_disk_path(int disk) {
     return str;
 }
 
-void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model, jint sizeROM,
+void Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
-    env = e;
-    clazz = cls;
+    clazzXTRS = cls;
+    int status = (*env)->GetJavaVM(env, &jvm);
+    if(status != 0) {
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                "NDK: GetJavaVM failed");
+        return;
+    }
 
     cleanup_xtrs();
 
@@ -143,9 +157,9 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model, jint size
         return;
     }
 
-    logMethodId = (*env)->GetStaticMethodID(env, cls, "log",
+    xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
             "(Ljava/lang/String;)V");
-    if (logMethodId == 0) {
+    if (xlogMethodId == 0) {
         __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
                 "NDK: log not found");
         return;
@@ -171,21 +185,17 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* e, jclass cls, jint model, jint size
     init_xtrs(model, sizeROM, entryAddr);
 }
 
-void Java_org_puder_trs80_XTRS_run(JNIEnv* e, jclass cls) {
+void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     if (emulator_status == EMULATOR_STATUS_NOT_INITIALIZED) {
         return;
     }
-    env = e;
-    clazz = cls;
     while (isRunning) {
         z80_run(0);
         check_for_screen_updates();
     }
 }
 
-void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* e, jclass cls) {
-    env = e;
-    clazz = cls;
+void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass clazz) {
     cleanup_xtrs();
 }
 
@@ -193,7 +203,9 @@ void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run)
     isRunning = run;
 }
 
-void log(const char* msg) {
+void xlog(const char* msg) {
+    JNIEnv *env = getEnv();
     jstring jmsg = (*env)->NewStringUTF(env, msg);
-    (*env)->CallStaticVoidMethod(env, clazz, logMethodId, jmsg);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, xlogMethodId, jmsg);
+    (*env)->DeleteLocalRef(env, jmsg);
 }
