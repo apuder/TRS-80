@@ -19,8 +19,10 @@ package org.puder.trs80;
 import org.puder.trs80.Hardware.Model;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -140,16 +142,44 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
         Hardware hardware = new Model3();
         int sizeROM = hardware.getSizeROM();
         if (sizeROM == 0) {
-            Toast.makeText(this, "No valid ROM found. Please use Settings to set ROM.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No valid ROM found. Please use Settings to set ROM.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
         TRS80Application.setHardware(hardware);
         byte[] memBuffer = hardware.getMemoryBuffer();
         byte[] screenBuffer = hardware.getScreenBuffer();
         int entryAddr = hardware.getEntryAddress();
-        XTRS.init(conf.getModel().getModelValue(), sizeROM, entryAddr, memBuffer, screenBuffer);
+        int err = XTRS.init(conf.getModel().getModelValue(), sizeROM, entryAddr, memBuffer,
+                screenBuffer);
+        if (err != 0) {
+            showError(err);
+            return;
+        }
         Intent i = new Intent(this, EmulatorActivity.class);
         startActivity(i);
+    }
+
+    private void showError(int err) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.initialization_error, null, false);
+        TextView t = (TextView) view.findViewById(R.id.error_text);
+        t.setText(this.getString(R.string.error_init, err));
+        builder.setView(view);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override

@@ -46,6 +46,11 @@ containing a value of this type.
          */
         public static final int size=0x7f010003;
     }
+    public static final class dimen {
+        public static final int padding_large=0x7f060002;
+        public static final int padding_medium=0x7f060001;
+        public static final int padding_small=0x7f060000;
+    }
     public static final class drawable {
         public static final int file_icon=0x7f020000;
         public static final int folder_icon=0x7f020001;
@@ -53,75 +58,76 @@ containing a value of this type.
         public static final int key_background=0x7f020003;
     }
     public static final class id {
-        public static final int configuration_label=0x7f09003d;
-        public static final int current_configuration=0x7f090040;
-        public static final int current_configuration_name=0x7f090042;
-        public static final int divider=0x7f09003f;
-        public static final int emulator=0x7f090000;
-        public static final int icon=0x7f090005;
-        public static final int key_0=0x7f090010;
-        public static final int key_1=0x7f090007;
-        public static final int key_2=0x7f090008;
-        public static final int key_3=0x7f090009;
-        public static final int key_4=0x7f09000a;
-        public static final int key_5=0x7f09000b;
-        public static final int key_6=0x7f09000c;
-        public static final int key_7=0x7f09000d;
-        public static final int key_8=0x7f09000e;
-        public static final int key_9=0x7f09000f;
-        public static final int key_A=0x7f090023;
-        public static final int key_AT=0x7f09001f;
-        public static final int key_B=0x7f090034;
-        public static final int key_BREAK=0x7f090013;
-        public static final int key_C=0x7f090032;
-        public static final int key_CLEAR=0x7f09002e;
-        public static final int key_COLON=0x7f090011;
-        public static final int key_COMMA=0x7f090037;
-        public static final int key_D=0x7f090025;
-        public static final int key_DOT=0x7f090038;
-        public static final int key_DOWN=0x7f090022;
-        public static final int key_E=0x7f090017;
-        public static final int key_ENTER=0x7f09002d;
-        public static final int key_F=0x7f090026;
-        public static final int key_G=0x7f090027;
-        public static final int key_H=0x7f090028;
-        public static final int key_I=0x7f09001c;
-        public static final int key_J=0x7f090029;
-        public static final int key_K=0x7f09002a;
-        public static final int key_L=0x7f09002b;
-        public static final int key_LEFT=0x7f090020;
-        public static final int key_M=0x7f090036;
-        public static final int key_MINUS=0x7f090012;
-        public static final int key_N=0x7f090035;
-        public static final int key_O=0x7f09001d;
-        public static final int key_P=0x7f09001e;
-        public static final int key_Q=0x7f090015;
-        public static final int key_R=0x7f090018;
-        public static final int key_RIGHT=0x7f090021;
-        public static final int key_S=0x7f090024;
-        public static final int key_SEMICOLON=0x7f09002c;
-        public static final int key_SHIFT1=0x7f09002f;
-        public static final int key_SHIFT2=0x7f09003a;
-        public static final int key_SLASH=0x7f090039;
-        public static final int key_SPACE=0x7f09003b;
-        public static final int key_T=0x7f090019;
-        public static final int key_U=0x7f09001b;
-        public static final int key_UP=0x7f090014;
-        public static final int key_V=0x7f090033;
-        public static final int key_W=0x7f090016;
-        public static final int key_X=0x7f090031;
-        public static final int key_Y=0x7f09001a;
-        public static final int key_Z=0x7f090030;
-        public static final int keyboard=0x7f090006;
-        public static final int keyboard_container=0x7f090003;
-        public static final int list_configurations=0x7f09003e;
-        public static final int log=0x7f090002;
-        public static final int main=0x7f09003c;
-        public static final int menu_add_configuration=0x7f090043;
-        public static final int menu_settings=0x7f090044;
-        public static final int path=0x7f090004;
-        public static final int screen=0x7f090001;
-        public static final int screenshot=0x7f090041;
+        public static final int configuration_label=0x7f0a003e;
+        public static final int current_configuration=0x7f0a0041;
+        public static final int current_configuration_name=0x7f0a0043;
+        public static final int divider=0x7f0a0040;
+        public static final int emulator=0x7f0a0000;
+        public static final int error_text=0x7f0a0006;
+        public static final int icon=0x7f0a0005;
+        public static final int key_0=0x7f0a0011;
+        public static final int key_1=0x7f0a0008;
+        public static final int key_2=0x7f0a0009;
+        public static final int key_3=0x7f0a000a;
+        public static final int key_4=0x7f0a000b;
+        public static final int key_5=0x7f0a000c;
+        public static final int key_6=0x7f0a000d;
+        public static final int key_7=0x7f0a000e;
+        public static final int key_8=0x7f0a000f;
+        public static final int key_9=0x7f0a0010;
+        public static final int key_A=0x7f0a0024;
+        public static final int key_AT=0x7f0a0020;
+        public static final int key_B=0x7f0a0035;
+        public static final int key_BREAK=0x7f0a0014;
+        public static final int key_C=0x7f0a0033;
+        public static final int key_CLEAR=0x7f0a002f;
+        public static final int key_COLON=0x7f0a0012;
+        public static final int key_COMMA=0x7f0a0038;
+        public static final int key_D=0x7f0a0026;
+        public static final int key_DOT=0x7f0a0039;
+        public static final int key_DOWN=0x7f0a0023;
+        public static final int key_E=0x7f0a0018;
+        public static final int key_ENTER=0x7f0a002e;
+        public static final int key_F=0x7f0a0027;
+        public static final int key_G=0x7f0a0028;
+        public static final int key_H=0x7f0a0029;
+        public static final int key_I=0x7f0a001d;
+        public static final int key_J=0x7f0a002a;
+        public static final int key_K=0x7f0a002b;
+        public static final int key_L=0x7f0a002c;
+        public static final int key_LEFT=0x7f0a0021;
+        public static final int key_M=0x7f0a0037;
+        public static final int key_MINUS=0x7f0a0013;
+        public static final int key_N=0x7f0a0036;
+        public static final int key_O=0x7f0a001e;
+        public static final int key_P=0x7f0a001f;
+        public static final int key_Q=0x7f0a0016;
+        public static final int key_R=0x7f0a0019;
+        public static final int key_RIGHT=0x7f0a0022;
+        public static final int key_S=0x7f0a0025;
+        public static final int key_SEMICOLON=0x7f0a002d;
+        public static final int key_SHIFT1=0x7f0a0030;
+        public static final int key_SHIFT2=0x7f0a003b;
+        public static final int key_SLASH=0x7f0a003a;
+        public static final int key_SPACE=0x7f0a003c;
+        public static final int key_T=0x7f0a001a;
+        public static final int key_U=0x7f0a001c;
+        public static final int key_UP=0x7f0a0015;
+        public static final int key_V=0x7f0a0034;
+        public static final int key_W=0x7f0a0017;
+        public static final int key_X=0x7f0a0032;
+        public static final int key_Y=0x7f0a001b;
+        public static final int key_Z=0x7f0a0031;
+        public static final int keyboard=0x7f0a0007;
+        public static final int keyboard_container=0x7f0a0003;
+        public static final int list_configurations=0x7f0a003f;
+        public static final int log=0x7f0a0002;
+        public static final int main=0x7f0a003d;
+        public static final int menu_add_configuration=0x7f0a0044;
+        public static final int menu_settings=0x7f0a0045;
+        public static final int path=0x7f0a0004;
+        public static final int screen=0x7f0a0001;
+        public static final int screenshot=0x7f0a0042;
     }
     public static final class layout {
         public static final int configuration_item=0x7f030000;
@@ -129,22 +135,25 @@ containing a value of this type.
         public static final int emulator=0x7f030002;
         public static final int file_browser=0x7f030003;
         public static final int file_browser_item=0x7f030004;
-        public static final int keyboard_default=0x7f030005;
-        public static final int main_activity=0x7f030006;
-        public static final int no_configurations=0x7f030007;
+        public static final int initialization_error=0x7f030005;
+        public static final int keyboard_default=0x7f030006;
+        public static final int main_activity=0x7f030007;
+        public static final int no_configurations=0x7f030008;
     }
     public static final class menu {
-        public static final int activity_main=0x7f080000;
+        public static final int activity_main=0x7f090000;
     }
     public static final class string {
-        public static final int app_name=0x7f060000;
-        public static final int configurations=0x7f060006;
-        public static final int currently_running=0x7f060007;
-        public static final int empty_dir=0x7f060003;
-        public static final int menu_add_configuration=0x7f060001;
-        public static final int menu_settings=0x7f060002;
-        public static final int no_configurations=0x7f060005;
-        public static final int path=0x7f060004;
+        public static final int app_name=0x7f070000;
+        public static final int configurations=0x7f070007;
+        public static final int currently_running=0x7f070008;
+        public static final int empty_dir=0x7f070003;
+        public static final int error_init=0x7f070009;
+        public static final int menu_add_configuration=0x7f070001;
+        public static final int menu_settings=0x7f070002;
+        public static final int no_configurations=0x7f070006;
+        public static final int ok=0x7f070005;
+        public static final int path=0x7f070004;
     }
     public static final class style {
         /** 
@@ -168,11 +177,11 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
+        public static final int AppTheme=0x7f080001;
     }
     public static final class xml {
         public static final int configuration=0x7f040000;

@@ -10,6 +10,15 @@
 
 #define DEBUG_TAG "Z80"
 
+#define NO_ERROR 0
+#define ERR_GET_JVM -1
+#define ERR_GET_METHOD_IS_RENDERING -2
+#define ERR_GET_METHOD_UPDATE_SCREEN -3
+#define ERR_GET_METHOD_GET_DISK_PATH -4
+#define ERR_GET_METHOD_XLOG -5
+#define ERR_MEMORY_IS_NO_COPY -6
+#define ERR_SCREEN_IS_NO_COPY -7
+
 Uchar* memory;
 int isRunning = 0;
 
@@ -121,14 +130,12 @@ char* get_disk_path(int disk) {
     return str;
 }
 
-void Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
+int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
     clazzXTRS = cls;
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: GetJavaVM failed");
-        return;
+        return ERR_GET_JVM;
     }
 
     cleanup_xtrs();
@@ -136,53 +143,42 @@ void Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint si
     isRenderingMethodId = (*env)->GetStaticMethodID(env, cls, "isRendering",
             "()Z");
     if (isRenderingMethodId == 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: isRendering not found");
-        return;
+        return ERR_GET_METHOD_IS_RENDERING;
     }
 
     updateScreenMethodId = (*env)->GetStaticMethodID(env, cls, "updateScreen",
             "()V");
     if (updateScreenMethodId == 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: updateScreen not found");
-        return;
+        return ERR_GET_METHOD_UPDATE_SCREEN;
     }
 
     getDiskPathMethodId = (*env)->GetStaticMethodID(env, cls, "getDiskPath",
             "(I)Ljava/lang/String;");
     if (getDiskPathMethodId == 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: getDiskPath not found");
-        return;
+        return ERR_GET_METHOD_GET_DISK_PATH;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
             "(Ljava/lang/String;)V");
     if (xlogMethodId == 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: log not found");
-        return;
+        return ERR_GET_METHOD_XLOG;
     }
 
     jboolean isCopy;
     memoryArray = (*env)->NewGlobalRef(env, mem);
     memory = (Uchar*) (*env)->GetByteArrayElements(env, mem, &isCopy);
     if (isCopy) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: didn't get copy of array");
-        return;
+        return ERR_MEMORY_IS_NO_COPY;
     }
 
     screenArray = (*env)->NewGlobalRef(env, screen);
     screenBuffer = (*env)->GetByteArrayElements(env, screen, &isCopy);
     if (isCopy) {
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
-                "NDK: didn't get copy of array");
-        return;
+        return ERR_SCREEN_IS_NO_COPY;
     }
 
     init_xtrs(model, sizeROM, entryAddr);
+    return NO_ERROR;
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
