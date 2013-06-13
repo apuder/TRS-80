@@ -2,6 +2,7 @@ package org.puder.trs80;
 
 import java.util.ArrayList;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * Demonstrates combining a TabHost with a ViewPager to implement a tab UI that
@@ -37,12 +40,21 @@ public class MainFragment extends SherlockFragmentActivity {
 
         mTabsAdapter.addTab(mTabHost.newTabSpec("configurations").setIndicator("Configurations"),
                 ConfigurationsFragment.class, null);
-//        mTabsAdapter.addTab(mTabHost.newTabSpec("emulator").setIndicator("Emulator"),
-//                LoaderCursorSupport.CursorLoaderListFragment.class, null);
+        // mTabsAdapter.addTab(mTabHost.newTabSpec("emulator").setIndicator("Emulator"),
+        // LoaderCursorSupport.CursorLoaderListFragment.class, null);
 
         if (savedInstanceState != null) {
             mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Intent i = new Intent(this, SettingsActivity.class);
+        menu.add("Settings").setIcon(R.drawable.settings_icon).setIntent(i)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+        return true;
     }
 
     @Override
