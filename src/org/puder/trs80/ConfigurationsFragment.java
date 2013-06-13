@@ -18,7 +18,6 @@ package org.puder.trs80;
 
 import org.puder.trs80.Hardware.Model;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -27,9 +26,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -39,7 +37,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
+import com.actionbarsherlock.app.SherlockFragment;
+
+public class ConfigurationsFragment extends SherlockFragment implements OnItemClickListener,
+        OnItemLongClickListener {
 
     private Configuration[] configurations;
     private String[]        configurationNames;
@@ -47,39 +48,23 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     private int             selectedPosition;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateView();
-    }
-
-    // @Override
-    // public void onDestroy() {
-    // super.onDestroy();
-    // XTRS.cleanup();
-    // }
-
-    private void updateView() {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         configurations = Configuration.getConfigurations();
         if (configurations.length == 0) {
-            setContentView(R.layout.no_configurations);
-            return;
+            View v = inflater.inflate(R.layout.no_configurations, container, false);
+            return v;
         }
 
-        setContentView(R.layout.main_activity);
+        View v = inflater.inflate(R.layout.main_activity, container, false);
 
         Bitmap screenshot = TRS80Application.getScreenshot();
         if (screenshot != null) {
-            ImageView img = (ImageView) findViewById(R.id.screenshot);
+            ImageView img = (ImageView) v.findViewById(R.id.screenshot);
             img.setImageBitmap(screenshot);
         }
 
         Configuration conf = TRS80Application.getCurrentConfiguration();
-        TextView nameLabel = (TextView) findViewById(R.id.current_configuration_name);
+        TextView nameLabel = (TextView) v.findViewById(R.id.current_configuration_name);
         nameLabel.setText(conf == null ? "-" : conf.getName());
 
         configurationNames = new String[configurations.length];
@@ -87,33 +72,35 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
             configurationNames[i] = configurations[i].getName();
         }
 
-        ListView list = (ListView) this.findViewById(R.id.list_configurations);
-        list.setAdapter(new ArrayAdapter<String>(this, R.layout.configuration_item,
+        ListView list = (ListView) v.findViewById(R.id.list_configurations);
+        list.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.configuration_item,
                 configurationNames));
         list.setLongClickable(true);
         list.setOnItemClickListener(this);
         list.setOnItemLongClickListener(this);
+        
+        return v;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.menu_add_configuration:
-            addConfiguration();
-            return true;
-        case R.id.menu_settings:
-            showSettings();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.activity_main, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//        case R.id.menu_add_configuration:
+//            addConfiguration();
+//            return true;
+//        case R.id.menu_settings:
+//            showSettings();
+//            return true;
+//        default:
+//            return super.onOptionsItemSelected(item);
+//        }
+//    }
 
     private void addConfiguration() {
         Configuration newConfig = Configuration.addConfiguration();
@@ -121,12 +108,12 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     private void showSettings() {
-        Intent i = new Intent(this, SettingsActivity.class);
+        Intent i = new Intent(getActivity(), SettingsActivity.class);
         startActivity(i);
     }
 
     private void editConfiguration(Configuration conf) {
-        Intent i = new Intent(this, ConfigurationActivity.class);
+        Intent i = new Intent(getActivity(), ConfigurationActivity.class);
         i.putExtra("CONFIG_ID", conf.getId());
         startActivity(i);
     }
@@ -134,15 +121,15 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     private void startConfiguration(Configuration conf) {
         Model model = conf.getModel();
         if (model != Model.MODEL3) {
-            Toast.makeText(this, "Only Model 3 is supported at this time.", Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(getActivity(), "Only Model 3 is supported at this time.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
         TRS80Application.setCurrentConfiguration(conf);
         Hardware hardware = new Model3();
         int sizeROM = hardware.getSizeROM();
         if (sizeROM == 0) {
-            Toast.makeText(this, "No valid ROM found. Please use Settings to set ROM.",
+            Toast.makeText(getActivity(), "No valid ROM found. Please use Settings to set ROM.",
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -156,15 +143,15 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
             showError(err);
             return;
         }
-        Intent i = new Intent(this, EmulatorActivity.class);
+        Intent i = new Intent(getActivity(), EmulatorActivity.class);
         startActivity(i);
     }
 
     private void showError(int err) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.app_name);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.initialization_error, null, false);
         TextView t = (TextView) view.findViewById(R.id.error_text);
         t.setText(this.getString(R.string.error_init, err));
@@ -198,7 +185,7 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     }
 
     public void doResumeEmulator(View view) {
-        Intent i = new Intent(this, EmulatorActivity.class);
+        Intent i = new Intent(getActivity(), EmulatorActivity.class);
         startActivity(i);
     }
 
@@ -210,10 +197,10 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         selectedPosition = position;
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
 
-        dialog = new Dialog(this);
+        dialog = new Dialog(getActivity());
         dialog.setContentView(inflater.inflate(R.layout.configuration_popup, null, false));
         dialog.setTitle("Choose action:");
         dialog.show();

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_height="fill_parent"
     android:orientation="horizontal"
-    tools:context=".MainActivity">
+    tools:context=".ConfigurationsFragment">
 
     <LinearLayout
         android:layout_width="wrap_content"

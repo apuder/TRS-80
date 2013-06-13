@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:id="@+id/main"
     android:layout_height="fill_parent"
-    tools:context=".MainActivity">
+    tools:context=".ConfigurationsFragment">
 
     <TextView
         android:text="@string/configurations"

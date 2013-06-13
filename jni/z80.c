@@ -2992,8 +2992,6 @@ volatile int x_poll_count = 0;
 
 int trs_continuous;
 
-int count = 0;
-
 int z80_run(int continuous)
      /*
       * -1 = single-step and disallow interrupts
@@ -3019,11 +3017,6 @@ int z80_run(int continuous)
 	    x_poll_count--;
 	}
         /* Speed control */
-if (count++ % 30000 == 0) {
-    char buf[50];
-    sprintf(buf, "%d", z80_state.delay);
-    log(buf);
-}
         if ((i = z80_state.delay)) {
 	  volatile int dummy;
 	  while (--i) dummy = i;

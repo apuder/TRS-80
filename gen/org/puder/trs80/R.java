@@ -123,8 +123,9 @@ containing a value of this type.
         public static final int list_configurations=0x7f0a003f;
         public static final int log=0x7f0a0002;
         public static final int main=0x7f0a003d;
-        public static final int menu_add_configuration=0x7f0a0044;
-        public static final int menu_settings=0x7f0a0045;
+        public static final int menu_add_configuration=0x7f0a0045;
+        public static final int menu_settings=0x7f0a0046;
+        public static final int pager=0x7f0a0044;
         public static final int path=0x7f0a0004;
         public static final int screen=0x7f0a0001;
         public static final int screenshot=0x7f0a0042;
@@ -138,7 +139,8 @@ containing a value of this type.
         public static final int initialization_error=0x7f030005;
         public static final int keyboard_default=0x7f030006;
         public static final int main_activity=0x7f030007;
-        public static final int no_configurations=0x7f030008;
+        public static final int main_fragment=0x7f030008;
+        public static final int no_configurations=0x7f030009;
     }
     public static final class menu {
         public static final int activity_main=0x7f090000;
