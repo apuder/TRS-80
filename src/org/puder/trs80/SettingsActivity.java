@@ -23,10 +23,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-public class SettingsActivity extends PreferenceActivity implements OnPreferenceChangeListener {
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+
+public class SettingsActivity extends SherlockPreferenceActivity implements OnPreferenceChangeListener {
 
     public static final String SHARED_PREF_NAME = "Settings";
 
