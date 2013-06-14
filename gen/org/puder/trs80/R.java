@@ -1065,8 +1065,6 @@ containing a value of this type.
         public static final int list_configurations=0x7f050073;
         public static final int log=0x7f050034;
         public static final int main=0x7f050070;
-        public static final int menu_add_configuration=0x7f05007a;
-        public static final int menu_settings=0x7f05007b;
         public static final int normal=0x7f050001;
         public static final int pager=0x7f050079;
         public static final int path=0x7f050036;
@@ -1117,9 +1115,6 @@ containing a value of this type.
         public static final int sherlock_spinner_dropdown_item=0x7f03001d;
         public static final int sherlock_spinner_item=0x7f03001e;
     }
-    public static final class menu {
-        public static final int activity_main=0x7f0d0000;
-    }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
          */
@@ -1160,19 +1155,17 @@ containing a value of this type.
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] 
          */
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
-        public static final int alert_dialog_cancel=0x7f0a0014;
-        public static final int alert_dialog_confirm_delete=0x7f0a0015;
-        public static final int alert_dialog_ok=0x7f0a0013;
+        public static final int alert_dialog_cancel=0x7f0a0012;
+        public static final int alert_dialog_confirm_delete=0x7f0a0013;
+        public static final int alert_dialog_ok=0x7f0a0011;
         public static final int app_name=0x7f0a000d;
-        public static final int currently_running=0x7f0a0017;
-        public static final int empty_dir=0x7f0a0010;
-        public static final int error_init=0x7f0a0018;
-        public static final int help=0x7f0a0019;
-        public static final int menu_add_configuration=0x7f0a000e;
-        public static final int menu_settings=0x7f0a000f;
-        public static final int no_configurations=0x7f0a0016;
-        public static final int ok=0x7f0a0012;
-        public static final int path=0x7f0a0011;
+        public static final int currently_running=0x7f0a0015;
+        public static final int empty_dir=0x7f0a000e;
+        public static final int error_init=0x7f0a0016;
+        public static final int help=0x7f0a0017;
+        public static final int no_configurations=0x7f0a0014;
+        public static final int ok=0x7f0a0010;
+        public static final int path=0x7f0a000f;
     }
     public static final class style {
         /** 
