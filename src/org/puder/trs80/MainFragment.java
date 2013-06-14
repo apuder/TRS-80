@@ -50,11 +50,23 @@ public class MainFragment extends SherlockFragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Intent i = new Intent(this, SettingsActivity.class);
         menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
-                .setIntent(i).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if ("Settings".equals(item.getTitle())) {
+            doSettings();
+            return false;
+        }
+        return true;
+    }
+
+    private void doSettings() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override
