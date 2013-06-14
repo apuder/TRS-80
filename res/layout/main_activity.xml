@@ -7,50 +7,61 @@
     tools:context=".ConfigurationsFragment">
 
     <TextView
-        android:text="@string/configurations"
-        android:id="@+id/configuration_label"
+        android:id="@+id/without_configurations"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" />
-    <ListView
-        android:id="@+id/list_configurations"
-        android:layout_below="@+id/configuration_label"
-        android:layout_above="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_centerInParent="true"
+        android:layout_margin="100dp"
+        android:gravity="center"
+        android:text="@string/no_configurations" />
 
-    <View
-        android:id="@+id/divider"
-        android:layout_above="@+id/current_configuration"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
+    <RelativeLayout
+        android:id="@+id/with_configurations"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <LinearLayout
-        android:id="@+id/current_configuration"
-        android:layout_above="@+id/screenshot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="10dp">
+        <ListView
+            android:id="@+id/list_configurations"
+            android:layout_above="@+id/divider"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentTop="true" />
 
-        <TextView
-            android:text="@string/currently_running"
+        <View
+            android:id="@+id/divider"
+            android:layout_above="@+id/current_configuration"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <LinearLayout
+            android:id="@+id/current_configuration"
+            android:layout_above="@+id/screenshot"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/current_configuration_name"
-            android:layout_marginLeft="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="10dp">
 
-    <ImageView
-        android:id="@+id/screenshot"
-        android:onClick="doResumeEmulator"
-        android:layout_alignParentBottom="true"
-        android:scaleType="fitCenter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+            <TextView
+                android:text="@string/currently_running"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/current_configuration_name"
+                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/screenshot"
+            android:onClick="doResumeEmulator"
+            android:layout_alignParentBottom="true"
+            android:scaleType="fitCenter"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
 
 </RelativeLayout>

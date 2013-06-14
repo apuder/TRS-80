@@ -33,8 +33,8 @@ public class Configuration {
         globalPrefs = PreferenceManager.getDefaultSharedPreferences(TRS80Application
                 .getAppContext());
         String[] configurationIds = new String[0];
-        String configs = globalPrefs.getString("CONFIGURATIONS", null);
-        if (configs != null) {
+        String configs = globalPrefs.getString("CONFIGURATIONS", "");
+        if (!configs.equals("")) {
             configurationIds = configs.split(",");
         }
         configurations = new Configuration[configurationIds.length];
@@ -53,7 +53,7 @@ public class Configuration {
         return configurations;
     }
 
-    public static Configuration addConfiguration() {
+    public static Configuration newConfiguration() {
         int nextId = globalPrefs.getInt("NEXT_ID", 0);
         nextId++;
         Editor e = globalPrefs.edit();
@@ -76,6 +76,38 @@ public class Configuration {
         return newConfig;
     }
 
+    public static void deleteConfiguration(Configuration config) {
+        // Delete ID
+        Editor e = globalPrefs.edit();
+        String configurationIds = globalPrefs.getString("CONFIGURATIONS", "");
+
+        String id = Integer.toString(config.getId());
+        configurationIds = configurationIds.replace(id + ",", "");
+        configurationIds = configurationIds.replace("," + id, "");
+        configurationIds = configurationIds.replace(id, "");
+        e.putString("CONFIGURATIONS", configurationIds);
+        e.commit();
+
+        // Delete shared preferences
+        SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
+                "CONFIG_" + id, Context.MODE_PRIVATE);
+        e = prefs.edit();
+        e.clear();
+        e.commit();
+
+        // Delete configuration
+        int len = configurations.length - 1;
+        Configuration[] newConfigurations = new Configuration[len];
+        int k = 0;
+        for (int i = 0; i < configurations.length; i++) {
+            if (configurations[i] == config) {
+                continue;
+            }
+            newConfigurations[k++] = configurations[i];
+        }
+        configurations = newConfigurations;
+    }
+
     private Configuration(int id) {
         this.id = id;
         sharedPrefs = TRS80Application.getAppContext().getSharedPreferences("CONFIG_" + id,
@@ -90,7 +122,7 @@ public class Configuration {
     }
 
     public Hardware.Model getModel() {
-        String model = sharedPrefs.getString(ConfigurationActivity.CONF_MODEL, null);
+        String model = sharedPrefs.getString(EditConfigurationFragment.CONF_MODEL, null);
         if (model == null) {
             return Model.NONE;
         }
@@ -119,16 +151,16 @@ public class Configuration {
         String key;
         switch (disk) {
         case 0:
-            key = ConfigurationActivity.CONF_DISK1;
+            key = EditConfigurationFragment.CONF_DISK1;
             break;
         case 1:
-            key = ConfigurationActivity.CONF_DISK2;
+            key = EditConfigurationFragment.CONF_DISK2;
             break;
         case 2:
-            key = ConfigurationActivity.CONF_DISK3;
+            key = EditConfigurationFragment.CONF_DISK3;
             break;
         case 3:
-            key = ConfigurationActivity.CONF_DISK4;
+            key = EditConfigurationFragment.CONF_DISK4;
             break;
         default:
             return null;
@@ -137,6 +169,6 @@ public class Configuration {
     }
 
     public String getName() {
-        return sharedPrefs.getString(ConfigurationActivity.CONF_NAME, "unknown");
+        return sharedPrefs.getString(EditConfigurationFragment.CONF_NAME, "unknown");
     }
 }

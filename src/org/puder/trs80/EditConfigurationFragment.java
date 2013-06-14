@@ -24,9 +24,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceActivity;
 
-public class ConfigurationActivity extends PreferenceActivity implements OnPreferenceChangeListener {
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+
+public class EditConfigurationFragment extends SherlockPreferenceActivity implements
+        OnPreferenceChangeListener {
 
     public static final String CONF_NAME  = "conf_name";
     public static final String CONF_MODEL = "conf_model";
@@ -61,7 +63,8 @@ public class ConfigurationActivity extends PreferenceActivity implements OnPrefe
             public boolean onPreferenceClick(Preference pref) {
                 String key = pref.getKey();
                 int disk = Integer.parseInt(key.substring(key.length() - 1));
-                Intent intent = new Intent(ConfigurationActivity.this, FileBrowserActivity.class);
+                Intent intent = new Intent(EditConfigurationFragment.this,
+                        FileBrowserActivity.class);
                 startActivityForResult(intent, disk);
                 return true;
             }

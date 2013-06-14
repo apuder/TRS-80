@@ -942,11 +942,15 @@ containing a value of this type.
         public static final int abs__textfield_searchview_right_holo_light=0x7f02006e;
         public static final int abs__toast_frame=0x7f02006f;
         public static final int add_icon=0x7f020070;
-        public static final int file_icon=0x7f020071;
-        public static final int folder_icon=0x7f020072;
-        public static final int ic_launcher=0x7f020073;
-        public static final int key_background=0x7f020074;
-        public static final int settings_icon=0x7f020075;
+        public static final int cancel_icon=0x7f020071;
+        public static final int delete_icon=0x7f020072;
+        public static final int file_icon=0x7f020073;
+        public static final int folder_icon=0x7f020074;
+        public static final int ic_launcher=0x7f020075;
+        public static final int key_background=0x7f020076;
+        public static final int ok_icon=0x7f020077;
+        public static final int play_icon=0x7f020078;
+        public static final int settings_icon=0x7f020079;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -988,11 +992,11 @@ containing a value of this type.
         public static final int abs__textButton=0x7f050013;
         public static final int abs__title=0x7f05001b;
         public static final int abs__up=0x7f05000b;
-        public static final int configuration_label=0x7f050070;
-        public static final int current_configuration=0x7f050073;
-        public static final int current_configuration_name=0x7f050075;
+        public static final int configuration_label=0x7f050077;
+        public static final int current_configuration=0x7f050074;
+        public static final int current_configuration_name=0x7f050076;
         public static final int disableHome=0x7f050009;
-        public static final int divider=0x7f050072;
+        public static final int divider=0x7f050073;
         public static final int edit_query=0x7f050026;
         public static final int emulator=0x7f050032;
         public static final int error_text=0x7f050038;
@@ -1054,21 +1058,23 @@ containing a value of this type.
         public static final int keyboard=0x7f050039;
         public static final int keyboard_container=0x7f050035;
         public static final int listMode=0x7f050002;
-        public static final int list_configurations=0x7f050071;
+        public static final int list_configurations=0x7f050072;
         public static final int log=0x7f050034;
         public static final int main=0x7f05006f;
-        public static final int menu_add_configuration=0x7f050077;
-        public static final int menu_settings=0x7f050078;
+        public static final int menu_add_configuration=0x7f050079;
+        public static final int menu_settings=0x7f05007a;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f050076;
+        public static final int pager=0x7f050078;
         public static final int path=0x7f050036;
         public static final int screen=0x7f050033;
-        public static final int screenshot=0x7f050074;
+        public static final int screenshot=0x7f050075;
         public static final int showCustom=0x7f050008;
         public static final int showHome=0x7f050005;
         public static final int showTitle=0x7f050007;
         public static final int tabMode=0x7f050003;
         public static final int useLogo=0x7f050004;
+        public static final int with_configurations=0x7f050071;
+        public static final int without_configurations=0x7f050070;
         public static final int wrap_content=0x7f050000;
     }
     public static final class integer {
@@ -1096,18 +1102,15 @@ containing a value of this type.
         public static final int abs__search_dropdown_item_icons_2line=0x7f030012;
         public static final int abs__search_view=0x7f030013;
         public static final int abs__simple_dropdown_hint=0x7f030014;
-        public static final int configuration_item=0x7f030015;
-        public static final int configuration_popup=0x7f030016;
-        public static final int emulator=0x7f030017;
-        public static final int file_browser=0x7f030018;
-        public static final int file_browser_item=0x7f030019;
-        public static final int initialization_error=0x7f03001a;
-        public static final int keyboard_default=0x7f03001b;
-        public static final int main_activity=0x7f03001c;
-        public static final int main_fragment=0x7f03001d;
-        public static final int no_configurations=0x7f03001e;
-        public static final int sherlock_spinner_dropdown_item=0x7f03001f;
-        public static final int sherlock_spinner_item=0x7f030020;
+        public static final int emulator=0x7f030015;
+        public static final int file_browser=0x7f030016;
+        public static final int file_browser_item=0x7f030017;
+        public static final int initialization_error=0x7f030018;
+        public static final int keyboard_default=0x7f030019;
+        public static final int main_activity=0x7f03001a;
+        public static final int main_fragment=0x7f03001b;
+        public static final int sherlock_spinner_dropdown_item=0x7f03001c;
+        public static final int sherlock_spinner_item=0x7f03001d;
     }
     public static final class menu {
         public static final int activity_main=0x7f0d0000;
@@ -1153,10 +1156,9 @@ containing a value of this type.
          */
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
         public static final int app_name=0x7f0a000d;
-        public static final int configurations=0x7f0a0014;
-        public static final int currently_running=0x7f0a0015;
+        public static final int currently_running=0x7f0a0014;
         public static final int empty_dir=0x7f0a0010;
-        public static final int error_init=0x7f0a0016;
+        public static final int error_init=0x7f0a0015;
         public static final int menu_add_configuration=0x7f0a000e;
         public static final int menu_settings=0x7f0a000f;
         public static final int no_configurations=0x7f0a0013;

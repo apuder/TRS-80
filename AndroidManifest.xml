@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ConfigurationActivity" />
+        <activity android:name=".EditConfigurationFragment" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".EmulatorActivity" />
         <activity android:name=".browser.FileBrowserActivity" />

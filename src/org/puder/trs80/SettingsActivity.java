@@ -26,8 +26,11 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
-public class SettingsActivity extends SherlockPreferenceActivity implements OnPreferenceChangeListener {
+public class SettingsActivity extends SherlockPreferenceActivity implements
+        OnPreferenceChangeListener {
 
     public static final String SHARED_PREF_NAME = "Settings";
 
@@ -73,8 +76,22 @@ public class SettingsActivity extends SherlockPreferenceActivity implements OnPr
         romModel4p = (Preference) findPreference(CONF_ROM_MODEL4P);
         romModel4p.setOnPreferenceChangeListener(this);
         romModel4p.setOnPreferenceClickListener(listener);
-        
+
         updateSummaries();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("done").setIcon(R.drawable.ok_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        finish();
+        return true;
     }
 
     private void updateSummaries() {

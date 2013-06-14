@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.puder.trs80.R;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,7 +29,11 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class FileBrowserActivity extends ListActivity {
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
+public class FileBrowserActivity extends SherlockListActivity {
 
     private List<String> items;
     private String       pathPrefix;
@@ -45,6 +48,21 @@ public class FileBrowserActivity extends ListActivity {
         pathPrefix = this.getString(id) + ": ";
         pathLabel = (TextView) this.findViewById(R.id.path);
         getFiles(Environment.getExternalStorageDirectory().getPath());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("cancel").setIcon(R.drawable.cancel_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        setResult(RESULT_CANCELED, getIntent());
+        finish();
+        return true;
     }
 
     @Override
