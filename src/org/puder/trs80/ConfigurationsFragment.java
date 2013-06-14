@@ -55,6 +55,8 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             menu.add("Play").setIcon(R.drawable.play_icon)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menu.add("Edit").setIcon(R.drawable.edit_icon)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add("Delete").setIcon(R.drawable.delete_icon)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
@@ -69,12 +71,15 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if ("Play".equals(item.getTitle())) {
-                mode.finish();
-                startConfiguration(configurations[selectedPosition]);
+                doStart();
+                return false;
+            }
+            if ("Edit".equals(item.getTitle())) {
+                doEdit();
                 return false;
             }
             if ("Delete".equals(item.getTitle())) {
-                showConfirmationDialog();
+                doDelete();
                 return false;
             }
             return true;
@@ -91,14 +96,6 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             // Needed because of a bug in Android
             configurationListView.requestLayout();
         }
-    }
-
-    private void showConfirmationDialog() {
-        String title = getActivity().getString(R.string.alert_dialog_confirm_delete,
-                configurationNames[selectedPosition]);
-        AlertDialogFragment dialog = AlertDialogFragment.newInstance(this, title);
-        dialog.setTargetFragment(this, 0);
-        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
     }
 
     public static class AlertDialogFragment extends SherlockDialogFragment {
@@ -281,11 +278,21 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         }
     }
 
-    public void doEdit(View view) {
+    private void doEdit() {
+        actionMode.finish();
         editConfiguration(configurations[selectedPosition]);
     }
 
-    public void doStart(View view) {
+    private void doDelete() {
+        String title = getActivity().getString(R.string.alert_dialog_confirm_delete,
+                configurationNames[selectedPosition]);
+        AlertDialogFragment dialog = AlertDialogFragment.newInstance(this, title);
+        dialog.setTargetFragment(this, 0);
+        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
+    }
+
+    private void doStart() {
+        actionMode.finish();
         startConfiguration(configurations[selectedPosition]);
     }
 
