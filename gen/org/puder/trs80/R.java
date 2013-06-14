@@ -951,6 +951,7 @@ containing a value of this type.
         public static final int ok_icon=0x7f020077;
         public static final int play_icon=0x7f020078;
         public static final int settings_icon=0x7f020079;
+        public static final int warning_icon=0x7f02007a;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -1155,13 +1156,16 @@ containing a value of this type.
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] 
          */
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
+        public static final int alert_dialog_cancel=0x7f0a0014;
+        public static final int alert_dialog_confirm_delete=0x7f0a0015;
+        public static final int alert_dialog_ok=0x7f0a0013;
         public static final int app_name=0x7f0a000d;
-        public static final int currently_running=0x7f0a0014;
+        public static final int currently_running=0x7f0a0017;
         public static final int empty_dir=0x7f0a0010;
-        public static final int error_init=0x7f0a0015;
+        public static final int error_init=0x7f0a0018;
         public static final int menu_add_configuration=0x7f0a000e;
         public static final int menu_settings=0x7f0a000f;
-        public static final int no_configurations=0x7f0a0013;
+        public static final int no_configurations=0x7f0a0016;
         public static final int ok=0x7f0a0012;
         public static final int path=0x7f0a0011;
     }

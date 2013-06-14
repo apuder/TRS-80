@@ -19,10 +19,10 @@ package org.puder.trs80;
 import org.puder.trs80.Hardware.Model;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,11 +31,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -71,9 +71,10 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             if ("Play".equals(item.getTitle())) {
                 mode.finish();
                 startConfiguration(configurations[selectedPosition]);
+                return false;
             }
             if ("Delete".equals(item.getTitle())) {
-                deleteConfiguration();
+                showConfirmationDialog();
                 return false;
             }
             return true;
@@ -89,6 +90,48 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             configurationListView.clearChoices();
             // Needed because of a bug in Android
             configurationListView.requestLayout();
+        }
+    }
+
+    private void showConfirmationDialog() {
+        String title = getActivity().getString(R.string.alert_dialog_confirm_delete,
+                configurationNames[selectedPosition]);
+        AlertDialogFragment dialog = AlertDialogFragment.newInstance(this, title);
+        dialog.setTargetFragment(this, 0);
+        dialog.show(getActivity().getSupportFragmentManager(), "dialog");
+    }
+
+    public static class AlertDialogFragment extends SherlockDialogFragment {
+
+        private ConfigurationsFragment configFrag;
+
+        public static AlertDialogFragment newInstance(ConfigurationsFragment configFrag,
+                String title) {
+            AlertDialogFragment frag = new AlertDialogFragment();
+            frag.configFrag = configFrag;
+            Bundle args = new Bundle();
+            args.putString("title", title);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            String title = getArguments().getString("title");
+            return new AlertDialog.Builder(getActivity())
+                    .setIcon(R.drawable.warning_icon)
+                    .setTitle(title)
+                    .setPositiveButton(R.string.alert_dialog_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    configFrag.userConfirmedDeleteConfiguration();
+                                }
+                            })
+                    .setNegativeButton(R.string.alert_dialog_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                }
+                            }).create();
         }
     }
 
@@ -167,7 +210,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         editConfiguration(newConfig);
     }
 
-    private void deleteConfiguration() {
+    private void userConfirmedDeleteConfiguration() {
         Configuration.deleteConfiguration(configurations[selectedPosition]);
         actionMode.finish();
         updateView();
