@@ -14,4 +14,15 @@
     <string name="currently_running">Currently running:</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>
+    <string name="help">ROM and disk images for the TRS-80 need to be copied to the SD card
+                        before using this app.
+                        For copyright reasons this app does not bundle ROM images. You can find
+                        them on the Internet (for example
+                        <a href="https://github.com/lkesteloot/trs80/tree/master/roms">here</a>).
+                        Tap on the \'+\' icon to create a new configuration.
+                        A configuration defines the TRS-80 model and the disk images used for
+                        the emulation. Click on a configuration and then the play icon to
+                        run a specific configuration.
+                        Note that currently only Model 3 emulation is supported.</string>
+    
 </resources>

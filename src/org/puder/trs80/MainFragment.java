@@ -1,17 +1,24 @@
 package org.puder.trs80;
 
 import java.util.ArrayList;
+
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.TextView;
+
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -50,8 +57,10 @@ public class MainFragment extends SherlockFragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
+        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Help").setIcon(R.drawable.help_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }
@@ -62,11 +71,37 @@ public class MainFragment extends SherlockFragmentActivity {
             doSettings();
             return false;
         }
+        if ("Help".equals(item.getTitle())) {
+            doHelp();
+            return false;
+        }
         return true;
     }
 
     private void doSettings() {
         startActivity(new Intent(this, SettingsActivity.class));
+    }
+
+    private void doHelp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.help, null, false);
+        TextView t = (TextView) view.findViewById(R.id.help_text);
+        t.setMovementMethod(LinkMovementMethod.getInstance());
+        builder.setView(view);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override

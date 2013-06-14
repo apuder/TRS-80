@@ -190,7 +190,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.add(Menu.NONE, 1, Menu.NONE, "Add").setIcon(R.drawable.add_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     }
 
     @Override
