@@ -197,9 +197,9 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     public boolean onOptionsItemSelected(MenuItem item) {
         if ("Add".equals(item.getTitle())) {
             addConfiguration();
-            return false;
+            return true;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void addConfiguration() {

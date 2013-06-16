@@ -69,13 +69,13 @@ public class MainFragment extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if ("Settings".equals(item.getTitle())) {
             doSettings();
-            return false;
+            return true;
         }
         if ("Help".equals(item.getTitle())) {
             doHelp();
-            return false;
+            return true;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void doSettings() {

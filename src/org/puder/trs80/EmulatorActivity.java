@@ -16,15 +16,17 @@
 
 package org.puder.trs80;
 
-import android.os.Bundle;
-import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class EmulatorActivity extends Activity {
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
+public class EmulatorActivity extends SherlockFragmentActivity {
 
     private Thread   cpuThread;
     private TextView logView;
@@ -32,6 +34,9 @@ public class EmulatorActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            getSupportActionBar().hide();
+        }
         XTRS.setEmulatorActivity(this);
         TRS80Application.getHardware().computeFontDimensions(getWindow());
         Keyboard keyboard = new Keyboard();
@@ -68,6 +73,23 @@ public class EmulatorActivity extends Activity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Pause").setIcon(R.drawable.pause_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if ("Pause".equals(item.getTitle())) {
+            takeScreenshot();
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void initView0() {
         setContentView(R.layout.emulator);
         LayoutInflater inflater = (LayoutInflater) this
@@ -97,9 +119,13 @@ public class EmulatorActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
+        takeScreenshot();
+    }
+
+    private void takeScreenshot() {
         Screen screen = (Screen) findViewById(R.id.screen);
         TRS80Application.setScreenshot(screen.takeScreenshot());
-        super.onBackPressed();
     }
 
     public void log(final String msg) {
@@ -108,6 +134,7 @@ public class EmulatorActivity extends Activity {
             @Override
             public void run() {
                 logView.setText(msg);
-            }});
+            }
+        });
     }
 }

@@ -951,9 +951,10 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020077;
         public static final int key_background=0x7f020078;
         public static final int ok_icon=0x7f020079;
-        public static final int play_icon=0x7f02007a;
-        public static final int settings_icon=0x7f02007b;
-        public static final int warning_icon=0x7f02007c;
+        public static final int pause_icon=0x7f02007a;
+        public static final int play_icon=0x7f02007b;
+        public static final int settings_icon=0x7f02007c;
+        public static final int warning_icon=0x7f02007d;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -995,7 +996,6 @@ containing a value of this type.
         public static final int abs__textButton=0x7f050013;
         public static final int abs__title=0x7f05001b;
         public static final int abs__up=0x7f05000b;
-        public static final int configuration_label=0x7f050078;
         public static final int current_configuration=0x7f050075;
         public static final int current_configuration_name=0x7f050077;
         public static final int disableHome=0x7f050009;
@@ -1066,7 +1066,7 @@ containing a value of this type.
         public static final int log=0x7f050034;
         public static final int main=0x7f050070;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f050079;
+        public static final int pager=0x7f050078;
         public static final int path=0x7f050036;
         public static final int screen=0x7f050033;
         public static final int screenshot=0x7f050076;
