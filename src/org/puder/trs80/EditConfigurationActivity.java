@@ -26,8 +26,10 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
-public class EditConfigurationFragment extends SherlockPreferenceActivity implements
+public class EditConfigurationActivity extends SherlockPreferenceActivity implements
         OnPreferenceChangeListener {
 
     public static final String CONF_NAME  = "conf_name";
@@ -52,8 +54,8 @@ public class EditConfigurationFragment extends SherlockPreferenceActivity implem
         super.onCreate(savedInstanceState);
         handler = new Handler();
         Intent i = getIntent();
-        int id = i.getExtras().getInt("CONFIG_ID");
-        getPreferenceManager().setSharedPreferencesName("CONFIG_" + id);
+        int configId = i.getExtras().getInt("CONFIG_ID");
+        getPreferenceManager().setSharedPreferencesName("CONFIG_" + configId);
         addPreferencesFromResource(R.xml.configuration);
         sharedPrefs = this.getPreferenceManager().getSharedPreferences();// this.getPreferences(MODE_PRIVATE);
         name = (Preference) findPreference(CONF_NAME);
@@ -63,7 +65,7 @@ public class EditConfigurationFragment extends SherlockPreferenceActivity implem
             public boolean onPreferenceClick(Preference pref) {
                 String key = pref.getKey();
                 int disk = Integer.parseInt(key.substring(key.length() - 1));
-                Intent intent = new Intent(EditConfigurationFragment.this,
+                Intent intent = new Intent(EditConfigurationActivity.this,
                         FileBrowserActivity.class);
                 startActivityForResult(intent, disk);
                 return true;
@@ -88,6 +90,39 @@ public class EditConfigurationFragment extends SherlockPreferenceActivity implem
         model = (Preference) findPreference(CONF_MODEL);
         model.setOnPreferenceChangeListener(this);
         updateSummaries();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Cancel").setIcon(R.drawable.cancel_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add("Done").setIcon(R.drawable.ok_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if ("Done".equals(item.getTitle())) {
+            doneEditing(false);
+            return true;
+        }
+        if ("Cancel".equals(item.getTitle())) {
+            doneEditing(true);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        doneEditing(false);
+    }
+
+    private void doneEditing(boolean cancel) {
+        setResult(cancel ? RESULT_CANCELED : RESULT_OK, getIntent());
+        finish();
     }
 
     private void updateSummaries() {

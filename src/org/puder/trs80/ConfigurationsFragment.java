@@ -18,11 +18,13 @@ package org.puder.trs80;
 
 import org.puder.trs80.Hardware.Model;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -44,11 +46,15 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class ConfigurationsFragment extends SherlockFragment implements OnItemClickListener {
 
-    private Configuration[] configurations;
-    private String[]        configurationNames;
-    private int             selectedPosition;
-    private ListView        configurationListView;
-    private ActionMode      actionMode;
+    private static final int    REQUEST_CODE_EDIT_CONFIG  = 0;
+    private static final int    REQUEST_CODE_RUN_EMULATOR = 1;
+
+    private Configuration[]     configurations;
+    private String[]            configurationNames;
+    private ConfigurationBackup backup;
+    private int                 selectedPosition;
+    private ListView            configurationListView;
+    private ActionMode          actionMode;
 
     private final class ConfigurationActionMode implements ActionMode.Callback {
         @Override
@@ -191,21 +197,39 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_EDIT_CONFIG) {
+            if (resultCode == Activity.RESULT_OK) {
+                return;
+            }
+            boolean isNew = data.getBooleanExtra("IS_NEW", false);
+            if (isNew) {
+                backup.delete();
+            } else {
+                backup.save();
+            }
+            updateView();
+        }
+    }
+
     private void addConfiguration() {
         Configuration newConfig = Configuration.newConfiguration();
-        editConfiguration(newConfig);
+        editConfiguration(newConfig, true);
     }
 
     private void userConfirmedDeleteConfiguration() {
-        Configuration.deleteConfiguration(configurations[selectedPosition]);
+        configurations[selectedPosition].delete();
         actionMode.finish();
         updateView();
     }
 
-    private void editConfiguration(Configuration conf) {
-        Intent i = new Intent(getActivity(), EditConfigurationFragment.class);
+    private void editConfiguration(Configuration conf, boolean isNew) {
+        backup = conf.backup();
+        Intent i = new Intent(getActivity(), EditConfigurationActivity.class);
         i.putExtra("CONFIG_ID", conf.getId());
-        startActivity(i);
+        i.putExtra("IS_NEW", isNew);
+        startActivityForResult(i, REQUEST_CODE_EDIT_CONFIG);
     }
 
     private void startConfiguration(Configuration conf) {
@@ -269,7 +293,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
 
     private void doEdit() {
         actionMode.finish();
-        editConfiguration(configurations[selectedPosition]);
+        editConfiguration(configurations[selectedPosition], false);
     }
 
     private void doDelete() {

@@ -43,12 +43,12 @@ public class Configuration {
         }
     }
 
-    private SharedPreferences        sharedPrefs;
-    private int                      id;
-    private int                      screenColor;
-    private int                      characterColor;
-    private int                      keyboardType;
-
+    protected SharedPreferences        sharedPrefs;
+    protected int                      id;
+    protected int                      screenColor;
+    protected int                      characterColor;
+    protected int                      keyboardType;
+    
     public static Configuration[] getConfigurations() {
         return configurations;
     }
@@ -76,22 +76,20 @@ public class Configuration {
         return newConfig;
     }
 
-    public static void deleteConfiguration(Configuration config) {
+    public void delete() {
         // Delete ID
         Editor e = globalPrefs.edit();
         String configurationIds = globalPrefs.getString("CONFIGURATIONS", "");
 
-        String id = Integer.toString(config.getId());
-        configurationIds = configurationIds.replace(id + ",", "");
-        configurationIds = configurationIds.replace("," + id, "");
-        configurationIds = configurationIds.replace(id, "");
+        String ids = Integer.toString(id);
+        configurationIds = configurationIds.replace(ids + ",", "");
+        configurationIds = configurationIds.replace("," + ids, "");
+        configurationIds = configurationIds.replace(ids, "");
         e.putString("CONFIGURATIONS", configurationIds);
         e.commit();
 
         // Delete shared preferences
-        SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
-                "CONFIG_" + id, Context.MODE_PRIVATE);
-        e = prefs.edit();
+        e = sharedPrefs.edit();
         e.clear();
         e.commit();
 
@@ -100,7 +98,7 @@ public class Configuration {
         Configuration[] newConfigurations = new Configuration[len];
         int k = 0;
         for (int i = 0; i < configurations.length; i++) {
-            if (configurations[i] == config) {
+            if (configurations[i].getId() == getId()) {
                 continue;
             }
             newConfigurations[k++] = configurations[i];
@@ -108,7 +106,7 @@ public class Configuration {
         configurations = newConfigurations;
     }
 
-    private Configuration(int id) {
+    protected Configuration(int id) {
         this.id = id;
         sharedPrefs = TRS80Application.getAppContext().getSharedPreferences("CONFIG_" + id,
                 Context.MODE_PRIVATE);
@@ -117,12 +115,16 @@ public class Configuration {
         characterColor = Color.GREEN;
     }
 
+    public ConfigurationBackup backup() {
+        return new ConfigurationBackup(this);
+    }
+
     public int getId() {
         return id;
     }
 
     public Hardware.Model getModel() {
-        String model = sharedPrefs.getString(EditConfigurationFragment.CONF_MODEL, null);
+        String model = sharedPrefs.getString(EditConfigurationActivity.CONF_MODEL, null);
         if (model == null) {
             return Model.NONE;
         }
@@ -151,16 +153,16 @@ public class Configuration {
         String key;
         switch (disk) {
         case 0:
-            key = EditConfigurationFragment.CONF_DISK1;
+            key = EditConfigurationActivity.CONF_DISK1;
             break;
         case 1:
-            key = EditConfigurationFragment.CONF_DISK2;
+            key = EditConfigurationActivity.CONF_DISK2;
             break;
         case 2:
-            key = EditConfigurationFragment.CONF_DISK3;
+            key = EditConfigurationActivity.CONF_DISK3;
             break;
         case 3:
-            key = EditConfigurationFragment.CONF_DISK4;
+            key = EditConfigurationActivity.CONF_DISK4;
             break;
         default:
             return null;
@@ -169,6 +171,6 @@ public class Configuration {
     }
 
     public String getName() {
-        return sharedPrefs.getString(EditConfigurationFragment.CONF_NAME, "unknown");
+        return sharedPrefs.getString(EditConfigurationActivity.CONF_NAME, "unknown");
     }
 }
