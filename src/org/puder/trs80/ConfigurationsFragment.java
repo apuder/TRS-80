@@ -211,6 +211,10 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             }
             updateView();
         }
+
+        if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
+            ((MainFragment) getActivity()).setCurrentItem(1);
+        }
     }
 
     private void addConfiguration() {
@@ -232,7 +236,41 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         startActivityForResult(i, REQUEST_CODE_EDIT_CONFIG);
     }
 
-    private void startConfiguration(Configuration conf) {
+    private void startConfiguration(final Configuration conf) {
+        Configuration currentConf = TRS80Application.getCurrentConfiguration();
+        if (currentConf == null) {
+            userConfirmedStartConfiguration(conf);
+            return;
+        }
+        String msg = getActivity().getString(R.string.alert_dialog_confirm_launch_new_config,
+                currentConf.getName());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(msg);
+        builder.setIcon(R.drawable.warning_icon);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                userConfirmedStartConfiguration(conf);
+            }
+
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void userConfirmedStartConfiguration(Configuration conf) {
         Model model = conf.getModel();
         if (model != Model.MODEL3) {
             Toast.makeText(getActivity(), "Only Model 3 is supported at this time.",
@@ -258,7 +296,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             return;
         }
         Intent i = new Intent(getActivity(), EmulatorActivity.class);
-        startActivity(i);
+        startActivityForResult(i, REQUEST_CODE_RUN_EMULATOR);
     }
 
     private void showError(int err) {
@@ -307,10 +345,5 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     private void doStart() {
         actionMode.finish();
         startConfiguration(configurations[selectedPosition]);
-    }
-
-    public void doResumeEmulator(View view) {
-        Intent i = new Intent(getActivity(), EmulatorActivity.class);
-        startActivity(i);
     }
 }

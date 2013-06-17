@@ -16,6 +16,7 @@
 
 package org.puder.trs80;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -83,7 +84,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if ("Pause".equals(item.getTitle())) {
-            takeScreenshot();
+            pauseEmulator();
             finish();
             return true;
         }
@@ -120,7 +121,12 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        pauseEmulator();
+    }
+
+    private void pauseEmulator() {
         takeScreenshot();
+        setResult(Activity.RESULT_OK, getIntent());
     }
 
     private void takeScreenshot() {

@@ -5,31 +5,48 @@
     android:layout_height="fill_parent"
     tools:context=".EmulatorStatusFragment">
 
-    <LinearLayout
-        android:id="@+id/current_configuration"
-        android:layout_above="@+id/screenshot"
+    <TextView
+        android:id="@+id/emulator_not_running"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_centerInParent="true"
+        android:layout_margin="100dp"
+        android:gravity="center"
+        android:text="@string/emulator_not_running" />
 
-        <TextView
-            android:text="@string/currently_running"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/current_configuration_name"
-            android:layout_marginLeft="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/screenshot"
-        android:onClick="doResumeEmulator"
-        android:layout_alignParentBottom="true"
-        android:scaleType="fitCenter"
+    <RelativeLayout
+        android:id="@+id/emulator_running"
+        android:visibility="gone"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="fill_parent">
 
+        <LinearLayout
+            android:id="@+id/current_configuration"
+            android:layout_above="@+id/screenshot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:text="@string/currently_running"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/current_configuration_name"
+                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/screenshot"
+            android:onClick="doResumeEmulator"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:scaleType="fitCenter"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
 </RelativeLayout>

@@ -87,7 +87,9 @@ public class MainFragment extends SherlockFragmentActivity {
         builder.setTitle(R.string.app_name);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.help, null, false);
+        int layoutId = mViewPager.getCurrentItem() == 0 ? R.layout.help_configurations
+                : R.layout.help_emulator;
+        View view = inflater.inflate(layoutId, null, false);
         TextView t = (TextView) view.findViewById(R.id.help_text);
         t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
@@ -108,6 +110,10 @@ public class MainFragment extends SherlockFragmentActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("tab", mTabHost.getCurrentTabTag());
+    }
+
+    public void setCurrentItem(int item) {
+        mViewPager.setCurrentItem(item, true);
     }
 
     /**

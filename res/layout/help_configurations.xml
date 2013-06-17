@@ -9,6 +9,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/padding_medium"
-        android:text="@string/help" />
+        android:text="@string/help_configurations" />
     
 </LinearLayout>

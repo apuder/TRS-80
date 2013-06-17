@@ -5,22 +5,32 @@
     <string name="empty_dir">Directory empty</string>
     <string name="path">Path</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
+    <string name="alert_dialog_confirm_launch_new_config">Emulator currently runs configuration \'%1$s\'.
+                         Do you want to launch new configuration?</string>
+    <string name="alert_dialog_confirm_stop_emu">Emulator currently runs configuration \'%1$s\'.
+                         Do you want to stop emulation?</string>
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
+    <string name="emulator_not_running">Emulator is currently not running!</string>
     <string name="currently_running">Currently running:</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>
-    <string name="help">ROM and disk images for the TRS-80 need to be copied to the SD card
+    <string name="help_configurations">ROM and disk images for the TRS-80 need to be copied to the SD card
                         before using this app.
                         For copyright reasons this app does not bundle ROM images. You can find
                         them on the Internet (for example
                         <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">here</a>).
                         Tap on the \'+\' icon to create a new configuration.
                         A configuration defines the TRS-80 model and the disk images used for
-                        the emulation. Click on a configuration and then the play icon to
+                        the emulation. Click on a configuration and then the Play icon to
                         run a specific configuration.
                         Note that currently only Model 3 emulation is supported.</string>
+    <string name="help_emulator">The Emulator tab shows the currently running emulator.
+                        To launch the emulator, switch to the Configurations tab and select
+                        a configuration. Use the Play icon to play/resume the emulator.
+                        Use the Stop icon to end the current emulation.</string>
     
 </resources>
