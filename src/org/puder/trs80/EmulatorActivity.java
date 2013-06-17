@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -37,6 +38,8 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         super.onCreate(savedInstanceState);
         if (getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
             getSupportActionBar().hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
         XTRS.setEmulatorActivity(this);
         TRS80Application.getHardware().computeFontDimensions(getWindow());
