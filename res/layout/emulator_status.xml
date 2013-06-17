@@ -15,15 +15,16 @@
         android:gravity="center"
         android:text="@string/emulator_not_running" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/emulator_running"
         android:visibility="gone"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/current_configuration"
-            android:layout_above="@+id/screenshot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -42,11 +43,8 @@
 
         <ImageView
             android:id="@+id/screenshot"
-            android:onClick="doResumeEmulator"
-            android:gravity="center"
-            android:layout_centerInParent="true"
             android:scaleType="fitCenter"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
-    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>
