@@ -162,17 +162,6 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         withoutConfigurationsView.setVisibility(View.GONE);
         withConfigurationsView.setVisibility(View.VISIBLE);
 
-        // Bitmap screenshot = TRS80Application.getScreenshot();
-        // if (screenshot != null) {
-        // ImageView img = (ImageView) v.findViewById(R.id.screenshot);
-        // img.setImageBitmap(screenshot);
-        // }
-
-        // Configuration conf = TRS80Application.getCurrentConfiguration();
-        // TextView nameLabel = (TextView)
-        // v.findViewById(R.id.current_configuration_name);
-        // nameLabel.setText(conf == null ? "-" : conf.getName());
-
         configurationNames = new String[configurations.length];
         for (int i = 0; i < configurations.length; i++) {
             configurationNames[i] = configurations[i].getName();

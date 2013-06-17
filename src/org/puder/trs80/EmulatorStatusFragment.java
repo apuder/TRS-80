@@ -16,10 +16,13 @@
 
 package org.puder.trs80;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -30,5 +33,26 @@ public class EmulatorStatusFragment extends SherlockFragment {
         return inflater.inflate(R.layout.emulator_status, container, false);
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
 
+        if (this.isVisible()) {
+            if (isVisibleToUser) {
+                updateScreenshot();
+            }
+        }
+    }
+
+    private void updateScreenshot() {
+        Bitmap screenshot = TRS80Application.getScreenshot();
+        if (screenshot != null) {
+            ImageView img = (ImageView) getView().findViewById(R.id.screenshot);
+            img.setImageBitmap(screenshot);
+        }
+
+        Configuration conf = TRS80Application.getCurrentConfiguration();
+        TextView nameLabel = (TextView) getView().findViewById(R.id.current_configuration_name);
+        nameLabel.setText(conf == null ? "-" : conf.getName());
+    }
 }
