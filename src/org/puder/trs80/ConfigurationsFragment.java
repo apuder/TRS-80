@@ -72,17 +72,17 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if ("Play".equals(item.getTitle())) {
                 doStart();
-                return false;
+                return true;
             }
             if ("Edit".equals(item.getTitle())) {
                 doEdit();
-                return false;
+                return true;
             }
             if ("Delete".equals(item.getTitle())) {
                 doDelete();
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         @Override
@@ -146,7 +146,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.main_activity, container, false);
+        return inflater.inflate(R.layout.configurations, container, false);
     }
 
     private void updateView() {
@@ -189,7 +189,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.add(Menu.NONE, 1, Menu.NONE, "Add").setIcon(R.drawable.add_icon)
+        menu.add("Add").setIcon(R.drawable.add_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     }
 

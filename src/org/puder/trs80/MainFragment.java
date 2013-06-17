@@ -47,8 +47,8 @@ public class MainFragment extends SherlockFragmentActivity {
 
         mTabsAdapter.addTab(mTabHost.newTabSpec("configurations").setIndicator("Configurations"),
                 ConfigurationsFragment.class, null);
-        // mTabsAdapter.addTab(mTabHost.newTabSpec("emulator").setIndicator("Emulator"),
-        // LoaderCursorSupport.CursorLoaderListFragment.class, null);
+        mTabsAdapter.addTab(mTabHost.newTabSpec("emulator").setIndicator("Emulator"),
+                EmulatorStatusFragment.class, null);
 
         if (savedInstanceState != null) {
             mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
