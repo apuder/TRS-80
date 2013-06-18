@@ -100,20 +100,31 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     emulator_status = EMULATOR_STATUS_INITIALIZED;
 }
 
+static int trigger_screen_update() {
+    JNIEnv *env = getEnv();
+    jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
+            isRenderingMethodId);
+    if (isRendering) {
+        return 0;
+    }
+    memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
+    return 1;
+}
+
 static void check_for_screen_updates() {
     instructionsSinceLastScreenAccess++;
+    if ((instructionsSinceLastScreenAccess % SCREEN_FORCED_UPDATE_INTERVAL) == 0) {
+        if (trigger_screen_update()) {
+            screenWasUpdated = 0;
+        }
+    }
     if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
         if (screenWasUpdated) {
-            JNIEnv *env = getEnv();
-            jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
-                    isRenderingMethodId);
-            if (!isRendering) {
-                memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-                (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
+            if (trigger_screen_update()) {
                 screenWasUpdated = 0;
             }
         }
-        instructionsSinceLastScreenAccess = 0;
     }
 }
 
