@@ -409,6 +409,9 @@ trs_timer_init()
   sigaction(SIGALRM, &sa, NULL);
 
   trs_timer_event(SIGALRM);
+#ifdef ANDROID
+  z80_state.delay = 2500;
+#endif
 
   /* Also initialize the clock in memory - hack */
   tt = time(NULL);
