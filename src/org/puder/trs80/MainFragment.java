@@ -83,12 +83,17 @@ public class MainFragment extends SherlockFragmentActivity {
     }
 
     private void doHelp() {
+        int titleId = R.string.help_title_configurations;
+        int layoutId = R.layout.help_configurations;
+        if (mViewPager.getCurrentItem() != 0) {
+            // We are on the Emulator tab
+            titleId = R.string.help_title_emulator;
+            layoutId = R.layout.help_emulator;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
+        builder.setTitle(titleId);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        int layoutId = mViewPager.getCurrentItem() == 0 ? R.layout.help_configurations
-                : R.layout.help_emulator;
         View view = inflater.inflate(layoutId, null, false);
         TextView t = (TextView) view.findViewById(R.id.help_text);
         t.setMovementMethod(LinkMovementMethod.getInstance());

@@ -1111,12 +1111,14 @@ containing a value of this type.
         public static final int file_browser=0x7f030018;
         public static final int file_browser_item=0x7f030019;
         public static final int help_configurations=0x7f03001a;
-        public static final int help_emulator=0x7f03001b;
-        public static final int initialization_error=0x7f03001c;
-        public static final int keyboard_default=0x7f03001d;
-        public static final int main_fragment=0x7f03001e;
-        public static final int sherlock_spinner_dropdown_item=0x7f03001f;
-        public static final int sherlock_spinner_item=0x7f030020;
+        public static final int help_edit_configuration=0x7f03001b;
+        public static final int help_emulator=0x7f03001c;
+        public static final int help_settings=0x7f03001d;
+        public static final int initialization_error=0x7f03001e;
+        public static final int keyboard_default=0x7f03001f;
+        public static final int main_fragment=0x7f030020;
+        public static final int sherlock_spinner_dropdown_item=0x7f030021;
+        public static final int sherlock_spinner_item=0x7f030022;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
@@ -1169,8 +1171,14 @@ containing a value of this type.
         public static final int empty_dir=0x7f0a000e;
         public static final int emulator_not_running=0x7f0a0018;
         public static final int error_init=0x7f0a001a;
-        public static final int help_configurations=0x7f0a001b;
-        public static final int help_emulator=0x7f0a001c;
+        public static final int help_configurations=0x7f0a001c;
+        public static final int help_edit_configuration=0x7f0a001e;
+        public static final int help_emulator=0x7f0a0020;
+        public static final int help_settings=0x7f0a0022;
+        public static final int help_title_configurations=0x7f0a001b;
+        public static final int help_title_edit_configuration=0x7f0a001d;
+        public static final int help_title_emulator=0x7f0a001f;
+        public static final int help_title_settings=0x7f0a0021;
         public static final int no_configurations=0x7f0a0017;
         public static final int ok=0x7f0a0010;
         public static final int path=0x7f0a000f;

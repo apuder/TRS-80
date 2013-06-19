@@ -18,12 +18,19 @@ package org.puder.trs80;
 
 import org.puder.trs80.browser.FileBrowserActivity;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.Menu;
@@ -82,16 +89,29 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("done").setIcon(R.drawable.ok_icon)
+        menu.add("Done").setIcon(R.drawable.ok_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        menu.add("Help").setIcon(R.drawable.help_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if ("Done".equals(item.getTitle())) {
+            doDone();
+            return true;
+        }
+        if ("Help".equals(item.getTitle())) {
+            doHelp();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void doDone() {
         finish();
-        return true;
     }
 
     private void updateSummaries() {
@@ -142,4 +162,25 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
         return true;
     }
 
+    private void doHelp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.help_title_settings);
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.help_settings, null, false);
+        TextView t = (TextView) view.findViewById(R.id.help_text);
+        t.setMovementMethod(LinkMovementMethod.getInstance());
+        builder.setView(view);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }
