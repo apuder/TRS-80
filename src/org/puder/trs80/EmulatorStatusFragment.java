@@ -16,14 +16,11 @@
 
 package org.puder.trs80;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +35,9 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class EmulatorStatusFragment extends SherlockFragment {
 
+    private MenuItem stopMenuItem;
+    private MenuItem playMenuItem;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +51,11 @@ public class EmulatorStatusFragment extends SherlockFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.add("Stop").setIcon(R.drawable.stop_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add("Play").setIcon(R.drawable.play_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        stopMenuItem = menu.add("Stop");
+        stopMenuItem.setIcon(R.drawable.stop_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        playMenuItem = menu.add("Play");
+        playMenuItem.setIcon(R.drawable.play_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        updateMenuItems();
     }
 
     @Override
@@ -82,12 +83,6 @@ public class EmulatorStatusFragment extends SherlockFragment {
     }
 
     private void doStop() {
-        Configuration conf = TRS80Application.getCurrentConfiguration();
-        if (conf == null) {
-            showNoEmuRunningAlertDialog();
-            return;
-        }
-
         Configuration config = TRS80Application.getCurrentConfiguration();
         String msg = getActivity().getString(R.string.alert_dialog_confirm_stop_emu,
                 config.getName());
@@ -120,10 +115,6 @@ public class EmulatorStatusFragment extends SherlockFragment {
 
     private void doPlay() {
         Configuration conf = TRS80Application.getCurrentConfiguration();
-        if (conf == null) {
-            showNoEmuRunningAlertDialog();
-            return;
-        }
         Intent i = new Intent(getActivity(), EmulatorActivity.class);
         startActivityForResult(i, 0);
     }
@@ -133,25 +124,8 @@ public class EmulatorStatusFragment extends SherlockFragment {
         updateView();
     }
 
-    private void showNoEmuRunningAlertDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.app_name);
-        builder.setMessage(R.string.emulator_not_running);
-        builder.setIcon(R.drawable.warning_icon);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
     private void updateView() {
+        updateMenuItems();
         boolean isRunning = TRS80Application.getCurrentConfiguration() != null;
         View runningView = getView().findViewById(R.id.emulator_running);
         View notRunningView = getView().findViewById(R.id.emulator_not_running);
@@ -166,6 +140,20 @@ public class EmulatorStatusFragment extends SherlockFragment {
         updateScreenshot();
     }
 
+    private void updateMenuItems() {
+        if (playMenuItem == null || stopMenuItem == null) {
+            return;
+        }
+        boolean isRunning = TRS80Application.getCurrentConfiguration() != null;
+        if (!isRunning) {
+            playMenuItem.setVisible(false);
+            stopMenuItem.setVisible(false);
+            return;
+        }
+        playMenuItem.setVisible(true);
+        stopMenuItem.setVisible(true);
+    }
+
     private void updateScreenshot() {
         Bitmap screenshot = TRS80Application.getScreenshot();
         if (screenshot != null) {
@@ -176,7 +164,8 @@ public class EmulatorStatusFragment extends SherlockFragment {
                 @Override
                 public void onClick(View v) {
                     doPlay();
-                }});
+                }
+            });
         }
 
         Configuration conf = TRS80Application.getCurrentConfiguration();
