@@ -20,7 +20,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -99,7 +102,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
-        ViewGroup keyboard = (ViewGroup) inflater.inflate(R.layout.keyboard_default, null);
+        ViewGroup keyboard = (ViewGroup) inflater.inflate(R.layout.keyboard_original, null);
 
         Key key_0 = (Key) keyboard.findViewById(R.id.key_0);
         ((ViewGroup) key_0.getParent()).removeView(key_0);
@@ -117,8 +120,32 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         logView = (TextView) findViewById(R.id.log);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
-        inflater.inflate(R.layout.keyboard_default, root);
+        final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
+        inflater.inflate(R.layout.keyboard_compact, root);
+        /*
+         * The following code is a hack to work around a problem with the
+         * keyboard layout in Android. The second keyboard should have
+         * visibility GONE initially when the keyboard layout is inflated.
+         * However, doing so messes up the layout of the second keyboard
+         * (R.id.keyboard_view_2). This does not happen when visibility is
+         * VISIBLE. So, to work around this issue, the initial visibility in the
+         * keyboard layout is VISIBLE and we use a layout listener to make it
+         * GONE after the layout has been computed and just before it will be
+         * rendered.
+         */
+        ViewTreeObserver vto = root.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+
+                View kb2 = root.findViewById(R.id.keyboard_view_2);
+                if (kb2 != null) {
+                    kb2.setVisibility(View.GONE);
+                }
+                ViewTreeObserver obs = root.getViewTreeObserver();
+                obs.removeGlobalOnLayoutListener(this);
+            }
+        });
     }
 
     @Override

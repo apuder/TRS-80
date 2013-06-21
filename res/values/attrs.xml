@@ -4,7 +4,9 @@
     <declare-styleable name="Keyboard">
         <attr name="label" format="string" />
         <attr name="address" format="integer" />
+        <attr name="address2" format="integer" />
         <attr name="mask" format="integer" />
+        <attr name="mask2" format="integer" />
         <attr name="size" format="integer" />
     </declare-styleable>
 

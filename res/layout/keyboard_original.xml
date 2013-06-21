@@ -444,7 +444,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             keyboard:address="0x3820"
-            keyboard:label="/"
+            keyboard:label="\?|/"
             keyboard:mask="128" />
 
         <org.puder.trs80.Key

@@ -160,6 +160,14 @@ theme attribute (in the form
 containing a value of this type.
          */
         public static final int address=0x7f010063;
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int address2=0x7f010064;
         /** <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
 <p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
@@ -392,7 +400,15 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
          */
-        public static final int mask=0x7f010064;
+        public static final int mask=0x7f010065;
+        /** <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int mask2=0x7f010066;
         /**  The type of navigation to use. 
          <p>Must be one of the following constant values.</p>
 <table>
@@ -517,7 +533,7 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
          */
-        public static final int size=0x7f010065;
+        public static final int size=0x7f010067;
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
@@ -1007,67 +1023,88 @@ containing a value of this type.
         public static final int help_text=0x7f050040;
         public static final int homeAsUp=0x7f050006;
         public static final int icon=0x7f05003f;
-        public static final int key_0=0x7f05004c;
-        public static final int key_1=0x7f050043;
-        public static final int key_2=0x7f050044;
-        public static final int key_3=0x7f050045;
-        public static final int key_4=0x7f050046;
-        public static final int key_5=0x7f050047;
-        public static final int key_6=0x7f050048;
-        public static final int key_7=0x7f050049;
-        public static final int key_8=0x7f05004a;
-        public static final int key_9=0x7f05004b;
-        public static final int key_A=0x7f05005f;
-        public static final int key_AT=0x7f05005b;
-        public static final int key_B=0x7f050070;
-        public static final int key_BREAK=0x7f05004f;
-        public static final int key_C=0x7f05006e;
-        public static final int key_CLEAR=0x7f05006a;
-        public static final int key_COLON=0x7f05004d;
-        public static final int key_COMMA=0x7f050073;
-        public static final int key_D=0x7f050061;
-        public static final int key_DOT=0x7f050074;
-        public static final int key_DOWN=0x7f05005e;
-        public static final int key_E=0x7f050053;
-        public static final int key_ENTER=0x7f050069;
-        public static final int key_F=0x7f050062;
-        public static final int key_G=0x7f050063;
-        public static final int key_H=0x7f050064;
-        public static final int key_I=0x7f050058;
-        public static final int key_J=0x7f050065;
-        public static final int key_K=0x7f050066;
-        public static final int key_L=0x7f050067;
-        public static final int key_LEFT=0x7f05005c;
-        public static final int key_M=0x7f050072;
-        public static final int key_MINUS=0x7f05004e;
-        public static final int key_N=0x7f050071;
-        public static final int key_O=0x7f050059;
-        public static final int key_P=0x7f05005a;
-        public static final int key_Q=0x7f050051;
-        public static final int key_R=0x7f050054;
-        public static final int key_RIGHT=0x7f05005d;
-        public static final int key_S=0x7f050060;
-        public static final int key_SEMICOLON=0x7f050068;
-        public static final int key_SHIFT1=0x7f05006b;
-        public static final int key_SHIFT2=0x7f050076;
+        public static final int key_0=0x7f050084;
+        public static final int key_1=0x7f050068;
+        public static final int key_2=0x7f050069;
+        public static final int key_3=0x7f05006a;
+        public static final int key_4=0x7f050071;
+        public static final int key_5=0x7f050072;
+        public static final int key_6=0x7f050073;
+        public static final int key_7=0x7f05007a;
+        public static final int key_8=0x7f05007b;
+        public static final int key_9=0x7f05007c;
+        public static final int key_A=0x7f05004e;
+        public static final int key_ADD=0x7f05006b;
+        public static final int key_ALT=0x7f050062;
+        public static final int key_ALT2=0x7f050083;
+        public static final int key_AMP=0x7f050089;
+        public static final int key_APOS=0x7f050081;
+        public static final int key_ASTERIX=0x7f050074;
+        public static final int key_AT=0x7f05006d;
+        public static final int key_B=0x7f05005d;
+        public static final int key_BREAK=0x7f050057;
+        public static final int key_BR_CLOSE=0x7f050070;
+        public static final int key_BR_OPEN=0x7f05006f;
+        public static final int key_C=0x7f05005b;
+        public static final int key_CLEAR=0x7f050065;
+        public static final int key_COLON=0x7f050080;
+        public static final int key_COMMA=0x7f05007d;
+        public static final int key_D=0x7f050050;
+        public static final int key_DOLLAR=0x7f050076;
+        public static final int key_DOT=0x7f050086;
+        public static final int key_DOWN=0x7f050063;
+        public static final int key_E=0x7f050046;
+        public static final int key_ENTER=0x7f050066;
+        public static final int key_EQUAL=0x7f05007e;
+        public static final int key_EXCLAMATION_MARK=0x7f050088;
+        public static final int key_F=0x7f050051;
+        public static final int key_G=0x7f050052;
+        public static final int key_GT=0x7f050079;
+        public static final int key_H=0x7f050053;
+        public static final int key_HASH=0x7f05006e;
+        public static final int key_I=0x7f05004b;
+        public static final int key_J=0x7f050054;
+        public static final int key_K=0x7f050055;
+        public static final int key_L=0x7f050056;
+        public static final int key_LEFT=0x7f050060;
+        public static final int key_LEFT2=0x7f050082;
+        public static final int key_LT=0x7f050078;
+        public static final int key_M=0x7f05005f;
+        public static final int key_MINUS=0x7f05006c;
+        public static final int key_N=0x7f05005e;
+        public static final int key_O=0x7f05004c;
+        public static final int key_P=0x7f05004d;
+        public static final int key_PERCENT=0x7f05007f;
+        public static final int key_Q=0x7f050044;
+        public static final int key_QUESTION=0x7f050077;
+        public static final int key_QUOT=0x7f05008a;
+        public static final int key_R=0x7f050047;
+        public static final int key_RIGHT=0x7f050061;
+        public static final int key_S=0x7f05004f;
+        public static final int key_SEMICOLON=0x7f050087;
+        public static final int key_SHIFT1=0x7f05008b;
+        public static final int key_SHIFT2=0x7f05008c;
         public static final int key_SLASH=0x7f050075;
-        public static final int key_SPACE=0x7f050077;
-        public static final int key_T=0x7f050055;
-        public static final int key_U=0x7f050057;
-        public static final int key_UP=0x7f050050;
-        public static final int key_V=0x7f05006f;
-        public static final int key_W=0x7f050052;
-        public static final int key_X=0x7f05006d;
-        public static final int key_Y=0x7f050056;
-        public static final int key_Z=0x7f05006c;
+        public static final int key_SPACE=0x7f050064;
+        public static final int key_SPACE2=0x7f050085;
+        public static final int key_T=0x7f050048;
+        public static final int key_U=0x7f05004a;
+        public static final int key_UP=0x7f050058;
+        public static final int key_V=0x7f05005c;
+        public static final int key_W=0x7f050045;
+        public static final int key_X=0x7f05005a;
+        public static final int key_Y=0x7f050049;
+        public static final int key_Z=0x7f050059;
         public static final int keyboard=0x7f050042;
         public static final int keyboard_container=0x7f050039;
+        public static final int keyboard_view_1=0x7f050043;
+        public static final int keyboard_view_2=0x7f050067;
         public static final int listMode=0x7f050002;
         public static final int list_configurations=0x7f050035;
         public static final int log=0x7f050038;
         public static final int main=0x7f050032;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f050078;
+        public static final int pager=0x7f05008d;
         public static final int path=0x7f05003e;
         public static final int screen=0x7f050037;
         public static final int screenshot=0x7f05003d;
@@ -1115,10 +1152,11 @@ containing a value of this type.
         public static final int help_emulator=0x7f03001c;
         public static final int help_settings=0x7f03001d;
         public static final int initialization_error=0x7f03001e;
-        public static final int keyboard_default=0x7f03001f;
-        public static final int main_fragment=0x7f030020;
-        public static final int sherlock_spinner_dropdown_item=0x7f030021;
-        public static final int sherlock_spinner_item=0x7f030022;
+        public static final int keyboard_compact=0x7f03001f;
+        public static final int keyboard_original=0x7f030020;
+        public static final int main_fragment=0x7f030021;
+        public static final int sherlock_spinner_dropdown_item=0x7f030022;
+        public static final int sherlock_spinner_item=0x7f030023;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
@@ -1312,17 +1350,22 @@ containing a value of this type.
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
            <tr><td><code>{@link #Keyboard_address org.puder.trs80:address}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_address2 org.puder.trs80:address2}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_label org.puder.trs80:label}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_mask org.puder.trs80:mask}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_mask2 org.puder.trs80:mask2}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_size org.puder.trs80:size}</code></td><td></td></tr>
            </table>
            @see #Keyboard_address
+           @see #Keyboard_address2
            @see #Keyboard_label
            @see #Keyboard_mask
+           @see #Keyboard_mask2
            @see #Keyboard_size
          */
         public static final int[] Keyboard = {
-            0x7f010062, 0x7f010063, 0x7f010064, 0x7f010065
+            0x7f010062, 0x7f010063, 0x7f010064, 0x7f010065,
+            0x7f010066, 0x7f010067
         };
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#address}
@@ -1338,6 +1381,20 @@ containing a value of this type.
           @attr name android:address
         */
         public static final int Keyboard_address = 1;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#address2}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:address2
+        */
+        public static final int Keyboard_address2 = 2;
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#label}
           attribute's value can be found in the {@link #Keyboard} array.
@@ -1365,7 +1422,21 @@ theme attribute (in the form
 containing a value of this type.
           @attr name android:mask
         */
-        public static final int Keyboard_mask = 2;
+        public static final int Keyboard_mask = 3;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#mask2}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be an integer value, such as "<code>100</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:mask2
+        */
+        public static final int Keyboard_mask2 = 4;
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#size}
           attribute's value can be found in the {@link #Keyboard} array.
@@ -1379,7 +1450,7 @@ theme attribute (in the form
 containing a value of this type.
           @attr name android:size
         */
-        public static final int Keyboard_size = 3;
+        public static final int Keyboard_size = 5;
         /**  Attributes used to style the Action Bar. 
            <p>Includes the following attributes:</p>
            <table>

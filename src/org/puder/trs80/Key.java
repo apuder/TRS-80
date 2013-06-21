@@ -38,9 +38,15 @@ public class Key extends View {
     private String   labelShifted;
     private boolean  isShifted;
     private boolean  isShiftKey;
+    private boolean  isAltKey;
+
+    private View     keyboardView1;
+    private View     keyboardView2;
 
     private int      address;
     private byte     mask;
+    private int      address2;
+    private byte     mask2;
     private int      size;
     private Paint    paint;
     private byte[]   memBuffer;
@@ -67,7 +73,9 @@ public class Key extends View {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
         label = ta.getString(R.styleable.Keyboard_label);
         address = ta.getInteger(R.styleable.Keyboard_address, -1);
+        address2 = ta.getInteger(R.styleable.Keyboard_address2, -1);
         mask = (byte) ta.getInteger(R.styleable.Keyboard_mask, -1);
+        mask2 = (byte) ta.getInteger(R.styleable.Keyboard_mask2, -1);
         size = ta.getInteger(R.styleable.Keyboard_size, 1);
         ta.recycle();
 
@@ -83,6 +91,7 @@ public class Key extends View {
             keyboard.addShiftableKey(this);
         }
         isShifted = false;
+        isAltKey = label.equals("Alt");
         paint = new Paint();
         paint.setTypeface(TRS80Application.getTypefaceBold());
         memBuffer = TRS80Application.getHardware().getMemoryBuffer();
@@ -91,8 +100,17 @@ public class Key extends View {
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
+                if (isAltKey) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        switchKeyboard();
+                    }
+                    return true;
+                }
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     memBuffer[address] |= mask;
+                    if (address2 != -1) {
+                        memBuffer[address2] |= mask2;
+                    }
                 }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     if (isShiftKey) {
@@ -104,6 +122,9 @@ public class Key extends View {
                         }
                     } else {
                         memBuffer[address] &= ~mask;
+                        if (address2 != -1) {
+                            memBuffer[address2] &= ~mask2;
+                        }
                         keyboard.unshiftKeys();
                     }
                 }
@@ -140,6 +161,14 @@ public class Key extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+
+        if (isAltKey) {
+            // We can only do this here to ensure that this view has already been
+            // added to the view hierarchy
+            keyboardView1 = this.getRootView().findViewById(R.id.keyboard_view_1);
+            keyboardView2 = this.getRootView().findViewById(R.id.keyboard_view_2);
+        }
+
         MarginLayoutParams params = (MarginLayoutParams) this.getLayoutParams();
         if (posX != -1 && posY != -1) {
             params.setMargins(posX, posY, 0, 0);
@@ -176,6 +205,16 @@ public class Key extends View {
                 memBuffer[address] &= ~mask;
             }
             invalidate();
+        }
+    }
+
+    public void switchKeyboard() {
+        if (keyboardView1.getVisibility() == View.GONE) {
+            keyboardView1.setVisibility(View.VISIBLE);
+            keyboardView2.setVisibility(View.GONE);
+        } else {
+            keyboardView1.setVisibility(View.GONE);
+            keyboardView2.setVisibility(View.VISIBLE);
         }
     }
 }
