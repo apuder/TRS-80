@@ -25,6 +25,8 @@ public class ConfigurationBackup extends Configuration {
     private String   backupName;
     private Model    backupModel;
     private String[] backupDisk = new String[4];
+    private int      backupKeyboardLayoutPortrait;
+    private int      backupKeyboardLayoutLandscape;
 
     private Editor   editor;
 
@@ -36,9 +38,8 @@ public class ConfigurationBackup extends Configuration {
         this.backupDisk[1] = other.getDiskPath(1);
         this.backupDisk[2] = other.getDiskPath(2);
         this.backupDisk[3] = other.getDiskPath(3);
-        this.screenColor = other.getScreenColor();
-        this.characterColor = other.getCharacterColor();
-        // this.keyboardType = other.keyboardType;
+        this.backupKeyboardLayoutPortrait = other.getKeyboardLayoutPortrait();
+        this.backupKeyboardLayoutLandscape = other.getKeyboardLayoutLandscape();
     }
 
     public void save() {
@@ -49,6 +50,7 @@ public class ConfigurationBackup extends Configuration {
         saveDiskPath(1);
         saveDiskPath(2);
         saveDiskPath(3);
+        saveKeyboardLayout();
         editor.commit();
     }
 
@@ -81,7 +83,7 @@ public class ConfigurationBackup extends Configuration {
         }
     }
 
-    public void saveDiskPath(int disk) {
+    private void saveDiskPath(int disk) {
         String key;
         switch (disk) {
         case 0:
@@ -104,5 +106,12 @@ public class ConfigurationBackup extends Configuration {
         } else {
             editor.putString(key, backupDisk[disk]);
         }
+    }
+
+    private void saveKeyboardLayout() {
+        editor.putString(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT,
+                Integer.toString(backupKeyboardLayoutPortrait));
+        editor.putString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE,
+                Integer.toString(backupKeyboardLayoutLandscape));
     }
 }

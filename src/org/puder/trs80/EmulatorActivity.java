@@ -35,11 +35,13 @@ public class EmulatorActivity extends SherlockFragmentActivity {
 
     private Thread   cpuThread;
     private TextView logView;
+    private int      orientation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+        orientation = getResources().getConfiguration().orientation;
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -121,7 +123,25 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
-        inflater.inflate(R.layout.keyboard_original, root);
+        int keyboardType;
+        switch (orientation) {
+        case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+            keyboardType = TRS80Application.getCurrentConfiguration().getKeyboardLayoutLandscape();
+            break;
+        default:
+            keyboardType = TRS80Application.getCurrentConfiguration().getKeyboardLayoutPortrait();
+            break;
+        }
+        int layoutId = 0;
+        switch (keyboardType) {
+        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+            layoutId = R.layout.keyboard_compact;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+            layoutId = R.layout.keyboard_original;
+            break;
+        }
+        inflater.inflate(layoutId, root);
         /*
          * The following code is a hack to work around a problem with the
          * keyboard layout in Android. The second keyboard should have

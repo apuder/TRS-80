@@ -9,6 +9,8 @@ package org.puder.trs80;
 
 public final class R {
     public static final class array {
+        public static final int conf_keyboard_type=0x7f0c0002;
+        public static final int conf_keyboard_type_values=0x7f0c0003;
         public static final int conf_trs_model=0x7f0c0000;
         public static final int conf_trs_model_values=0x7f0c0001;
     }
@@ -1033,7 +1035,7 @@ containing a value of this type.
         public static final int key_7=0x7f05007a;
         public static final int key_8=0x7f05007b;
         public static final int key_9=0x7f05007c;
-        public static final int key_A=0x7f05004e;
+        public static final int key_A=0x7f05004f;
         public static final int key_ADD=0x7f05006b;
         public static final int key_ALT=0x7f050062;
         public static final int key_ALT2=0x7f050083;
@@ -1042,30 +1044,30 @@ containing a value of this type.
         public static final int key_ASTERIX=0x7f050074;
         public static final int key_AT=0x7f05006d;
         public static final int key_B=0x7f05005d;
-        public static final int key_BREAK=0x7f050057;
+        public static final int key_BREAK=0x7f050063;
         public static final int key_BR_CLOSE=0x7f050070;
         public static final int key_BR_OPEN=0x7f05006f;
         public static final int key_C=0x7f05005b;
         public static final int key_CLEAR=0x7f050065;
         public static final int key_COLON=0x7f050080;
         public static final int key_COMMA=0x7f05007d;
-        public static final int key_D=0x7f050050;
+        public static final int key_D=0x7f050051;
         public static final int key_DOLLAR=0x7f050076;
         public static final int key_DOT=0x7f050086;
-        public static final int key_DOWN=0x7f050063;
+        public static final int key_DOWN=0x7f050058;
         public static final int key_E=0x7f050046;
         public static final int key_ENTER=0x7f050066;
         public static final int key_EQUAL=0x7f05007e;
         public static final int key_EXCLAMATION_MARK=0x7f050088;
-        public static final int key_F=0x7f050051;
-        public static final int key_G=0x7f050052;
+        public static final int key_F=0x7f050052;
+        public static final int key_G=0x7f050053;
         public static final int key_GT=0x7f050079;
-        public static final int key_H=0x7f050053;
+        public static final int key_H=0x7f050054;
         public static final int key_HASH=0x7f05006e;
         public static final int key_I=0x7f05004b;
-        public static final int key_J=0x7f050054;
-        public static final int key_K=0x7f050055;
-        public static final int key_L=0x7f050056;
+        public static final int key_J=0x7f050055;
+        public static final int key_K=0x7f050056;
+        public static final int key_L=0x7f050057;
         public static final int key_LEFT=0x7f050060;
         public static final int key_LEFT2=0x7f050082;
         public static final int key_LT=0x7f050078;
@@ -1080,7 +1082,7 @@ containing a value of this type.
         public static final int key_QUOT=0x7f05008a;
         public static final int key_R=0x7f050047;
         public static final int key_RIGHT=0x7f050061;
-        public static final int key_S=0x7f05004f;
+        public static final int key_S=0x7f050050;
         public static final int key_SEMICOLON=0x7f050087;
         public static final int key_SHIFT1=0x7f05008b;
         public static final int key_SHIFT2=0x7f05008c;
@@ -1089,7 +1091,7 @@ containing a value of this type.
         public static final int key_SPACE2=0x7f050085;
         public static final int key_T=0x7f050048;
         public static final int key_U=0x7f05004a;
-        public static final int key_UP=0x7f050058;
+        public static final int key_UP=0x7f05004e;
         public static final int key_V=0x7f05005c;
         public static final int key_W=0x7f050045;
         public static final int key_X=0x7f05005a;

@@ -32,7 +32,10 @@
                         copied to the SD card. This app does not contain disk images for copyright
                         reasons. You can search the Internet for
                         \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk
-                        images</a>\'.</string>
+                        images</a>\'.
+                        Different keyboard types can be configured for portrait and landscape
+                        orientation. The original keyboard mimics the layout of the TRS-80
+                        keyboard. The compact layout is appropriate for smaller screen sizes.</string>
     <string name="help_title_emulator">Help: Emulator</string>
     <string name="help_emulator">The Emulator tab shows the currently running emulator.
                         To launch the emulator, switch to the Configurations tab and select

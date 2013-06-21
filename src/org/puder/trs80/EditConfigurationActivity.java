@@ -39,12 +39,14 @@ import com.actionbarsherlock.view.MenuItem;
 public class EditConfigurationActivity extends SherlockPreferenceActivity implements
         OnPreferenceChangeListener {
 
-    public static final String CONF_NAME  = "conf_name";
-    public static final String CONF_MODEL = "conf_model";
-    public static final String CONF_DISK1 = "conf_disk1";
-    public static final String CONF_DISK2 = "conf_disk2";
-    public static final String CONF_DISK3 = "conf_disk3";
-    public static final String CONF_DISK4 = "conf_disk4";
+    public static final String CONF_NAME               = "conf_name";
+    public static final String CONF_MODEL              = "conf_model";
+    public static final String CONF_DISK1              = "conf_disk1";
+    public static final String CONF_DISK2              = "conf_disk2";
+    public static final String CONF_DISK3              = "conf_disk3";
+    public static final String CONF_DISK4              = "conf_disk4";
+    public static final String CONF_KEYBOARD_PORTRAIT  = "conf_keyboard_portrait";
+    public static final String CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape";
 
     private SharedPreferences  sharedPrefs;
     private Handler            handler;
@@ -55,6 +57,8 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
     private Preference         disk2;
     private Preference         disk3;
     private Preference         disk4;
+    private Preference         keyboardPortrait;
+    private Preference         keyboardLandscape;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,13 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
 
         model = (Preference) findPreference(CONF_MODEL);
         model.setOnPreferenceChangeListener(this);
+
+        keyboardPortrait = (Preference) findPreference(CONF_KEYBOARD_PORTRAIT);
+        keyboardPortrait.setOnPreferenceChangeListener(this);
+
+        keyboardLandscape = (Preference) findPreference(CONF_KEYBOARD_LANDSCAPE);
+        keyboardLandscape.setOnPreferenceChangeListener(this);
+
         updateSummaries();
     }
 
@@ -173,6 +184,26 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
         val = sharedPrefs.getString(CONF_DISK4, null);
         if (val != null) {
             disk4.setSummary(val);
+        }
+
+        // Keyboard portrait
+        val = sharedPrefs.getString(CONF_KEYBOARD_PORTRAIT, null);
+        setKeyboardSummary(keyboardPortrait, val);
+
+        // Keyboard landscape
+        val = sharedPrefs.getString(CONF_KEYBOARD_LANDSCAPE, null);
+        setKeyboardSummary(keyboardLandscape, val);
+    }
+
+    private void setKeyboardSummary(Preference pref, String val) {
+        if (val == null) {
+            return;
+        }
+        if ("0".equals(val)) {
+            pref.setSummary("Original layout");
+        }
+        if ("1".equals(val)) {
+            pref.setSummary("Compact layout");
         }
     }
 

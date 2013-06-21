@@ -91,8 +91,25 @@ public class Model3 extends Hardware {
         }
 
         // Compute size of keyboard keys
-        final int MAX_BOXES = 15;//15;
-        int boxWidth = rect.right / MAX_BOXES;
+        int orientation = TRS80Application.getAppContext().getResources().getConfiguration().orientation;
+        int keyboardLayout;
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            keyboardLayout = TRS80Application.getCurrentConfiguration()
+                    .getKeyboardLayoutLandscape();
+        } else {
+            keyboardLayout = TRS80Application.getCurrentConfiguration().getKeyboardLayoutPortrait();
+        }
+        // The maximum number of key "boxes" per row
+        int maxKeyBoxes = 15;
+        switch (keyboardLayout) {
+        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+            maxKeyBoxes = 10;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+            maxKeyBoxes = 15;
+            break;
+        }
+        int boxWidth = rect.right / maxKeyBoxes;
         keyWidth = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
 

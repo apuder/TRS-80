@@ -26,6 +26,9 @@ import android.preference.PreferenceManager;
 
 public class Configuration {
 
+    public static final int          KEYBOARD_LAYOUT_ORIGINAL = 0;
+    public static final int          KEYBOARD_LAYOUT_COMPACT  = 1;
+
     private static Configuration[]   configurations;
     private static SharedPreferences globalPrefs;
 
@@ -43,12 +46,11 @@ public class Configuration {
         }
     }
 
-    protected SharedPreferences        sharedPrefs;
-    protected int                      id;
-    protected int                      screenColor;
-    protected int                      characterColor;
-    protected int                      keyboardType;
-    
+    protected SharedPreferences      sharedPrefs;
+    protected int                    id;
+    protected int                    screenColor;
+    protected int                    characterColor;
+
     public static Configuration[] getConfigurations() {
         return configurations;
     }
@@ -172,5 +174,15 @@ public class Configuration {
 
     public String getName() {
         return sharedPrefs.getString(EditConfigurationActivity.CONF_NAME, "unknown");
+    }
+
+    public int getKeyboardLayoutPortrait() {
+        String v = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT, "0");
+        return Integer.parseInt(v);
+    }
+
+    public int getKeyboardLayoutLandscape() {
+        String v = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE, "0");
+        return Integer.parseInt(v);
     }
 }

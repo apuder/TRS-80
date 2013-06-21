@@ -30,4 +30,24 @@
             android:summary="File to use for disk 4"
             android:key="conf_disk4" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Portrait Mode"
+        android:key="conf_portrait">
+        <ListPreference
+            android:entries="@array/conf_keyboard_type"
+            android:title="Keyboard type"
+            android:summary="The keyboard type to be used in portrait"
+            android:key="conf_keyboard_portrait"
+            android:entryValues="@array/conf_keyboard_type_values" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Landscape Mode"
+        android:key="conf_landscape">
+        <ListPreference
+            android:entries="@array/conf_keyboard_type"
+            android:title="Keyboard type"
+            android:summary="The keyboard type to be used in landscape"
+            android:key="conf_keyboard_landscape"
+            android:entryValues="@array/conf_keyboard_type_values" />
+    </PreferenceCategory>
 </PreferenceScreen>
