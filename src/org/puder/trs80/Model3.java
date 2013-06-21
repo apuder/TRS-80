@@ -91,7 +91,7 @@ public class Model3 extends Hardware {
         }
 
         // Compute size of keyboard keys
-        final int MAX_BOXES = 10;//15;
+        final int MAX_BOXES = 15;//15;
         int boxWidth = rect.right / MAX_BOXES;
         keyWidth = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;

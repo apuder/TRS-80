@@ -121,7 +121,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
-        inflater.inflate(R.layout.keyboard_compact, root);
+        inflater.inflate(R.layout.keyboard_original, root);
         /*
          * The following code is a hack to work around a problem with the
          * keyboard layout in Android. The second keyboard should have

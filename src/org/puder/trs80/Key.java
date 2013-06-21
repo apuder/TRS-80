@@ -37,6 +37,7 @@ public class Key extends View {
     private String   label;
     private String   labelShifted;
     private boolean  isShifted;
+    private boolean  isPressed;
     private boolean  isShiftKey;
     private boolean  isAltKey;
 
@@ -91,6 +92,7 @@ public class Key extends View {
             keyboard.addShiftableKey(this);
         }
         isShifted = false;
+        isPressed = false;
         isAltKey = label.equals("Alt");
         paint = new Paint();
         paint.setTypeface(TRS80Application.getTypefaceBold());
@@ -100,6 +102,14 @@ public class Key extends View {
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    isPressed = true;
+                    invalidate();
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    isPressed = false;
+                    invalidate();
+                }
                 if (isAltKey) {
                     if (event.getAction() == MotionEvent.ACTION_UP) {
                         switchKeyboard();
@@ -138,6 +148,13 @@ public class Key extends View {
         if (isShifted) {
             paint.setColor(Color.WHITE);
             paint.setAlpha(70);
+            paint.setStyle(Style.FILL);
+            canvas.drawRoundRect(rect, 10, 10, paint);
+        }
+
+        if (isPressed) {
+            paint.setColor(Color.WHITE);
+            paint.setAlpha(95);
             paint.setStyle(Style.FILL);
             canvas.drawRoundRect(rect, 10, 10, paint);
         }
