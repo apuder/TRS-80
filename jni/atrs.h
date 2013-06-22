@@ -3,7 +3,7 @@
 #define __ATRS_H__
 
 #define SCREEN_UPDATE_THRESHOLD 2000
-#define SCREEN_FORCED_UPDATE_INTERVAL 50000
+#define SCREEN_FORCED_UPDATE_INTERVAL 1000000
 
 extern Uchar* memory;
 extern unsigned char trs_screen[2048];
