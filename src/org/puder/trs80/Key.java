@@ -56,6 +56,7 @@ public class Key extends View {
     private Keyboard keyboard;
 
     private int      keyWidth;
+    private int      keyHeight;
     private int      keyMargin;
 
     private int      posX = -1;
@@ -68,6 +69,7 @@ public class Key extends View {
 
         Hardware h = TRS80Application.getHardware();
         keyWidth = h.getKeyWidth();
+        keyHeight = h.getKeyHeight();
         keyMargin = h.getKeyMargin();
 
         keyboard = TRS80Application.getKeyboard();
@@ -95,7 +97,11 @@ public class Key extends View {
         isPressed = false;
         isAltKey = label.equals("Alt");
         paint = new Paint();
-        paint.setTypeface(TRS80Application.getTypefaceBold());
+        paint.setTypeface(TRS80Application.getTypeface());
+        paint.setAntiAlias(true);
+        float textSizeScale = label.length() > 1 ? 0.4f : 0.6f;
+        paint.setTextSize(keyHeight * textSizeScale);
+
         memBuffer = TRS80Application.getHardware().getMemoryBuffer();
         rect = new RectF();
         this.setOnTouchListener(new OnTouchListener() {
@@ -166,7 +172,6 @@ public class Key extends View {
         canvas.drawRoundRect(rect, 10, 10, paint);
 
         paint.setColor(Color.WHITE);
-        paint.setTextSize(20);
         paint.setStyle(Style.FILL);
         paint.setStrokeWidth(1);
         paint.setTextAlign(Align.CENTER);
@@ -180,7 +185,8 @@ public class Key extends View {
         super.onLayout(changed, left, top, right, bottom);
 
         if (isAltKey) {
-            // We can only do this here to ensure that this view has already been
+            // We can only do this here to ensure that this view has already
+            // been
             // added to the view hierarchy
             keyboardView1 = this.getRootView().findViewById(R.id.keyboard_view_1);
             keyboardView2 = this.getRootView().findViewById(R.id.keyboard_view_2);
@@ -198,7 +204,7 @@ public class Key extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = keyWidth * size;
-        int height = keyWidth;
+        int height = keyHeight;
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
         rect.set(1, 1, width - 1, height - 1);
     }

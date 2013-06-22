@@ -36,6 +36,7 @@ public class Model3 extends Hardware {
     private int      trsCharHeight;
 
     private int      keyWidth;
+    private int      keyHeight;
     private int      keyMargin;
 
     private Bitmap[] font;
@@ -108,9 +109,12 @@ public class Model3 extends Hardware {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             maxKeyBoxes = 15;
             break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING:
+            maxKeyBoxes = 8;
+            break;
         }
         int boxWidth = rect.right / maxKeyBoxes;
-        keyWidth = (int) (boxWidth * 0.9f);
+        keyWidth = keyHeight = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
 
         generateGraphicsFont();
@@ -237,6 +241,11 @@ public class Model3 extends Hardware {
     @Override
     public int getKeyWidth() {
         return keyWidth;
+    }
+
+    @Override
+    public int getKeyHeight() {
+        return keyHeight;
     }
 
     @Override

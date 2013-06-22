@@ -1,0 +1,28 @@
+<!-- http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13 -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:keyboard="http://schemas.android.com/apk/res/org.puder.trs80"
+    android:id="@+id/keyboard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp">
+
+    <org.puder.trs80.Key
+        android:id="@+id/key_SPACE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        keyboard:address="0x3840"
+        keyboard:label=""
+        keyboard:mask="128"
+        keyboard:size="3" />
+
+    <org.puder.trs80.Joystick
+        android:id="@+id/key_joystick"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_alignParentRight="true"/>
+
+</RelativeLayout>

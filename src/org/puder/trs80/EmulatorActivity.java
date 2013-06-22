@@ -140,6 +140,9 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             layoutId = R.layout.keyboard_original;
             break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING:
+            layoutId = R.layout.keyboard_gaming;
+            break;
         }
         inflater.inflate(layoutId, root);
         /*

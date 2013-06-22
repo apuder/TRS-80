@@ -28,6 +28,7 @@ public class Configuration {
 
     public static final int          KEYBOARD_LAYOUT_ORIGINAL = 0;
     public static final int          KEYBOARD_LAYOUT_COMPACT  = 1;
+    public static final int          KEYBOARD_LAYOUT_GAMING   = 2;
 
     private static Configuration[]   configurations;
     private static SharedPreferences globalPrefs;
