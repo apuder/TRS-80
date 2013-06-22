@@ -19,8 +19,8 @@
         keyboard:mask="128"
         keyboard:size="3" />
 
-    <org.puder.trs80.Joystick
-        android:id="@+id/key_joystick"
+    <org.puder.trs80.JoystickRound
+        android:id="@+id/key_joystick_round"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:layout_alignParentRight="true"/>

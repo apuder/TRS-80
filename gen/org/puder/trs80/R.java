@@ -1097,7 +1097,7 @@ containing a value of this type.
         public static final int key_X=0x7f05005a;
         public static final int key_Y=0x7f050049;
         public static final int key_Z=0x7f050059;
-        public static final int key_joystick=0x7f05008b;
+        public static final int key_joystick_round=0x7f05008b;
         public static final int keyboard=0x7f050042;
         public static final int keyboard_container=0x7f050039;
         public static final int keyboard_view_1=0x7f050043;
