@@ -2,13 +2,18 @@
 #ifndef __ATRS_H__
 #define __ATRS_H__
 
-#define SCREEN_UPDATE_THRESHOLD 2000
-#define SCREEN_FORCED_UPDATE_INTERVAL 1000000
+#define SCREEN_UPDATE_THRESHOLD 5000
 
 extern Uchar* memory;
 extern unsigned char trs_screen[2048];
+
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
+#define SCREEN_FORCED_UPDATE_INTERVAL 1000000
+
 extern int instructionsSinceLastScreenAccess;
 extern int screenWasUpdated;
+#endif
+
 extern int trs_rom_size;
 
 char* get_disk_path(int disk);

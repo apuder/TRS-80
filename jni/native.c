@@ -37,8 +37,12 @@ static jbyteArray memoryArray;
 static jbyteArray screenArray;
 
 unsigned char trs_screen[2048];
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
 int instructionsSinceLastScreenAccess;
 int screenWasUpdated;
+#endif
+static int instructionsSinceLastScreenUpdate;
+
 
 extern char *program_name;
 
@@ -94,8 +98,12 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     trs_timer_init();
     trs_reset(1);
     z80_state.pc.word = entryAddr;
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
     instructionsSinceLastScreenAccess = 0;
     screenWasUpdated = 0;
+#else
+    instructionsSinceLastScreenUpdate = 0;
+#endif
 
     emulator_status = EMULATOR_STATUS_INITIALIZED;
 }
@@ -112,7 +120,17 @@ static int trigger_screen_update() {
     return 1;
 }
 
+/*
+ * This function gets called after each Z80 instruction. The original idea
+ * for screen updates was to wait until a certain number of Z80 instructions
+ * had passed during which no screen updates occurred (SCREEN_UPDATE_THRESHOLD).
+ * This worked reasonably well when only few screen updates happened, but it
+ * didn't work so well for arcade games that frequently updated the screen.
+ * For that reason the screen update is now triggered after a certain number
+ * of Z80 instructions, irrespective whether the screen was updated or not.
+ */
 static void check_for_screen_updates() {
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
     instructionsSinceLastScreenAccess++;
     if ((instructionsSinceLastScreenAccess % SCREEN_FORCED_UPDATE_INTERVAL) == 0) {
         if (trigger_screen_update()) {
@@ -126,6 +144,12 @@ static void check_for_screen_updates() {
             }
         }
     }
+#else
+    if (instructionsSinceLastScreenUpdate++ > SCREEN_UPDATE_THRESHOLD) {
+        instructionsSinceLastScreenUpdate = 0;
+        trigger_screen_update();
+    }
+#endif
 }
 
 char* get_disk_path(int disk) {

@@ -143,8 +143,10 @@ void trs_screen_refresh()
 void trs_screen_write_char(int position, int char_index)
 {
 	trs_screen[position] = char_index;
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
 	instructionsSinceLastScreenAccess = 0;
 	screenWasUpdated = 1;
+#endif
 }
 
  /* Copy lines 1 through col_chars-1 to lines 0 through col_chars-2.
@@ -168,8 +170,10 @@ void trs_screen_scroll()
 	    trs_screen_refresh();
 	  } else {
 #ifdef ANDROID
+#ifdef ANDROID_BATCHED_SCREEN_UPDATE
 		  screenWasUpdated = 1;
 		  instructionsSinceLastScreenAccess = SCREEN_UPDATE_THRESHOLD;
+#endif
 #else
 	    XCopyArea(display,window,window,gc,
 	              left_margin,cur_char_height+top_margin,
