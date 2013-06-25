@@ -109,7 +109,10 @@ public class Model3 extends Hardware {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             maxKeyBoxes = 15;
             break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING:
+        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
+            maxKeyBoxes = 8;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING_2:
             maxKeyBoxes = 8;
             break;
         }
@@ -139,6 +142,12 @@ public class Model3 extends Hardware {
             c.drawColor(config.getScreenColor());
             c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
             font[i + 32] = b;
+        }
+        // Use space for all other characters
+        for (int i = 0; i < font.length; i++) {
+            if (font[i] == null) {
+                font[i] = font[32];
+            }
         }
     }
 

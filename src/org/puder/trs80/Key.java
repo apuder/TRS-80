@@ -108,27 +108,28 @@ public class Key extends View {
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                int action = event.getAction() & MotionEvent.ACTION_MASK;
+                if (action == MotionEvent.ACTION_DOWN) {
                     isPressed = true;
                     invalidate();
                 }
-                if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (action == MotionEvent.ACTION_UP) {
                     isPressed = false;
                     invalidate();
                 }
                 if (isAltKey) {
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (action == MotionEvent.ACTION_UP) {
                         switchKeyboard();
                     }
                     return true;
                 }
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (action == MotionEvent.ACTION_DOWN) {
                     memBuffer[address] |= mask;
                     if (address2 != -1) {
                         memBuffer[address2] |= mask2;
                     }
                 }
-                if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (action == MotionEvent.ACTION_UP) {
                     if (isShiftKey) {
                         if (!isShifted) {
                             keyboard.shiftKeys();
@@ -203,8 +204,20 @@ public class Key extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = keyWidth * size;
-        int height = keyHeight;
+        int width;
+        int height;
+        if ((widthMeasureSpec & MeasureSpec.EXACTLY) != 0) {
+            // Layout specifies specific size. Use that.
+            width = widthMeasureSpec & ~MeasureSpec.EXACTLY;
+        } else {
+            width = keyWidth * size;
+        }
+        if ((heightMeasureSpec & MeasureSpec.EXACTLY) != 0) {
+            // Layout specifies specific size. Use that.
+            height = heightMeasureSpec & ~MeasureSpec.EXACTLY;
+        } else {
+            height = keyHeight;
+        }
         setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
         rect.set(1, 1, width - 1, height - 1);
     }

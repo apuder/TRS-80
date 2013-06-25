@@ -43,7 +43,7 @@ public class JoystickRound extends Joystick {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 allKeysUp();
-                int action = event.getAction();
+                int action = event.getAction() & MotionEvent.ACTION_MASK;
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                     return true;
                 }

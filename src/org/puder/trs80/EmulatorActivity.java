@@ -123,6 +123,10 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
+        // if (android.os.Build.VERSION.SDK_INT >=
+        // Build.VERSION_CODES.HONEYCOMB) {
+        // root.setMotionEventSplittingEnabled(true);
+        // }
         int keyboardType;
         switch (orientation) {
         case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
@@ -140,8 +144,11 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             layoutId = R.layout.keyboard_original;
             break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING:
-            layoutId = R.layout.keyboard_gaming;
+        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
+            layoutId = R.layout.keyboard_gaming_1;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING_2:
+            layoutId = R.layout.keyboard_gaming_2;
             break;
         }
         inflater.inflate(layoutId, root);

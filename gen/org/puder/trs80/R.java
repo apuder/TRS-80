@@ -1084,8 +1084,8 @@ containing a value of this type.
         public static final int key_RIGHT=0x7f050061;
         public static final int key_S=0x7f050050;
         public static final int key_SEMICOLON=0x7f050087;
-        public static final int key_SHIFT1=0x7f05008c;
-        public static final int key_SHIFT2=0x7f05008d;
+        public static final int key_SHIFT1=0x7f05008e;
+        public static final int key_SHIFT2=0x7f05008f;
         public static final int key_SLASH=0x7f050075;
         public static final int key_SPACE=0x7f050064;
         public static final int key_SPACE2=0x7f050085;
@@ -1097,7 +1097,9 @@ containing a value of this type.
         public static final int key_X=0x7f05005a;
         public static final int key_Y=0x7f050049;
         public static final int key_Z=0x7f050059;
+        public static final int key_joystick_horizontal=0x7f05008c;
         public static final int key_joystick_round=0x7f05008b;
+        public static final int key_joystick_vertical=0x7f05008d;
         public static final int keyboard=0x7f050042;
         public static final int keyboard_container=0x7f050039;
         public static final int keyboard_view_1=0x7f050043;
@@ -1107,7 +1109,7 @@ containing a value of this type.
         public static final int log=0x7f050038;
         public static final int main=0x7f050032;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f05008e;
+        public static final int pager=0x7f050090;
         public static final int path=0x7f05003e;
         public static final int screen=0x7f050037;
         public static final int screenshot=0x7f05003d;
@@ -1156,11 +1158,12 @@ containing a value of this type.
         public static final int help_settings=0x7f03001d;
         public static final int initialization_error=0x7f03001e;
         public static final int keyboard_compact=0x7f03001f;
-        public static final int keyboard_gaming=0x7f030020;
-        public static final int keyboard_original=0x7f030021;
-        public static final int main_fragment=0x7f030022;
-        public static final int sherlock_spinner_dropdown_item=0x7f030023;
-        public static final int sherlock_spinner_item=0x7f030024;
+        public static final int keyboard_gaming_1=0x7f030020;
+        public static final int keyboard_gaming_2=0x7f030021;
+        public static final int keyboard_original=0x7f030022;
+        public static final int main_fragment=0x7f030023;
+        public static final int sherlock_spinner_dropdown_item=0x7f030024;
+        public static final int sherlock_spinner_item=0x7f030025;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
