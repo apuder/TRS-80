@@ -26,26 +26,23 @@ import android.view.Window;
 
 public class Model3 extends Hardware {
 
-    private int      trsScreenCols = 64;
-    private int      trsScreenRows = 16;
-    private float    aspectRatio   = 1.5f;
+    final private int   trsScreenCols = 64;
+    final private int   trsScreenRows = 16;
+    final private float aspectRatio   = 3f;
 
-    private int      trsScreenWidth;
-    private int      trsScreenHeight;
-    private int      trsCharWidth;
-    private int      trsCharHeight;
+    private int         trsScreenWidth;
+    private int         trsScreenHeight;
+    private int         trsCharWidth;
+    private int         trsCharHeight;
 
-    private int      keyWidth;
-    private int      keyHeight;
-    private int      keyMargin;
+    private int         keyWidth;
+    private int         keyHeight;
+    private int         keyMargin;
 
-    private Bitmap[] font;
+    private Bitmap[]    font;
 
     public Model3() {
         super(Model.MODEL3);
-        trsScreenCols = 64;
-        trsScreenRows = 16;
-        aspectRatio = 1.5f;
         font = new Bitmap[256];
         setMemorySize(128 * 1024 + 1);
         setScreenBuffer(0x3fff - 0x3c00 + 1);
@@ -132,8 +129,9 @@ public class Model3 extends Hardware {
         Typeface tf = TRS80Application.getTypeface();
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
-        p.setTextSize(trsCharHeight);
         p.setColor(config.getCharacterColor());
+        p.setAntiAlias(true);
+        setFontSize(p);
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
         for (int i = 0; i < ascii.length(); i++) {
@@ -149,6 +147,25 @@ public class Model3 extends Hardware {
                 font[i] = font[32];
             }
         }
+    }
+
+    /**
+     * Compute the correct font size. The font size designates the height of the
+     * font. trsCharHeight will be much bigger than trsCharWidth because of the
+     * aspect ration. For this reason we cannot use trsCharHeight as the font
+     * size. Instead we measure the width of string "X" and incrementally
+     * increase the font size until we hit trsCharWidth.
+     */
+    private void setFontSize(Paint p) {
+        float fontSize = trsCharWidth;
+        final float delta = 0.1f;
+        float width;
+        do {
+            fontSize += delta;
+            p.setTextSize(fontSize);
+            width = p.measureText("X");
+        } while (width <= trsCharWidth);
+        p.setTextSize(fontSize - delta);
     }
 
     private void generateGraphicsFont() {
