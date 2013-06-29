@@ -166,13 +166,14 @@ public class Key extends View {
             canvas.drawRoundRect(rect, 10, 10, paint);
         }
 
-        paint.setAlpha(180);
         paint.setColor(Color.GRAY);
+        paint.setAlpha(130);
         paint.setStyle(Style.STROKE);
         paint.setStrokeWidth(3);
         canvas.drawRoundRect(rect, 10, 10, paint);
 
         paint.setColor(Color.WHITE);
+        paint.setAlpha(110);
         paint.setStyle(Style.FILL);
         paint.setStrokeWidth(1);
         paint.setTextAlign(Align.CENTER);
