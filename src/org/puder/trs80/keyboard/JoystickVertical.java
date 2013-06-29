@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80.keyboard;
 
 import android.content.Context;
 import android.graphics.Canvas;

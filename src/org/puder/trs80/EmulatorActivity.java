@@ -16,6 +16,9 @@
 
 package org.puder.trs80;
 
+import org.puder.trs80.keyboard.Key;
+import org.puder.trs80.keyboard.KeyboardManager;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -48,7 +51,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         }
         XTRS.setEmulatorActivity(this);
         TRS80Application.getHardware().computeFontDimensions(getWindow());
-        Keyboard keyboard = new Keyboard();
+        KeyboardManager keyboard = new KeyboardManager();
         TRS80Application.setKeyboard(keyboard);
         initView();
     }

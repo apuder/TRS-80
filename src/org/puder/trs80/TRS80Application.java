@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import org.puder.trs80.keyboard.KeyboardManager;
+
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,7 +27,7 @@ public class TRS80Application extends Application {
 
     private static Context       context;
     private static Hardware      hardware;
-    private static Keyboard      keyboard;
+    private static KeyboardManager      keyboard;
     private static Configuration configuration;
     private static Bitmap        screenshot;
 
@@ -62,11 +64,11 @@ public class TRS80Application extends Application {
         return hardware;
     }
 
-    public static void setKeyboard(Keyboard theKeyboard) {
+    public static void setKeyboard(KeyboardManager theKeyboard) {
         keyboard = theKeyboard;
     }
 
-    public static Keyboard getKeyboard() {
+    public static KeyboardManager getKeyboard() {
         return keyboard;
     }
 

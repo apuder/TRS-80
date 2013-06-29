@@ -8,14 +8,14 @@
     android:layout_height="wrap_content"
     android:layout_margin="20dp">
 
-    <org.puder.trs80.JoystickHorizontal
+    <org.puder.trs80.keyboard.JoystickHorizontal
         android:id="@+id/key_joystick_horizontal"
         android:layout_width="130dp"
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:layout_alignParentLeft="true" />
 
-    <org.puder.trs80.Key
+    <org.puder.trs80.keyboard.Key
         android:id="@+id/key_SPACE"
         android:layout_width="130dp"
         android:layout_height="50dp"
@@ -27,7 +27,7 @@
         keyboard:mask="128"
         keyboard:size="3" />
 
-    <org.puder.trs80.JoystickVertical
+    <org.puder.trs80.keyboard.JoystickVertical
         android:id="@+id/key_joystick_vertical"
         android:layout_width="50dp"
         android:layout_height="130dp"

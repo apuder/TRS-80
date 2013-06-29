@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80.keyboard;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Keyboard {
+public class KeyboardManager {
 
     private List<Key> shiftableKeys;
 
-    public Keyboard() {
+    public KeyboardManager() {
         shiftableKeys = new ArrayList<Key>();
     }
 

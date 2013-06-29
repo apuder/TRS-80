@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80.keyboard;
+
+import org.puder.trs80.Hardware;
+import org.puder.trs80.R;
+import org.puder.trs80.TRS80Application;
+import org.puder.trs80.R.drawable;
+import org.puder.trs80.R.id;
+import org.puder.trs80.R.styleable;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -53,7 +60,7 @@ public class Key extends View {
     private byte[]   memBuffer;
     private RectF    rect;
 
-    private Keyboard keyboard;
+    private KeyboardManager keyboard;
 
     private int      keyWidth;
     private int      keyHeight;
