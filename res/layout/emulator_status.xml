@@ -44,7 +44,10 @@
         <ImageView
             android:id="@+id/screenshot"
             android:scaleType="fitCenter"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:adjustViewBounds="true"
+            android:layout_margin="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/screenshot_background" />
     </LinearLayout>
 </RelativeLayout>
