@@ -27,7 +27,7 @@ int isRunning = 0;
 static int emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 
 static JavaVM *jvm;
-static jclass clazzXTRS;
+static jclass clazzXTRS = NULL;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
@@ -167,10 +167,13 @@ char* get_disk_path(int disk) {
 
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
-    clazzXTRS = cls;
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
         return ERR_GET_JVM;
+    }
+
+    if (clazzXTRS == NULL) {
+        clazzXTRS = (*env)->NewGlobalRef(env, cls);
     }
 
     cleanup_xtrs();
