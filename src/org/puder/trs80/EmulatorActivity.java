@@ -96,7 +96,6 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if ("Pause".equals(item.getTitle())) {
             pauseEmulator();
-            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -189,6 +188,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     private void pauseEmulator() {
         takeScreenshot();
         setResult(Activity.RESULT_OK, getIntent());
+        finish();
     }
 
     private void takeScreenshot() {
