@@ -29,6 +29,7 @@ public class Model3 extends Hardware {
     final private int   trsScreenCols = 64;
     final private int   trsScreenRows = 16;
     final private float aspectRatio   = 3f;
+    final private float maxKeyBoxSize = 55; // 55dp
 
     private int         trsScreenWidth;
     private int         trsScreenHeight;
@@ -114,6 +115,10 @@ public class Model3 extends Hardware {
             break;
         }
         int boxWidth = rect.right / maxKeyBoxes;
+        float threshold = pxFromDp(maxKeyBoxSize);
+        if (boxWidth > threshold) {
+            boxWidth = (int) threshold;
+        }
         keyWidth = keyHeight = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
 
@@ -232,6 +237,10 @@ public class Model3 extends Hardware {
 
             font[i] = b;
         }
+    }
+
+    protected float pxFromDp(float dp) {
+        return dp * TRS80Application.getAppContext().getResources().getDisplayMetrics().density;
     }
 
     @Override
