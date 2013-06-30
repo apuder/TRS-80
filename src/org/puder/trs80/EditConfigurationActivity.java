@@ -140,7 +140,6 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         doneEditing(false);
     }
 

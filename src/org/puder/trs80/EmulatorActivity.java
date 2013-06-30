@@ -183,7 +183,6 @@ public class EmulatorActivity extends SherlockFragmentActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         pauseEmulator();
     }
 
