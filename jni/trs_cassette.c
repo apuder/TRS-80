@@ -68,6 +68,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#ifdef ANDROID
+#include "atrs.h"
+#endif
+
 #if SB_SOUND
 /*#include <sys/io.h>  delete this line if it gives you a compile error */
 #include <asm/io.h>
@@ -1164,6 +1168,11 @@ void trs_cassette_out(int value)
 {
 #if CASSDEBUG3
   debug("out %ld\n", z80_state.t_count);
+#endif
+#ifdef ANDROID
+  if (cassette_motor == 0) {
+    android_cassette_out(value);
+  }
 #endif
   if (cassette_motor) {
     if (cassette_state == READ) {

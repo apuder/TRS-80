@@ -15,9 +15,10 @@
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
 #define ERR_GET_METHOD_GET_DISK_PATH -4
-#define ERR_GET_METHOD_XLOG -5
-#define ERR_MEMORY_IS_NO_COPY -6
-#define ERR_SCREEN_IS_NO_COPY -7
+#define ERR_GET_METHOD_GET_CASSETTE_OUT -5
+#define ERR_GET_METHOD_XLOG -6
+#define ERR_MEMORY_IS_NO_COPY -7
+#define ERR_SCREEN_IS_NO_COPY -8
 
 Uchar* memory;
 int isRunning = 0;
@@ -31,6 +32,7 @@ static jclass clazzXTRS = NULL;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
+static jmethodID cassetteOutMethodId;
 static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
@@ -165,6 +167,11 @@ char* get_disk_path(int disk) {
     return str;
 }
 
+void android_cassette_out(int value) {
+    JNIEnv *env = getEnv();
+    (*env)->CallStaticObjectMethod(env, clazzXTRS, cassetteOutMethodId, value);
+}
+
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
         jint entryAddr, jbyteArray mem, jbyteArray screen) {
     int status = (*env)->GetJavaVM(env, &jvm);
@@ -194,6 +201,12 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
             "(I)Ljava/lang/String;");
     if (getDiskPathMethodId == 0) {
         return ERR_GET_METHOD_GET_DISK_PATH;
+    }
+
+    cassetteOutMethodId = (*env)->GetStaticMethodID(env, cls, "cassetteOut",
+            "(I)V");
+    if (cassetteOutMethodId == 0) {
+        return ERR_GET_METHOD_GET_CASSETTE_OUT;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",

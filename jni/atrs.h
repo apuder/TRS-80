@@ -18,6 +18,8 @@ extern int trs_rom_size;
 
 char* get_disk_path(int disk);
 
+void android_cassette_out(int value);
+
 void xlog(const char* msg);
 
 #ifdef SETITIMER_FIX

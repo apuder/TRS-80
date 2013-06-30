@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import android.util.Log;
+
 public class XTRS {
 
     static {
@@ -56,6 +58,10 @@ public class XTRS {
         if (renderer != null) {
             renderer.triggerScreenUpdate();
         }
+    }
+
+    public static void cassetteOut(int value) {
+        Log.d("TRS80", "CassetteOut: " + value);
     }
 
     public static void xlog(String msg) {
