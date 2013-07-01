@@ -20,6 +20,10 @@
 /*#define IDEBUG 1*/
 /*#define IDEBUG2 1*/
 
+#ifdef SETITIMER_FIX
+suseconds_t next_timer;
+#endif
+
 /* IRQs */
 #define M1_TIMER_BIT    0x80
 #define M1_DISK_BIT     0x40
@@ -383,7 +387,11 @@ trs_timer_event(int signo)
     (1000000/timer_hz) - (tv.tv_usec % (1000000/timer_hz));
   it.it_interval.tv_sec = 0;
   it.it_interval.tv_usec = 1000000/timer_hz;  /* fail-safe */
+#ifdef SETITIMER_FIX
+  next_timer = tv.tv_sec * 1000000 + tv.tv_usec + it.it_value.tv_usec;
+#else
   setitimer(ITIMER_REAL, &it, NULL);
+#endif
 }
 
 void
@@ -402,16 +410,15 @@ trs_timer_init()
       z80_state.clockMHz = CLOCK_MHZ_3;
   }
 
+#ifndef SETITIMER_FIX
   sa.sa_handler = trs_timer_event;
   sigemptyset(&sa.sa_mask);
   sigaddset(&sa.sa_mask, SIGALRM);
   sa.sa_flags = SA_RESTART;
   sigaction(SIGALRM, &sa, NULL);
+#endif
 
   trs_timer_event(SIGALRM);
-#ifdef ANDROID
-  z80_state.delay = 2500;
-#endif
 
   /* Also initialize the clock in memory - hack */
   tt = time(NULL);

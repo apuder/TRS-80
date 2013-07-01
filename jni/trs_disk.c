@@ -442,7 +442,9 @@ trs_disk_init(int poweron)
   sigemptyset(&sa.sa_mask);
   sigaddset(&sa.sa_mask, SIGUSR1);
   sa.sa_flags = SA_RESTART;
+#ifndef SETITIMER_FIX
   sigaction(SIGUSR1, &sa, NULL);
+#endif
 }
 
 void

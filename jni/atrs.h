@@ -20,4 +20,9 @@ char* get_disk_path(int disk);
 
 void xlog(const char* msg);
 
+#ifdef SETITIMER_FIX
+#include <time.h>
+extern suseconds_t next_timer;
+#endif
+
 #endif

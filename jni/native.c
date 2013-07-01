@@ -226,6 +226,14 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     while (isRunning) {
         z80_run(0);
         check_for_screen_updates();
+#ifdef SETITIMER_FIX
+        struct timeval tv;
+
+        gettimeofday(&tv, NULL);
+        if ((tv.tv_sec*1000000 + tv.tv_usec) >= next_timer) {
+            trs_timer_event(0);
+        }
+#endif
     }
 }
 
