@@ -18,7 +18,7 @@ extern int trs_rom_size;
 
 char* get_disk_path(int disk);
 
-void android_cassette_out(int value);
+void android_cassette_out(int sample, int nsamples);
 
 void xlog(const char* msg);
 

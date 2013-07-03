@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog
 LOCAL_MODULE := xtrs
-LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."' -DANDROID -D__WORDSIZE=32 -DSETITIMER_FIX
+LOCAL_CFLAGS := -I. -fsigned-char -DDISKDIR='"."' -DANDROID -D__WORDSIZE=32
 LOCAL_SRC_FILES := native.c \
 	trs_chars.c \
 	trs_printer.c \

@@ -39,6 +39,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     private Thread   cpuThread;
     private TextView logView;
     private int      orientation;
+    private Audio    audio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,8 @@ public class EmulatorActivity extends SherlockFragmentActivity {
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
         XTRS.setEmulatorActivity(this);
+        audio = new Audio();
+        XTRS.setAudio(audio);
         TRS80Application.getHardware().computeFontDimensions(getWindow());
         KeyboardManager keyboard = new KeyboardManager();
         TRS80Application.setKeyboard(keyboard);
@@ -74,6 +77,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     public void onPause() {
         super.onPause();
         boolean retry = true;
+        audio.stop();
         XTRS.setRunning(false);
         while (retry) {
             try {

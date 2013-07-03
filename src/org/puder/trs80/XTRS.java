@@ -16,8 +16,6 @@
 
 package org.puder.trs80;
 
-import android.util.Log;
-
 public class XTRS {
 
     static {
@@ -25,6 +23,8 @@ public class XTRS {
     }
 
     private static RenderThread     renderer = null;
+
+    private static Audio            audio    = null;
 
     private static EmulatorActivity emulator = null;
 
@@ -34,12 +34,18 @@ public class XTRS {
 
     public static native void reset();
 
+    public static native int setAudioBuffer(byte[] data);
+
     public static native void cleanup();
 
     public static native void run();
 
     public static void setRenderer(RenderThread r) {
         renderer = r;
+    }
+
+    public static void setAudio(Audio a) {
+        audio = a;
     }
 
     public static void setEmulatorActivity(EmulatorActivity activity) {
@@ -60,8 +66,8 @@ public class XTRS {
         }
     }
 
-    public static void cassetteOut(int value) {
-        Log.d("TRS80", "CassetteOut: " + value);
+    public static void playSound() {
+        audio.playSound();
     }
 
     public static void xlog(String msg) {

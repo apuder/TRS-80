@@ -15,7 +15,7 @@
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
 #define ERR_GET_METHOD_GET_DISK_PATH -4
-#define ERR_GET_METHOD_GET_CASSETTE_OUT -5
+#define ERR_GET_METHOD_PLAY_SOUND -5
 #define ERR_GET_METHOD_XLOG -6
 #define ERR_MEMORY_IS_NO_COPY -7
 #define ERR_SCREEN_IS_NO_COPY -8
@@ -32,11 +32,14 @@ static jclass clazzXTRS = NULL;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
-static jmethodID cassetteOutMethodId;
+static jmethodID playSoundMethodId;
 static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
 static jbyteArray screenArray;
+static jbyteArray audioBufferArray;
+static jbyte* audioBuffer;
+static jint audioBufferSize;
 
 unsigned char trs_screen[2048];
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
@@ -91,7 +94,7 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
-    cassette_default_sample_rate = 0;
+//    cassette_default_sample_rate = 0;
     trs_uart_name = "UART";
     trs_uart_switches = 0;
     trs_kb_bracket(0);
@@ -167,9 +170,22 @@ char* get_disk_path(int disk) {
     return str;
 }
 
-void android_cassette_out(int value) {
-    JNIEnv *env = getEnv();
-    (*env)->CallStaticObjectMethod(env, clazzXTRS, cassetteOutMethodId, value);
+static jbyte tempAudioBuf[1024];
+static jint audioBufIndex = 0;
+
+void android_cassette_out(int sample, int nsamples) {
+    int i;
+    for (i = 0; i < nsamples; i++) {
+        if (audioBufIndex == audioBufferSize) {
+            memcpy(audioBuffer, tempAudioBuf, audioBufferSize);
+            audioBufIndex = 0;
+            JNIEnv *env = getEnv();
+            (*env)->PushLocalFrame(env, 64);
+            (*env)->CallStaticObjectMethod(env, clazzXTRS, playSoundMethodId);
+            (*env)->PopLocalFrame(env, NULL);
+        }
+        tempAudioBuf[audioBufIndex++] = sample;
+    }
 }
 
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
@@ -203,10 +219,10 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
         return ERR_GET_METHOD_GET_DISK_PATH;
     }
 
-    cassetteOutMethodId = (*env)->GetStaticMethodID(env, cls, "cassetteOut",
-            "(I)V");
-    if (cassetteOutMethodId == 0) {
-        return ERR_GET_METHOD_GET_CASSETTE_OUT;
+    playSoundMethodId = (*env)->GetStaticMethodID(env, cls, "playSound",
+            "()V");
+    if (playSoundMethodId == 0) {
+        return ERR_GET_METHOD_PLAY_SOUND;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
@@ -230,6 +246,16 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
 
     init_xtrs(model, sizeROM, entryAddr);
     return NO_ERROR;
+}
+
+void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArray buffer) {
+    jboolean isCopy;
+    audioBufferArray = (*env)->NewGlobalRef(env, buffer);
+    audioBuffer = (Uchar*) (*env)->GetByteArrayElements(env, buffer, &isCopy);
+    audioBufferSize = (*env)->GetArrayLength(env, buffer);
+    if (isCopy) {
+        // TODO error
+    }
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {

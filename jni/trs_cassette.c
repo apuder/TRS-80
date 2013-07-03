@@ -101,10 +101,20 @@ static char *format_name[] = {
 #define DEFAULT_SAMPLE_RATE 44100  /* samples/sec to use for .wav files */
 #define NOISE_FLOOR 64
 
-#define CONTROL_FILENAME	".cassette.ctl"
-#define DEFAULT_FILENAME	"cassette.cas"
+#ifdef ANDROID
+#define CONTROL_FILENAME	"/sdcard/cassette.ctl"
+#define DEFAULT_FILENAME	"/sdcard/cassette.cas"
+#else
+#define CONTROL_FILENAME    ".cassette.ctl"
+#define DEFAULT_FILENAME    "cassette.cas"
+#endif
+
 #define DSP_FILENAME            "/dev/dsp"  /* for sound output */
+#ifdef ANDROID
 #define DEFAULT_FORMAT		CAS_FORMAT
+#else
+#define DEFAULT_FORMAT      WAV_FORMAT
+#endif
 
 #define FLUSH -500  /* special fake signal value used when turning off motor */
 
@@ -1171,7 +1181,27 @@ void trs_cassette_out(int value)
 #endif
 #ifdef ANDROID
   if (cassette_motor == 0) {
-    android_cassette_out(value);
+      float ddelta_us;
+      long nsamples;
+
+      ddelta_us = (z80_state.t_count - cassette_transition) / z80_state.clockMHz
+        - cassette_roundoff_error;
+      if (ddelta_us > 20000.0) {
+        /* Truncate silent periods */
+        ddelta_us = 20000.0;
+      }
+      nsamples = (unsigned long)
+        (ddelta_us / (1000000.0/cassette_sample_rate) + 0.5);
+
+      if (nsamples == 0) {
+          nsamples = 1;
+      }
+
+      cassette_roundoff_error =
+        nsamples * (1000000.0/cassette_sample_rate) - ddelta_us;
+
+      cassette_transition = z80_state.t_count;
+      android_cassette_out(value_to_sample[value], nsamples);
   }
 #endif
   if (cassette_motor) {
