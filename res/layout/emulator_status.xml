@@ -11,9 +11,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_margin="100dp"
         android:gravity="center"
-        android:text="@string/emulator_not_running" />
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        android:text="@string/emulator_not_running"
+        android:background="@drawable/emulator_status_background" />
 
     <LinearLayout
         android:id="@+id/emulator_running"

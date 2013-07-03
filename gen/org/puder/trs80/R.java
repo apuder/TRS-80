@@ -963,18 +963,19 @@ containing a value of this type.
         public static final int cancel_icon=0x7f020071;
         public static final int delete_icon=0x7f020072;
         public static final int edit_icon=0x7f020073;
-        public static final int file_icon=0x7f020074;
-        public static final int folder_icon=0x7f020075;
-        public static final int help_icon=0x7f020076;
-        public static final int ic_launcher=0x7f020077;
-        public static final int key_background=0x7f020078;
-        public static final int ok_icon=0x7f020079;
-        public static final int pause_icon=0x7f02007a;
-        public static final int play_icon=0x7f02007b;
-        public static final int screenshot_background=0x7f02007c;
-        public static final int settings_icon=0x7f02007d;
-        public static final int stop_icon=0x7f02007e;
-        public static final int warning_icon=0x7f02007f;
+        public static final int emulator_status_background=0x7f020074;
+        public static final int file_icon=0x7f020075;
+        public static final int folder_icon=0x7f020076;
+        public static final int help_icon=0x7f020077;
+        public static final int ic_launcher=0x7f020078;
+        public static final int key_background=0x7f020079;
+        public static final int ok_icon=0x7f02007a;
+        public static final int pause_icon=0x7f02007b;
+        public static final int play_icon=0x7f02007c;
+        public static final int screenshot_background=0x7f02007d;
+        public static final int settings_icon=0x7f02007e;
+        public static final int stop_icon=0x7f02007f;
+        public static final int warning_icon=0x7f020080;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
