@@ -44,7 +44,7 @@ public class Audio implements Runnable {
         XTRS.setAudioBuffer(data);
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLE_RATE,
                 AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT, BUF_SIZE,
-                AudioTrack.MODE_STATIC);
+                AudioTrack.MODE_STREAM);
         audioTrack.play();
         queue = new Vector<byte[]>();
         isRunning = true;
