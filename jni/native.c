@@ -15,10 +15,12 @@
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
 #define ERR_GET_METHOD_GET_DISK_PATH -4
-#define ERR_GET_METHOD_PLAY_SOUND -5
-#define ERR_GET_METHOD_XLOG -6
-#define ERR_MEMORY_IS_NO_COPY -7
-#define ERR_SCREEN_IS_NO_COPY -8
+#define ERR_GET_METHOD_INIT_AUDIO -5
+#define ERR_GET_METHOD_DEINIT_AUDIO -6
+#define ERR_GET_METHOD_PAUSE_AUDIO -7
+#define ERR_GET_METHOD_XLOG -8
+#define ERR_MEMORY_IS_NO_COPY -9
+#define ERR_SCREEN_IS_NO_COPY -10
 
 Uchar* memory;
 int isRunning = 0;
@@ -32,7 +34,9 @@ static jclass clazzXTRS = NULL;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
-static jmethodID playSoundMethodId;
+static jmethodID initAudioMethodId;
+static jmethodID deinitAudioMethodId;
+static jmethodID pauseAudioMethodId;
 static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
 static jbyteArray memoryArray;
@@ -170,22 +174,19 @@ char* get_disk_path(int disk) {
     return str;
 }
 
-static jbyte tempAudioBuf[1024];
-static jint audioBufIndex = 0;
+void init_audio(int rate, int channels, int encoding, int bufSize) {
+    JNIEnv *env = getEnv();
+    (*env)->CallStaticObjectMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
+}
 
-void android_cassette_out(int sample, int nsamples) {
-    int i;
-    for (i = 0; i < nsamples; i++) {
-        if (audioBufIndex == audioBufferSize) {
-            memcpy(audioBuffer, tempAudioBuf, audioBufferSize);
-            audioBufIndex = 0;
-            JNIEnv *env = getEnv();
-            (*env)->PushLocalFrame(env, 64);
-            (*env)->CallStaticObjectMethod(env, clazzXTRS, playSoundMethodId);
-            (*env)->PopLocalFrame(env, NULL);
-        }
-        tempAudioBuf[audioBufIndex++] = sample;
-    }
+void deinit_audio() {
+    JNIEnv *env = getEnv();
+    (*env)->CallStaticObjectMethod(env, clazzXTRS, deinitAudioMethodId);
+}
+
+void pause_audio(int pause_on) {
+    JNIEnv *env = getEnv();
+    (*env)->CallStaticObjectMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
 }
 
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
@@ -219,10 +220,19 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
         return ERR_GET_METHOD_GET_DISK_PATH;
     }
 
-    playSoundMethodId = (*env)->GetStaticMethodID(env, cls, "playSound",
-            "()V");
-    if (playSoundMethodId == 0) {
-        return ERR_GET_METHOD_PLAY_SOUND;
+    initAudioMethodId = (*env)->GetStaticMethodID(env, cls, "initAudio", "(IIII)V");
+    if (initAudioMethodId == 0) {
+        return ERR_GET_METHOD_INIT_AUDIO;
+    }
+
+    deinitAudioMethodId = (*env)->GetStaticMethodID(env, cls, "deinitAudio", "()V");
+    if (deinitAudioMethodId == 0) {
+        return ERR_GET_METHOD_DEINIT_AUDIO;
+    }
+
+    pauseAudioMethodId = (*env)->GetStaticMethodID(env, cls, "pauseAudio", "(I)V");
+    if (pauseAudioMethodId == 0) {
+        return ERR_GET_METHOD_PAUSE_AUDIO;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
@@ -256,6 +266,14 @@ void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArra
     if (isCopy) {
         // TODO error
     }
+}
+
+typedef unsigned char Uint8;
+typedef unsigned short Uint16;
+typedef unsigned int Uint32;
+extern void fillBuffer(Uint8* stream, int len);
+void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
+    fillBuffer(audioBuffer, audioBufferSize);
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {

@@ -20,7 +20,9 @@ extern int trs_rom_size;
 
 char* get_disk_path(int disk);
 
-void android_cassette_out(int sample, int nsamples);
+void init_audio(int rate, int channels, int encoding, int bufSize);
+void deinit_audio();
+void pause_audio(int pause_on);
 
 void xlog(const char* msg);
 

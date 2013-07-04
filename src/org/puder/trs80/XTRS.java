@@ -22,11 +22,13 @@ public class XTRS {
         System.loadLibrary("xtrs");
     }
 
-    private static RenderThread     renderer = null;
+    private static RenderThread     renderer      = null;
 
-    private static Audio            audio    = null;
+    private static Audio            audioRunnable = null;
 
-    private static EmulatorActivity emulator = null;
+    private static Thread           audioThread   = null;
+
+    private static EmulatorActivity emulator      = null;
 
     public static native void setRunning(boolean run);
 
@@ -36,16 +38,14 @@ public class XTRS {
 
     public static native int setAudioBuffer(byte[] data);
 
+    public static native void fillAudioBuffer();
+
     public static native void cleanup();
 
     public static native void run();
 
     public static void setRenderer(RenderThread r) {
         renderer = r;
-    }
-
-    public static void setAudio(Audio a) {
-        audio = a;
     }
 
     public static void setEmulatorActivity(EmulatorActivity activity) {
@@ -66,8 +66,27 @@ public class XTRS {
         }
     }
 
-    public static void playSound() {
-        audio.playSound();
+    public static void initAudio(int rate, int channels, int encoding, int bufSize) {
+        deinitAudio();
+        audioRunnable = new Audio(rate, channels, encoding, bufSize);
+    }
+
+    public static void deinitAudio() {
+        if (audioRunnable != null) {
+            audioRunnable.setRunning(false);
+            audioRunnable = null;
+        }
+    }
+
+    public static void pauseAudio(int pauseOn) {
+        if (audioRunnable == null) {
+            return;
+        }
+        audioRunnable.setRunning(false);
+        if (pauseOn == 0) {
+            audioRunnable.setRunning(true);
+            new Thread(audioRunnable).start();
+        }
     }
 
     public static void xlog(String msg) {

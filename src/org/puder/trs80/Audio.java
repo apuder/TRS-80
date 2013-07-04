@@ -16,65 +16,71 @@
 
 package org.puder.trs80;
 
-import java.util.Vector;
-
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
-public class Audio implements Runnable {
+class Audio implements Runnable {
 
-    final private static int DEFAULT_SAMPLE_RATE = 44100;
+    private boolean    isRunning;
+    private AudioTrack audioTrack;
+    private byte[]     audioBuffer;
+    private int        audioBufSize;
 
-    final int                BUF_SIZE            = 1024;
+    public Audio(int rate, int channels, int encoding, int bufSize) {
+        isRunning = true;
+        audioTrack = null;
+        audioBuffer = null;
+        channels = (channels == 1) ? AudioFormat.CHANNEL_CONFIGURATION_MONO
+                : AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        encoding = (encoding == 1) ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
 
-    private AudioTrack       audioTrack;
+        audioBufSize = bufSize;
 
-    private Thread           audioThread;
+        if (AudioTrack.getMinBufferSize(rate, channels, encoding) > bufSize)
+            bufSize = AudioTrack.getMinBufferSize(rate, channels, encoding);
 
-    private Vector<byte[]>   queue;
+        audioBuffer = new byte[bufSize];
 
-    private boolean          isRunning;
+        XTRS.setAudioBuffer(audioBuffer);
 
-    private byte[]           data                = null;
-
-    public Audio() {
-        data = new byte[1024];
-        XTRS.setAudioBuffer(data);
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLE_RATE,
-                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT, BUF_SIZE,
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, rate, channels, encoding, bufSize,
                 AudioTrack.MODE_STREAM);
         audioTrack.play();
-        queue = new Vector<byte[]>();
-        isRunning = true;
-        audioThread = new Thread(this);
-        audioThread.start();
     }
 
-    public synchronized void playSound() {
-        queue.add(data.clone());
-        this.notify();
+    public void deinitAudio() {
+        if (audioTrack != null) {
+            audioTrack.stop();
+            audioTrack.release();
+            audioTrack = null;
+        }
+        audioBuffer = null;
     }
 
-    public void stop() {
-        isRunning = false;
+    public void pauseAudioPlayback() {
+        if (audioTrack != null) {
+            audioTrack.pause();
+        }
+    }
+
+    public void resumeAudioPlayback() {
+        if (audioTrack != null) {
+            audioTrack.play();
+        }
+    }
+
+    public void setRunning(boolean flag) {
+        isRunning = flag;
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         while (isRunning) {
-            try {
-                this.wait();
-                while (queue.size() > 0) {
-                    byte[] data = queue.firstElement();
-                    queue.remove(0);
-                    audioTrack.write(data, 0, data.length);
-                }
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            XTRS.fillAudioBuffer();
+            audioTrack.write(audioBuffer, 0, audioBufSize);
         }
     }
+
 }
