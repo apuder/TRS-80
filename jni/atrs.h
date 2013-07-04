@@ -2,6 +2,8 @@
 #ifndef __ATRS_H__
 #define __ATRS_H__
 
+#include "z80.h"
+
 #define SCREEN_UPDATE_THRESHOLD 5000
 
 extern Uchar* memory;
