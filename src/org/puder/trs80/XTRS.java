@@ -67,13 +67,22 @@ public class XTRS {
     }
 
     public static void initAudio(int rate, int channels, int encoding, int bufSize) {
-        deinitAudio();
+        closeAudio();
         audioRunnable = new Audio(rate, channels, encoding, bufSize);
     }
 
-    public static void deinitAudio() {
+    public static void closeAudio() {
         if (audioRunnable != null) {
-            audioRunnable.setRunning(false);
+            audioRunnable.deinitAudio();
+            try {
+                if (audioThread != null) {
+                    audioThread.join();
+                }
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            audioThread = null;
             audioRunnable = null;
         }
     }
@@ -85,7 +94,8 @@ public class XTRS {
         audioRunnable.setRunning(false);
         if (pauseOn == 0) {
             audioRunnable.setRunning(true);
-            new Thread(audioRunnable).start();
+            audioThread = new Thread(audioRunnable);
+            audioThread.start();
         }
     }
 

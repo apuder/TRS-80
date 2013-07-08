@@ -112,10 +112,14 @@ static int soundDeviceOpen = FALSE;
 
 /* Windows won't work with a sound fragment size smaller than 2048,
    or you get gaps in sound */
+#ifdef ANDROID
+#define FRAGSIZE 14
+#else
 #ifdef _WIN32
 #define FRAGSIZE 11
 #else
 #define FRAGSIZE 9
+#endif
 #endif
 #define SOUND_RING_SIZE (1<<(FRAGSIZE+8))
 static int cassette_afmt = AUDIO_U8;

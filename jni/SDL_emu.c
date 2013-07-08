@@ -41,7 +41,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 
 void SDL_CloseAudio(void)
 {
-    deinit_audio();
+    close_audio();
 }
 
 void SDL_PauseAudio(int pause_on)

@@ -29,13 +29,13 @@ class Audio implements Runnable {
 
     public Audio(int rate, int channels, int encoding, int bufSize) {
         isRunning = true;
-        audioTrack = null;
-        audioBuffer = null;
         channels = (channels == 1) ? AudioFormat.CHANNEL_CONFIGURATION_MONO
                 : AudioFormat.CHANNEL_CONFIGURATION_STEREO;
         encoding = (encoding == 1) ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
 
         audioBufSize = bufSize;
+
+        // int min = AudioTrack.getMinBufferSize( rate, channels, encoding );
 
         if (AudioTrack.getMinBufferSize(rate, channels, encoding) > bufSize)
             bufSize = AudioTrack.getMinBufferSize(rate, channels, encoding);
@@ -50,12 +50,11 @@ class Audio implements Runnable {
     }
 
     public void deinitAudio() {
+        setRunning(false);
         if (audioTrack != null) {
             audioTrack.stop();
             audioTrack.release();
-            audioTrack = null;
         }
-        audioBuffer = null;
     }
 
     public void pauseAudioPlayback() {

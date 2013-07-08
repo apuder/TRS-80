@@ -16,7 +16,7 @@
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
 #define ERR_GET_METHOD_GET_DISK_PATH -4
 #define ERR_GET_METHOD_INIT_AUDIO -5
-#define ERR_GET_METHOD_DEINIT_AUDIO -6
+#define ERR_GET_METHOD_CLOSE_AUDIO -6
 #define ERR_GET_METHOD_PAUSE_AUDIO -7
 #define ERR_GET_METHOD_XLOG -8
 #define ERR_MEMORY_IS_NO_COPY -9
@@ -35,7 +35,7 @@ static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID getDiskPathMethodId;
 static jmethodID initAudioMethodId;
-static jmethodID deinitAudioMethodId;
+static jmethodID closeAudioMethodId;
 static jmethodID pauseAudioMethodId;
 static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
@@ -179,9 +179,9 @@ void init_audio(int rate, int channels, int encoding, int bufSize) {
     (*env)->CallStaticObjectMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
 }
 
-void deinit_audio() {
+void close_audio() {
     JNIEnv *env = getEnv();
-    (*env)->CallStaticObjectMethod(env, clazzXTRS, deinitAudioMethodId);
+    (*env)->CallStaticObjectMethod(env, clazzXTRS, closeAudioMethodId);
 }
 
 void pause_audio(int pause_on) {
@@ -225,9 +225,9 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
         return ERR_GET_METHOD_INIT_AUDIO;
     }
 
-    deinitAudioMethodId = (*env)->GetStaticMethodID(env, cls, "deinitAudio", "()V");
-    if (deinitAudioMethodId == 0) {
-        return ERR_GET_METHOD_DEINIT_AUDIO;
+    closeAudioMethodId = (*env)->GetStaticMethodID(env, cls, "closeAudio", "()V");
+    if (closeAudioMethodId == 0) {
+        return ERR_GET_METHOD_CLOSE_AUDIO;
     }
 
     pauseAudioMethodId = (*env)->GetStaticMethodID(env, cls, "pauseAudio", "(I)V");
