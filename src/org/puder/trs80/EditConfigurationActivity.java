@@ -47,6 +47,7 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
     public static final String CONF_DISK4              = "conf_disk4";
     public static final String CONF_KEYBOARD_PORTRAIT  = "conf_keyboard_portrait";
     public static final String CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape";
+    public static final String CONF_MUTE_SOUND         = "conf_mute_sound";
 
     private SharedPreferences  sharedPrefs;
     private Handler            handler;

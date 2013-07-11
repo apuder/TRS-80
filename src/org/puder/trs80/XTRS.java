@@ -67,6 +67,9 @@ public class XTRS {
     }
 
     public static void initAudio(int rate, int channels, int encoding, int bufSize) {
+        if (TRS80Application.getCurrentConfiguration().muteSound()) {
+            return;
+        }
         closeAudio();
         audioRunnable = new Audio(rate, channels, encoding, bufSize);
     }
@@ -91,6 +94,10 @@ public class XTRS {
         if (audioRunnable == null) {
             return;
         }
+        /*
+         * For pausing we just exit the thread that calls AudioTrack.write(). We
+         * do not call AudioTrack.pause()
+         */
         audioRunnable.setRunning(false);
         if (pauseOn == 0) {
             audioRunnable.setRunning(true);

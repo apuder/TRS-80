@@ -176,17 +176,17 @@ char* get_disk_path(int disk) {
 
 void init_audio(int rate, int channels, int encoding, int bufSize) {
     JNIEnv *env = getEnv();
-    (*env)->CallStaticObjectMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
 }
 
 void close_audio() {
     JNIEnv *env = getEnv();
-    (*env)->CallStaticObjectMethod(env, clazzXTRS, closeAudioMethodId);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, closeAudioMethodId);
 }
 
 void pause_audio(int pause_on) {
     JNIEnv *env = getEnv();
-    (*env)->CallStaticObjectMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
 }
 
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,

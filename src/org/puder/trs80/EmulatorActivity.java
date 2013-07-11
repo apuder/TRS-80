@@ -82,7 +82,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
             } catch (InterruptedException e) {
             }
         }
-
+        XTRS.closeAudio();
     }
 
     @Override

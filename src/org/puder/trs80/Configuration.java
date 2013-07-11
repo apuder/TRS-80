@@ -187,4 +187,8 @@ public class Configuration {
         String v = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE, "0");
         return Integer.parseInt(v);
     }
+
+    public boolean muteSound() {
+        return sharedPrefs.getBoolean(EditConfigurationActivity.CONF_MUTE_SOUND, false);
+    }
 }

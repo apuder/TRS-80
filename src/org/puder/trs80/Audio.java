@@ -52,14 +52,9 @@ class Audio implements Runnable {
     public void deinitAudio() {
         setRunning(false);
         if (audioTrack != null) {
-            audioTrack.stop();
-            audioTrack.release();
-        }
-    }
-
-    public void pauseAudioPlayback() {
-        if (audioTrack != null) {
             audioTrack.pause();
+            audioTrack.flush();
+            audioTrack.release();
         }
     }
 
