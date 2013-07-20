@@ -268,6 +268,10 @@ void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArra
     }
 }
 
+void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
+    flush_audio_queue();
+}
+
 typedef unsigned char Uint8;
 typedef unsigned short Uint16;
 typedef unsigned int Uint32;

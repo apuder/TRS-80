@@ -148,6 +148,17 @@ static int cassette_pulsestate;
 #define SPEED_250     2
 int cassette_speed = SPEED_500;
 
+#ifdef ANDROID
+void flush_audio_queue()
+{
+    SDL_LockAudio();
+    sound_ring_read_ptr = sound_ring;
+    sound_ring_write_ptr = sound_ring;
+    sound_ring_count = 0;
+    SDL_UnlockAudio();
+}
+#endif
+
 /* Pulse shapes for conversion from .cas on input */
 #define CAS_MAXSTATES 8
 struct {

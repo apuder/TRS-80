@@ -39,6 +39,8 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     private Thread   cpuThread;
     private TextView logView;
     private int      orientation;
+    private MenuItem muteMenuItem;
+    private MenuItem unmuteMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
         TRS80Application.getHardware().computeFontDimensions(getWindow());
         KeyboardManager keyboard = new KeyboardManager();
         TRS80Application.setKeyboard(keyboard);
+        XTRS.flushAudioQueue();
         initView();
     }
 
@@ -91,17 +94,42 @@ public class EmulatorActivity extends SherlockFragmentActivity {
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         menu.add("Reset").setIcon(R.drawable.reset_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        if (TRS80Application.getCurrentConfiguration().muteSound()) {
+            // Mute sound permanently and don't show mute/unmute icons
+            XTRS.setSoundMuted(true);
+        } else {
+            muteMenuItem = menu.add("Sound Off");
+            muteMenuItem.setIcon(R.drawable.sound_off_icon).setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+            unmuteMenuItem = menu.add("Sound On");
+            unmuteMenuItem.setIcon(R.drawable.sound_on_icon).setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+            updateMuteSoundIcons();
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if ("Pause".equals(item.getTitle())) {
+        CharSequence title = item.getTitle();
+        if ("Pause".equals(title)) {
             pauseEmulator();
             return true;
         }
-        if ("Reset".equals(item.getTitle())) {
+        if ("Reset".equals(title)) {
             XTRS.reset();
+            return true;
+        }
+        if ("Sound On".equals(title)) {
+            XTRS.setSoundMuted(true);
+            XTRS.flushAudioQueue();
+            updateMuteSoundIcons();
+            return true;
+        }
+        if ("Sound Off".equals(title)) {
+            XTRS.setSoundMuted(false);
+            XTRS.flushAudioQueue();
+            updateMuteSoundIcons();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -200,6 +228,16 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     private void takeScreenshot() {
         Screen screen = (Screen) findViewById(R.id.screen);
         TRS80Application.setScreenshot(screen.takeScreenshot());
+    }
+
+    private void updateMuteSoundIcons() {
+        if (XTRS.isSoundMuted()) {
+            muteMenuItem.setVisible(true);
+            unmuteMenuItem.setVisible(false);
+        } else {
+            muteMenuItem.setVisible(false);
+            unmuteMenuItem.setVisible(true);
+        }
     }
 
     public void log(final String msg) {

@@ -23,6 +23,7 @@ char* get_disk_path(int disk);
 void init_audio(int rate, int channels, int encoding, int bufSize);
 void close_audio();
 void pause_audio(int pause_on);
+void flush_audio_queue();
 
 void xlog(const char* msg);
 

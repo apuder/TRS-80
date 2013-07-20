@@ -25,6 +25,7 @@ public class ConfigurationBackup extends Configuration {
     private String   backupName;
     private Model    backupModel;
     private String[] backupDisk = new String[4];
+    private boolean  backupMuteSound;
     private int      backupKeyboardLayoutPortrait;
     private int      backupKeyboardLayoutLandscape;
 
@@ -38,6 +39,7 @@ public class ConfigurationBackup extends Configuration {
         this.backupDisk[1] = other.getDiskPath(1);
         this.backupDisk[2] = other.getDiskPath(2);
         this.backupDisk[3] = other.getDiskPath(3);
+        this.backupMuteSound = other.muteSound();
         this.backupKeyboardLayoutPortrait = other.getKeyboardLayoutPortrait();
         this.backupKeyboardLayoutLandscape = other.getKeyboardLayoutLandscape();
     }
@@ -50,6 +52,7 @@ public class ConfigurationBackup extends Configuration {
         saveDiskPath(1);
         saveDiskPath(2);
         saveDiskPath(3);
+        saveMuteSound();
         saveKeyboardLayout();
         editor.commit();
     }
@@ -106,6 +109,10 @@ public class ConfigurationBackup extends Configuration {
         } else {
             editor.putString(key, backupDisk[disk]);
         }
+    }
+
+    private void saveMuteSound() {
+        editor.putBoolean(EditConfigurationActivity.CONF_MUTE_SOUND, backupMuteSound);
     }
 
     private void saveKeyboardLayout() {

@@ -30,6 +30,8 @@ public class XTRS {
 
     private static EmulatorActivity emulator      = null;
 
+    private static boolean          soundMuted    = false;
+
     public static native void setRunning(boolean run);
 
     public static native int init(int model, int sizeROM, int entryAddr, byte[] mem, byte[] screen);
@@ -39,6 +41,8 @@ public class XTRS {
     public static native int setAudioBuffer(byte[] data);
 
     public static native void fillAudioBuffer();
+
+    public static native void flushAudioQueue();
 
     public static native void cleanup();
 
@@ -50,6 +54,17 @@ public class XTRS {
 
     public static void setEmulatorActivity(EmulatorActivity activity) {
         emulator = activity;
+    }
+
+    public static void setSoundMuted(boolean isMuted) {
+        soundMuted = isMuted;
+        if (isMuted) {
+            closeAudio();
+        }
+    }
+
+    public static boolean isSoundMuted() {
+        return soundMuted;
     }
 
     public static String getDiskPath(int disk) {
@@ -67,7 +82,7 @@ public class XTRS {
     }
 
     public static void initAudio(int rate, int channels, int encoding, int bufSize) {
-        if (TRS80Application.getCurrentConfiguration().muteSound()) {
+        if (soundMuted) {
             return;
         }
         closeAudio();
@@ -77,14 +92,6 @@ public class XTRS {
     public static void closeAudio() {
         if (audioRunnable != null) {
             audioRunnable.deinitAudio();
-            try {
-                if (audioThread != null) {
-                    audioThread.join();
-                }
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
             audioThread = null;
             audioRunnable = null;
         }

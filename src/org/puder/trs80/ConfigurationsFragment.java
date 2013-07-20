@@ -199,7 +199,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_EDIT_CONFIG) {
-            if (resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK || data == null) {
                 return;
             }
             boolean isNew = data.getBooleanExtra("IS_NEW", false);

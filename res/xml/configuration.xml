@@ -29,6 +29,11 @@
             android:title="Disk 4"
             android:summary="File to use for disk 4"
             android:key="conf_disk4" />
+        <CheckBoxPreference
+            android:title="Mute"
+            android:summaryOn="All game sounds will be muted"
+            android:summaryOff="Play game sounds"
+            android:key="conf_mute_sound" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Portrait Mode"
