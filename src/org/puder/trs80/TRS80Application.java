@@ -16,6 +16,10 @@
 
 package org.puder.trs80;
 
+import java.util.HashMap;
+
+import org.acra.ACRA;
+import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.app.Application;
@@ -23,17 +27,21 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 
+@ReportsCrashes(formKey = "", formUri = "")
 public class TRS80Application extends Application {
 
-    private static Context       context;
-    private static Hardware      hardware;
-    private static KeyboardManager      keyboard;
-    private static Configuration configuration;
-    private static Bitmap        screenshot;
+    private static Context         context;
+    private static Hardware        hardware;
+    private static KeyboardManager keyboard;
+    private static Configuration   configuration;
+    private static Bitmap          screenshot;
 
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        ACRA.init(this);
+        HashMap<String, String> ACRAData = new HashMap<String, String>();
+        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {
