@@ -89,6 +89,8 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Pause").setIcon(R.drawable.pause_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add("Reset").setIcon(R.drawable.reset_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
@@ -96,6 +98,10 @@ public class EmulatorActivity extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if ("Pause".equals(item.getTitle())) {
             pauseEmulator();
+            return true;
+        }
+        if ("Reset".equals(item.getTitle())) {
+            XTRS.reset();
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -972,10 +972,11 @@ containing a value of this type.
         public static final int ok_icon=0x7f02007a;
         public static final int pause_icon=0x7f02007b;
         public static final int play_icon=0x7f02007c;
-        public static final int screenshot_background=0x7f02007d;
-        public static final int settings_icon=0x7f02007e;
-        public static final int stop_icon=0x7f02007f;
-        public static final int warning_icon=0x7f020080;
+        public static final int reset_icon=0x7f02007d;
+        public static final int screenshot_background=0x7f02007e;
+        public static final int settings_icon=0x7f02007f;
+        public static final int stop_icon=0x7f020080;
+        public static final int warning_icon=0x7f020081;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;

@@ -237,6 +237,10 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     }
 }
 
+void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
+    z80_reset();
+}
+
 void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass clazz) {
     cleanup_xtrs();
 }

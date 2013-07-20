@@ -30,6 +30,8 @@ public class XTRS {
 
     public static native int init(int model, int sizeROM, int entryAddr, byte[] mem, byte[] screen);
 
+    public static native void reset();
+
     public static native void cleanup();
 
     public static native void run();
