@@ -6,7 +6,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -29,13 +32,24 @@ import com.actionbarsherlock.view.MenuItem;
  * to move between the tabs.
  */
 public class MainFragment extends SherlockFragmentActivity {
-    TabHost     mTabHost;
-    ViewPager   mViewPager;
-    TabsAdapter mTabsAdapter;
+
+    private static final int REQUEST_CODE_EDIT_SETTINGS = 0;
+
+    TabHost                  mTabHost;
+    ViewPager                mViewPager;
+    TabsAdapter              mTabsAdapter;
+    MenuItem                 downloadMenuItem           = null;
+    SharedPreferences        sharedPrefs;
+    Handler                  handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
+                Context.MODE_PRIVATE);
+
+        handler = new Handler();
 
         setContentView(R.layout.main_fragment);
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
@@ -56,7 +70,31 @@ public class MainFragment extends SherlockFragmentActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FRIST_TIME, true)) {
+            return;
+        }
+        Editor editor = sharedPrefs.edit();
+        editor.putBoolean(SettingsActivity.CONF_FRIST_TIME, false);
+        editor.commit();
+        if (!hasROM()) {
+            doDownload();
+        }
+    }
+
+    public boolean hasROM() {
+        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null) != null;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        if (!hasROM()) {
+            downloadMenuItem = menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Download");
+            downloadMenuItem.setIcon(R.drawable.download_icon).setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
         menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Help").setIcon(R.drawable.help_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
@@ -67,6 +105,10 @@ public class MainFragment extends SherlockFragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if ("Download".equals(item.getTitle())) {
+            doDownload();
+            return true;
+        }
         if ("Settings".equals(item.getTitle())) {
             doSettings();
             return true;
@@ -78,8 +120,36 @@ public class MainFragment extends SherlockFragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_EDIT_SETTINGS) {
+            /*
+             * Came back from SettingsActivity. Check if download icon can be
+             * disabled.
+             */
+            if (downloadMenuItem != null && hasROM()) {
+                downloadMenuItem.setVisible(false);
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public void romDownloaded() {
+        downloadMenuItem.setVisible(false);
+        ConfigurationsFragment fragment = (ConfigurationsFragment) getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.pager + ":0");
+        fragment.updateView();
+    }
+
     private void doSettings() {
-        startActivity(new Intent(this, SettingsActivity.class));
+        startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
+    }
+
+    private void doDownload() {
+        InitialSetupDialogFragment dialog = InitialSetupDialogFragment.newInstance(this);
+        // dialog.setTargetFragment(this, 0);
+        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     private void doHelp() {

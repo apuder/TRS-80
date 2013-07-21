@@ -44,6 +44,14 @@ public class ConfigurationBackup extends Configuration {
         this.backupKeyboardLayoutLandscape = other.getKeyboardLayoutLandscape();
     }
 
+    public void setName(String name) {
+        this.backupName = name;
+    }
+
+    public void setModel(Model model) {
+        this.backupModel = model;
+    }
+
     public void save() {
         editor = sharedPrefs.edit();
         saveName();

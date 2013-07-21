@@ -18,6 +18,11 @@
     <string name="currently_running">Currently running:</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>
+    <string name="title_initial_setup">Initial Setup</string>
+    <string name="initial_setup">For copyright reasons this emulator does not contain ROM
+                        images. However, you have the option to download the required ROM
+                        files from well-known locations from the Internet. Would you like
+                        to download the ROM images?</string>
     <string name="help_title_configurations">Help: Configurations</string>
     <string name="help_configurations">Tap on the \'+\' icon to create a new configuration.
                         A configuration defines the TRS-80 model and the disk images used for

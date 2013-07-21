@@ -962,23 +962,24 @@ containing a value of this type.
         public static final int add_icon=0x7f020070;
         public static final int cancel_icon=0x7f020071;
         public static final int delete_icon=0x7f020072;
-        public static final int edit_icon=0x7f020073;
-        public static final int emulator_status_background=0x7f020074;
-        public static final int file_icon=0x7f020075;
-        public static final int folder_icon=0x7f020076;
-        public static final int help_icon=0x7f020077;
-        public static final int ic_launcher=0x7f020078;
-        public static final int key_background=0x7f020079;
-        public static final int ok_icon=0x7f02007a;
-        public static final int pause_icon=0x7f02007b;
-        public static final int play_icon=0x7f02007c;
-        public static final int reset_icon=0x7f02007d;
-        public static final int screenshot_background=0x7f02007e;
-        public static final int settings_icon=0x7f02007f;
-        public static final int sound_off_icon=0x7f020080;
-        public static final int sound_on_icon=0x7f020081;
-        public static final int stop_icon=0x7f020082;
-        public static final int warning_icon=0x7f020083;
+        public static final int download_icon=0x7f020073;
+        public static final int edit_icon=0x7f020074;
+        public static final int emulator_status_background=0x7f020075;
+        public static final int file_icon=0x7f020076;
+        public static final int folder_icon=0x7f020077;
+        public static final int help_icon=0x7f020078;
+        public static final int ic_launcher=0x7f020079;
+        public static final int key_background=0x7f02007a;
+        public static final int ok_icon=0x7f02007b;
+        public static final int pause_icon=0x7f02007c;
+        public static final int play_icon=0x7f02007d;
+        public static final int reset_icon=0x7f02007e;
+        public static final int screenshot_background=0x7f02007f;
+        public static final int settings_icon=0x7f020080;
+        public static final int sound_off_icon=0x7f020081;
+        public static final int sound_on_icon=0x7f020082;
+        public static final int stop_icon=0x7f020083;
+        public static final int warning_icon=0x7f020084;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -1161,14 +1162,15 @@ containing a value of this type.
         public static final int help_edit_configuration=0x7f03001b;
         public static final int help_emulator=0x7f03001c;
         public static final int help_settings=0x7f03001d;
-        public static final int initialization_error=0x7f03001e;
-        public static final int keyboard_compact=0x7f03001f;
-        public static final int keyboard_gaming_1=0x7f030020;
-        public static final int keyboard_gaming_2=0x7f030021;
-        public static final int keyboard_original=0x7f030022;
-        public static final int main_fragment=0x7f030023;
-        public static final int sherlock_spinner_dropdown_item=0x7f030024;
-        public static final int sherlock_spinner_item=0x7f030025;
+        public static final int initial_setup=0x7f03001e;
+        public static final int initialization_error=0x7f03001f;
+        public static final int keyboard_compact=0x7f030020;
+        public static final int keyboard_gaming_1=0x7f030021;
+        public static final int keyboard_gaming_2=0x7f030022;
+        public static final int keyboard_original=0x7f030023;
+        public static final int main_fragment=0x7f030024;
+        public static final int sherlock_spinner_dropdown_item=0x7f030025;
+        public static final int sherlock_spinner_item=0x7f030026;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
@@ -1221,17 +1223,19 @@ containing a value of this type.
         public static final int empty_dir=0x7f0a000e;
         public static final int emulator_not_running=0x7f0a0018;
         public static final int error_init=0x7f0a001a;
-        public static final int help_configurations=0x7f0a001c;
-        public static final int help_edit_configuration=0x7f0a001e;
-        public static final int help_emulator=0x7f0a0020;
-        public static final int help_settings=0x7f0a0022;
-        public static final int help_title_configurations=0x7f0a001b;
-        public static final int help_title_edit_configuration=0x7f0a001d;
-        public static final int help_title_emulator=0x7f0a001f;
-        public static final int help_title_settings=0x7f0a0021;
+        public static final int help_configurations=0x7f0a001e;
+        public static final int help_edit_configuration=0x7f0a0020;
+        public static final int help_emulator=0x7f0a0022;
+        public static final int help_settings=0x7f0a0024;
+        public static final int help_title_configurations=0x7f0a001d;
+        public static final int help_title_edit_configuration=0x7f0a001f;
+        public static final int help_title_emulator=0x7f0a0021;
+        public static final int help_title_settings=0x7f0a0023;
+        public static final int initial_setup=0x7f0a001c;
         public static final int no_configurations=0x7f0a0017;
         public static final int ok=0x7f0a0010;
         public static final int path=0x7f0a000f;
+        public static final int title_initial_setup=0x7f0a001b;
     }
     public static final class style {
         /** 

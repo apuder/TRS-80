@@ -18,6 +18,7 @@ package org.puder.trs80;
 
 import org.puder.trs80.browser.FileBrowserActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,6 +42,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 
     public static final String SHARED_PREF_NAME = "Settings";
 
+    public static final String CONF_FRIST_TIME  = "conf_first_time";
     public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
     public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
     public static final String CONF_ROM_MODEL4  = "conf_rom_model4";
@@ -110,7 +112,13 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        doDone();
+    }
+
     private void doDone() {
+        setResult(Activity.RESULT_OK, getIntent());
         finish();
     }
 

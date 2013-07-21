@@ -45,8 +45,8 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class ConfigurationsFragment extends SherlockFragment implements OnItemClickListener {
 
-    private static final int    REQUEST_CODE_EDIT_CONFIG  = 0;
-    private static final int    REQUEST_CODE_RUN_EMULATOR = 1;
+    private static final int    REQUEST_CODE_EDIT_CONFIG  = 1;
+    private static final int    REQUEST_CODE_RUN_EMULATOR = 2;
 
     private Configuration[]     configurations;
     private String[]            configurationNames;
@@ -154,7 +154,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         return inflater.inflate(R.layout.configurations, container, false);
     }
 
-    private void updateView() {
+    public void updateView() {
         View withoutConfigurationsView = getView().findViewById(R.id.without_configurations);
         View withConfigurationsView = getView().findViewById(R.id.with_configurations);
         configurations = Configuration.getConfigurations();
@@ -189,7 +189,8 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if ("Add".equals(item.getTitle())) {
+        CharSequence title = item.getTitle();
+        if ("Add".equals(title)) {
             addConfiguration();
             return true;
         }
