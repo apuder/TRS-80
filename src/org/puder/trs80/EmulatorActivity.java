@@ -86,6 +86,7 @@ public class EmulatorActivity extends SherlockFragmentActivity {
             }
         }
         XTRS.closeAudio();
+        XTRS.flushAudioQueue();
     }
 
     @Override
