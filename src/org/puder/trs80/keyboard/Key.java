@@ -19,9 +19,6 @@ package org.puder.trs80.keyboard;
 import org.puder.trs80.Hardware;
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
-import org.puder.trs80.R.drawable;
-import org.puder.trs80.R.id;
-import org.puder.trs80.R.styleable;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -37,37 +34,49 @@ import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 
 /**
+ * The emulator features different keyboard layouts (original, compact, etc).
+ * The XML layout resources can be found in res/layout/keyboard_*.xml. Class Key
+ * implements the behavior of one key of the keyboard. Class Key is a custom
+ * Android widget that is referenced from the aforementioned XML layout files.
+ * Whenever the user 'clicks' on a key, class Key uses memory mapped IO to poke
+ * a bit into the emulated RAM of the TRS-80. See the onTouch() method further
+ * below. The XML layout file contains the memory address and bit mask via
+ * custom XML attributes keyboard:address and keyboard:mask. The emulator runs
+ * in a separate thread and will 'see' that a bit is flipped at a certain memory
+ * address and will interpret this as a key-press. See the following link for
+ * the memory-mapped IO address of the Model 3 keyboard:
+ * 
  * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
  */
 public class Key extends View {
 
-    private String   label;
-    private String   labelShifted;
-    private boolean  isShifted;
-    private boolean  isPressed;
-    private boolean  isShiftKey;
-    private boolean  isAltKey;
+    private String          label;
+    private String          labelShifted;
+    private boolean         isShifted;
+    private boolean         isPressed;
+    private boolean         isShiftKey;
+    private boolean         isAltKey;
 
-    private View     keyboardView1;
-    private View     keyboardView2;
+    private View            keyboardView1;
+    private View            keyboardView2;
 
-    private int      address;
-    private byte     mask;
-    private int      address2;
-    private byte     mask2;
-    private int      size;
-    private Paint    paint;
-    private byte[]   memBuffer;
-    private RectF    rect;
+    private int             address;
+    private byte            mask;
+    private int             address2;
+    private byte            mask2;
+    private int             size;
+    private Paint           paint;
+    private byte[]          memBuffer;
+    private RectF           rect;
 
     private KeyboardManager keyboard;
 
-    private int      keyWidth;
-    private int      keyHeight;
-    private int      keyMargin;
+    private int             keyWidth;
+    private int             keyHeight;
+    private int             keyMargin;
 
-    private int      posX = -1;
-    private int      posY = -1;
+    private int             posX = -1;
+    private int             posY = -1;
 
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);

@@ -1,7 +1,75 @@
-http://actionbarsherlock.com/
-http://www.tim-mann.org/xtrs.html
-http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
-http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
-http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-mime-2-icon.html
-ACRA: http://acra.ch/
-ACRA Mailer: https://github.com/d-a-n/acra-mailer
+
+TRS-80 Emulator for Android
+---------------------------
+
+This is the first version of a TRS-80 Emulator for Android. It is
+based on a popular emulator originally written for X-Windows called
+xtrs [1]. This port adds a layer for Android.
+
+
+Compiling from Source
+---------------------
+
+It is recommended to use Eclipse for compiling the sources. You will
+need to install the Android SDK and NDK. You should also install the
+accompanying ADT plugin for Eclipse (be sure to check "NDK" when
+installing the ADT for Android in Eclipse).
+
+The TRS-80 emulator depends on a project called ActionBarSherlock
+[2]. Note that the way ActionBarSherlock is designed, it cannot be
+integrated with the emulator. You need to import ActioBarSherlock as a
+separate Eclipse project into your workspace. Next download an import
+the sources of TRS-80 into Eclipse. Since your directory structure
+will be different, you need to edit the location of
+ActionBarSherlock. In Eclipse, right-click on TRS-80 > Preferences >
+Android. In the bottom edit the path to ActioBarSherlock.
+
+At this point you should be able to compile the sources. Note that
+running the TRS-80 emulator inside the Android emulator is very
+slow. It is recommended to use a real device for testing and
+debugging.
+
+
+Quick Overview
+--------------
+
+The original C sources of xtrs reside in the 'jni' folder. The Android
+layer uses JNI (Java Native Interface) to access the C sources from
+Java. Whenever I made a change to the original xtrs sources, I used
+#ifdef ANDROID to annotate my changes. This should make it easy to see
+what was changed.
+
+Some of the key files:
+
+- MainFragment.java: main entry point of the Android app
+- ConfigurationsFragment.java: the "Configurations" tab
+- EmulatorStatusFragment.java: the "Emulator" tab
+- EmulatorActivity.java: this is the Android activity that
+  runs the emulator
+- XTRS: this class is the gateway to the C sources of xtrs.
+  All down-calls and up-calls to the C code will go through
+  this class. The native methods declared in XTRS are implemented
+  in jni/native.c
+- keyboard_original.xml: Android XML layout that defines the
+  original Model 3 keyboard layout. Note the custom attributes
+  keyboard:address and keyboard:mask. These attribtues define
+  the memory-mapped bit that need to be set to "1" when the
+  user pushes the key.
+- Key.java: the accompanying Android custom widget that implements
+  the behavior of one key of the keyboard. Note the onTouch()
+  method that pokes the appropriate bits into RAM of the emulated
+  TRS-80.
+
+
+External Resources
+------------------
+
+The following resources have been used for this project:
+
+[1] http://www.tim-mann.org/xtrs.html
+[2] http://actionbarsherlock.com/
+[3] http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
+[4] http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
+[5] http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-mime-2-icon.html
+[6] ACRA: http://acra.ch/
+[7] ACRA Mailer: https://github.com/d-a-n/acra-mailer

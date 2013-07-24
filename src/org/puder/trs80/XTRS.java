@@ -16,6 +16,13 @@
 
 package org.puder.trs80;
 
+/**
+ * Class XTRS acts as a gateway to the native layer. The native methods declared
+ * in this class are implemented in jni/native.c. Note that XTRS also handles
+ * upcalls (when the emulator needs to call the Java layer). This happens for
+ * example when the screen needs to be updated or sound has to be played.
+ * 
+ */
 public class XTRS {
 
     static {
