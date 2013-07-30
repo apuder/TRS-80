@@ -50,8 +50,6 @@ public class Configuration {
 
     protected SharedPreferences      sharedPrefs;
     protected int                    id;
-    protected int                    screenColor;
-    protected int                    characterColor;
 
     public static Configuration[] getConfigurations() {
         return configurations;
@@ -114,9 +112,6 @@ public class Configuration {
         this.id = id;
         sharedPrefs = TRS80Application.getAppContext().getSharedPreferences("CONFIG_" + id,
                 Context.MODE_PRIVATE);
-
-        screenColor = Color.DKGRAY;
-        characterColor = Color.GREEN;
     }
 
     public ConfigurationBackup backup() {
@@ -145,12 +140,23 @@ public class Configuration {
         return Model.NONE;
     }
 
-    public int getScreenColor() {
-        return screenColor;
+    public int getScreenColorAsRGB() {
+        return Color.DKGRAY;
+    }
+
+    public int getCharacterColorAsRGB() {
+        int c = getCharacterColor();
+        switch (c) {
+        case 0:
+            return Color.GREEN;
+        default:
+            return Color.WHITE;
+        }
     }
 
     public int getCharacterColor() {
-        return characterColor;
+        return Integer.parseInt(sharedPrefs.getString(
+                EditConfigurationActivity.CONF_CHARACTER_COLOR, "0"));
     }
 
     public String getDiskPath(int disk) {

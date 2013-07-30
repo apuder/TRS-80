@@ -75,7 +75,7 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
         Hardware h = TRS80Application.getHardware();
         Bitmap screenshot = Bitmap.createBitmap(h.getScreenWidth(), h.getScreenHeight(), Config.RGB_565);
         Canvas c = new Canvas(screenshot);
-        c.drawColor(TRS80Application.getCurrentConfiguration().getScreenColor());
+        c.drawColor(TRS80Application.getCurrentConfiguration().getScreenColorAsRGB());
         threadRender.renderScreen(c);
         return screenshot;
     }

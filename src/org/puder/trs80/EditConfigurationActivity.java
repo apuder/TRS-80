@@ -45,6 +45,7 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
     public static final String CONF_DISK2              = "conf_disk2";
     public static final String CONF_DISK3              = "conf_disk3";
     public static final String CONF_DISK4              = "conf_disk4";
+    public static final String CONF_CHARACTER_COLOR    = "conf_character_color";
     public static final String CONF_KEYBOARD_PORTRAIT  = "conf_keyboard_portrait";
     public static final String CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape";
     public static final String CONF_MUTE_SOUND         = "conf_mute_sound";
@@ -58,6 +59,7 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
     private Preference         disk2;
     private Preference         disk3;
     private Preference         disk4;
+    private Preference         characterColor;
     private Preference         keyboardPortrait;
     private Preference         keyboardLandscape;
 
@@ -101,6 +103,9 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
 
         model = (Preference) findPreference(CONF_MODEL);
         model.setOnPreferenceChangeListener(this);
+
+        characterColor = (Preference) findPreference(CONF_CHARACTER_COLOR);
+        characterColor.setOnPreferenceChangeListener(this);
 
         keyboardPortrait = (Preference) findPreference(CONF_KEYBOARD_PORTRAIT);
         keyboardPortrait.setOnPreferenceChangeListener(this);
@@ -186,6 +191,10 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
             disk4.setSummary(val);
         }
 
+        // Character color
+        val = sharedPrefs.getString(CONF_CHARACTER_COLOR, null);
+        setCharacterColorSummary(val);
+
         // Keyboard portrait
         val = sharedPrefs.getString(CONF_KEYBOARD_PORTRAIT, null);
         setKeyboardSummary(keyboardPortrait, val);
@@ -193,6 +202,18 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
         // Keyboard landscape
         val = sharedPrefs.getString(CONF_KEYBOARD_LANDSCAPE, null);
         setKeyboardSummary(keyboardLandscape, val);
+    }
+
+    private void setCharacterColorSummary(String val) {
+        if (val == null) {
+            return;
+        }
+        if ("0".equals(val)) {
+            characterColor.setSummary("Green");
+        }
+        if ("1".equals(val)) {
+            characterColor.setSummary("White");
+        }
     }
 
     private void setKeyboardSummary(Preference pref, String val) {

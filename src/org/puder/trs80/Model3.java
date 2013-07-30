@@ -146,7 +146,7 @@ public class Model3 extends Hardware {
         Typeface tf = TRS80Application.getTypeface();
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
-        p.setColor(config.getCharacterColor());
+        p.setColor(config.getCharacterColorAsRGB());
         p.setAntiAlias(true);
         setFontSize(p);
         int xPos = trsCharWidth / 2;
@@ -154,7 +154,7 @@ public class Model3 extends Hardware {
         for (int i = 0; i < ascii.length(); i++) {
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(config.getScreenColor());
+            c.drawColor(config.getScreenColorAsRGB());
             c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
             font[i + 32] = b;
         }
@@ -191,8 +191,8 @@ public class Model3 extends Hardware {
         for (int i = 128; i <= 191; i++) {
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(config.getScreenColor());
-            p.setColor(config.getCharacterColor());
+            c.drawColor(config.getScreenColorAsRGB());
+            p.setColor(config.getCharacterColorAsRGB());
             Rect r = new Rect();
             // Top-left
             if ((i & 1) != 0) {

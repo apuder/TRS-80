@@ -29,6 +29,12 @@
             android:title="Disk 4"
             android:summary="File to use for disk 4"
             android:key="conf_disk4" />
+        <ListPreference
+            android:entries="@array/conf_character_color"
+            android:title="Character color"
+            android:summary="The color used to render characters on the screen"
+            android:key="conf_character_color"
+            android:entryValues="@array/conf_character_color_values" />
         <CheckBoxPreference
             android:title="Mute"
             android:summaryOn="All game sounds will be muted"

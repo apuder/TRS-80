@@ -9,8 +9,10 @@ package org.puder.trs80;
 
 public final class R {
     public static final class array {
-        public static final int conf_keyboard_type=0x7f0c0002;
-        public static final int conf_keyboard_type_values=0x7f0c0003;
+        public static final int conf_character_color=0x7f0c0002;
+        public static final int conf_character_color_values=0x7f0c0003;
+        public static final int conf_keyboard_type=0x7f0c0004;
+        public static final int conf_keyboard_type_values=0x7f0c0005;
         public static final int conf_trs_model=0x7f0c0000;
         public static final int conf_trs_model_values=0x7f0c0001;
     }
