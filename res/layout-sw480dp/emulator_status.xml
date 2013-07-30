@@ -12,8 +12,10 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
+        android:textColor="@android:color/black"
         android:textStyle="bold"
-        android:text="@string/emulator_not_running" />
+        android:text="@string/emulator_not_running"
+        android:background="@drawable/emulator_status_background" />
 
     <LinearLayout
         android:id="@+id/emulator_running"
@@ -47,6 +49,7 @@
             android:adjustViewBounds="true"
             android:layout_margin="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@drawable/screenshot_background" />
     </LinearLayout>
 </RelativeLayout>
