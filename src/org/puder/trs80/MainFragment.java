@@ -1,6 +1,8 @@
 package org.puder.trs80;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -137,9 +139,10 @@ public class MainFragment extends SherlockFragmentActivity {
 
     public void romDownloaded() {
         downloadMenuItem.setVisible(false);
-        ConfigurationsFragment fragment = (ConfigurationsFragment) getSupportFragmentManager()
-                .findFragmentByTag("android:switcher:" + R.id.pager + ":0");
-        fragment.updateView();
+        ConfigurationsFragment fragment = (ConfigurationsFragment) mTabsAdapter.getFragment(0);
+        if (fragment != null) {
+            fragment.updateView();
+        }
     }
 
     private void doSettings() {
@@ -204,10 +207,11 @@ public class MainFragment extends SherlockFragmentActivity {
      */
     public static class TabsAdapter extends FragmentPagerAdapter implements
             TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
-        private final Context            mContext;
-        private final TabHost            mTabHost;
-        private final ViewPager          mViewPager;
-        private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
+        private final Context                mContext;
+        private final TabHost                mTabHost;
+        private final ViewPager              mViewPager;
+        private final ArrayList<TabInfo>     mTabs             = new ArrayList<TabInfo>();
+        private final Map<Integer, Fragment> mPageReferenceMap = new HashMap<Integer, Fragment>();
 
         static final class TabInfo {
             private final String   tag;
@@ -265,7 +269,15 @@ public class MainFragment extends SherlockFragmentActivity {
         @Override
         public Fragment getItem(int position) {
             TabInfo info = mTabs.get(position);
-            return Fragment.instantiate(mContext, info.clss.getName(), info.args);
+            Fragment frag = Fragment.instantiate(mContext, info.clss.getName(), info.args);
+            mPageReferenceMap.put(position, frag);
+            return frag;
+        }
+
+        @Override
+        public void destroyItem(View container, int position, Object object) {
+            super.destroyItem(container, position, object);
+            mPageReferenceMap.remove(position);
         }
 
         @Override
@@ -294,6 +306,10 @@ public class MainFragment extends SherlockFragmentActivity {
 
         @Override
         public void onPageScrollStateChanged(int state) {
+        }
+
+        public Fragment getFragment(int position) {
+            return mPageReferenceMap.get(position);
         }
     }
 }
