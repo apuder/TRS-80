@@ -976,12 +976,13 @@ containing a value of this type.
         public static final int pause_icon=0x7f02007c;
         public static final int play_icon=0x7f02007d;
         public static final int reset_icon=0x7f02007e;
-        public static final int screenshot_background=0x7f02007f;
-        public static final int settings_icon=0x7f020080;
-        public static final int sound_off_icon=0x7f020081;
-        public static final int sound_on_icon=0x7f020082;
-        public static final int stop_icon=0x7f020083;
-        public static final int warning_icon=0x7f020084;
+        public static final int screen_rotation_icon=0x7f02007f;
+        public static final int screenshot_background=0x7f020080;
+        public static final int settings_icon=0x7f020081;
+        public static final int sound_off_icon=0x7f020082;
+        public static final int sound_on_icon=0x7f020083;
+        public static final int stop_icon=0x7f020084;
+        public static final int warning_icon=0x7f020085;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -1068,6 +1069,7 @@ containing a value of this type.
         public static final int key_EQUAL=0x7f05007e;
         public static final int key_EXCLAMATION_MARK=0x7f050088;
         public static final int key_F=0x7f050052;
+        public static final int key_FIRE=0x7f050090;
         public static final int key_G=0x7f050053;
         public static final int key_GT=0x7f050079;
         public static final int key_H=0x7f050054;
@@ -1117,7 +1119,7 @@ containing a value of this type.
         public static final int log=0x7f050038;
         public static final int main=0x7f050032;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f050090;
+        public static final int pager=0x7f050091;
         public static final int path=0x7f05003e;
         public static final int screen=0x7f050037;
         public static final int screenshot=0x7f05003d;
@@ -1170,9 +1172,10 @@ containing a value of this type.
         public static final int keyboard_gaming_1=0x7f030021;
         public static final int keyboard_gaming_2=0x7f030022;
         public static final int keyboard_original=0x7f030023;
-        public static final int main_fragment=0x7f030024;
-        public static final int sherlock_spinner_dropdown_item=0x7f030025;
-        public static final int sherlock_spinner_item=0x7f030026;
+        public static final int keyboard_tilt=0x7f030024;
+        public static final int main_fragment=0x7f030025;
+        public static final int sherlock_spinner_dropdown_item=0x7f030026;
+        public static final int sherlock_spinner_item=0x7f030027;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 

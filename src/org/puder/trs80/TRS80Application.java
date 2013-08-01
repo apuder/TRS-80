@@ -72,11 +72,11 @@ public class TRS80Application extends Application {
         return hardware;
     }
 
-    public static void setKeyboard(KeyboardManager theKeyboard) {
+    public static void setKeyboardManager(KeyboardManager theKeyboard) {
         keyboard = theKeyboard;
     }
 
-    public static KeyboardManager getKeyboard() {
+    public static KeyboardManager getKeyboardManager() {
         return keyboard;
     }
 

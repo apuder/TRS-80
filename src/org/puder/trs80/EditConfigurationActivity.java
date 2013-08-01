@@ -233,6 +233,9 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
         if ("3".equals(val)) {
             pref.setSummary("Gaming layout 2");
         }
+        if ("4".equals(val)) {
+            pref.setSummary("Tilt interface");
+        }
     }
 
     @Override

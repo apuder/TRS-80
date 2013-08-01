@@ -88,7 +88,7 @@ public class Key extends View {
         keyHeight = h.getKeyHeight();
         keyMargin = h.getKeyMargin();
 
-        keyboard = TRS80Application.getKeyboard();
+        keyboard = TRS80Application.getKeyboardManager();
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
         label = ta.getString(R.styleable.Keyboard_label);
         address = ta.getInteger(R.styleable.Keyboard_address, -1);

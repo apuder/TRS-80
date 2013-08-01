@@ -19,11 +19,32 @@ package org.puder.trs80.keyboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.puder.trs80.Hardware;
+
 public class KeyboardManager {
 
-    private List<Key> shiftableKeys;
+    private static final int KEY_ADDRESS_SPACE = 0x3840;
+    private static final int KEY_MASK_SPACE    = 128;
 
-    public KeyboardManager() {
+    private static final int KEY_ADDRESS_LEFT  = 0x3840;
+    private static final int KEY_MASK_LEFT     = 0x20;
+
+    private static final int KEY_ADDRESS_RIGHT = 0x3840;
+    private static final int KEY_MASK_RIGHT    = 0x40;
+
+    private static final int KEY_ADDRESS_DOWN  = 0x3840;
+    private static final int KEY_MASK_DOWN     = 16;
+
+    private static final int KEY_ADDRESS_UP    = 0x3840;
+    private static final int KEY_MASK_UP       = 8;
+
+    private Hardware.Model   model;
+    private byte[]           memBuffer;
+    private List<Key>        shiftableKeys;
+
+    public KeyboardManager(Hardware.Model model, byte[] memBuffer) {
+        this.model = model;
+        this.memBuffer = memBuffer;
         shiftableKeys = new ArrayList<Key>();
     }
 
@@ -41,5 +62,36 @@ public class KeyboardManager {
         for (Key key : shiftableKeys) {
             key.unshift();
         }
+    }
+
+    public void allCursorKeysUp() {
+        memBuffer[KEY_ADDRESS_LEFT] &= ~KEY_MASK_LEFT;
+        memBuffer[KEY_ADDRESS_RIGHT] &= ~KEY_MASK_RIGHT;
+        memBuffer[KEY_ADDRESS_UP] &= ~KEY_MASK_UP;
+        memBuffer[KEY_ADDRESS_DOWN] &= ~KEY_MASK_DOWN;
+    }
+
+    public void pressKeyDown() {
+        memBuffer[KEY_ADDRESS_DOWN] |= KEY_MASK_DOWN;
+    }
+
+    public void pressKeyUp() {
+        memBuffer[KEY_ADDRESS_UP] |= KEY_MASK_UP;
+    }
+
+    public void pressKeyLeft() {
+        memBuffer[KEY_ADDRESS_LEFT] |= KEY_MASK_LEFT;
+    }
+
+    public void pressKeyRight() {
+        memBuffer[KEY_ADDRESS_RIGHT] |= KEY_MASK_RIGHT;
+    }
+
+    public void pressKeySpace() {
+        memBuffer[KEY_ADDRESS_SPACE] |= KEY_MASK_SPACE;
+    }
+
+    public void unpressKeySpace() {
+        memBuffer[KEY_ADDRESS_SPACE] &= ~KEY_MASK_SPACE;
     }
 }

@@ -40,7 +40,10 @@
                         images</a>\'.
                         Different keyboard types can be configured for portrait and landscape
                         orientation. The original keyboard mimics the layout of the TRS-80
-                        keyboard. The compact layout is appropriate for smaller screen sizes.</string>
+                        keyboard. The compact layout is appropriate for smaller screen sizes.
+                        The gaming layout offers a joystick control.
+                        The tilt interface uses the accelerometer to control the cursor keys.
+                        Touching the screen anywhere triggers the SPACE key.</string>
     <string name="help_title_emulator">Help: Emulator</string>
     <string name="help_emulator">The Emulator tab shows the currently running emulator.
                         To launch the emulator, switch to the Configurations tab and select

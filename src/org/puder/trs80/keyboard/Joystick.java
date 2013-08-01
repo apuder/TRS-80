@@ -29,25 +29,13 @@ import android.view.View;
  */
 public class Joystick extends View {
 
-    protected static final String KEY_LEFT          = "\u2190";
-    protected static final String KEY_RIGHT         = "\u2192";
-    protected static final String KEY_UP            = "\u2191";
-    protected static final String KEY_DOWN          = "\u2193";
-
-    protected static final int    KEY_ADDRESS_LEFT  = 0x3840;
-    protected static final int    KEY_MASK_LEFT     = 0x20;
-
-    protected static final int    KEY_ADDRESS_RIGHT = 0x3840;
-    protected static final int    KEY_MASK_RIGHT    = 0x40;
-
-    protected static final int    KEY_ADDRESS_DOWN  = 0x3840;
-    protected static final int    KEY_MASK_DOWN     = 16;
-
-    protected static final int    KEY_ADDRESS_UP    = 0x3840;
-    protected static final int    KEY_MASK_UP       = 8;
+    protected static final String KEY_LEFT  = "\u2190";
+    protected static final String KEY_RIGHT = "\u2192";
+    protected static final String KEY_UP    = "\u2191";
+    protected static final String KEY_DOWN  = "\u2193";
 
     protected Paint               paint;
-    protected byte[]              memBuffer;
+    protected KeyboardManager     keyboardManager;
 
     public Joystick(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,30 +48,27 @@ public class Joystick extends View {
         paint.setTextAlign(Align.CENTER);
         paint.setAntiAlias(true);
 
-        memBuffer = TRS80Application.getHardware().getMemoryBuffer();
+        keyboardManager = TRS80Application.getKeyboardManager();
     }
 
     protected void allKeysUp() {
-        memBuffer[KEY_ADDRESS_LEFT] &= ~KEY_MASK_LEFT;
-        memBuffer[KEY_ADDRESS_RIGHT] &= ~KEY_MASK_RIGHT;
-        memBuffer[KEY_ADDRESS_UP] &= ~KEY_MASK_UP;
-        memBuffer[KEY_ADDRESS_DOWN] &= ~KEY_MASK_DOWN;
+        keyboardManager.allCursorKeysUp();
     }
 
     protected void pressKeyDown() {
-        memBuffer[KEY_ADDRESS_DOWN] |= KEY_MASK_DOWN;
+        keyboardManager.pressKeyDown();
     }
 
     protected void pressKeyUp() {
-        memBuffer[KEY_ADDRESS_UP] |= KEY_MASK_UP;
+        keyboardManager.pressKeyUp();
     }
 
     protected void pressKeyLeft() {
-        memBuffer[KEY_ADDRESS_LEFT] |= KEY_MASK_LEFT;
+        keyboardManager.pressKeyLeft();
     }
 
     protected void pressKeyRight() {
-        memBuffer[KEY_ADDRESS_RIGHT] |= KEY_MASK_RIGHT;
+        keyboardManager.pressKeyRight();
     }
 
     protected float pxFromDp(float dp) {
