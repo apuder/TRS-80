@@ -277,7 +277,6 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
                     Toast.LENGTH_LONG).show();
             return;
         }
-        TRS80Application.setCurrentConfiguration(conf);
         Hardware hardware = new Model3();
         int sizeROM = hardware.getSizeROM();
         if (sizeROM == 0) {
@@ -285,6 +284,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
                     Toast.LENGTH_LONG).show();
             return;
         }
+        TRS80Application.setCurrentConfiguration(conf);
         TRS80Application.setHardware(hardware);
         byte[] memBuffer = hardware.getMemoryBuffer();
         byte[] screenBuffer = hardware.getScreenBuffer();
