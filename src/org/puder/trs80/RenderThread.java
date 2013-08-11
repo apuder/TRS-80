@@ -74,7 +74,7 @@ public class RenderThread extends Thread {
         }
     }
 
-    public void renderScreen(Canvas canvas) {
+    public synchronized void renderScreen(Canvas canvas) {
         int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols; col++) {
