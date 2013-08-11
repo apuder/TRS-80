@@ -30,6 +30,7 @@ import org.puder.trs80.Hardware.Model;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -72,6 +73,11 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
     }
 
     private void doInitialSetup() {
+        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Downloading...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.show();
         new Thread(new Runnable() {
 
             @Override
@@ -83,6 +89,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
                         @Override
                         public void run() {
+                            progressDialog.dismiss();
                             mainFrag.romDownloaded();
                             Toast.makeText(mainFrag.getApplicationContext(), "Download succeeded!",
                                     Toast.LENGTH_LONG).show();
@@ -93,6 +100,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
                         @Override
                         public void run() {
+                            progressDialog.dismiss();
                             Toast.makeText(mainFrag.getApplicationContext(), "Download failed!",
                                     Toast.LENGTH_LONG).show();
                         }
