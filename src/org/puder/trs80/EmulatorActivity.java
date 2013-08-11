@@ -124,6 +124,15 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (TRS80Application.getCurrentConfiguration() == null) {
+            /*
+             * We got killed by Android and then re-launched. The only thing we
+             * can do is exit.
+             */
+            finish();
+            return;
+        }
+
         orientation = getResources().getConfiguration().orientation;
         if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
             getSupportActionBar().hide();
