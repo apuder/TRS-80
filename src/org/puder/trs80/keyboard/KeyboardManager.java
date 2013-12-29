@@ -16,36 +16,127 @@
 
 package org.puder.trs80.keyboard;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.puder.trs80.Hardware;
+import org.puder.trs80.R;
+import org.puder.trs80.TRS80Application;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import android.content.res.XmlResourceParser;
 
 public class KeyboardManager {
 
-    private static final int KEY_ADDRESS_SPACE = 0x3840;
-    private static final int KEY_MASK_SPACE    = 128;
+    private static int                 KEY_ADDRESS_SPACE;
+    private static int                 KEY_MASK_SPACE;
 
-    private static final int KEY_ADDRESS_LEFT  = 0x3840;
-    private static final int KEY_MASK_LEFT     = 0x20;
+    private static int                 KEY_ADDRESS_LEFT;
+    private static int                 KEY_MASK_LEFT;
 
-    private static final int KEY_ADDRESS_RIGHT = 0x3840;
-    private static final int KEY_MASK_RIGHT    = 0x40;
+    private static int                 KEY_ADDRESS_RIGHT;
+    private static int                 KEY_MASK_RIGHT;
 
-    private static final int KEY_ADDRESS_DOWN  = 0x3840;
-    private static final int KEY_MASK_DOWN     = 16;
+    private static int                 KEY_ADDRESS_DOWN;
+    private static int                 KEY_MASK_DOWN;
 
-    private static final int KEY_ADDRESS_UP    = 0x3840;
-    private static final int KEY_MASK_UP       = 8;
+    private static int                 KEY_ADDRESS_UP;
+    private static int                 KEY_MASK_UP;
 
-    private Hardware.Model   model;
-    private byte[]           memBuffer;
-    private List<Key>        shiftableKeys;
+    private Hardware.Model             model;
+    private byte[]                     memBuffer;
+    private List<Key>                  shiftableKeys;
+    private Map<String, KeyMap>        keyMap;
+
+    private static Map<String, KeyMap> keyMapModel3;
+
+    static {
+        keyMapModel3 = parseKeyMap(R.xml.keymap_model3);
+    }
+
+    static private Map<String, KeyMap> parseKeyMap(int keyMapLayout) {
+        XmlResourceParser parser = TRS80Application.getAppContext().getResources()
+                .getXml(keyMapLayout);
+        Map<String, KeyMap> keyMap = new HashMap<String, KeyMap>();
+        try {
+            parser.next();
+            int eventType = parser.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    String tagName = parser.getName();
+                    if (tagName.equals("Key")) {
+                        String id = parser.getAttributeValue(null, "id");
+                        String label = parser.getAttributeValue(null, "label");
+                        String address = parser.getAttributeValue(null, "address");
+                        String mask = parser.getAttributeValue(null, "mask");
+                        String address2 = parser.getAttributeValue(null, "address2");
+                        String mask2 = parser.getAttributeValue(null, "mask2");
+                        KeyMap key = new KeyMap();
+                        key.label = label;
+                        key.address = Long.decode(address).intValue();
+                        key.mask = Long.decode(mask).byteValue();
+                        key.address2 = (address2 == null) ? -1 : Long.decode(address2).intValue();
+                        key.mask2 = (mask2 == null) ? -1 : Long.decode(mask2).byteValue();
+                        keyMap.put(id, key);
+                    }
+                }
+                eventType = parser.next();
+            }
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        parser.close();
+        return keyMap;
+    }
 
     public KeyboardManager(Hardware.Model model, byte[] memBuffer) {
         this.model = model;
         this.memBuffer = memBuffer;
         shiftableKeys = new ArrayList<Key>();
+        initKeyMap(model);
+    }
+
+    private void initKeyMap(Hardware.Model model) {
+        switch (model) {
+        case MODEL3:
+            keyMap = keyMapModel3;
+            break;
+        default:
+            keyMap = null;
+            break;
+        }
+
+        KeyMap key = keyMap.get("key_SPACE");
+        KEY_ADDRESS_SPACE = key.address;
+        KEY_MASK_SPACE = key.mask;
+
+        key = keyMap.get("key_LEFT");
+        KEY_ADDRESS_LEFT = key.address;
+        KEY_MASK_LEFT = key.mask;
+
+        key = keyMap.get("key_RIGHT");
+        KEY_ADDRESS_RIGHT = key.address;
+        KEY_MASK_RIGHT = key.mask;
+
+        key = keyMap.get("key_DOWN");
+        KEY_ADDRESS_DOWN = key.address;
+        KEY_MASK_DOWN = key.mask;
+
+        key = keyMap.get("key_UP");
+        KEY_ADDRESS_UP = key.address;
+        KEY_MASK_UP = key.mask;
+    }
+
+    public KeyMap getKeyMap(String id) {
+        return keyMap.get(id);
     }
 
     public void addShiftableKey(Key key) {

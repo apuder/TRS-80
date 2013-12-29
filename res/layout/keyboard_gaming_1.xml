@@ -9,14 +9,11 @@
     android:layout_margin="20dp">
 
     <org.puder.trs80.keyboard.Key
-        android:id="@+id/key_SPACE"
+        keyboard:id="key_SPACE"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        keyboard:address="0x3840"
-        keyboard:label=""
-        keyboard:mask="128"
         keyboard:size="3" />
 
     <org.puder.trs80.keyboard.JoystickRound

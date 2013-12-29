@@ -16,15 +16,12 @@
         android:layout_alignParentLeft="true" />
 
     <org.puder.trs80.keyboard.Key
-        android:id="@+id/key_SPACE"
+        keyboard:id="key_SPACE"
         android:layout_width="130dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/key_joystick_horizontal"
         android:layout_centerVertical="true"
-        keyboard:address="0x3840"
-        keyboard:label=""
-        keyboard:mask="128"
         keyboard:size="3" />
 
     <org.puder.trs80.keyboard.JoystickVertical

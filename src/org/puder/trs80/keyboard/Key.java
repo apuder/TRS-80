@@ -40,11 +40,13 @@ import android.view.ViewGroup.MarginLayoutParams;
  * Android widget that is referenced from the aforementioned XML layout files.
  * Whenever the user 'clicks' on a key, class Key uses memory mapped IO to poke
  * a bit into the emulated RAM of the TRS-80. See the onTouch() method further
- * below. The XML layout file contains the memory address and bit mask via
- * custom XML attributes keyboard:address and keyboard:mask. The emulator runs
- * in a separate thread and will 'see' that a bit is flipped at a certain memory
- * address and will interpret this as a key-press. See the following link for
- * the memory-mapped IO address of the Model 3 keyboard:
+ * below. The custom XML attribute keyboard:id is used to cross-reference a key
+ * map via the KeyboardManager (e.g., the Model 3 key map is stored in
+ * keymap_model3.xml and loaded by KeyboardManager). This file contains the
+ * memory addresses and bit mask for each key. The emulator runs in a separate
+ * thread and will 'see' that a bit is flipped at a certain memory address and
+ * will interpret this as a key-press. See the following link for the
+ * memory-mapped IO address of the Model 3 keyboard:
  * 
  * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
  */
@@ -90,11 +92,17 @@ public class Key extends View {
 
         keyboard = TRS80Application.getKeyboardManager();
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
-        label = ta.getString(R.styleable.Keyboard_label);
-        address = ta.getInteger(R.styleable.Keyboard_address, -1);
-        address2 = ta.getInteger(R.styleable.Keyboard_address2, -1);
-        mask = (byte) ta.getInteger(R.styleable.Keyboard_mask, -1);
-        mask2 = (byte) ta.getInteger(R.styleable.Keyboard_mask2, -1);
+        String id = ta.getString(R.styleable.Keyboard_id);
+        if (id.equals("key_ALT")) {
+            label = "Alt";
+        } else {
+            KeyMap keyMap = keyboard.getKeyMap(id);
+            label = keyMap.label;
+            address = keyMap.address;
+            address2 = keyMap.address2;
+            mask = keyMap.mask;
+            mask2 = keyMap.mask2;
+        }
         size = ta.getInteger(R.styleable.Keyboard_size, 1);
         ta.recycle();
 
