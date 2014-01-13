@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /* Copyright (c) 2000, Timothy Mann */
 /* $Id: trs_hard.c,v 1.8 2009/06/15 23:40:47 mann Exp $ */
 
@@ -5,6 +28,11 @@
  * without fee, provided that (1) the above copyright notice is
  * retained, and (2) modified versions are clearly marked as having
  * been modified, with the modifier's name and the date included.  */
+
+/*
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
+*/
 
 /*
  * Emulation of the Radio Shack TRS-80 Model I/III/4/4P
@@ -16,6 +44,8 @@
 #include <string.h>
 #include "trs.h"
 #include "trs_hard.h"
+#include "trs_state_save.h"
+#include "trs_imp_exp.h"
 #include "reed.h"
 
 /*#define HARDDEBUG1 1*/  /* show detail on all port i/o */
@@ -27,6 +57,7 @@
 /* Structure describing one drive */
 typedef struct {
   FILE* file;
+  char filename[FILENAME_MAX];
   /* Values decoded from rhh */
   int writeprot;
   int cyls;  /* cyls per drive */
@@ -90,15 +121,45 @@ void trs_hard_init(void)
   state.status = 0;
   state.command = 0;
   for (i=0; i<TRS_HARD_MAXDRIVES; i++) {
-    if (state.d[i].file) {
-      fclose(state.d[i].file);
-      state.d[i].file = NULL;
+    if (state.d[i].file == NULL) {
+      state.d[i].writeprot = 0;
+      state.d[i].cyls = 0;
+      state.d[i].heads = 0;
+      state.d[i].secs = 0;
     }
-    state.d[i].writeprot = 0;
-    state.d[i].cyls = 0;
-    state.d[i].heads = 0;
-    state.d[i].secs = 0;
   }
+}
+
+void trs_hard_attach(int drive, char *diskname)
+{
+  if (state.d[drive].file != NULL)
+    fclose(state.d[drive].file);
+  strcpy(state.d[drive].filename, diskname);
+  if (open_drive(drive) == 0) {
+    trs_hard_remove(drive); 
+  }
+  trs_impexp_xtrshard_attach(drive, diskname);
+}
+
+void trs_hard_remove(int drive)
+{
+  if (state.d[drive].file != NULL)
+    fclose(state.d[drive].file);
+  trs_impexp_xtrshard_remove(drive);
+  state.d[drive].filename[0] = 0;
+  state.d[drive].file = NULL;
+}
+
+char* 
+trs_hard_getfilename(int unit)
+{
+  return state.d[unit].filename;
+}
+
+int 
+trs_hard_getwriteprotect(int unit)
+{
+  return state.d[unit].writeprot;
 }
 
 /* Read from an I/O port mapped to the controller */
@@ -351,20 +412,16 @@ static int open_drive(int drive)
   ReedHardHeader rhh;
   size_t res;
 
-  if (d->file != NULL) return 1;
-
-  /* Compute the filename */
-  if (trs_model == 5) {
-    sprintf(diskname, "%s/hard4p-%d", trs_disk_dir, drive);
-  } else {
-    sprintf(diskname, "%s/hard%d-%d", trs_disk_dir, trs_model, drive);
-  }
-
+  if (d->file != NULL)
+   return 1;
+  if (d->filename[0] == 0)
+    goto fail;
+	
   /* First try opening for reading and writing */
-  d->file = fopen(diskname, "r+");
+  d->file = fopen(d->filename, "rb+");
   if (d->file == NULL) {
     /* No luck, try for reading only */
-    d->file = fopen(diskname, "r");
+    d->file = fopen(d->filename, "rb");
     if (d->file == NULL) {
 #if HARDDEBUG3
       error("trs_hard: could not open hard drive image %s: %s",
@@ -444,6 +501,7 @@ static int find_sector(int newstatus)
 static int hard_data_in()
 {
   Drive *d = &state.d[state.drive];
+  trs_hard_led(state.drive,1);
   if ((state.command & TRS_HARD_CMDMASK) == TRS_HARD_READ &&
       (state.status & TRS_HARD_ERR) == 0) {
     if (state.bytesdone < TRS_HARD_SECSIZE) {
@@ -458,6 +516,7 @@ static void hard_data_out(int value)
 {
   Drive *d = &state.d[state.drive];
   int res = 0;
+  trs_hard_led(state.drive,1);
   state.data = value;
   if ((state.command & TRS_HARD_CMDMASK) == TRS_HARD_WRITE &&
       (state.status & TRS_HARD_ERR) == 0) {
@@ -492,3 +551,90 @@ static void set_dir_cyl(int cyl)
   putc(cyl, d->file);
   fseek(d->file, where, 0);
 }
+
+static void trs_save_harddrive(FILE *file, Drive *d)
+{
+  int one = 1;
+  int zero = 0;
+
+  if (d->file == NULL)
+     trs_save_int(file, &zero, 1);
+  else
+     trs_save_int(file, &one, 1);
+  trs_save_filename(file, d->filename);
+  trs_save_int(file, &d->writeprot,1);
+  trs_save_int(file, &d->cyls,1);
+  trs_save_int(file, &d->heads,1);
+  trs_save_int(file, &d->secs,1);
+}
+
+static void trs_load_harddrive(FILE *file, Drive *d)
+{
+  int file_not_null;
+  
+  trs_load_int(file,&file_not_null,1);
+  if (file_not_null)
+    d->file = (FILE *) 1;
+  else
+    d->file = NULL;
+  trs_load_filename(file, d->filename);
+  trs_load_int(file, &d->writeprot,1);
+  trs_load_int(file, &d->cyls,1);
+  trs_load_int(file, &d->heads,1);
+  trs_load_int(file, &d->secs,1);
+}
+
+void trs_hard_save(FILE *file)
+{
+  int i;
+  
+  trs_save_int(file, &state.present, 1);
+  trs_save_uchar(file, &state.control, 1);
+  trs_save_uchar(file, &state.data, 1);
+  trs_save_uchar(file, &state.error, 1);
+  trs_save_uchar(file, &state.seccnt, 1);
+  trs_save_uchar(file, &state.secnum, 1);
+  trs_save_uint16(file, &state.cyl, 1);
+  trs_save_uchar(file, &state.drive, 1);
+  trs_save_uchar(file, &state.head, 1);
+  trs_save_uchar(file, &state.status, 1);
+  trs_save_uchar(file, &state.command, 1);
+  trs_save_int(file, &state.bytesdone, 1);
+  for (i=0;i<TRS_HARD_MAXDRIVES;i++)
+    trs_save_harddrive(file, &state.d[i]);
+}
+
+void trs_hard_load(FILE *file)
+{
+  int i;
+    
+  for (i=0;i<TRS_HARD_MAXDRIVES;i++) {
+    if (state.d[i].file != NULL) 
+      fclose(state.d[i].file);
+  }
+  trs_load_int(file, &state.present, 1);
+  trs_load_uchar(file, &state.control, 1);
+  trs_load_uchar(file, &state.data, 1);
+  trs_load_uchar(file, &state.error, 1);
+  trs_load_uchar(file, &state.seccnt, 1);
+  trs_load_uchar(file, &state.secnum, 1);
+  trs_load_uint16(file, &state.cyl, 1);
+  trs_load_uchar(file, &state.drive, 1);
+  trs_load_uchar(file, &state.head, 1);
+  trs_load_uchar(file, &state.status, 1);
+  trs_load_uchar(file, &state.command, 1);
+  trs_load_int(file, &state.bytesdone, 1);
+  for (i=0;i<TRS_HARD_MAXDRIVES;i++) {
+    trs_load_harddrive(file, &state.d[i]);
+    if (state.d[i].file != NULL) {
+      state.d[i].file = fopen(state.d[i].filename,"rb+");
+      if (state.d[i].file == NULL) {
+        state.d[i].file = fopen(state.d[i].filename,"rb");
+        state.d[i].writeprot = 1;
+      } else {
+        state.d[i].writeprot = 0;
+      }
+    }
+  }
+}
+

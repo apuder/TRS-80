@@ -55,6 +55,11 @@ static int instructionsSinceLastScreenUpdate;
 
 extern char *program_name;
 
+void trs_debug()
+{
+    // Do nothing
+}
+
 static void check_endian() {
     wordregister x;
     x.byte.low = 1;
@@ -95,6 +100,7 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     trs_model = model;
     trs_rom_size = sizeROM;
     trs_autodelay = 1;
+    trs_show_led = 0;
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
@@ -278,6 +284,11 @@ typedef unsigned int Uint32;
 extern void fillBuffer(Uint8* stream, int len);
 void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
     fillBuffer(audioBuffer, audioBufferSize);
+}
+
+extern void add_key_event(Uint16 event, Uint16 mod, Uint16 key);
+void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, jint mod, jint key) {
+    add_key_event(event, mod, key);
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {

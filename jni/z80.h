@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /*
  * Copyright (C) 1992 Clarendon Hill Software.
  *
@@ -16,6 +39,8 @@
 /*
    Modified by Timothy Mann, 1996 and later
    $Id: z80.h,v 1.16 2009/06/15 23:45:56 mann Exp $
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
 */
 
 #ifndef _Z80_H
@@ -35,15 +60,9 @@ typedef unsigned int Uint;      /* 4 bytes */
 typedef unsigned short Ushort;  /* 2 bytes */
 typedef unsigned char Uchar;    /* 1 byte */
 
-#if __WORDSIZE == 32
 typedef unsigned long long tstate_t;
 #define TSTATE_T_MID (((unsigned long long) -1LL)/2ULL)
-#define TSTATE_T_LEN "llu"
-#else
-typedef unsigned long tstate_t;
-#define TSTATE_T_MID (((unsigned long) -1L)/2UL)
-#define TSTATE_T_LEN "lu"
-#endif
+#define TSTATE_T_LEN "Lu"
 
 struct twobyte
 {
@@ -238,7 +257,6 @@ extern int mem_block_transfer(Ushort dest, Ushort source, int direction,
 extern int load_hex(); /* returns highest address loaded + 1 */
 extern void debug(const char *fmt, ...);
 extern void error(const char *fmt, ...);
-extern void fatal(const char *fmt, ...);
 extern void z80_out(int port, int value);
 extern int z80_in(int port);
 extern int disassemble(unsigned short pc);

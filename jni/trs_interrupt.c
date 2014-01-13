@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /* Copyright (c) 1996, Timothy Mann */
 /* $Id: trs_interrupt.c,v 1.27 2008/06/26 04:39:56 mann Exp $ */
 
@@ -12,17 +35,15 @@
 
 #include "z80.h"
 #include "trs.h"
+#include "trs_state_save.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
-#include <signal.h>
+#include <unistd.h>
+#include <SDL/SDL.h>
 
 /*#define IDEBUG 1*/
 /*#define IDEBUG2 1*/
-
-#ifdef SETITIMER_FIX
-suseconds_t next_timer;
-#endif
 
 /* IRQs */
 #define M1_TIMER_BIT    0x80
@@ -47,7 +68,10 @@ static unsigned char nmi_mask = M3_RESET_BIT;
 #define TIMER_HZ_1 40
 #define TIMER_HZ_3 30
 #define TIMER_HZ_4 60
-static int timer_hz;
+int timer_hz;
+int timer_overclock = 0;
+int timer_overclock_rate = 5;
+unsigned int cycles_per_timer;
 
 #define CLOCK_MHZ_1 1.77408
 #define CLOCK_MHZ_3 2.02752
@@ -133,6 +157,22 @@ int
 trs_cassette_interrupts_enabled()
 {
   return interrupt_mask & (M3_CASSRISE_BIT|M3_CASSFALL_BIT);
+}
+
+int
+trs_timer_is_turbo()
+{
+    return(timer_overclock);
+}
+
+int
+trs_timer_switch_turbo()
+{
+    timer_overclock = !timer_overclock;
+#ifdef MACOSX	
+	SetControlManagerTurboMode(timer_overclock);
+#endif
+    return(timer_overclock);
 }
 
 void
@@ -324,7 +364,6 @@ trs_restore_delay()
   if (saved_delay) {
     z80_state.delay = saved_delay;
     saved_delay = 0;
-    trs_paused = 1;
   }
 }
 
@@ -332,72 +371,46 @@ trs_restore_delay()
 #define DOWN_F 0.50 
 
 void
-trs_timer_event(int signo)
+trs_timer_event(void)
 {
-  struct timeval tv;
-  struct itimerval it;
-
-  gettimeofday(&tv, NULL);
-  if (trs_autodelay) {
-      static struct timeval oldtv;
-      static int increment = 1;
-      static int oldtoofast = 0;
-      static tstate_t oldtcount;
-      if (!trs_paused /*&& !saved_delay*/) {
-	int toofast = (z80_state.t_count - oldtcount) >
-	  ((tv.tv_sec*1000000 + tv.tv_usec) -
-	   (oldtv.tv_sec*1000000 + oldtv.tv_usec))*z80_state.clockMHz;
-	if (toofast == oldtoofast) {
-	  increment = (int)(increment * UP_F + 0.5);
-	} else {
-	  increment = (int)(increment * DOWN_F + 0.5);
-	}
-	oldtoofast = toofast;
-	if (increment < 1) increment = 1;
-	if (toofast) {
-	  z80_state.delay += increment;
-	} else {
-	  z80_state.delay -= increment;
-	  if (z80_state.delay < 0) {
-	    z80_state.delay = 0;
-	    increment = 1;
-	  }
-	}
-      }
-      trs_paused = 0;
-      oldtv = tv;
-      oldtcount = z80_state.t_count;
-  }
-
   if (timer_on) {
     trs_timer_interrupt(1); /* generate */
     trs_disk_motoroff_interrupt(trs_disk_motoroff());
     trs_kb_heartbeat(); /* part of keyboard stretch kludge */
   }
-  x_poll_count = 0; /* be sure to flush and check for X events */
+}
 
-  /* Schedule next tick.  We do it this way because the host system
-     probably didn't wake us up at exactly the right time.  For
-     instance, on Linux i386 the real clock ticks at 10ms, but we want
-     to tick at 25ms.  If we ask setitimer to wake us up in 25ms, it
-     will really wake us up in 30ms.  The algorithm below compensates
-     for such an error by making the next tick shorter. */
-  it.it_value.tv_sec = 0;
-  it.it_value.tv_usec =
-    (1000000/timer_hz) - (tv.tv_usec % (1000000/timer_hz));
-  it.it_interval.tv_sec = 0;
-  it.it_interval.tv_usec = 1000000/timer_hz;  /* fail-safe */
-#ifdef SETITIMER_FIX
-  next_timer = tv.tv_sec * 1000000 + tv.tv_usec + it.it_value.tv_usec;
-#else
-  setitimer(ITIMER_REAL, &it, NULL);
-#endif
+void trs_timer_sync_with_host(void)
+{
+	Uint32 curtime;
+	Uint32 deltatime;
+    static Uint32 lasttime = 0;
+
+    if (timer_overclock) {
+        deltatime = 1000 / (timer_overclock_rate * timer_hz);
+    } else {
+        deltatime = 1000 / timer_hz;
+    }
+
+	curtime = SDL_GetTicks();
+
+	if (lasttime + deltatime > curtime) {
+		SDL_Delay(lasttime + deltatime - curtime);
+    }
+	curtime = SDL_GetTicks();
+
+	lasttime += deltatime;
+	if ((lasttime + deltatime) < curtime)
+		lasttime = curtime;
+    
+    trs_disk_led(0,0);
+    trs_hard_led(0,0);
+    trs_timer_event();
 }
 
 void
 trs_timer_init()
 {
-  struct sigaction sa;
   struct tm *lt;
   time_t tt;
 
@@ -409,16 +422,9 @@ trs_timer_init()
       timer_hz = TIMER_HZ_3;  
       z80_state.clockMHz = CLOCK_MHZ_3;
   }
-
-#ifndef SETITIMER_FIX
-  sa.sa_handler = trs_timer_event;
-  sigemptyset(&sa.sa_mask);
-  sigaddset(&sa.sa_mask, SIGALRM);
-  sa.sa_flags = SA_RESTART;
-  sigaction(SIGALRM, &sa, NULL);
-#endif
-
-  trs_timer_event(SIGALRM);
+  cycles_per_timer = z80_state.clockMHz * 1000000 / timer_hz;
+  
+  trs_timer_event();
 
   /* Also initialize the clock in memory - hack */
   tt = time(NULL);
@@ -468,7 +474,7 @@ trs_timer_on()
 {
   if (!timer_on) {
     timer_on = 1;
-    trs_timer_event(SIGALRM);
+    trs_timer_event();
   }
 }
 
@@ -482,6 +488,7 @@ trs_timer_speed(int fast)
         /* Typical 2x clock speedup kit */
         z80_state.clockMHz = CLOCK_MHZ_1 * ((fast&1) + 1);
     }
+    cycles_per_timer = z80_state.clockMHz * 1000000 / timer_hz;
 }
 
 static trs_event_func event_func = NULL;
@@ -545,3 +552,106 @@ trs_event_scheduled()
 {
     return event_func;
 }
+
+void trs_interrupt_save(FILE *file)
+{
+  int event;
+  
+  trs_save_uchar(file, &interrupt_latch, 1);
+  trs_save_uchar(file, &interrupt_mask, 1);
+  trs_save_uchar(file, &nmi_latch, 1);
+  trs_save_int(file, &timer_hz, 1);
+  trs_save_uint32(file, &cycles_per_timer, 1);
+  trs_save_int(file, &timer_on, 1);
+  trs_save_int(file, &saved_delay, 1);
+  if (event_func == (trs_event_func) assert_state)
+    event = 1;
+  else if (event_func == transition_out)
+    event = 2;
+  else if (event_func == trs_cassette_kickoff)
+    event = 3;
+  else if (event_func == orch90_flush)
+    event = 4;
+  else if (event_func == trs_cassette_fall_interrupt)
+    event = 5;
+  else if (event_func == trs_cassette_rise_interrupt)
+    event = 6;
+  else if (event_func == trs_cassette_update)
+    event = 7;
+  else if (event_func == trs_disk_lostdata)
+    event = 8;
+  else if (event_func == trs_disk_done)
+    event = 9;
+  else if (event_func == trs_disk_firstdrq)
+    event = 10;
+  else if (event_func == trs_reset_button_interrupt)
+    event = 11;
+  else if (event_func == trs_uart_set_avail)
+    event = 12;
+  else if (event_func == trs_uart_set_empty)
+    event = 13;
+  else
+    event = 0;
+  trs_save_int(file, &event, 1);
+  trs_save_int(file, &event_arg, 1);
+}
+
+void trs_interrupt_load(FILE *file)
+{
+  int event;
+  
+  trs_load_uchar(file, &interrupt_latch, 1);
+  trs_load_uchar(file, &interrupt_mask, 1);
+  trs_load_uchar(file, &nmi_latch, 1);
+  trs_load_int(file, &timer_hz, 1);
+  trs_load_uint32(file, &cycles_per_timer, 1);
+  trs_load_int(file, &timer_on, 1);
+  trs_load_int(file, &saved_delay, 1);
+  trs_load_int(file, &event, 1);
+  switch(event) {
+  case 1:
+    event_func = (trs_event_func) assert_state;
+    break;
+  case 2:
+    event_func = transition_out;
+    break;
+  case 3:
+    event_func = trs_cassette_kickoff;
+    break;
+  case 4:
+    event_func = orch90_flush;
+    break;
+  case 5:
+    event_func = trs_cassette_fall_interrupt;
+    break;
+  case 6:
+    event_func = trs_cassette_rise_interrupt;
+    break;
+  case 7:
+    event_func = trs_cassette_update;
+    break;
+  case 8:
+    event_func = trs_disk_lostdata;
+    break;
+  case 9:
+    event_func = trs_disk_done;
+    break;
+  case 10:
+    event_func = trs_disk_firstdrq;
+    break;
+  case 11:
+    event_func = trs_reset_button_interrupt;
+    break;
+  case 12:
+    event_func = trs_uart_set_avail;
+    break;
+  case 13:
+    event_func = trs_uart_set_empty;
+    break;
+  default:
+    event_func = NULL;
+    break;
+  }
+  trs_load_int(file, &event_arg, 1);
+}
+

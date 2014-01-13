@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /* Copyright (c) 1996, Timothy Mann */
 /* $Id: trs_disk.h,v 1.12 2008/06/26 04:39:56 mann Exp $ */
 
@@ -5,6 +28,11 @@
  * without fee, provided that (1) the above copyright notice is
  * retained, and (2) modified versions are clearly marked as having
  * been modified, with the modifier's name and the date included.  */
+
+/*
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
+*/
 
 /*
  * Emulate Model-I or Model-III disk controller
@@ -27,11 +55,27 @@ extern void trs_disk_setstep(int unit, int value);
 extern int trs_disk_getstep(int unit);
 extern void trs_disk_setsize(int unit, int value);
 extern int trs_disk_getsize(int unit);
+extern char* trs_disk_getfilename(int unit);
+extern int trs_disk_getwriteprotect(int unit);
+extern int trs_disk_getdisktype(int unit);
+
+extern void trs_disk_insert(int drive, char *diskname);
+extern void trs_disk_remove(int drive);
+
+extern int trs_diskset_save(char *filename);
+extern int trs_diskset_load(char *filename);
 
 extern int trs_disk_doubler;
-extern char* trs_disk_dir;
-extern unsigned short trs_disk_changecount;
+extern char trs_disk_dir[FILENAME_MAX];
 extern int trs_disk_truedam;
+
+/* Values for emulated disk image type (emutype) */
+#define JV1 1 /* compatible with Vavasour Model I emulator */
+#define JV3 3 /* compatible with Vavasour Model III/4 emulator */
+#define DMK 4 /* compatible with Keil Model III/4 emulator */
+#define REAL 100 /* real floppy drive, PC controller */
+#define CATW 101 /* real floppy drive, Catweasel controller (future) */
+#define NONE 0
 
 /* Values for trs_disk_doubler flag word */
 #define TRSDISK_NODOUBLER 0

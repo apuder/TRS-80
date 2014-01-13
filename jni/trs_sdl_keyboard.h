@@ -21,27 +21,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
 */
-/*
- * Copyright (C) 1992 Clarendon Hill Software.
- *
- * Permission is granted to any individual or institution to use, copy,
- * or redistribute this software, provided this copyright notice is retained. 
- *
- * This software is provided "as is" without any expressed or implied
- * warranty.  If this software brings on any sort of damage -- physical,
- * monetary, emotional, or brain -- too bad.  You've got no one to blame
- * but yourself. 
- *
- * The software may be modified for your own purposes, but modified versions
- * must retain this notice.
- */
 
 /*
-   Modified by Timothy Mann, 1996 and later
-   $Id: trs_iodefs.h,v 1.6 2008/06/26 04:39:56 mann Exp $
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
 */
 
-#define MAXCHARS 256
-#define TRS_CHAR_WIDTH 8
-#define TRS_CHAR_HEIGHT 12
-#define TRS_CHAR_HEIGHT4 10
+int trs_emulate_joystick(int key_down, int bit_action);
+void trs_joy_button_down(void);
+void trs_joy_button_up(void);
+void trs_joy_hat(unsigned char value);
+void trs_set_keypad_joystick(void);
+void trs_open_joystick(void);
+void trs_joy_axis(unsigned char axis, short value);
+
+
+
+

@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /*
  * Copyright (C) 1992 Clarendon Hill Software.
  *
@@ -16,6 +39,8 @@
 /*
    Modified by Timothy Mann, 1996 and later
    $Id: trs_memory.c,v 1.24 2009/06/15 23:41:56 mann Exp $
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
 */
 
 /*
@@ -31,6 +56,13 @@
 #include <stdlib.h>
 #include "trs_disk.h"
 #include "trs_hard.h"
+#include "trs_state_save.h"
+#ifndef ANDROID
+#include "trs_imp_exp.h"
+#endif
+#ifdef MACOSX
+#include "trs_mac_interface.h"
+#endif
 
 #define MAX_ROM_SIZE	(0x3800)
 #define MAX_VIDEO_SIZE	(0x0800)
@@ -56,6 +88,8 @@ Uchar *rom;
 int trs_rom_size;
 Uchar *video;
 int trs_video_size;
+Uchar rom_4[MAX_ROM_SIZE+1];
+Uchar video_4[MAX_VIDEO_SIZE+1];
 
 int memory_map = 0;
 int bank_offset[2];
@@ -103,6 +137,9 @@ void mem_bank(int command)
 
 void trs_exit()
 {
+#ifdef MACOSX
+    trs_mac_save_defaults();
+#endif
     exit(0);
 }
 
@@ -111,6 +148,12 @@ void trs_exit()
    handle hard reset or initial poweron if poweron=1 */
 void trs_reset(int poweron)
 {
+    trs_emu_mouse = FALSE;
+
+#ifndef ANDROID
+    /* Close disks opened by Z80 programs */
+    do_emt_resetdisk();
+#endif
     /* Reset devices (Model I SYSRES, Model III/4 RESET) */
     trs_cassette_reset();
     trs_timer_speed(0);
@@ -170,9 +213,8 @@ void mem_init()
 	video = &memory[VIDEO_START];
 	trs_video_size = 1024;
     } else {
-	/* +1 so strings from mem_pointer are NUL-terminated */
-	rom = (Uchar *) calloc(MAX_ROM_SIZE+1, 1);
-	video = (Uchar *) calloc(MAX_VIDEO_SIZE+1, 1);
+	rom = rom_4;
+	video = video_4;
 	trs_video_size = MAX_VIDEO_SIZE;
     }
     mem_map(0);
@@ -229,11 +271,7 @@ int mem_read(int address)
 	if (address >= VIDEO_START) {
 	  return grafyx_m3_read_byte(address - VIDEO_START);
 	}
-#ifdef ANDROID
-	if (address >= KEYBOARD_START) return memory[address];
-#else
 	if (address >= KEYBOARD_START) return trs_kb_mem_read(address);
-#endif
 	return 0xff;
 
       case 0x40: /* Model 4 map 0 */
@@ -245,11 +283,7 @@ int mem_read(int address)
 	if (address >= VIDEO_START) {
 	    return video[address + video_offset];
 	}
-#ifdef ANDROID
-	if (address >= KEYBOARD_START) return memory[address];
-#else
 	if (address >= KEYBOARD_START) return trs_kb_mem_read(address);
-#endif
 	return 0xff;
 
       case 0x54: /* Model 4P map 0, boot ROM in */
@@ -523,8 +557,6 @@ mem_block_transfer(Ushort dest, Ushort source, int direction, Ushort count)
     }
     else
     {
-	trs_screen_batch();
-	
 	if(direction > 0)
 	{
 	    do
@@ -543,9 +575,44 @@ mem_block_transfer(Ushort dest, Ushort source, int direction, Ushort count)
 	    }
 	    while(count);
 	}
-
-	trs_screen_unbatch();
     }
     return ret;
+}
+
+void trs_mem_save(FILE *file)
+{
+#ifndef ANDROID
+  trs_save_uchar(file, memory, 0x20001);
+  trs_save_int(file, &trs_rom_size, 1);
+  trs_save_int(file, &trs_video_size, 1);
+  trs_save_uchar(file, rom_4, MAX_ROM_SIZE+1);
+  trs_save_uchar(file, video_4, MAX_VIDEO_SIZE+1);
+  trs_save_int(file, &memory_map, 1);
+  trs_save_int(file, bank_offset, 2);
+  trs_save_int(file, &video_offset, 1);
+  trs_save_int(file, &romin, 1);
+#endif
+}
+
+void trs_mem_load(FILE *file)
+{
+#ifndef ANDROID
+  trs_load_uchar(file, memory, 0x20001);
+  trs_load_int(file, &trs_rom_size, 1);
+  trs_load_int(file, &trs_video_size, 1);
+  trs_load_uchar(file, rom_4, MAX_ROM_SIZE+1);
+  trs_load_uchar(file, video_4, MAX_VIDEO_SIZE+1);
+  trs_load_int(file, &memory_map, 1);
+  trs_load_int(file, bank_offset, 2);
+  trs_load_int(file, &video_offset, 1);
+  trs_load_int(file, &romin, 1);
+  if (trs_model <= 3) {
+    rom = &memory[ROM_START];
+    video = &memory[VIDEO_START];
+  } else {
+    rom = rom_4;
+    video = video_4;
+  }
+#endif
 }
 

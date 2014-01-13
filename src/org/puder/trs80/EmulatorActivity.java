@@ -18,6 +18,7 @@ package org.puder.trs80;
 
 import org.puder.trs80.keyboard.KeyboardManager;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -72,6 +74,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
             }
         }
 
+        @SuppressLint("NewApi")
         private void lockOrientation() {
             Log.d("TRS80", "Locking screen orientation");
             Display display = getWindowManager().getDefaultDisplay();
@@ -167,6 +170,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
             }
         });
         XTRS.setRunning(true);
+        cpuThread.setPriority(Thread.MAX_PRIORITY);
         cpuThread.start();
     }
 
@@ -237,6 +241,28 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (event.getRepeatCount() > 0) {
+            return true;
+        }
+        if (keyboardManager.keyDown(event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (event.getRepeatCount() > 0) {
+            return true;
+        }
+        if (keyboardManager.keyUp(event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
     public void onScreenRotationClick(View view) {
         view.setEnabled(false);
         stopAccelerometer();
@@ -262,10 +288,15 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
 
     private void initView() {
         setContentView(R.layout.emulator);
+        View top = this.findViewById(R.id.emulator);
+        top.requestFocus();
         logView = (TextView) findViewById(R.id.log);
+        if (getResources().getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
+            return;
+        }
+        final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
         // if (android.os.Build.VERSION.SDK_INT >=
         // Build.VERSION_CODES.HONEYCOMB) {
         // root.setMotionEventSplittingEnabled(true);

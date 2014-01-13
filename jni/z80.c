@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /*
  * Copyright (C) 1992 Clarendon Hill Software.
  *
@@ -16,6 +39,8 @@
 /*
    Modified by Timothy Mann, 1996-2008
    $Id: z80.c,v 1.29 2009/06/15 23:45:19 mann Exp $
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
 */
 
 /*
@@ -42,16 +67,10 @@
 
 #include "z80.h"
 #include "trs.h"
-#ifndef ANDROID
 #include "trs_imp_exp.h"
-#endif
+#include "trs_state_save.h"
 #include <stdlib.h>  /* for rand() */
-#include <unistd.h>  /* for pause() */
 #include <time.h>    /* for time() */
-
-#ifdef ANDROID
-#include "atrs.h"
-#endif
 
 /*
  * Keep Saber quiet.
@@ -61,10 +80,14 @@
 /*SUPPRESS 112*/
 /*SUPPRESS 115*/
 
+extern unsigned int cycles_per_timer;
+extern void trs_timer_sync_with_host(void);
+
 /*
  * The state of our Z-80 registers is kept in this structure:
  */
 struct z80_state_struct z80_state;
+static tstate_t last_t_count = 0;
 
 /*
  * Tables and routines for computing various flag values:
@@ -2569,7 +2592,7 @@ static void do_indexed_instruction(Ushort *ixp)
 	HIGH(ixp) = REG_E;  T_COUNT(8);
 	break;
       case 0x64:	/* ld ixh, ixh */
-	/*HIGH(ixp) = HIGH(ixp);*/  T_COUNT(8);
+	HIGH(ixp) = HIGH(ixp);  T_COUNT(8);
 	break;
       case 0x65:	/* ld ixh, ixl */
 	HIGH(ixp) = LOW(ixp);  T_COUNT(8);
@@ -2593,7 +2616,7 @@ static void do_indexed_instruction(Ushort *ixp)
 	LOW(ixp) = HIGH(ixp);  T_COUNT(8);
 	break;
       case 0x6D:	/* ld ixl, ixl */
-	/*LOW(ixp) = LOW(ixp);*/  T_COUNT(8);
+	LOW(ixp) = LOW(ixp);  T_COUNT(8);
 	break;
       case 0x26:	/* ld ixh, value */
 	HIGH(ixp) = mem_read(REG_PC++);  T_COUNT(11);
@@ -2909,7 +2932,6 @@ static int do_ED_instruction()
 	T_COUNT(15);
 	break;
 
-#ifndef ANDROID
       /* Emulator traps -- not real Z-80 instructions */
       case 0x28:        /* emt_system */
 	do_emt_system();
@@ -2975,7 +2997,6 @@ static int do_ED_instruction()
       case 0x3f:	/* emt_closedisk */
 	do_emt_closedisk();
 	break;
-#endif
 
       default:
 #ifndef ANDROID
@@ -2986,9 +3007,6 @@ static int do_ED_instruction()
 
     return debug;
 }
-
-volatile int x_poll_count = 0;
-#define X_POLL_INTERVAL 10000
 
 int trs_continuous;
 
@@ -3002,26 +3020,26 @@ int z80_run(int continuous)
     Uchar instruction;
     Ushort address; /* generic temps */
     int ret = 0;
-    int i;
+	tstate_t t_delta;
     trs_continuous = continuous;
 
     /* loop to do a z80 instruction */
     do {
-
-        /* We need to poll for X events periodically.  That also
-	   flushes output to the X server. */
-	if (x_poll_count <= 0) {
-	    x_poll_count = X_POLL_INTERVAL;
+    /* Speed control */
+	if (z80_state.t_count > last_t_count)
+		t_delta = z80_state.t_count - last_t_count;
+	else
+		t_delta = last_t_count - z80_state.t_count;
+    if (t_delta >= cycles_per_timer) {
 	    trs_get_event(0);
-	} else {
-	    x_poll_count--;
-	}
-        /* Speed control */
-        if ((i = z80_state.delay)) {
-	  volatile int dummy;
-	  while (--i) dummy = i;
-	}
-
+        if (trs_paused) {
+          while (trs_paused)
+            trs_get_event(1);
+        } 
+		trs_timer_sync_with_host();
+		last_t_count = z80_state.t_count;
+		}
+	
 	instruction = mem_read(REG_PC++);
 	
 	switch(instruction)
@@ -3449,13 +3467,14 @@ int z80_run(int continuous)
 		   (see below) we undo this decrement to get out of
 		   the halt state. */
 	        REG_PC--;
+#if 0 /* Removed for new sdltrs timing scheme */	        
 		if (continuous > 0 &&
 		    !(z80_state.nmi && !z80_state.nmi_seen) &&
 		    !(z80_state.irq && z80_state.iff1) &&
 		    !trs_event_scheduled()) {
-		    trs_paused = 1;
 		    pause();
 		}
+#endif		
 	    }
 	    T_COUNT(4);
 	    break;
@@ -3686,7 +3705,7 @@ int z80_run(int continuous)
 	    break;
 	    
 	  case 0x7F:	/* ld a, a */
-	    /*REG_A = REG_A;*/  T_COUNT(4);
+	    REG_A = REG_A;  T_COUNT(4);
 	    break;
 	  case 0x78:	/* ld a, b */
 	    REG_A = REG_B;  T_COUNT(4);
@@ -3710,7 +3729,7 @@ int z80_run(int continuous)
 	    REG_B = REG_A;  T_COUNT(4);
 	    break;
 	  case 0x40:	/* ld b, b */
-	    /*REG_B = REG_B;*/  T_COUNT(4);
+	    REG_B = REG_B;  T_COUNT(4);
 	    break;
 	  case 0x41:	/* ld b, c */
 	    REG_B = REG_C;  T_COUNT(4);
@@ -3734,7 +3753,7 @@ int z80_run(int continuous)
 	    REG_C = REG_B;  T_COUNT(4);
 	    break;
 	  case 0x49:	/* ld c, c */
-	    /*REG_C = REG_C;*/  T_COUNT(4);
+	    REG_C = REG_C;  T_COUNT(4);
 	    break;
 	  case 0x4A:	/* ld c, d */
 	    REG_C = REG_D;  T_COUNT(4);
@@ -3758,7 +3777,7 @@ int z80_run(int continuous)
 	    REG_D = REG_C;  T_COUNT(4);
 	    break;
 	  case 0x52:	/* ld d, d */
-	    /*REG_D = REG_D;*/  T_COUNT(4);
+	    REG_D = REG_D;  T_COUNT(4);
 	    break;
 	  case 0x53:	/* ld d, e */
 	    REG_D = REG_E;  T_COUNT(4);
@@ -3782,7 +3801,7 @@ int z80_run(int continuous)
 	    REG_E = REG_D;  T_COUNT(4);
 	    break;
 	  case 0x5B:	/* ld e, e */
-	    /*REG_E = REG_E;*/  T_COUNT(4);
+	    REG_E = REG_E;  T_COUNT(4);
 	    break;
 	  case 0x5C:	/* ld e, h */
 	    REG_E = REG_H;  T_COUNT(4);
@@ -3806,7 +3825,7 @@ int z80_run(int continuous)
 	    REG_H = REG_E;  T_COUNT(4);
 	    break;
 	  case 0x64:	/* ld h, h */
-	    /*REG_H = REG_H;*/  T_COUNT(4);
+	    REG_H = REG_H;  T_COUNT(4);
 	    break;
 	  case 0x65:	/* ld h, l */
 	    REG_H = REG_L;  T_COUNT(4);
@@ -3830,7 +3849,7 @@ int z80_run(int continuous)
 	    REG_L = REG_H;  T_COUNT(4);
 	    break;
 	  case 0x6D:	/* ld l, l */
-	    /*REG_L = REG_L;*/  T_COUNT(4);
+	    REG_L = REG_L;  T_COUNT(4);
 	    break;
 	    
 	  case 0x02:	/* ld (bc), a */
@@ -4360,5 +4379,57 @@ void z80_reset()
 
     /* z80_state.r = 0; */
     srand(time(NULL));  /* Seed the RNG, for reading the refresh register */
+}
+
+void trs_z80_save(FILE *file)
+{
+  trs_save_uint16(file, &z80_state.af.word, 1);
+  trs_save_uint16(file, &z80_state.bc.word, 1);
+  trs_save_uint16(file, &z80_state.de.word, 1);
+  trs_save_uint16(file, &z80_state.hl.word, 1);
+  trs_save_uint16(file, &z80_state.ix.word, 1);
+  trs_save_uint16(file, &z80_state.iy.word, 1);
+  trs_save_uint16(file, &z80_state.sp.word, 1);
+  trs_save_uint16(file, &z80_state.pc.word, 1);
+  trs_save_uint16(file, &z80_state.af_prime.word, 1);
+  trs_save_uint16(file, &z80_state.bc_prime.word, 1);
+  trs_save_uint16(file, &z80_state.de_prime.word, 1);
+  trs_save_uint16(file, &z80_state.hl_prime.word, 1);
+  trs_save_uchar(file, &z80_state.i, 1);
+  trs_save_uchar(file, &z80_state.interrupt_mode, 1);
+  trs_save_int(file,&z80_state.irq,1);
+  trs_save_int(file,&z80_state.nmi,1);
+  trs_save_int(file,&z80_state.nmi_seen,1);
+  trs_save_int(file,&z80_state.delay,1);
+  trs_save_uint64(file,(unsigned long long *)&z80_state.t_count,1);
+  trs_save_float(file,&z80_state.clockMHz,1);
+  trs_save_uint64(file,(unsigned long long *)&z80_state.sched,1);
+  trs_save_uint64(file,(unsigned long long *)&last_t_count,1);
+}
+
+void trs_z80_load(FILE *file)
+{
+  trs_load_uint16(file, &z80_state.af.word, 1);
+  trs_load_uint16(file, &z80_state.bc.word, 1);
+  trs_load_uint16(file, &z80_state.de.word, 1);
+  trs_load_uint16(file, &z80_state.hl.word, 1);
+  trs_load_uint16(file, &z80_state.ix.word, 1);
+  trs_load_uint16(file, &z80_state.iy.word, 1);
+  trs_load_uint16(file, &z80_state.sp.word, 1);
+  trs_load_uint16(file, &z80_state.pc.word, 1);
+  trs_load_uint16(file, &z80_state.af_prime.word, 1);
+  trs_load_uint16(file, &z80_state.bc_prime.word, 1);
+  trs_load_uint16(file, &z80_state.de_prime.word, 1);
+  trs_load_uint16(file, &z80_state.hl_prime.word, 1);
+  trs_load_uchar(file, &z80_state.i, 1);
+  trs_load_uchar(file, &z80_state.interrupt_mode, 1);
+  trs_load_int(file,&z80_state.irq,1);
+  trs_load_int(file,&z80_state.nmi,1);
+  trs_load_int(file,&z80_state.nmi_seen,1);
+  trs_load_int(file,&z80_state.delay,1);
+  trs_load_uint64(file,(unsigned long long *)&z80_state.t_count,1);
+  trs_load_float(file,&z80_state.clockMHz,1);
+  trs_load_uint64(file,(unsigned long long *)&z80_state.sched,1);
+  trs_load_uint64(file,(unsigned long long *)&last_t_count,1);
 }
 

@@ -1,3 +1,26 @@
+/* SDLTRS version Copyright (c): 2006, Mark Grebe */
+
+/* Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+*/
 /*
  * Copyright (C) 1992 Clarendon Hill Software.
  *
@@ -14,8 +37,9 @@
  */
 
 /*
-   Modified by Timothy Mann, 1996 and later
-   $Id: trs_keyboard.c,v 1.27 2009/06/15 23:41:21 mann Exp $
+   Modified by Timothy Mann, 1996
+   Modified by Mark Grebe, 2006
+   Last modified on Wed May 07 09:12:00 MST 2006 by markgrebe
 */
 
 /*#define KBDEBUG 1*/
@@ -25,13 +49,10 @@
 #define SHIFT_F1_IS_F13 1     /* use if X reports Shift+F1..F8 as F13..F20 */
 /*#define SHIFT_F1_IS_F11 1*/ /* use if X reports Shift+F1..F10 as F11..F20 */
 
+#include <SDL/SDL.h>
 #include "z80.h"
 #include "trs.h"
-#ifndef ANDROID
-#include <X11/keysym.h>
-#include <X11/X.h>
-#endif
-#include <unistd.h>
+#include "trs_sdl_keyboard.h"
 
 /*
  * Key event queue
@@ -40,7 +61,6 @@
 static int key_queue[KEY_QUEUE_SIZE];
 static int key_queue_head;
 static int key_queue_entries;
-static int skip_next_kbwait;
 
 /*
  * TRS-80 key matrix
@@ -133,6 +153,8 @@ static int skip_next_kbwait;
 #define TK_Northwest            TK(10,  6)
 #define TK_Fire                 TK(10, 16)
 
+#define JOY_BOUNCE 20000
+
 typedef struct
 {
     int bit_action;
@@ -150,12 +172,12 @@ KeyTable ascii_key_table[] = {
 /* 0x5 */     { TK_NULL, TK_Neutral },
 /* 0x6 */     { TK_NULL, TK_Neutral },
 /* 0x7 */     { TK_NULL, TK_Neutral },
-/* 0x8 */     { TK_NULL, TK_Neutral },
-/* 0x9 */     { TK_NULL, TK_Neutral },
+/* 0x8 */     { TK_Left, TK_Neutral },
+/* 0x9 */     { TK_Right, TK_Neutral },
 /* 0xa */     { TK_NULL, TK_Neutral },
 /* 0xb */     { TK_NULL, TK_Neutral },
-/* 0xc */     { TK_NULL, TK_Neutral },
-/* 0xd */     { TK_NULL, TK_Neutral },
+/* 0xc */     { TK_Clear, TK_Neutral },
+/* 0xd */     { TK_Enter, TK_Neutral },
 /* 0xe */     { TK_NULL, TK_Neutral },
 /* 0xf */     { TK_NULL, TK_Neutral },
 /* 0x10 */    { TK_NULL, TK_Neutral },
@@ -169,11 +191,11 @@ KeyTable ascii_key_table[] = {
 /* 0x18 */    { TK_NULL, TK_Neutral },
 /* 0x19 */    { TK_NULL, TK_Neutral },
 /* 0x1a */    { TK_NULL, TK_Neutral },
-/* 0x1b */    { TK_NULL, TK_Neutral },
+/* 0x1b */    { TK_Break, TK_Neutral },
 /* 0x1c */    { TK_NULL, TK_Neutral },
 /* 0x1d */    { TK_NULL, TK_Neutral },
 /* 0x1e */    { TK_NULL, TK_Neutral },
-/* 0x1f */    { TK_NULL, TK_Neutral },  /* ...end undefined keysyms */
+/* 0x1f */    { TK_NULL, TK_Neutral }, 
 /* 0x20 */    { TK_Space, TK_Neutral },
 /* 0x21 */    { TK_1, TK_ForceShift },
 /* 0x22 */    { TK_2, TK_ForceShift },
@@ -269,7 +291,7 @@ KeyTable ascii_key_table[] = {
 /* 0x7c */    { TK_Backslash, TK_ForceShift },
 /* 0x7d */    { TK_RightBracket, TK_ForceShift },
 /* 0x7e */    { TK_Caret, TK_ForceShift },
-/* 0x7f */    { TK_NULL, TK_Neutral },
+/* 0x7f */    { TK_Left, TK_Neutral },
 /* 0x80 */    { TK_NULL, TK_Neutral },
 /* 0x81 */    { TK_NULL, TK_Neutral },
 /* 0x82 */    { TK_NULL, TK_Neutral },
@@ -397,329 +419,114 @@ KeyTable ascii_key_table[] = {
 /* 0xfc */    { TK_RightBracket, TK_ForceNoShift }, /* ü */
 /* 0xfd */    { TK_NULL, TK_Neutral },
 /* 0xfe */    { TK_NULL, TK_Neutral },
-/* 0xff */    { TK_NULL, TK_Neutral }
-};
-
-/* Keysyms in the function key range 0xff00 - 0xffff */
-
-KeyTable function_key_table[] = {
-/* 0xff00                  */    { TK_NULL, TK_Neutral },
-/* 0xff01                  */    { TK_NULL, TK_Neutral },
-/* 0xff02                  */    { TK_NULL, TK_Neutral },
-/* 0xff03                  */    { TK_NULL, TK_Neutral },
-/* 0xff04                  */    { TK_NULL, TK_Neutral },
-/* 0xff05                  */    { TK_NULL, TK_Neutral },
-/* 0xff06                  */    { TK_NULL, TK_Neutral },
-/* 0xff07                  */    { TK_NULL, TK_Neutral },
-/* 0xff08   XK_BackSpace   */    { TK_Left, TK_Neutral },
-/* 0xff09   XK_Tab         */    { TK_Right, TK_Neutral },
-/* 0xff0a   XK_Linefeed    */    { TK_Down, TK_Neutral },
-/* 0xff0b   XK_Clear       */    { TK_Clear, TK_Neutral },
-/* 0xff0c                  */    { TK_NULL, TK_Neutral },
-/* 0xff0d   XK_Return      */    { TK_Enter, TK_Neutral },
-/* 0xff0e                  */    { TK_NULL, TK_Neutral },
-/* 0xff0f                  */    { TK_NULL, TK_Neutral },
-/* 0xff10                  */    { TK_NULL, TK_Neutral },
-/* 0xff11                  */    { TK_NULL, TK_Neutral },
-/* 0xff12                  */    { TK_NULL, TK_Neutral },
-/* 0xff13   XK_Pause       */    { TK_NULL, TK_Neutral },
-/* 0xff14   XK_ScrollLock  */    { TK_AtSign, TK_Neutral },
-/* 0xff15   XK_Sys_Req     */    { TK_NULL, TK_Neutral },
-/* 0xff16                  */    { TK_NULL, TK_Neutral },
-/* 0xff17                  */    { TK_NULL, TK_Neutral },
-/* 0xff18                  */    { TK_NULL, TK_Neutral },
-/* 0xff19                  */    { TK_NULL, TK_Neutral },
-/* 0xff1a                  */    { TK_NULL, TK_Neutral },
-/* 0xff1b   XK_Escape      */    { TK_Break, TK_Neutral },
-/* 0xff1c                  */    { TK_NULL, TK_Neutral },
-/* 0xff1d                  */    { TK_NULL, TK_Neutral },
-/* 0xff1e                  */    { TK_NULL, TK_Neutral },
-/* 0xff1f                  */    { TK_NULL, TK_Neutral },
-/* 0xff20   XK_Multi_key   */    { TK_AtSign, TK_Neutral },
-/* 0xff21                  */    { TK_NULL, TK_Neutral },
-/* 0xff22                  */    { TK_NULL, TK_Neutral },
-/* 0xff23                  */    { TK_NULL, TK_Neutral },
-/* 0xff24                  */    { TK_NULL, TK_Neutral },
-/* 0xff25                  */    { TK_NULL, TK_Neutral },
-/* 0xff26                  */    { TK_NULL, TK_Neutral },
-/* 0xff27                  */    { TK_NULL, TK_Neutral },
-/* 0xff28                  */    { TK_NULL, TK_Neutral },
-/* 0xff29                  */    { TK_NULL, TK_Neutral },
-/* 0xff2a                  */    { TK_NULL, TK_Neutral },
-/* 0xff2b                  */    { TK_NULL, TK_Neutral },
-/* 0xff2c                  */    { TK_NULL, TK_Neutral },
-/* 0xff2d                  */    { TK_NULL, TK_Neutral },
-/* 0xff2e                  */    { TK_NULL, TK_Neutral },
-/* 0xff2f                  */    { TK_NULL, TK_Neutral },
-/* 0xff30                  */    { TK_NULL, TK_Neutral },
-/* 0xff31                  */    { TK_NULL, TK_Neutral },
-/* 0xff32                  */    { TK_NULL, TK_Neutral },
-/* 0xff33                  */    { TK_NULL, TK_Neutral },
-/* 0xff34                  */    { TK_NULL, TK_Neutral },
-/* 0xff35                  */    { TK_NULL, TK_Neutral },
-/* 0xff36                  */    { TK_NULL, TK_Neutral },
-/* 0xff37                  */    { TK_NULL, TK_Neutral },
-/* 0xff38                  */    { TK_NULL, TK_Neutral },
-/* 0xff39                  */    { TK_NULL, TK_Neutral },
-/* 0xff3a                  */    { TK_NULL, TK_Neutral },
-/* 0xff3b                  */    { TK_NULL, TK_Neutral },
-/* 0xff3c                  */    { TK_NULL, TK_Neutral },
-/* 0xff3d                  */    { TK_NULL, TK_Neutral },
-/* 0xff3e                  */    { TK_NULL, TK_Neutral },
-/* 0xff3f                  */    { TK_NULL, TK_Neutral },
-/* 0xff40                  */    { TK_NULL, TK_Neutral },
-/* 0xff41                  */    { TK_NULL, TK_Neutral },
-/* 0xff42                  */    { TK_NULL, TK_Neutral },
-/* 0xff43                  */    { TK_NULL, TK_Neutral },
-/* 0xff44                  */    { TK_NULL, TK_Neutral },
-/* 0xff45                  */    { TK_NULL, TK_Neutral },
-/* 0xff46                  */    { TK_NULL, TK_Neutral },
-/* 0xff47                  */    { TK_NULL, TK_Neutral },
-/* 0xff48                  */    { TK_NULL, TK_Neutral },
-/* 0xff49                  */    { TK_NULL, TK_Neutral },
-/* 0xff4a                  */    { TK_NULL, TK_Neutral },
-/* 0xff4b                  */    { TK_NULL, TK_Neutral },
-/* 0xff4c                  */    { TK_NULL, TK_Neutral },
-/* 0xff4d                  */    { TK_NULL, TK_Neutral },
-/* 0xff4e                  */    { TK_NULL, TK_Neutral },
-/* 0xff4f                  */    { TK_NULL, TK_Neutral },
-/* 0xff50   XK_Home        */    { TK_Clear, TK_Neutral },
-/* 0xff51   XK_Left        */    { TK_Left, TK_Neutral },
-/* 0xff52   XK_Up          */    { TK_Up, TK_Neutral },
-/* 0xff53   XK_Right       */    { TK_Right, TK_Neutral },
-/* 0xff54   XK_Down        */    { TK_Down, TK_Neutral },
-/* 0xff55   XK_Prior, XK_Page_Up  */  { TK_LeftShift, TK_Neutral },
-/* 0xff56   XK_Next, XK_Page_Down */  { TK_RightShift, TK_Neutral },
-/* 0xff57   XK_End         */    { TK_Unused, TK_Neutral },
-/* 0xff58   XK_Begin       */    { TK_NULL, TK_Neutral },
-/* 0xff59                  */    { TK_NULL, TK_Neutral },
-/* 0xff5a                  */    { TK_NULL, TK_Neutral },
-/* 0xff5b                  */    { TK_NULL, TK_Neutral },
-/* 0xff5c                  */    { TK_NULL, TK_Neutral },
-/* 0xff5d                  */    { TK_NULL, TK_Neutral },
-/* 0xff5e                  */    { TK_NULL, TK_Neutral },
-/* 0xff5f                  */    { TK_NULL, TK_Neutral },
-/* 0xff60   XK_Select      */    { TK_NULL, TK_Neutral },
-/* 0xff61   XK_Print       */    { TK_NULL, TK_Neutral },
-/* 0xff62   XK_Execute     */    { TK_NULL, TK_Neutral },
-/* 0xff63   XK_Insert      */    { TK_Underscore, TK_Neutral },
-/* 0xff64                  */    { TK_NULL, TK_Neutral },
-/* 0xff65   XK_Undo        */    { TK_NULL, TK_Neutral },
-/* 0xff66   XK_Redo        */    { TK_NULL, TK_Neutral },
-/* 0xff67   XK_Menu        */    { TK_NULL, TK_Neutral },
-/* 0xff68   XK_Find        */    { TK_NULL, TK_Neutral },
-/* 0xff69   XK_Cancel      */    { TK_NULL, TK_Neutral },
-/* 0xff6a   XK_Help        */    { TK_NULL, TK_Neutral },
-/* 0xff6b   XK_Break       */    { TK_Break, TK_Neutral },
-/* 0xff6c                  */    { TK_NULL, TK_Neutral },
-/* 0xff6d                  */    { TK_NULL, TK_Neutral },
-/* 0xff6e                  */    { TK_NULL, TK_Neutral },
-/* 0xff6f                  */    { TK_NULL, TK_Neutral },
-/* 0xff70                  */    { TK_NULL, TK_Neutral },
-/* 0xff71                  */    { TK_NULL, TK_Neutral },
-/* 0xff72                  */    { TK_NULL, TK_Neutral },
-/* 0xff73                  */    { TK_NULL, TK_Neutral },
-/* 0xff74                  */    { TK_NULL, TK_Neutral },
-/* 0xff75                  */    { TK_NULL, TK_Neutral },
-/* 0xff76                  */    { TK_NULL, TK_Neutral },
-/* 0xff77                  */    { TK_NULL, TK_Neutral },
-/* 0xff78                  */    { TK_NULL, TK_Neutral },
-/* 0xff79                  */    { TK_NULL, TK_Neutral },
-/* 0xff7a                  */    { TK_NULL, TK_Neutral },
-/* 0xff7b                  */    { TK_NULL, TK_Neutral },
-/* 0xff7c                  */    { TK_NULL, TK_Neutral },
-/* 0xff7d                  */    { TK_NULL, TK_Neutral },
-/* 0xff7e   XK_Mode_switch */    { TK_NULL, TK_Neutral },
-/* 0xff7f   XK_Num_Lock    */    { TK_NULL, TK_Neutral },
-/* 0xff80   XK_KP_Space    */    { TK_Space, TK_Neutral },
-/* 0xff81                  */    { TK_NULL, TK_Neutral },
-/* 0xff82                  */    { TK_NULL, TK_Neutral },
-/* 0xff83                  */    { TK_NULL, TK_Neutral },
-/* 0xff84                  */    { TK_NULL, TK_Neutral },
-/* 0xff85                  */    { TK_NULL, TK_Neutral },
-/* 0xff86                  */    { TK_NULL, TK_Neutral },
-/* 0xff87                  */    { TK_NULL, TK_Neutral },
-/* 0xff88                  */    { TK_NULL, TK_Neutral },
-/* 0xff89   XK_KP_Tab      */    { TK_Right, TK_Neutral },
-/* 0xff8a                  */    { TK_NULL, TK_Neutral },
-/* 0xff8b                  */    { TK_NULL, TK_Neutral },
-/* 0xff8c                  */    { TK_NULL, TK_Neutral },
-/* 0xff8d   XK_KP_Enter    */    { TK_Enter, TK_Neutral },
-/* 0xff8e                  */    { TK_NULL, TK_Neutral },
-/* 0xff8f                  */    { TK_NULL, TK_Neutral },
-/* 0xff90                  */    { TK_NULL, TK_Neutral },
-/* 0xff91   XK_KP_F1       */    { TK_F1, TK_Neutral },
-/* 0xff92   XK_KP_F2       */    { TK_F2, TK_Neutral },
-/* 0xff93   XK_KP_F3       */    { TK_F3, TK_Neutral },
-/* 0xff94   XK_KP_F4       */    { TK_CapsLock, TK_Neutral },
-#if KP_JOYSTICK
-/* 0xff95   XK_KP_Home     */    { TK_Northwest, TK_Neutral },
-/* 0xff96   XK_KP_Left     */    { TK_West, TK_Neutral },
-/* 0xff97   XK_KP_Up       */    { TK_North, TK_Neutral },
-/* 0xff98   XK_KP_Right    */    { TK_East, TK_Neutral },
-/* 0xff99   XK_KP_Down     */    { TK_South, TK_Neutral },
-/* 0xff9a   XK_KP_Prior, XK_KP_Page_Up  */ { TK_Northeast, TK_Neutral },
-/* 0xff9b   XK_KP_Next, XK_KP_Page_Down */ { TK_Southeast, TK_Neutral },
-/* 0xff9c   XK_KP_End      */    { TK_Southwest, TK_Neutral },
-/* 0xff9d   XK_KP_Begin    */    { TK_Fire, TK_Neutral },
-/* 0xff9e   XK_KP_Insert   */    { TK_Fire, TK_Neutral },
+/* 0xff */    { TK_NULL, TK_Neutral },
+/* 0x100 */    { TK_Fire, TK_Neutral },
+/* 0x101 */    { TK_Northwest, TK_Neutral },
+/* 0x102 */    { TK_South, TK_Neutral },
+/* 0x103 */    { TK_Southeast, TK_Neutral },
+/* 0x104 */    { TK_West, TK_Neutral },
+/* 0x105 */    { TK_NULL, TK_Neutral },
+/* 0x106 */    { TK_East, TK_Neutral },
+/* 0x107 */    { TK_Southwest, TK_Neutral },
+/* 0x108 */    { TK_North, TK_Neutral },
+/* 0x109 */    { TK_Northeast, TK_Neutral },
+/* 0x10a */    { TK_Left, TK_Neutral },
+/* 0x10b */    { TK_Slash, TK_Neutral },
+/* 0x10c */    { TK_Colon, TK_ForceShift },
+/* 0x10d */    { TK_Minus, TK_Neutral },
+/* 0x10e */    { TK_Semicolon, TK_ForceShift },
+/* 0x10f */    { TK_Enter, TK_Neutral },
+/* 0x110 */    { TK_Minus,  TK_ForceShift },
+/* 0x111 */    { TK_Up, TK_Neutral },
+/* 0x112 */    { TK_Down, TK_Neutral },
+/* 0x113 */    { TK_Right, TK_Neutral },
+/* 0x114 */    { TK_Left, TK_Neutral },
+/* 0x115 */    { TK_Underscore, TK_Neutral },
+/* 0x116 */    { TK_Clear, TK_Neutral },
+/* 0x117 */    { TK_Unused, TK_Neutral },
+/* 0x118 */    { TK_LeftShift, TK_Neutral },
+/* 0x119 */    { TK_RightShift, TK_Neutral },
+/* 0x11a */    { TK_F1, TK_Neutral },
+/* 0x11b */    { TK_F2, TK_Neutral },
+/* 0x11c */    { TK_F3, TK_Neutral },
+/* 0x11d */    { TK_CapsLock, TK_Neutral },
+/* 0x11e */    { TK_AtSign, TK_Neutral },
+/* 0x11f */    { TK_0, TK_Neutral },
+/* 0x120 */    { TK_NULL, TK_Neutral },
+/* 0x121 */    { TK_NULL, TK_Neutral },
+/* 0x122 */    { TK_NULL, TK_Neutral },
+/* 0x123 */    { TK_NULL, TK_Neutral },
+/* 0x124 */    { TK_NULL, TK_Neutral },
+/* 0x125 */    { TK_NULL, TK_Neutral },
+/* 0x126 */    { TK_NULL, TK_Neutral },
+/* 0x127 */    { TK_NULL, TK_Neutral },
+/* 0x128 */    { TK_NULL, TK_Neutral },
+/* 0x129 */    { TK_NULL, TK_Neutral },
+/* 0x12a */    { TK_NULL, TK_Neutral },
+/* 0x12b */    { TK_NULL, TK_Neutral },
+/* 0x12c */    { TK_NULL, TK_Neutral },
+/* 0x12d */    { TK_NULL, TK_Neutral },
+/* 0x12e */    { TK_AtSign, TK_Neutral },
+/* 0x12f */    { TK_RightShift, TK_Neutral },
+/* 0x130 */    { TK_LeftShift, TK_Neutral },
+/* 0x131 */    { TK_Ctrl, TK_Neutral },
+/* 0x132 */    { TK_Ctrl, TK_Neutral },
+#ifdef MACOSX
+/* 0x133 */    { TK_NULL, TK_Neutral },
 #else
-/* 0xff95   XK_KP_Home     */    { TK_Clear, TK_Neutral },
-/* 0xff96   XK_KP_Left     */    { TK_Left, TK_Neutral },
-/* 0xff97   XK_KP_Up       */    { TK_Up, TK_Neutral },
-/* 0xff98   XK_KP_Right    */    { TK_Right, TK_Neutral },
-/* 0xff99   XK_KP_Down     */    { TK_Down, TK_Neutral },
-/* 0xff9a   XK_KP_Prior, XK_KP_Page_Up  */ { TK_LeftShift, TK_Neutral },
-/* 0xff9b   XK_KP_Next, XK_KP_Page_Down */ { TK_RightShift, TK_Neutral },
-/* 0xff9c   XK_KP_End      */    { TK_Unused, TK_Neutral },
-/* 0xff9d   XK_KP_Begin    */    { TK_NULL, TK_Neutral },
-/* 0xff9e   XK_KP_Insert   */    { TK_Underscore, TK_Neutral },
+/* 0x133 */    { TK_Down, TK_ForceShiftPersistent },
 #endif
-/* 0xff9f   XK_KP_Delete   */    { TK_Left, TK_Neutral },
-/* 0xffa0                  */    { TK_NULL, TK_Neutral },
-/* 0xffa1                  */    { TK_NULL, TK_Neutral },
-/* 0xffa2                  */    { TK_NULL, TK_Neutral },
-/* 0xffa3                  */    { TK_NULL, TK_Neutral },
-/* 0xffa4                  */    { TK_NULL, TK_Neutral },
-/* 0xffa5                  */    { TK_NULL, TK_Neutral },
-/* 0xffa6                  */    { TK_NULL, TK_Neutral },
-/* 0xffa7                  */    { TK_NULL, TK_Neutral },
-/* 0xffa8                  */    { TK_NULL, TK_Neutral },
-/* 0xffa9                  */    { TK_NULL, TK_Neutral },
-/* 0xffaa   XK_KP_Multiply */    { TK_Colon, TK_ForceShift },
-/* 0xffab   XK_KP_Add      */    { TK_Semicolon, TK_ForceShift },
-/* 0xffac   XK_KP_Separator*/    { TK_Comma, TK_Neutral },
-/* 0xffad   XK_KP_Subtract */    { TK_Minus, TK_Neutral },
-/* 0xffae   XK_KP_Decimal  */    { TK_Period, TK_Neutral },
-/* 0xffaf   XK_KP_Divide   */    { TK_Slash, TK_Neutral },
-#if KPNUM_JOYSTICK
-/* 0xffb0   XK_KP_0        */    { TK_Fire, TK_Neutral },
-/* 0xffb1   XK_KP_1        */    { TK_Southwest, TK_Neutral },
-/* 0xffb2   XK_KP_2        */    { TK_South, TK_Neutral },
-/* 0xffb3   XK_KP_3        */    { TK_Southeast, TK_Neutral },
-/* 0xffb4   XK_KP_4        */    { TK_West, TK_Neutral },
-/* 0xffb5   XK_KP_5        */    { TK_Fire, TK_Neutral },
-/* 0xffb6   XK_KP_6        */    { TK_East, TK_Neutral },
-/* 0xffb7   XK_KP_7        */    { TK_Northwest, TK_Neutral },
-/* 0xffb8   XK_KP_8        */    { TK_North, TK_Neutral },
-/* 0xffb9   XK_KP_9        */    { TK_Northeast, TK_Neutral },
+/* 0x134 */    { TK_NULL, TK_Neutral },
+#ifdef MACOSX
+/* 0x135 */    { TK_Down, TK_ForceShiftPersistent },
 #else
-/* 0xffb0   XK_KP_0        */    { TK_0, TK_Neutral },
-/* 0xffb1   XK_KP_1        */    { TK_1, TK_Neutral },
-/* 0xffb2   XK_KP_2        */    { TK_2, TK_Neutral },
-/* 0xffb3   XK_KP_3        */    { TK_3, TK_Neutral },
-/* 0xffb4   XK_KP_4        */    { TK_4, TK_Neutral },
-/* 0xffb5   XK_KP_5        */    { TK_5, TK_Neutral },
-/* 0xffb6   XK_KP_6        */    { TK_6, TK_Neutral },
-/* 0xffb7   XK_KP_7        */    { TK_7, TK_Neutral },
-/* 0xffb8   XK_KP_8        */    { TK_8, TK_Neutral },
-/* 0xffb9   XK_KP_9        */    { TK_9, TK_Neutral },
+/* 0x135 */    { TK_NULL, TK_Neutral },
 #endif
-/* 0xffba                  */    { TK_NULL, TK_Neutral },
-/* 0xffbb                  */    { TK_NULL, TK_Neutral },
-/* 0xffbc                  */    { TK_NULL, TK_Neutral },
-/* 0xffbd   XK_KP_Equal    */    { TK_Minus,  TK_ForceShift },
-/* 0xffbe   XK_F1          */    { TK_F1, TK_Neutral },
-/* 0xffbf   XK_F2          */    { TK_F2, TK_Neutral },
-/* 0xffc0   XK_F3          */    { TK_F3, TK_Neutral },
-/* 0xffc1   XK_F4          */    { TK_CapsLock, TK_Neutral },
-/* 0xffc2   XK_F5          */    { TK_AtSign, TK_Neutral },
-/* 0xffc3   XK_F6          */    { TK_0, TK_Neutral },
-/* 0xffc4   XK_F7          */    { TK_NULL, TK_Neutral },
-/* 0xffc5   XK_F8          */    { TK_NULL, TK_Neutral },
-/* 0xffc6   XK_F9          */    { TK_NULL, TK_Neutral },
-/* 0xffc7   XK_F10         */    { TK_NULL, TK_Neutral },
-/* In some versions of XFree86, XK_F11 to XK_F20 are produced for the
-   shifted F1 to F10 keys, in some XK_F13 to XK_F20 are produced for
-   the shifted F1 to F8 keys, and in some the keysyms are not altered.
-   Arrgh.
-*/
-#if SHIFT_F1_IS_F11
-/* 0xffc8   XK_F11         */    { TK_F1, TK_Neutral },
-/* 0xffc9   XK_F12         */    { TK_F2, TK_Neutral },
-/* 0xffca   XK_F13         */    { TK_F3, TK_Neutral },
-/* 0xffcb   XK_F14         */    { TK_CapsLock, TK_Neutral },
-/* 0xffcc   XK_F15         */    { TK_AtSign, TK_Neutral },
-/* 0xffcd   XK_F16         */    { TK_0, TK_Neutral },
-/* 0xffce   XK_F17         */    { TK_NULL, TK_Neutral },
-/* 0xffcf   XK_F18         */    { TK_NULL, TK_Neutral },
-#elif SHIFT_F1_IS_F13
-/* 0xffc8   XK_F11         */    { TK_NULL, TK_Neutral },
-/* 0xffc9   XK_F12         */    { TK_NULL, TK_Neutral },
-/* 0xffca   XK_F13         */    { TK_F1, TK_Neutral },
-/* 0xffcb   XK_F14         */    { TK_F2, TK_Neutral },
-/* 0xffcc   XK_F15         */    { TK_F3, TK_Neutral },
-/* 0xffcd   XK_F16         */    { TK_CapsLock, TK_Neutral },
-/* 0xffce   XK_F17         */    { TK_AtSign, TK_Neutral },
-/* 0xffcf   XK_F18         */    { TK_0, TK_Neutral },
-#else
-/* 0xffc8   XK_F11         */    { TK_NULL, TK_Neutral },
-/* 0xffc9   XK_F12         */    { TK_NULL, TK_Neutral },
-/* 0xffca   XK_F13         */    { TK_NULL, TK_Neutral },
-/* 0xffcb   XK_F14         */    { TK_NULL, TK_Neutral },
-/* 0xffcc   XK_F15         */    { TK_NULL, TK_Neutral },
-/* 0xffcd   XK_F16         */    { TK_NULL, TK_Neutral },
-/* 0xffce   XK_F17         */    { TK_NULL, TK_Neutral },
-/* 0xffcf   XK_F18         */    { TK_NULL, TK_Neutral },
-#endif
-/* 0xffd0   XK_F19         */    { TK_NULL, TK_Neutral },
-/* 0xffd1   XK_F20         */    { TK_NULL, TK_Neutral },
-/* 0xffd2   XK_F21         */    { TK_NULL, TK_Neutral },
-/* 0xffd3   XK_F22         */    { TK_NULL, TK_Neutral },
-/* 0xffd4   XK_F23         */    { TK_NULL, TK_Neutral },
-/* 0xffd5   XK_F24         */    { TK_NULL, TK_Neutral },
-/* 0xffd6   XK_F25         */    { TK_NULL, TK_Neutral },
-/* 0xffd7   XK_F26         */    { TK_NULL, TK_Neutral },
-/* 0xffd8   XK_F27         */    { TK_NULL, TK_Neutral },
-/* 0xffd9   XK_F28         */    { TK_NULL, TK_Neutral },
-/* 0xffda   XK_F29         */    { TK_NULL, TK_Neutral },
-/* 0xffdb   XK_F30         */    { TK_NULL, TK_Neutral },
-/* 0xffdc   XK_F31         */    { TK_NULL, TK_Neutral },
-/* 0xffdd   XK_F32         */    { TK_NULL, TK_Neutral },
-/* 0xffde   XK_F33         */    { TK_NULL, TK_Neutral },
-/* 0xffdf   XK_F34         */    { TK_NULL, TK_Neutral },
-/* 0xffe0   XK_F35         */    { TK_NULL, TK_Neutral },
-/* 0xffe1   XK_Shift_L     */    { TK_LeftShift, TK_Neutral },
-/* 0xffe2   XK_Shift_R     */    { TK_RightShift, TK_Neutral },
-/* 0xffe3   XK_Control_L   */    { TK_Ctrl, TK_Neutral },
-/* 0xffe4   XK_Control_R   */    { TK_Ctrl, TK_Neutral },
-/* 0xffe5   XK_Caps_Lock   */    { TK_NULL, TK_Neutral },
-/* 0xffe6   XK_Shift_Lock  */    { TK_NULL, TK_Neutral },
-/* 0xffe7   XK_Meta_L      */    { TK_Clear, TK_Neutral },
-/* 0xffe8   XK_Meta_R      */    { TK_Down, TK_ForceShiftPersistent },
-/* 0xffe9   XK_Alt_L       */    { TK_Clear, TK_Neutral },
-/* 0xffea   XK_Alt_R       */    { TK_Down, TK_ForceShiftPersistent },
-/* 0xffeb   XK_Super_L     */    { TK_NULL, TK_Neutral },
-/* 0xffec   XK_Super_R     */    { TK_NULL, TK_Neutral },
-/* 0xffed   XK_Hyper_L     */    { TK_NULL, TK_Neutral },
-/* 0xffee   XK_Hyper_R     */    { TK_NULL, TK_Neutral },
-/* 0xffef                  */    { TK_NULL, TK_Neutral },
-/* 0xfff0                  */    { TK_NULL, TK_Neutral },
-/* 0xfff1                  */    { TK_NULL, TK_Neutral },
-/* 0xfff2                  */    { TK_NULL, TK_Neutral },
-/* 0xfff3                  */    { TK_NULL, TK_Neutral },
-/* 0xfff4                  */    { TK_NULL, TK_Neutral },
-/* 0xfff5                  */    { TK_NULL, TK_Neutral },
-/* 0xfff6                  */    { TK_NULL, TK_Neutral },
-/* 0xfff7                  */    { TK_NULL, TK_Neutral },
-/* 0xfff8                  */    { TK_NULL, TK_Neutral },
-/* 0xfff9                  */    { TK_NULL, TK_Neutral },
-/* 0xfffa                  */    { TK_NULL, TK_Neutral },
-/* 0xfffb                  */    { TK_NULL, TK_Neutral },
-/* 0xfffc                  */    { TK_NULL, TK_Neutral },
-/* 0xfffd                  */    { TK_NULL, TK_Neutral },
-/* 0xfffe                  */    { TK_NULL, TK_Neutral },
-/* 0xffff   XK_Delete      */    { TK_Left, TK_Neutral }
+/* 0x136 */    { TK_NULL, TK_Neutral },
+/* 0x137 */    { TK_NULL, TK_Neutral },
+/* 0x138 */    { TK_NULL, TK_Neutral },
+/* 0x139 */    { TK_NULL, TK_Neutral },
+/* 0x13a */    { TK_NULL, TK_Neutral },
+/* 0x13b */    { TK_NULL, TK_Neutral },
+/* 0x13c */    { TK_NULL, TK_Neutral },
+/* 0x13d */    { TK_NULL, TK_Neutral },
+/* 0x13e */    { TK_Break, TK_Neutral },
+/* 0x13f */    { TK_NULL, TK_Neutral },
+/* 0x140 */    { TK_NULL, TK_Neutral },
+/* 0x141 */    { TK_NULL, TK_Neutral },
+/* 0x142 */    { TK_NULL, TK_Neutral },
 };
 
 static int keystate[8] = { 0, };
 static int force_shift = TK_Neutral;
 static int joystate = 0;
+int trs_joystick_num = 0;
+int trs_keypad_joystick = TRUE;
 
 /* Avoid changing state too fast so keystrokes aren't lost. */
-#define STRETCH_AMOUNT 4000
 static tstate_t key_stretch_timeout;
 int stretch_amount = STRETCH_AMOUNT;
+int trs_kb_bracket_state = 0;
+
+void trs_keyboard_save(FILE *file)
+{
+  fwrite(&keystate,8,sizeof(int),file);
+  fwrite(&force_shift,1,sizeof(int),file);
+  fwrite(&joystate,1,sizeof(int),file);
+  fwrite(&key_stretch_timeout,1,sizeof(long long),file);
+  fwrite(&stretch_amount,1,sizeof(int),file);
+  fwrite(&trs_kb_bracket_state,1,sizeof(int),file);
+}
+
+void trs_keyboard_load(FILE *file)
+{
+  fread(&keystate,8,sizeof(int),file);
+  fread(&force_shift,1,sizeof(int),file);
+  fread(&joystate,1,sizeof(int),file);
+  fread(&key_stretch_timeout,1,sizeof(long long),file);
+  fread(&stretch_amount,1,sizeof(int),file);
+  fread(&trs_kb_bracket_state,1,sizeof(int),file);
+}
 
 void trs_kb_reset()
 {
@@ -743,11 +550,12 @@ void trs_kb_bracket(int shifted)
      these keys didn't exist on real machines anyway.
   */
   int i;
+  trs_kb_bracket_state = shifted;
   for (i=0x5b; i<=0x5f; i++) {
     ascii_key_table[i].shift_action =
       shifted ? TK_ForceShift : TK_ForceNoShift;
   }
-  for (i=0x7b; i<=0x7f; i++) {
+  for (i=0x7b; i<0x7f; i++) {
     ascii_key_table[i].shift_action =
       shifted ? TK_ForceNoShift : TK_ForceShift;
   }
@@ -765,12 +573,145 @@ int trs_emulate_joystick(int key_down, int bit_action)
   return 1;
 }
 
+/* Joystick functions called when SDL Joystick events occur */
+void trs_joy_button_down(void)
+{
+  joystate |= (TK_Fire & 0x1f);
+}
+
+void trs_joy_button_up(void)
+{
+  joystate &= ~(TK_Fire & 0x1f);
+}
+
+void trs_joy_hat(unsigned char value)
+{
+  joystate &= (TK_Fire & 0x1f);
+  
+  switch(value) {
+    case SDL_HAT_CENTERED:
+      break;
+    case SDL_HAT_UP:
+      joystate |= (TK_North & 0x1f);
+      break;
+    case SDL_HAT_RIGHT:
+      joystate |= (TK_East & 0x1f);
+      break;
+    case SDL_HAT_DOWN:
+      joystate |= (TK_South & 0x1f);
+      break;
+    case SDL_HAT_LEFT:
+      joystate |= (TK_West & 0x1f);
+      break;
+    case SDL_HAT_RIGHTUP:
+      joystate |= (TK_Northeast & 0x1f);
+      break;
+    case SDL_HAT_RIGHTDOWN:
+      joystate |= (TK_Southeast & 0x1f);
+      break;
+    case SDL_HAT_LEFTUP:
+      joystate |= (TK_Southwest & 0x1f);
+      break;
+    case SDL_HAT_LEFTDOWN:
+      joystate |= (TK_Northwest & 0x1f);
+      break;
+    }
+}
+
+void trs_set_keypad_joystick(void)
+{
+  if (trs_keypad_joystick) {
+    ascii_key_table[0x100].bit_action = TK_Fire;
+    ascii_key_table[0x101].bit_action = TK_Northwest;
+    ascii_key_table[0x102].bit_action = TK_South;
+    ascii_key_table[0x103].bit_action = TK_Southeast;
+    ascii_key_table[0x104].bit_action = TK_West;
+    ascii_key_table[0x105].bit_action = TK_NULL;
+    ascii_key_table[0x106].bit_action = TK_East;
+    ascii_key_table[0x107].bit_action = TK_Southwest;
+    ascii_key_table[0x108].bit_action = TK_North;
+    ascii_key_table[0x109].bit_action = TK_Northeast;
+  } else {
+    ascii_key_table[0x100].bit_action = TK_0;
+    ascii_key_table[0x101].bit_action = TK_1;
+    ascii_key_table[0x102].bit_action = TK_2;
+    ascii_key_table[0x103].bit_action = TK_3;
+    ascii_key_table[0x104].bit_action = TK_4;
+    ascii_key_table[0x105].bit_action = TK_5;
+    ascii_key_table[0x106].bit_action = TK_6;
+    ascii_key_table[0x107].bit_action = TK_7;
+    ascii_key_table[0x108].bit_action = TK_8;
+    ascii_key_table[0x109].bit_action = TK_9;
+  }
+}
+
+void trs_open_joystick(void)
+{
+  static SDL_Joystick *open_joy = NULL;
+  int num_joysticks = SDL_NumJoysticks();
+  
+  if (open_joy != NULL) {
+    SDL_JoystickClose(open_joy);
+    open_joy = NULL;
+ }
+
+  if ((trs_joystick_num != -1) &&
+      (trs_joystick_num <= (num_joysticks -1))) {
+      open_joy = SDL_JoystickOpen(trs_joystick_num);
+  }
+  else
+    trs_joystick_num = -1;
+}
+
+void trs_joy_axis(unsigned char axis, short value)
+{
+  int dir;
+  
+  if (value < -JOY_BOUNCE)
+    dir = -1;
+  else if (value > JOY_BOUNCE)
+    dir = 1;
+  else
+    dir = 0;
+    
+  if (axis == 0) {
+    switch (dir) {
+      case -1:
+        joystate |= (TK_West & 0x1f);
+        joystate &= ~(TK_East & 0x1f);
+        break;
+      case 0:
+        joystate &= ~((TK_West | TK_East) & 0x1f);
+        break;
+      case 1:
+        joystate |= (TK_East & 0x1f);
+        joystate &= ~(TK_West & 0x1f);
+        break;
+    }
+  }
+  else if (axis == 1) {
+    switch (dir) {
+      case -1:
+        joystate |= (TK_North & 0x1f);
+        joystate &= ~(TK_South & 0x1f);
+        break;
+      case 0:
+        joystate &= ~((TK_North | TK_South) & 0x1f);
+        break;
+      case 1:
+        joystate |= (TK_South & 0x1f);
+        joystate &= ~(TK_North & 0x1f);
+        break;
+    }
+  }
+}
+
 int trs_joystick_in()
 {
 #if JOYDEBUG
   debug("joy %02x ", joystate);
 #endif
-  return (Uchar) ~joystate;
+  return ~joystate;
 }
 
 void trs_xlate_keysym(int keysym)
@@ -787,11 +728,8 @@ void trs_xlate_keysym(int keysym)
     }
 
     key_down = (keysym & 0x10000) == 0;
-    if (keysym & 0xff00) {
-      kt = &function_key_table[keysym & 0xff];
-    } else {
-      kt = &ascii_key_table[keysym & 0xff];
-    }
+    kt = &ascii_key_table[keysym & 0xFFFF];
+
     if (kt->bit_action == TK_NULL) return;
     if (trs_emulate_joystick(key_down, kt->bit_action)) return;
 
@@ -984,32 +922,8 @@ int dequeue_key()
   return rval;
 }
 
-void
-trs_skip_next_kbwait()
-{
-  skip_next_kbwait = 1;
-}
-
 int trs_next_key(int wait)
 {
-#if KBWAIT
-  if (wait) {
-    int rval;
-    for (;;) {
-      if ((rval = dequeue_key()) >= 0) break;
-      if ((z80_state.nmi && !z80_state.nmi_seen) ||
-	  (z80_state.irq && z80_state.iff1) ||
-	  trs_event_scheduled() || skip_next_kbwait) {
-	skip_next_kbwait = 0;
-	rval = -1;
-	break;
-      }
-      trs_paused = 1;
-      pause();			/* Wait for SIGALRM */
-      trs_get_event(0);
-    }
-    return rval;
-  }
-#endif
   return dequeue_key();
+
 }

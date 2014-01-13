@@ -25,10 +25,12 @@ import java.util.Map;
 import org.puder.trs80.Hardware;
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
+import org.puder.trs80.XTRS;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.XmlResourceParser;
+import android.view.KeyEvent;
 
 public class KeyboardManager {
 
@@ -184,5 +186,67 @@ public class KeyboardManager {
 
     public void unpressKeySpace() {
         memBuffer[KEY_ADDRESS_SPACE] &= ~KEY_MASK_SPACE;
+    }
+
+    public boolean keyDown(KeyEvent event) {
+        final int SDL_KEYDOWN = 2;
+        int key = event.getUnicodeChar();
+        if (key != 0 && key < 0xff) {
+            int mod = genSDLModifier(event);
+            XTRS.addKeyEvent(SDL_KEYDOWN, mod, key);
+            return true;
+        }
+//        KeyMap keyMap = null;//getKeyMap(event);
+//        if (keyMap == null) {
+//            return false;
+//        }
+//        memBuffer[keyMap.address] |= keyMap.mask;
+        return false;
+    }
+
+    public boolean keyUp(KeyEvent event) {
+        final int SDL_KEYUP = 3;
+        int key = event.getUnicodeChar();
+        if (key != 0 && key < 0xff) {
+            int mod = genSDLModifier(event);
+            XTRS.addKeyEvent(SDL_KEYUP, mod, key);
+            return true;
+        }
+//        KeyMap keyMap = null;//getKeyMap(key);
+//        if (keyMap == null) {
+//            return false;
+//        }
+//        memBuffer[keyMap.address] &= ~keyMap.mask;
+        return false;
+    }
+
+    private int genSDLModifier(KeyEvent event) {
+        final int KMOD_CAPS = 0x2000;
+        final int KMOD_LSHIFT = 0x0001;
+        final int KMOD_RSHIFT = 0x0002;
+        int mod = 0;
+        if ((event.getMetaState() & KeyEvent.META_CAPS_LOCK_ON) != 0) {
+            mod |= KMOD_CAPS;
+        }
+        if ((event.getMetaState() & KeyEvent.META_SHIFT_LEFT_ON) != 0) {
+            mod |= KMOD_LSHIFT;
+        }
+        if ((event.getMetaState() & KeyEvent.META_SHIFT_RIGHT_ON) != 0) {
+            mod |= KMOD_RSHIFT;
+        }
+        return mod;
+    }
+    private KeyMap getKeyMap(char key) {
+        key = Character.toUpperCase(key);
+        String id = "";
+        switch (key) {
+        case '\n':
+            id = "ENTER";
+            break;
+        default:
+            id = "" + key;
+            break;
+        }
+        return getKeyMap("key_" + id);
     }
 }
