@@ -192,6 +192,12 @@ public class KeyboardManager {
         final int SDL_KEYDOWN = 2;
         int key = event.getUnicodeChar();
         if (key != 0 && key < 0xff) {
+            if (key == 0xa) {
+                key = 0xd;
+            }
+            if (key >= 'a' && key <= 'z') {
+                key -= 0x20;
+            }
             int mod = genSDLModifier(event);
             XTRS.addKeyEvent(SDL_KEYDOWN, mod, key);
             return true;
@@ -208,6 +214,12 @@ public class KeyboardManager {
         final int SDL_KEYUP = 3;
         int key = event.getUnicodeChar();
         if (key != 0 && key < 0xff) {
+            if (key == 0xa) {
+                key = 0xd;
+            }
+            if (key >= 'a' && key <= 'z') {
+                key -= 0x20;
+            }
             int mod = genSDLModifier(event);
             XTRS.addKeyEvent(SDL_KEYUP, mod, key);
             return true;
