@@ -29,6 +29,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -58,6 +59,8 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     private KeyboardManager    keyboardManager;
     private int                rotation;
     private OrientationChanged orientationManager;
+    private Handler handler = new Handler();
+
 
     class OrientationChanged extends OrientationEventListener {
 
@@ -253,14 +256,20 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyUp(int keyCode, final KeyEvent event) {
         if (event.getRepeatCount() > 0) {
             return true;
         }
-        if (keyboardManager.keyUp(event)) {
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
+        
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                keyboardManager.keyUp(event);
+            }
+        }, 50);
+        return true;
+//        return super.onKeyUp(keyCode, event);
     }
 
     public void onScreenRotationClick(View view) {

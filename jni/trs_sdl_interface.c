@@ -2774,6 +2774,7 @@ void trs_screen_scroll()
   for (i = row_chars; i < screen_chars; i++)
     trs_screen[i-row_chars] = trs_screen[i];
 
+#ifndef ANDROID
   if (grafyx_enable) {
     if (grafyx_overlay) {
       trs_screen_refresh();
@@ -2792,6 +2793,7 @@ void trs_screen_scroll()
     SDL_BlitSurface(screen, &srcRect, screen, &destRect);
     addToDrawList(&destRect);
   }
+#endif
 }
 
 void grafyx_write_byte(int x, int y, char byte)

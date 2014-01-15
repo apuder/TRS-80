@@ -195,9 +195,6 @@ public class KeyboardManager {
             if (key == 0xa) {
                 key = 0xd;
             }
-            if (key >= 'a' && key <= 'z') {
-                key -= 0x20;
-            }
             int mod = genSDLModifier(event);
             XTRS.addKeyEvent(SDL_KEYDOWN, mod, key);
             return true;
@@ -216,9 +213,6 @@ public class KeyboardManager {
         if (key != 0 && key < 0xff) {
             if (key == 0xa) {
                 key = 0xd;
-            }
-            if (key >= 'a' && key <= 'z') {
-                key -= 0x20;
             }
             int mod = genSDLModifier(event);
             XTRS.addKeyEvent(SDL_KEYUP, mod, key);
