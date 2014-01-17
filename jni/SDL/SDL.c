@@ -71,7 +71,6 @@ int SDLCALL SDL_PollEvent(SDL_Event *event)
     }
     KeyBuffer* nextKey = &keyBuffer[keyBufferFirst];
     keyBufferFirst = (keyBufferFirst + 1) % MAX_KEY_BUFFER;
-    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "Dequeue key: 0x%x", nextKey->key);
     event->type = nextKey->event;
     event->key.keysym.mod = 0;//nextKey->mod;
     event->key.keysym.sym = nextKey->sym;
