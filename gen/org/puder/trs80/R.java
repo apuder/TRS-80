@@ -284,14 +284,110 @@ theme attribute (in the form
 containing a value of this type.
          */
         public static final int iconifiedByDefault=0x7f010060;
-        /** <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+        /** <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>key_0</code></td><td>0</td><td></td></tr>
+<tr><td><code>key_1</code></td><td>1</td><td></td></tr>
+<tr><td><code>key_2</code></td><td>2</td><td></td></tr>
+<tr><td><code>key_3</code></td><td>3</td><td></td></tr>
+<tr><td><code>key_4</code></td><td>4</td><td></td></tr>
+<tr><td><code>key_5</code></td><td>5</td><td></td></tr>
+<tr><td><code>key_6</code></td><td>6</td><td></td></tr>
+<tr><td><code>key_7</code></td><td>7</td><td></td></tr>
+<tr><td><code>key_8</code></td><td>8</td><td></td></tr>
+<tr><td><code>key_9</code></td><td>9</td><td></td></tr>
+<tr><td><code>key_A</code></td><td>10</td><td></td></tr>
+<tr><td><code>key_B</code></td><td>11</td><td></td></tr>
+<tr><td><code>key_C</code></td><td>12</td><td></td></tr>
+<tr><td><code>key_D</code></td><td>13</td><td></td></tr>
+<tr><td><code>key_E</code></td><td>14</td><td></td></tr>
+<tr><td><code>key_F</code></td><td>15</td><td></td></tr>
+<tr><td><code>key_G</code></td><td>16</td><td></td></tr>
+<tr><td><code>key_H</code></td><td>17</td><td></td></tr>
+<tr><td><code>key_I</code></td><td>18</td><td></td></tr>
+<tr><td><code>key_J</code></td><td>19</td><td></td></tr>
+<tr><td><code>key_K</code></td><td>20</td><td></td></tr>
+<tr><td><code>key_L</code></td><td>21</td><td></td></tr>
+<tr><td><code>key_M</code></td><td>22</td><td></td></tr>
+<tr><td><code>key_N</code></td><td>23</td><td></td></tr>
+<tr><td><code>key_O</code></td><td>24</td><td></td></tr>
+<tr><td><code>key_P</code></td><td>25</td><td></td></tr>
+<tr><td><code>key_Q</code></td><td>26</td><td></td></tr>
+<tr><td><code>key_R</code></td><td>27</td><td></td></tr>
+<tr><td><code>key_S</code></td><td>28</td><td></td></tr>
+<tr><td><code>key_T</code></td><td>29</td><td></td></tr>
+<tr><td><code>key_U</code></td><td>30</td><td></td></tr>
+<tr><td><code>key_V</code></td><td>31</td><td></td></tr>
+<tr><td><code>key_W</code></td><td>32</td><td></td></tr>
+<tr><td><code>key_X</code></td><td>33</td><td></td></tr>
+<tr><td><code>key_Y</code></td><td>34</td><td></td></tr>
+<tr><td><code>key_Z</code></td><td>35</td><td></td></tr>
+<tr><td><code>key_COMMA</code></td><td>36</td><td></td></tr>
+<tr><td><code>key_DOT</code></td><td>37</td><td></td></tr>
+<tr><td><code>key_SLASH</code></td><td>38</td><td></td></tr>
+<tr><td><code>key_SPACE</code></td><td>39</td><td></td></tr>
+<tr><td><code>key_ADD</code></td><td>40</td><td></td></tr>
+<tr><td><code>key_HASH</code></td><td>41</td><td></td></tr>
+<tr><td><code>key_BR_OPEN</code></td><td>42</td><td></td></tr>
+<tr><td><code>key_BR_CLOSE</code></td><td>43</td><td></td></tr>
+<tr><td><code>key_ASTERIX</code></td><td>44</td><td></td></tr>
+<tr><td><code>key_DOLLAR</code></td><td>45</td><td></td></tr>
+<tr><td><code>key_QUESTION</code></td><td>46</td><td></td></tr>
+<tr><td><code>key_LT</code></td><td>47</td><td></td></tr>
+<tr><td><code>key_GT</code></td><td>48</td><td></td></tr>
+<tr><td><code>key_EQUAL</code></td><td>49</td><td></td></tr>
+<tr><td><code>key_PERCENT</code></td><td>50</td><td></td></tr>
+<tr><td><code>key_APOS</code></td><td>51</td><td></td></tr>
+<tr><td><code>key_EXCLAMATION_MARK</code></td><td>52</td><td></td></tr>
+<tr><td><code>key_AMP</code></td><td>53</td><td></td></tr>
+<tr><td><code>key_QUOT</code></td><td>54</td><td></td></tr>
+<tr><td><code>key_SEMICOLON</code></td><td>55</td><td></td></tr>
+<tr><td><code>key_ENTER</code></td><td>56</td><td></td></tr>
+<tr><td><code>key_CLEAR</code></td><td>57</td><td></td></tr>
+<tr><td><code>key_CLEAR_SHORT</code></td><td>58</td><td></td></tr>
+<tr><td><code>key_SHIFT_LEFT</code></td><td>59</td><td></td></tr>
+<tr><td><code>key_SHIFT_RIGHT</code></td><td>60</td><td></td></tr>
+<tr><td><code>key_COLON</code></td><td>61</td><td></td></tr>
+<tr><td><code>key_MINUS</code></td><td>62</td><td></td></tr>
+<tr><td><code>key_BREAK</code></td><td>63</td><td></td></tr>
+<tr><td><code>key_BREAK_SHORT</code></td><td>64</td><td></td></tr>
+<tr><td><code>key_UP</code></td><td>65</td><td></td></tr>
+<tr><td><code>key_AT</code></td><td>66</td><td></td></tr>
+<tr><td><code>key_LEFT</code></td><td>67</td><td></td></tr>
+<tr><td><code>key_RIGHT</code></td><td>68</td><td></td></tr>
+<tr><td><code>key_DOWN</code></td><td>69</td><td></td></tr>
+<tr><td><code>key_ALT</code></td><td>70</td><td></td></tr>
+</table>
          */
-        public static final int id=0x7f010062;
+        public static final int id=0x7f010063;
+        /** <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>key_EXCLAMATION_MARK</code></td><td>52</td><td></td></tr>
+<tr><td><code>key_QUOT</code></td><td>54</td><td></td></tr>
+<tr><td><code>key_HASH</code></td><td>41</td><td></td></tr>
+<tr><td><code>key_DOLLAR</code></td><td>45</td><td></td></tr>
+<tr><td><code>key_PERCENT</code></td><td>50</td><td></td></tr>
+<tr><td><code>key_AMP</code></td><td>53</td><td></td></tr>
+<tr><td><code>key_APOS</code></td><td>51</td><td></td></tr>
+<tr><td><code>key_BR_OPEN</code></td><td>42</td><td></td></tr>
+<tr><td><code>key_BR_CLOSE</code></td><td>43</td><td></td></tr>
+<tr><td><code>key_ASTERIX</code></td><td>44</td><td></td></tr>
+<tr><td><code>key_EQUAL</code></td><td>49</td><td></td></tr>
+<tr><td><code>key_ADD</code></td><td>40</td><td></td></tr>
+<tr><td><code>key_LT</code></td><td>47</td><td></td></tr>
+<tr><td><code>key_GT</code></td><td>48</td><td></td></tr>
+<tr><td><code>key_QUESTION</code></td><td>46</td><td></td></tr>
+</table>
+         */
+        public static final int idShifted=0x7f010064;
         /**  Specifies a style resource to use for an indeterminate progress spinner. 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -505,7 +601,7 @@ theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
          */
-        public static final int size=0x7f010063;
+        public static final int size=0x7f010062;
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
@@ -953,79 +1049,150 @@ containing a value of this type.
         public static final int warning_icon=0x7f020085;
     }
     public static final class id {
-        public static final int abs__action_bar=0x7f050020;
-        public static final int abs__action_bar_container=0x7f05001f;
-        public static final int abs__action_bar_subtitle=0x7f050011;
-        public static final int abs__action_bar_title=0x7f050010;
-        public static final int abs__action_context_bar=0x7f050021;
+        public static final int abs__action_bar=0x7f050067;
+        public static final int abs__action_bar_container=0x7f050066;
+        public static final int abs__action_bar_subtitle=0x7f050058;
+        public static final int abs__action_bar_title=0x7f050057;
+        public static final int abs__action_context_bar=0x7f050068;
         public static final int abs__action_menu_divider=0x7f05000c;
         public static final int abs__action_menu_presenter=0x7f05000d;
-        public static final int abs__action_mode_bar=0x7f050025;
-        public static final int abs__action_mode_bar_stub=0x7f050024;
-        public static final int abs__action_mode_close_button=0x7f050014;
-        public static final int abs__activity_chooser_view_content=0x7f050015;
-        public static final int abs__checkbox=0x7f05001c;
-        public static final int abs__content=0x7f050022;
-        public static final int abs__default_activity_button=0x7f050018;
-        public static final int abs__expand_activities_button=0x7f050016;
+        public static final int abs__action_mode_bar=0x7f05006c;
+        public static final int abs__action_mode_bar_stub=0x7f05006b;
+        public static final int abs__action_mode_close_button=0x7f05005b;
+        public static final int abs__activity_chooser_view_content=0x7f05005c;
+        public static final int abs__checkbox=0x7f050063;
+        public static final int abs__content=0x7f050069;
+        public static final int abs__default_activity_button=0x7f05005f;
+        public static final int abs__expand_activities_button=0x7f05005d;
         public static final int abs__home=0x7f05000a;
-        public static final int abs__icon=0x7f05001a;
-        public static final int abs__image=0x7f050017;
-        public static final int abs__imageButton=0x7f050012;
-        public static final int abs__list_item=0x7f050019;
+        public static final int abs__icon=0x7f050061;
+        public static final int abs__image=0x7f05005e;
+        public static final int abs__imageButton=0x7f050059;
+        public static final int abs__list_item=0x7f050060;
         public static final int abs__progress_circular=0x7f05000e;
         public static final int abs__progress_horizontal=0x7f05000f;
-        public static final int abs__radio=0x7f05001d;
-        public static final int abs__search_badge=0x7f050028;
-        public static final int abs__search_bar=0x7f050027;
-        public static final int abs__search_button=0x7f050029;
-        public static final int abs__search_close_btn=0x7f05002e;
-        public static final int abs__search_edit_frame=0x7f05002a;
-        public static final int abs__search_go_btn=0x7f050030;
-        public static final int abs__search_mag_icon=0x7f05002b;
-        public static final int abs__search_plate=0x7f05002c;
-        public static final int abs__search_src_text=0x7f05002d;
-        public static final int abs__search_voice_btn=0x7f050031;
-        public static final int abs__shortcut=0x7f05001e;
-        public static final int abs__split_action_bar=0x7f050023;
-        public static final int abs__submit_area=0x7f05002f;
-        public static final int abs__textButton=0x7f050013;
-        public static final int abs__title=0x7f05001b;
+        public static final int abs__radio=0x7f050064;
+        public static final int abs__search_badge=0x7f05006f;
+        public static final int abs__search_bar=0x7f05006e;
+        public static final int abs__search_button=0x7f050070;
+        public static final int abs__search_close_btn=0x7f050075;
+        public static final int abs__search_edit_frame=0x7f050071;
+        public static final int abs__search_go_btn=0x7f050077;
+        public static final int abs__search_mag_icon=0x7f050072;
+        public static final int abs__search_plate=0x7f050073;
+        public static final int abs__search_src_text=0x7f050074;
+        public static final int abs__search_voice_btn=0x7f050078;
+        public static final int abs__shortcut=0x7f050065;
+        public static final int abs__split_action_bar=0x7f05006a;
+        public static final int abs__submit_area=0x7f050076;
+        public static final int abs__textButton=0x7f05005a;
+        public static final int abs__title=0x7f050062;
         public static final int abs__up=0x7f05000b;
-        public static final int current_configuration_name=0x7f05003c;
+        public static final int current_configuration_name=0x7f050083;
         public static final int disableHome=0x7f050009;
-        public static final int edit_query=0x7f050026;
-        public static final int emulator=0x7f050036;
-        public static final int emulator_not_running=0x7f05003a;
-        public static final int emulator_running=0x7f05003b;
-        public static final int error_text=0x7f050041;
-        public static final int help_text=0x7f050040;
+        public static final int edit_query=0x7f05006d;
+        public static final int emulator=0x7f05007d;
+        public static final int emulator_not_running=0x7f050081;
+        public static final int emulator_running=0x7f050082;
+        public static final int error_text=0x7f050088;
+        public static final int help_text=0x7f050087;
         public static final int homeAsUp=0x7f050006;
-        public static final int icon=0x7f05003f;
-        public static final int key_FIRE=0x7f050048;
-        public static final int key_joystick_horizontal=0x7f050046;
-        public static final int key_joystick_round=0x7f050045;
-        public static final int key_joystick_vertical=0x7f050047;
-        public static final int keyboard=0x7f050042;
-        public static final int keyboard_container=0x7f050039;
-        public static final int keyboard_view_1=0x7f050043;
-        public static final int keyboard_view_2=0x7f050044;
+        public static final int icon=0x7f050086;
+        public static final int key_0=0x7f050010;
+        public static final int key_1=0x7f050011;
+        public static final int key_2=0x7f050012;
+        public static final int key_3=0x7f050013;
+        public static final int key_4=0x7f050014;
+        public static final int key_5=0x7f050015;
+        public static final int key_6=0x7f050016;
+        public static final int key_7=0x7f050017;
+        public static final int key_8=0x7f050018;
+        public static final int key_9=0x7f050019;
+        public static final int key_A=0x7f05001a;
+        public static final int key_ADD=0x7f050038;
+        public static final int key_ALT=0x7f050056;
+        public static final int key_AMP=0x7f050045;
+        public static final int key_APOS=0x7f050043;
+        public static final int key_ASTERIX=0x7f05003c;
+        public static final int key_AT=0x7f050052;
+        public static final int key_B=0x7f05001b;
+        public static final int key_BREAK=0x7f05004f;
+        public static final int key_BREAK_SHORT=0x7f050050;
+        public static final int key_BR_CLOSE=0x7f05003b;
+        public static final int key_BR_OPEN=0x7f05003a;
+        public static final int key_C=0x7f05001c;
+        public static final int key_CLEAR=0x7f050049;
+        public static final int key_CLEAR_SHORT=0x7f05004a;
+        public static final int key_COLON=0x7f05004d;
+        public static final int key_COMMA=0x7f050034;
+        public static final int key_D=0x7f05001d;
+        public static final int key_DOLLAR=0x7f05003d;
+        public static final int key_DOT=0x7f050035;
+        public static final int key_DOWN=0x7f050055;
+        public static final int key_E=0x7f05001e;
+        public static final int key_ENTER=0x7f050048;
+        public static final int key_EQUAL=0x7f050041;
+        public static final int key_EXCLAMATION_MARK=0x7f050044;
+        public static final int key_F=0x7f05001f;
+        public static final int key_FIRE=0x7f05008f;
+        public static final int key_G=0x7f050020;
+        public static final int key_GT=0x7f050040;
+        public static final int key_H=0x7f050021;
+        public static final int key_HASH=0x7f050039;
+        public static final int key_I=0x7f050022;
+        public static final int key_J=0x7f050023;
+        public static final int key_K=0x7f050024;
+        public static final int key_L=0x7f050025;
+        public static final int key_LEFT=0x7f050053;
+        public static final int key_LT=0x7f05003f;
+        public static final int key_M=0x7f050026;
+        public static final int key_MINUS=0x7f05004e;
+        public static final int key_N=0x7f050027;
+        public static final int key_O=0x7f050028;
+        public static final int key_P=0x7f050029;
+        public static final int key_PERCENT=0x7f050042;
+        public static final int key_Q=0x7f05002a;
+        public static final int key_QUESTION=0x7f05003e;
+        public static final int key_QUOT=0x7f050046;
+        public static final int key_R=0x7f05002b;
+        public static final int key_RIGHT=0x7f050054;
+        public static final int key_S=0x7f05002c;
+        public static final int key_SEMICOLON=0x7f050047;
+        public static final int key_SHIFT_LEFT=0x7f05004b;
+        public static final int key_SHIFT_RIGHT=0x7f05004c;
+        public static final int key_SLASH=0x7f050036;
+        public static final int key_SPACE=0x7f050037;
+        public static final int key_T=0x7f05002d;
+        public static final int key_U=0x7f05002e;
+        public static final int key_UP=0x7f050051;
+        public static final int key_V=0x7f05002f;
+        public static final int key_W=0x7f050030;
+        public static final int key_X=0x7f050031;
+        public static final int key_Y=0x7f050032;
+        public static final int key_Z=0x7f050033;
+        public static final int key_joystick_horizontal=0x7f05008d;
+        public static final int key_joystick_round=0x7f05008c;
+        public static final int key_joystick_vertical=0x7f05008e;
+        public static final int keyboard=0x7f050089;
+        public static final int keyboard_container=0x7f050080;
+        public static final int keyboard_view_1=0x7f05008a;
+        public static final int keyboard_view_2=0x7f05008b;
         public static final int listMode=0x7f050002;
-        public static final int list_configurations=0x7f050035;
-        public static final int log=0x7f050038;
-        public static final int main=0x7f050032;
+        public static final int list_configurations=0x7f05007c;
+        public static final int log=0x7f05007f;
+        public static final int main=0x7f050079;
         public static final int normal=0x7f050001;
-        public static final int pager=0x7f050049;
-        public static final int path=0x7f05003e;
-        public static final int screen=0x7f050037;
-        public static final int screenshot=0x7f05003d;
+        public static final int pager=0x7f050090;
+        public static final int path=0x7f050085;
+        public static final int screen=0x7f05007e;
+        public static final int screenshot=0x7f050084;
         public static final int showCustom=0x7f050008;
         public static final int showHome=0x7f050005;
         public static final int showTitle=0x7f050007;
         public static final int tabMode=0x7f050003;
         public static final int useLogo=0x7f050004;
-        public static final int with_configurations=0x7f050034;
-        public static final int without_configurations=0x7f050033;
+        public static final int with_configurations=0x7f05007b;
+        public static final int without_configurations=0x7f05007a;
         public static final int wrap_content=0x7f050000;
     }
     public static final class integer {
@@ -1257,7 +1424,7 @@ containing a value of this type.
     }
     public static final class xml {
         public static final int configuration=0x7f040000;
-        public static final int keymap_model3=0x7f040001;
+        public static final int keymap_us=0x7f040001;
         public static final int settings=0x7f040002;
     }
     public static final class styleable {
@@ -1268,28 +1435,132 @@ containing a value of this type.
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
            <tr><td><code>{@link #Keyboard_id org.puder.trs80:id}</code></td><td></td></tr>
+           <tr><td><code>{@link #Keyboard_idShifted org.puder.trs80:idShifted}</code></td><td></td></tr>
            <tr><td><code>{@link #Keyboard_size org.puder.trs80:size}</code></td><td></td></tr>
            </table>
            @see #Keyboard_id
+           @see #Keyboard_idShifted
            @see #Keyboard_size
          */
         public static final int[] Keyboard = {
-            0x7f010062, 0x7f010063
+            0x7f010062, 0x7f010063, 0x7f010064
         };
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#id}
           attribute's value can be found in the {@link #Keyboard} array.
 
 
-          <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>key_0</code></td><td>0</td><td></td></tr>
+<tr><td><code>key_1</code></td><td>1</td><td></td></tr>
+<tr><td><code>key_2</code></td><td>2</td><td></td></tr>
+<tr><td><code>key_3</code></td><td>3</td><td></td></tr>
+<tr><td><code>key_4</code></td><td>4</td><td></td></tr>
+<tr><td><code>key_5</code></td><td>5</td><td></td></tr>
+<tr><td><code>key_6</code></td><td>6</td><td></td></tr>
+<tr><td><code>key_7</code></td><td>7</td><td></td></tr>
+<tr><td><code>key_8</code></td><td>8</td><td></td></tr>
+<tr><td><code>key_9</code></td><td>9</td><td></td></tr>
+<tr><td><code>key_A</code></td><td>10</td><td></td></tr>
+<tr><td><code>key_B</code></td><td>11</td><td></td></tr>
+<tr><td><code>key_C</code></td><td>12</td><td></td></tr>
+<tr><td><code>key_D</code></td><td>13</td><td></td></tr>
+<tr><td><code>key_E</code></td><td>14</td><td></td></tr>
+<tr><td><code>key_F</code></td><td>15</td><td></td></tr>
+<tr><td><code>key_G</code></td><td>16</td><td></td></tr>
+<tr><td><code>key_H</code></td><td>17</td><td></td></tr>
+<tr><td><code>key_I</code></td><td>18</td><td></td></tr>
+<tr><td><code>key_J</code></td><td>19</td><td></td></tr>
+<tr><td><code>key_K</code></td><td>20</td><td></td></tr>
+<tr><td><code>key_L</code></td><td>21</td><td></td></tr>
+<tr><td><code>key_M</code></td><td>22</td><td></td></tr>
+<tr><td><code>key_N</code></td><td>23</td><td></td></tr>
+<tr><td><code>key_O</code></td><td>24</td><td></td></tr>
+<tr><td><code>key_P</code></td><td>25</td><td></td></tr>
+<tr><td><code>key_Q</code></td><td>26</td><td></td></tr>
+<tr><td><code>key_R</code></td><td>27</td><td></td></tr>
+<tr><td><code>key_S</code></td><td>28</td><td></td></tr>
+<tr><td><code>key_T</code></td><td>29</td><td></td></tr>
+<tr><td><code>key_U</code></td><td>30</td><td></td></tr>
+<tr><td><code>key_V</code></td><td>31</td><td></td></tr>
+<tr><td><code>key_W</code></td><td>32</td><td></td></tr>
+<tr><td><code>key_X</code></td><td>33</td><td></td></tr>
+<tr><td><code>key_Y</code></td><td>34</td><td></td></tr>
+<tr><td><code>key_Z</code></td><td>35</td><td></td></tr>
+<tr><td><code>key_COMMA</code></td><td>36</td><td></td></tr>
+<tr><td><code>key_DOT</code></td><td>37</td><td></td></tr>
+<tr><td><code>key_SLASH</code></td><td>38</td><td></td></tr>
+<tr><td><code>key_SPACE</code></td><td>39</td><td></td></tr>
+<tr><td><code>key_ADD</code></td><td>40</td><td></td></tr>
+<tr><td><code>key_HASH</code></td><td>41</td><td></td></tr>
+<tr><td><code>key_BR_OPEN</code></td><td>42</td><td></td></tr>
+<tr><td><code>key_BR_CLOSE</code></td><td>43</td><td></td></tr>
+<tr><td><code>key_ASTERIX</code></td><td>44</td><td></td></tr>
+<tr><td><code>key_DOLLAR</code></td><td>45</td><td></td></tr>
+<tr><td><code>key_QUESTION</code></td><td>46</td><td></td></tr>
+<tr><td><code>key_LT</code></td><td>47</td><td></td></tr>
+<tr><td><code>key_GT</code></td><td>48</td><td></td></tr>
+<tr><td><code>key_EQUAL</code></td><td>49</td><td></td></tr>
+<tr><td><code>key_PERCENT</code></td><td>50</td><td></td></tr>
+<tr><td><code>key_APOS</code></td><td>51</td><td></td></tr>
+<tr><td><code>key_EXCLAMATION_MARK</code></td><td>52</td><td></td></tr>
+<tr><td><code>key_AMP</code></td><td>53</td><td></td></tr>
+<tr><td><code>key_QUOT</code></td><td>54</td><td></td></tr>
+<tr><td><code>key_SEMICOLON</code></td><td>55</td><td></td></tr>
+<tr><td><code>key_ENTER</code></td><td>56</td><td></td></tr>
+<tr><td><code>key_CLEAR</code></td><td>57</td><td></td></tr>
+<tr><td><code>key_CLEAR_SHORT</code></td><td>58</td><td></td></tr>
+<tr><td><code>key_SHIFT_LEFT</code></td><td>59</td><td></td></tr>
+<tr><td><code>key_SHIFT_RIGHT</code></td><td>60</td><td></td></tr>
+<tr><td><code>key_COLON</code></td><td>61</td><td></td></tr>
+<tr><td><code>key_MINUS</code></td><td>62</td><td></td></tr>
+<tr><td><code>key_BREAK</code></td><td>63</td><td></td></tr>
+<tr><td><code>key_BREAK_SHORT</code></td><td>64</td><td></td></tr>
+<tr><td><code>key_UP</code></td><td>65</td><td></td></tr>
+<tr><td><code>key_AT</code></td><td>66</td><td></td></tr>
+<tr><td><code>key_LEFT</code></td><td>67</td><td></td></tr>
+<tr><td><code>key_RIGHT</code></td><td>68</td><td></td></tr>
+<tr><td><code>key_DOWN</code></td><td>69</td><td></td></tr>
+<tr><td><code>key_ALT</code></td><td>70</td><td></td></tr>
+</table>
           @attr name android:id
         */
-        public static final int Keyboard_id = 0;
+        public static final int Keyboard_id = 1;
+        /**
+          <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#idShifted}
+          attribute's value can be found in the {@link #Keyboard} array.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>key_EXCLAMATION_MARK</code></td><td>52</td><td></td></tr>
+<tr><td><code>key_QUOT</code></td><td>54</td><td></td></tr>
+<tr><td><code>key_HASH</code></td><td>41</td><td></td></tr>
+<tr><td><code>key_DOLLAR</code></td><td>45</td><td></td></tr>
+<tr><td><code>key_PERCENT</code></td><td>50</td><td></td></tr>
+<tr><td><code>key_AMP</code></td><td>53</td><td></td></tr>
+<tr><td><code>key_APOS</code></td><td>51</td><td></td></tr>
+<tr><td><code>key_BR_OPEN</code></td><td>42</td><td></td></tr>
+<tr><td><code>key_BR_CLOSE</code></td><td>43</td><td></td></tr>
+<tr><td><code>key_ASTERIX</code></td><td>44</td><td></td></tr>
+<tr><td><code>key_EQUAL</code></td><td>49</td><td></td></tr>
+<tr><td><code>key_ADD</code></td><td>40</td><td></td></tr>
+<tr><td><code>key_LT</code></td><td>47</td><td></td></tr>
+<tr><td><code>key_GT</code></td><td>48</td><td></td></tr>
+<tr><td><code>key_QUESTION</code></td><td>46</td><td></td></tr>
+</table>
+          @attr name android:idShifted
+        */
+        public static final int Keyboard_idShifted = 2;
         /**
           <p>This symbol is the offset where the {@link org.puder.trs80.R.attr#size}
           attribute's value can be found in the {@link #Keyboard} array.
@@ -1303,7 +1574,7 @@ theme attribute (in the form
 containing a value of this type.
           @attr name android:size
         */
-        public static final int Keyboard_size = 1;
+        public static final int Keyboard_size = 0;
         /**  Attributes used to style the Action Bar. 
            <p>Includes the following attributes:</p>
            <table>

@@ -1,0 +1,80 @@
+<!-- http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13 -->
+<KeyMapping>
+    <KeyMap label="0" sym="0" key="0" name="key_0" value="0" />
+    <KeyMap label="1" sym="0" key="1" name="key_1" value="1" />
+    <KeyMap label="2" sym="0" key="2" name="key_2" value="2" />
+    <KeyMap label="3" sym="0" key="3" name="key_3" value="3" />
+    <KeyMap label="4" sym="0" key="4" name="key_4" value="4" />
+    <KeyMap label="5" sym="0" key="5" name="key_5" value="5" />
+    <KeyMap label="6" sym="0" key="6" name="key_6" value="6" />
+    <KeyMap label="7" sym="0" key="7" name="key_7" value="7" />
+    <KeyMap label="8" sym="0" key="8" name="key_8" value="8" />
+    <KeyMap label="9" sym="0" key="9" name="key_9" value="9" />
+    <KeyMap label="A" sym="0" key="A" name="key_A" value="10" />
+    <KeyMap label="B" sym="0" key="B" name="key_B" value="11" />
+    <KeyMap label="C" sym="0" key="C" name="key_C" value="12" />
+    <KeyMap label="D" sym="0" key="D" name="key_D" value="13" />
+    <KeyMap label="E" sym="0" key="E" name="key_E" value="14" />
+    <KeyMap label="F" sym="0" key="F" name="key_F" value="15" />
+    <KeyMap label="G" sym="0" key="G" name="key_G" value="16" />
+    <KeyMap label="H" sym="0" key="H" name="key_H" value="17" />
+    <KeyMap label="I" sym="0" key="I" name="key_I" value="18" />
+    <KeyMap label="J" sym="0" key="J" name="key_J" value="19" />
+    <KeyMap label="K" sym="0" key="K" name="key_K" value="20" />
+    <KeyMap label="L" sym="0" key="L" name="key_L" value="21" />
+    <KeyMap label="M" sym="0" key="M" name="key_M" value="22" />
+    <KeyMap label="N" sym="0" key="N" name="key_N" value="23" />
+    <KeyMap label="O" sym="0" key="O" name="key_O" value="24" />
+    <KeyMap label="P" sym="0" key="P" name="key_P" value="25" />
+    <KeyMap label="Q" sym="0" key="Q" name="key_Q" value="26" />
+    <KeyMap label="R" sym="0" key="R" name="key_R" value="27" />
+    <KeyMap label="S" sym="0" key="S" name="key_S" value="28" />
+    <KeyMap label="T" sym="0" key="T" name="key_T" value="29" />
+    <KeyMap label="U" sym="0" key="U" name="key_U" value="30" />
+    <KeyMap label="V" sym="0" key="V" name="key_V" value="31" />
+    <KeyMap label="W" sym="0" key="W" name="key_W" value="32" />
+    <KeyMap label="X" sym="0" key="X" name="key_X" value="33" />
+    <KeyMap label="Y" sym="0" key="Y" name="key_Y" value="34" />
+    <KeyMap label="Z" sym="0" key="Z" name="key_Z" value="35" />
+    <KeyMap label="," sym="0" key="," name="key_COMMA" value="36" />
+    <KeyMap label="." sym="0" key="." name="key_DOT" value="37" />
+    <KeyMap label="/" sym="0" key="/" name="key_SLASH" value="38" />
+    <KeyMap label=" " sym="0" key=" " name="key_SPACE" value="39" />
+    <KeyMap label="+" sym="0" key="+" name="key_ADD" value="40" />
+    <KeyMap label="\#" sym="0" key="\#" name="key_HASH" value="41" />
+    <KeyMap label="(" sym="0" key="(" name="key_BR_OPEN" value="42" />
+    <KeyMap label=")" sym="0" key=")" name="key_BR_CLOSE" value="43" />
+    <KeyMap label="*" sym="0" key="*" name="key_ASTERIX" value="44" />
+    <KeyMap label="$" sym="0" key="$" name="key_DOLLAR" value="45" />
+    <KeyMap label="\?" sym="0" key="\?" name="key_QUESTION" value="46" />
+    <KeyMap label="&lt;" sym="0" key="&lt;" name="key_LT" value="47" />
+    <KeyMap label="&gt;" sym="0" key="&gt;" name="key_GT" value="48" />
+    <KeyMap label="=" sym="0" key="=" name="key_EQUAL" value="49" />
+    <KeyMap label="%" sym="0" key="%" name="key_PERCENT" value="50" />
+    <KeyMap label="&apos;" sym="0" key="&apos;" name="key_APOS" value="51" />
+    <KeyMap label="!" sym="0" key="!" name="key_EXCLAMATION_MARK" value="52" />
+    <KeyMap label="&amp;" sym="0" key="&amp;" name="key_AMP" value="53" />
+    <KeyMap label="&quot;" sym="0" key="&quot;" name="key_QUOT" value="54" />
+    <KeyMap label=";" sym="0" key=";" name="key_SEMICOLON" value="55" />
+    <KeyMap label="ENTER" sym="0xd" key="NEXT_FREE" name="key_ENTER" value="56" />
+    <KeyMap label="CLEAR" sym="0xc" key="NEXT_FREE" name="key_CLEAR" value="57" />
+    <KeyMap label="CLR" sym="0xc" key="NEXT_FREE" name="key_CLEAR_SHORT" value="58" />
+    <KeyMap label="SHIFT" sym="0x118" key="NEXT_FREE" name="key_SHIFT_LEFT"
+        value="59" />
+    <KeyMap label="SHIFT" sym="0x119" key="NEXT_FREE" name="key_SHIFT_RIGHT"
+        value="60" />
+    <KeyMap label=":" sym="0" key=":" name="key_COLON" value="61" />
+    <KeyMap label="-" sym="0" key="-" name="key_MINUS" value="62" />
+    <KeyMap label="BREAK" sym="0x1b" key="NEXT_FREE" name="key_BREAK" value="63" />
+    <KeyMap label="BRK" sym="0x1b" key="NEXT_FREE" name="key_BREAK_SHORT"
+        value="64" />
+    <KeyMap label="\u2191" sym="0x111" key="NEXT_FREE" name="key_UP"
+        value="65" />
+    <KeyMap label="\u0040" sym="0" key="\u0040" name="key_AT" value="66" />
+    <KeyMap label="\u2190" sym="8" key="NEXT_FREE" name="key_LEFT" value="67" />
+    <KeyMap label="\u2192" sym="9" key="NEXT_FREE" name="key_RIGHT"
+        value="68" />
+    <KeyMap label="\u2193" sym="0x112" key="NEXT_FREE" name="key_DOWN"
+        value="69" />
+    <KeyMap label="ALT" sym="0" key="0" name="key_ALT" value="70" />
+</KeyMapping>

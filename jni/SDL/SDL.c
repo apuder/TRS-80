@@ -37,7 +37,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct {
     Uint16 event;
-    Uint16 mod;
+    Uint16 sym;
     Uint16 key;
 } KeyBuffer;
 
@@ -47,12 +47,12 @@ static int keyBufferFirst = 0;
 static int keyBufferLast = 0;
 static KeyBuffer keyBuffer[MAX_KEY_BUFFER];
 
-void add_key_event(Uint16 event, Uint16 mod, Uint16 key)
+void add_key_event(Uint16 event, Uint16 sym, Uint16 key)
 {
     pthread_mutex_lock(&mutex);
     KeyBuffer nextKey;
     nextKey.event = event;
-    nextKey.mod = mod;
+    nextKey.sym = sym;
     nextKey.key = key;
     keyBuffer[keyBufferLast] = nextKey;
     keyBufferLast = (keyBufferLast + 1) % MAX_KEY_BUFFER;
@@ -73,8 +73,8 @@ int SDLCALL SDL_PollEvent(SDL_Event *event)
     keyBufferFirst = (keyBufferFirst + 1) % MAX_KEY_BUFFER;
     __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "Dequeue key: 0x%x", nextKey->key);
     event->type = nextKey->event;
-    event->key.keysym.mod = nextKey->mod;
-    event->key.keysym.sym = nextKey->key;
+    event->key.keysym.mod = 0;//nextKey->mod;
+    event->key.keysym.sym = nextKey->sym;
     event->key.keysym.scancode = nextKey->key;
     event->key.keysym.unicode = nextKey->key;
     pthread_mutex_unlock(&mutex);

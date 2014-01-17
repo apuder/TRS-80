@@ -2,8 +2,99 @@
 <resources>
 
     <declare-styleable name="Keyboard">
-        <attr name="id" format="string" />
         <attr name="size" format="integer" />
+
+        <attr name="id" format="enum">
+            <enum name="key_0" value="0" />
+            <enum name="key_1" value="1" />
+            <enum name="key_2" value="2" />
+            <enum name="key_3" value="3" />
+            <enum name="key_4" value="4" />
+            <enum name="key_5" value="5" />
+            <enum name="key_6" value="6" />
+            <enum name="key_7" value="7" />
+            <enum name="key_8" value="8" />
+            <enum name="key_9" value="9" />
+            <enum name="key_A" value="10" />
+            <enum name="key_B" value="11" />
+            <enum name="key_C" value="12" />
+            <enum name="key_D" value="13" />
+            <enum name="key_E" value="14" />
+            <enum name="key_F" value="15" />
+            <enum name="key_G" value="16" />
+            <enum name="key_H" value="17" />
+            <enum name="key_I" value="18" />
+            <enum name="key_J" value="19" />
+            <enum name="key_K" value="20" />
+            <enum name="key_L" value="21" />
+            <enum name="key_M" value="22" />
+            <enum name="key_N" value="23" />
+            <enum name="key_O" value="24" />
+            <enum name="key_P" value="25" />
+            <enum name="key_Q" value="26" />
+            <enum name="key_R" value="27" />
+            <enum name="key_S" value="28" />
+            <enum name="key_T" value="29" />
+            <enum name="key_U" value="30" />
+            <enum name="key_V" value="31" />
+            <enum name="key_W" value="32" />
+            <enum name="key_X" value="33" />
+            <enum name="key_Y" value="34" />
+            <enum name="key_Z" value="35" />
+            <enum name="key_COMMA" value="36" />
+            <enum name="key_DOT" value="37" />
+            <enum name="key_SLASH" value="38" />
+            <enum name="key_SPACE" value="39" />
+            <enum name="key_ADD" value="40" />
+            <enum name="key_HASH" value="41" />
+            <enum name="key_BR_OPEN" value="42" />
+            <enum name="key_BR_CLOSE" value="43" />
+            <enum name="key_ASTERIX" value="44" />
+            <enum name="key_DOLLAR" value="45" />
+            <enum name="key_QUESTION" value="46" />
+            <enum name="key_LT" value="47" />
+            <enum name="key_GT" value="48" />
+            <enum name="key_EQUAL" value="49" />
+            <enum name="key_PERCENT" value="50" />
+            <enum name="key_APOS" value="51" />
+            <enum name="key_EXCLAMATION_MARK" value="52" />
+            <enum name="key_AMP" value="53" />
+            <enum name="key_QUOT" value="54" />
+            <enum name="key_SEMICOLON" value="55" />
+            <enum name="key_ENTER" value="56" />
+            <enum name="key_CLEAR" value="57" />
+            <enum name="key_CLEAR_SHORT" value="58" />
+            <enum name="key_SHIFT_LEFT" value="59" />
+            <enum name="key_SHIFT_RIGHT" value="60" />
+            <enum name="key_COLON" value="61" />
+            <enum name="key_MINUS" value="62" />
+            <enum name="key_BREAK" value="63" />
+            <enum name="key_BREAK_SHORT" value="64" />
+            <enum name="key_UP" value="65" />
+            <enum name="key_AT" value="66" />
+            <enum name="key_LEFT" value="67" />
+            <enum name="key_RIGHT" value="68" />
+            <enum name="key_DOWN" value="69" />
+            <enum name="key_ALT" value="70" />
+        </attr>
+
+        <attr name="idShifted" format="enum">
+            <enum name="key_EXCLAMATION_MARK" value="52" />
+            <enum name="key_QUOT" value="54" />
+            <enum name="key_HASH" value="41" />
+            <enum name="key_DOLLAR" value="45" />
+            <enum name="key_PERCENT" value="50" />
+            <enum name="key_AMP" value="53" />
+            <enum name="key_APOS" value="51" />
+            <enum name="key_BR_OPEN" value="42" />
+            <enum name="key_BR_CLOSE" value="43" />
+            <enum name="key_ASTERIX" value="44" />
+            <enum name="key_EQUAL" value="49" />
+            <enum name="key_ADD" value="40" />
+            <enum name="key_LT" value="47" />
+            <enum name="key_GT" value="48" />
+            <enum name="key_QUESTION" value="46" />
+        </attr>
     </declare-styleable>
 
 </resources>

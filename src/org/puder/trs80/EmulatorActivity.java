@@ -59,8 +59,6 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     private KeyboardManager    keyboardManager;
     private int                rotation;
     private OrientationChanged orientationManager;
-    private Handler handler = new Handler();
-
 
     class OrientationChanged extends OrientationEventListener {
 
@@ -148,9 +146,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         XTRS.setEmulatorActivity(this);
         Hardware hardware = TRS80Application.getHardware();
         hardware.computeFontDimensions(getWindow());
-        Hardware.Model model = hardware.getModel();
-        byte[] memBuffer = hardware.getMemoryBuffer();
-        keyboardManager = new KeyboardManager(model, memBuffer);
+        keyboardManager = new KeyboardManager();
         TRS80Application.setKeyboardManager(keyboardManager);
         XTRS.flushAudioQueue();
         initView();
@@ -260,16 +256,10 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         if (event.getRepeatCount() > 0) {
             return true;
         }
-        
-        handler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                keyboardManager.keyUp(event);
-            }
-        }, 50);
-        return true;
-//        return super.onKeyUp(keyCode, event);
+        if (keyboardManager.keyUp(event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     public void onScreenRotationClick(View view) {

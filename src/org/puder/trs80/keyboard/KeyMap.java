@@ -18,8 +18,8 @@ package org.puder.trs80.keyboard;
 
 class KeyMap {
     String label;
-    int    address;
-    byte   mask;
-    int    address2;
-    byte   mask2;
+    int    sym;
+    int    key;
+    String name;
+    int    value;
 }

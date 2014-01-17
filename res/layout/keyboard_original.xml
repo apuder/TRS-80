@@ -16,46 +16,55 @@
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_1"
+            keyboard:idShifted="key_EXCLAMATION_MARK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_2"
+            keyboard:idShifted="key_QUOT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_3"
+            keyboard:idShifted="key_HASH"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_4"
+            keyboard:idShifted="key_DOLLAR"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_5"
+            keyboard:idShifted="key_PERCENT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_6"
+            keyboard:idShifted="key_AMP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_7"
+            keyboard:idShifted="key_APOS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_8"
+            keyboard:idShifted="key_BR_OPEN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_9"
+            keyboard:idShifted="key_BR_CLOSE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -66,11 +75,13 @@
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_COLON"
+            keyboard:idShifted="key_ASTERIX"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_MINUS"
+            keyboard:idShifted="key_EQUAL"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -216,6 +227,7 @@
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_SEMICOLON"
+            keyboard:idShifted="key_ADD"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -239,7 +251,7 @@
         android:orientation="horizontal">
 
         <org.puder.trs80.keyboard.Key
-            keyboard:id="key_SHIFT"
+            keyboard:id="key_SHIFT_LEFT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             keyboard:size="2" />
@@ -281,21 +293,24 @@
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_COMMA"
+            keyboard:idShifted="key_LT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_DOT"
+            keyboard:idShifted="key_GT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
             keyboard:id="key_SLASH"
+            keyboard:idShifted="key_QUESTION"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <org.puder.trs80.keyboard.Key
-            keyboard:id="key_SHIFT"
+            keyboard:id="key_SHIFT_RIGHT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             keyboard:size="2" />

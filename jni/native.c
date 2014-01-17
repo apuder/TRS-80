@@ -286,9 +286,9 @@ void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
     fillBuffer(audioBuffer, audioBufferSize);
 }
 
-extern void add_key_event(Uint16 event, Uint16 mod, Uint16 key);
-void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, jint mod, jint key) {
-    add_key_event(event, mod, key);
+extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
+void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, jint sym, jint key) {
+    add_key_event(event, sym, key);
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {

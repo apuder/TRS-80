@@ -52,7 +52,10 @@ import android.view.ViewGroup.MarginLayoutParams;
  */
 public class Key extends View {
 
-    private String          label;
+    private int             idNormal;
+    private int             idShifted;
+
+    private String          labelNormal;
     private String          labelShifted;
     private boolean         isShifted;
     private boolean         isPressed;
@@ -62,13 +65,8 @@ public class Key extends View {
     private View            keyboardView1;
     private View            keyboardView2;
 
-    private int             address;
-    private byte            mask;
-    private int             address2;
-    private byte            mask2;
     private int             size;
     private Paint           paint;
-    private byte[]          memBuffer;
     private RectF           rect;
 
     private KeyboardManager keyboard;
@@ -92,41 +90,36 @@ public class Key extends View {
 
         keyboard = TRS80Application.getKeyboardManager();
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
-        String id = ta.getString(R.styleable.Keyboard_id);
-        if (id.equals("key_ALT")) {
-            label = "Alt";
+        idNormal = ta.getInt(R.styleable.Keyboard_id, -1);
+        idShifted = ta.getInt(R.styleable.Keyboard_idShifted, -1);
+        if (idNormal == 70 /* key_ALT */) {
+            labelNormal = "Alt";
         } else {
-            KeyMap keyMap = keyboard.getKeyMap(id);
-            label = keyMap.label;
-            address = keyMap.address;
-            address2 = keyMap.address2;
-            mask = keyMap.mask;
-            mask2 = keyMap.mask2;
+            KeyMap keyMap = keyboard.getKeyMap(idNormal);
+            labelNormal = keyMap.label;
         }
         size = ta.getInteger(R.styleable.Keyboard_size, 1);
         ta.recycle();
 
-        int idx = label.indexOf("|");
-        if (idx > 0) {
-            labelShifted = label.substring(0, idx);
-            label = label.substring(idx + 1);
+        if (idShifted != -1) {
+            KeyMap keyMap = keyboard.getKeyMap(idShifted);
+            labelShifted = keyMap.label;
             keyboard.addShiftableKey(this);
         }
-        isShiftKey = label.equals("SHIFT");
+        isShiftKey = labelNormal.equals("SHIFT");
         if (isShiftKey) {
-            labelShifted = label;
+            labelShifted = labelNormal;
             keyboard.addShiftableKey(this);
         }
         isShifted = false;
         isPressed = false;
-        isAltKey = label.equals("Alt");
+        isAltKey = labelNormal.equals("Alt");
         paint = new Paint();
         paint.setTypeface(TRS80Application.getTypeface());
         paint.setAntiAlias(true);
-        float textSizeScale = label.length() > 1 ? 0.4f : 0.6f;
+        float textSizeScale = labelNormal.length() > 1 ? 0.4f : 0.6f;
         paint.setTextSize(keyHeight * textSizeScale);
 
-        memBuffer = TRS80Application.getHardware().getMemoryBuffer();
         rect = new RectF();
         this.setOnTouchListener(new OnTouchListener() {
 
@@ -148,9 +141,10 @@ public class Key extends View {
                     return true;
                 }
                 if (action == MotionEvent.ACTION_DOWN) {
-                    memBuffer[address] |= mask;
-                    if (address2 != -1) {
-                        memBuffer[address2] |= mask2;
+                    if (isShifted && idShifted != -1) {
+                        keyboard.keyDown(idShifted);
+                    } else {
+                        keyboard.keyDown(idNormal);
                     }
                 }
                 if (action == MotionEvent.ACTION_UP) {
@@ -158,13 +152,13 @@ public class Key extends View {
                         if (!isShifted) {
                             keyboard.shiftKeys();
                         } else {
-                            memBuffer[address] &= ~mask;
                             keyboard.unshiftKeys();
                         }
                     } else {
-                        memBuffer[address] &= ~mask;
-                        if (address2 != -1) {
-                            memBuffer[address2] &= ~mask2;
+                        if (isShifted && idShifted != -1) {
+                            keyboard.keyUp(idShifted);
+                        } else {
+                            keyboard.keyUp(idNormal);
                         }
                         keyboard.unshiftKeys();
                     }
@@ -203,7 +197,7 @@ public class Key extends View {
         paint.setTextAlign(Align.CENTER);
         int xPos = (int) (rect.right / 2);
         int yPos = (int) ((rect.bottom / 2) - ((paint.descent() + paint.ascent()) / 2));
-        canvas.drawText(isShifted ? labelShifted : label, xPos, yPos, paint);
+        canvas.drawText(isShifted ? labelShifted : labelNormal, xPos, yPos, paint);
     }
 
     @Override
@@ -262,9 +256,6 @@ public class Key extends View {
     public void unshift() {
         if (isShifted) {
             isShifted = false;
-            if (isShiftKey) {
-                memBuffer[address] &= ~mask;
-            }
             invalidate();
         }
     }
