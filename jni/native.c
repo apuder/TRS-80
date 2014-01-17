@@ -112,6 +112,15 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     trs_screen_init();
     trs_timer_init();
     trs_reset(1);
+    int i;
+    for (i = 0; i < 4; i++) {
+        char* path = get_disk_path(i);
+        if (path != NULL) {
+            trs_disk_insert(i, path);
+            free(path);
+        }
+    }
+    trs_disk_init(1);
     z80_state.pc.word = entryAddr;
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
     instructionsSinceLastScreenAccess = 0;
@@ -172,7 +181,7 @@ char* get_disk_path(int disk) {
     jstring jpath = (*env)->CallStaticObjectMethod(env, clazzXTRS,
             getDiskPathMethodId, disk);
     if (jpath == NULL) {
-        return strdup("");
+        return NULL;
     }
     const char* path = (*env)->GetStringUTFChars(env, jpath, NULL);
     char* str = strdup(path);
