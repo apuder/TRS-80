@@ -71,8 +71,8 @@
 #include "trs_state_save.h"
 #ifndef ANDROID
 #include "trs_sdl_gui.h"
-#include "trs_cassette.h"
 #endif
+#include "trs_cassette.h"
 #include "trs_sdl_keyboard.h"
 
 #include "SDL/SDL.h"
@@ -2683,6 +2683,10 @@ void trs_screen_write_char(int position, int char_index)
   }
 #endif
 }
+
+#ifdef ANDROID
+void trs_gui_write_char(int position, int char_index, int invert);
+#endif
 
 void trs_gui_refresh()
 {
