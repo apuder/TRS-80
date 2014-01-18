@@ -33,23 +33,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 
-/**
- * The emulator features different keyboard layouts (original, compact, etc).
- * The XML layout resources can be found in res/layout/keyboard_*.xml. Class Key
- * implements the behavior of one key of the keyboard. Class Key is a custom
- * Android widget that is referenced from the aforementioned XML layout files.
- * Whenever the user 'clicks' on a key, class Key uses memory mapped IO to poke
- * a bit into the emulated RAM of the TRS-80. See the onTouch() method further
- * below. The custom XML attribute keyboard:id is used to cross-reference a key
- * map via the KeyboardManager (e.g., the Model 3 key map is stored in
- * keymap_model3.xml and loaded by KeyboardManager). This file contains the
- * memory addresses and bit mask for each key. The emulator runs in a separate
- * thread and will 'see' that a bit is flipped at a certain memory address and
- * will interpret this as a key-press. See the following link for the
- * memory-mapped IO address of the Model 3 keyboard:
- * 
- * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
- */
 public class Key extends View {
 
     final static int        TK_0                = 0;

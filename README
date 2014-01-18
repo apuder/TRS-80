@@ -50,15 +50,32 @@ Some of the key files:
   All down-calls and up-calls to the C code will go through
   this class. The native methods declared in XTRS are implemented
   in jni/native.c
+- Hardware: defines the hardware characteristics of the TRS machine
+  (e.g., TRS Model, disks to be mounted, etc). An instance of class
+  Hardware is passed to XTRS.init() to initialize the native layer.
 - keyboard_original.xml: Android XML layout that defines the
-  original Model 3 keyboard layout. Note the custom attributes
-  keyboard:address and keyboard:mask. These attribtues define
-  the memory-mapped bit that need to be set to "1" when the
-  user pushes the key.
+  original Model 3 keyboard layout.
 - Key.java: the accompanying Android custom widget that implements
-  the behavior of one key of the keyboard. Note the onTouch()
-  method that pokes the appropriate bits into RAM of the emulated
-  TRS-80.
+  the behavior of one key of the keyboard.
+
+
+Details of the keyboard
+-----------------------
+
+The emulator features different keyboard layouts (original, compact, etc).
+The XML layout resources can be found in res/layout/keyboard_*.xml. Class Key
+implements the behavior of one key of the keyboard. Class Key is a custom
+Android widget that is referenced from the aforementioned XML layout files.
+Whenever the user 'clicks' on a key, class Key uses the KeyboardManager to
+add a key event which will eventually be delivered to xtrs via SDL_PollEvent.
+File res/values/attrs.xml defines an enum for all the keys available on a TRS
+machine. The TK_* constants in class Key mirror the definitions in attrs.xml.
+When a user presses a key, the TK_* ID needs to be mapped to a
+SDL_KeyboardEvent. Specifically, the SDL virtual key code and the unicode
+character are needed to populate SDL_KeyboardEvent. This mapping is achieved
+with file res/xml/keymap_us.xml. Once the virtual key code and unicode
+character are determined, KeyboardManager uses XTRS.addKeyEvent() to fill a
+key buffer in the native layer.
 
 
 External Resources
