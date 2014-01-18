@@ -54,6 +54,12 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
     private Preference         romModel4;
     private Preference         romModel4p;
 
+    public static String getSetting(String key) {
+        SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
+                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(key, null);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

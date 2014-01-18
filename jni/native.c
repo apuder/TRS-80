@@ -22,7 +22,6 @@
 #define ERR_MEMORY_IS_NO_COPY -9
 #define ERR_SCREEN_IS_NO_COPY -10
 
-Uchar* memory;
 int isRunning = 0;
 
 #define EMULATOR_STATUS_NOT_INITIALIZED 0
@@ -39,7 +38,6 @@ static jmethodID closeAudioMethodId;
 static jmethodID pauseAudioMethodId;
 static jmethodID xlogMethodId;
 static jbyte* screenBuffer;
-static jbyteArray memoryArray;
 static jbyteArray screenArray;
 static jbyteArray audioBufferArray;
 static jbyte* audioBuffer;
@@ -81,16 +79,13 @@ static void cleanup_xtrs() {
         return;
     }
     JNIEnv *env = getEnv();
-    (*env)->ReleaseByteArrayElements(env, memoryArray, (jbyte*) memory,
-            JNI_COMMIT);
-    (*env)->DeleteGlobalRef(env, memoryArray);
     (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer,
             JNI_COMMIT);
     (*env)->DeleteGlobalRef(env, screenArray);
     emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 }
 
-static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
+static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr) {
     int debug = FALSE;
 
     /* program_name must be set first because the error
@@ -98,7 +93,22 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     program_name = "xtrs";
     check_endian();
     trs_model = model;
-    trs_rom_size = sizeROM;
+    const char* path = (*env)->GetStringUTFChars(env, romFile, NULL);
+    char* dest = NULL;
+    switch(model) {
+    case 1:
+        dest = romfile;
+        break;
+    case 3:
+        dest = romfile3;
+        break;
+    case 4:
+    case 5:
+        dest = romfile4p;
+        break;
+    }
+    strncpy(dest, path, FILENAME_MAX);
+    (*env)->ReleaseStringUTFChars(env, romFile, path);
     trs_autodelay = 1;
     trs_show_led = 0;
     grafyx_set_microlabs(0);
@@ -109,6 +119,7 @@ static void init_xtrs(jint model, Ushort sizeROM, Ushort entryAddr) {
     trs_uart_switches = 0;
     trs_kb_bracket(0);
     mem_init();
+    trs_rom_init();
     trs_screen_init();
     trs_timer_init();
     trs_reset(1);
@@ -204,8 +215,8 @@ void pause_audio(int pause_on) {
     (*env)->CallStaticVoidMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
 }
 
-int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint sizeROM,
-        jint entryAddr, jbyteArray mem, jbyteArray screen) {
+int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jstring romFile,
+                                   jint entryAddr, jbyteArray screen) {
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
         return ERR_GET_JVM;
@@ -257,19 +268,13 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jint siz
     }
 
     jboolean isCopy;
-    memoryArray = (*env)->NewGlobalRef(env, mem);
-    memory = (Uchar*) (*env)->GetByteArrayElements(env, mem, &isCopy);
-    if (isCopy) {
-        return ERR_MEMORY_IS_NO_COPY;
-    }
-
     screenArray = (*env)->NewGlobalRef(env, screen);
     screenBuffer = (*env)->GetByteArrayElements(env, screen, &isCopy);
     if (isCopy) {
         return ERR_SCREEN_IS_NO_COPY;
     }
 
-    init_xtrs(model, sizeROM, entryAddr);
+    init_xtrs(env, model, romFile, entryAddr);
     return NO_ERROR;
 }
 

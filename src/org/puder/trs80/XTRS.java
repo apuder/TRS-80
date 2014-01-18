@@ -41,7 +41,7 @@ public class XTRS {
 
     public static native void setRunning(boolean run);
 
-    public static native int init(int model, int sizeROM, int entryAddr, byte[] mem, byte[] screen);
+    public static native int init(int model, String romFile, int entryAddr, byte[] screen);
 
     public static native void reset();
 

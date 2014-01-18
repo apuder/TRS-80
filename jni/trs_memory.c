@@ -57,9 +57,7 @@
 #include "trs_disk.h"
 #include "trs_hard.h"
 #include "trs_state_save.h"
-#ifndef ANDROID
 #include "trs_imp_exp.h"
-#endif
 #ifdef MACOSX
 #include "trs_mac_interface.h"
 #endif
@@ -79,11 +77,7 @@
 /* Interrupt latch register in EI (Model 1) */
 #define TRS_INTLATCH(addr) (((addr)&~3) == 0x37e0)
 
-#ifdef ANDROID
-#include "atrs.h"
-#else
 Uchar memory[0x20001]; /* +1 so strings from mem_pointer are NUL-terminated */
-#endif
 Uchar *rom;
 int trs_rom_size;
 Uchar *video;
@@ -581,7 +575,6 @@ mem_block_transfer(Ushort dest, Ushort source, int direction, Ushort count)
 
 void trs_mem_save(FILE *file)
 {
-#ifndef ANDROID
   trs_save_uchar(file, memory, 0x20001);
   trs_save_int(file, &trs_rom_size, 1);
   trs_save_int(file, &trs_video_size, 1);
@@ -591,12 +584,10 @@ void trs_mem_save(FILE *file)
   trs_save_int(file, bank_offset, 2);
   trs_save_int(file, &video_offset, 1);
   trs_save_int(file, &romin, 1);
-#endif
 }
 
 void trs_mem_load(FILE *file)
 {
-#ifndef ANDROID
   trs_load_uchar(file, memory, 0x20001);
   trs_load_int(file, &trs_rom_size, 1);
   trs_load_int(file, &trs_video_size, 1);
@@ -613,6 +604,5 @@ void trs_mem_load(FILE *file)
     rom = rom_4;
     video = video_4;
   }
-#endif
 }
 

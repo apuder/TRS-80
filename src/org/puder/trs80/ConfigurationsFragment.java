@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import java.io.File;
+
 import org.puder.trs80.Hardware.Model;
 
 import android.app.Activity;
@@ -277,20 +279,36 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
                     Toast.LENGTH_LONG).show();
             return;
         }
-        Hardware hardware = new Model3();
-        int sizeROM = hardware.getSizeROM();
-        if (sizeROM == 0) {
+
+        String romFile = null;
+        switch (model) {
+        case MODEL1:
+            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
+            break;
+        case MODEL3:
+            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
+            break;
+        case MODEL4:
+            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
+            break;
+        case MODEL4P:
+            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
+            break;
+        default:
+            break;
+        }
+        if (romFile == null || !new File(romFile).exists()) {
             Toast.makeText(getActivity(), "No valid ROM found. Please use Settings to set ROM.",
                     Toast.LENGTH_LONG).show();
             return;
         }
+
+        Hardware hardware = new Model3();
         TRS80Application.setCurrentConfiguration(conf);
         TRS80Application.setHardware(hardware);
-        byte[] memBuffer = hardware.getMemoryBuffer();
         byte[] screenBuffer = hardware.getScreenBuffer();
         int entryAddr = hardware.getEntryAddress();
-        int err = XTRS.init(conf.getModel().getModelValue(), sizeROM, entryAddr, memBuffer,
-                screenBuffer);
+        int err = XTRS.init(conf.getModel().getModelValue(), romFile, entryAddr, screenBuffer);
         if (err != 0) {
             showError(err);
             return;

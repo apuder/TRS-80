@@ -6,7 +6,6 @@
 
 #define SCREEN_UPDATE_THRESHOLD 5000
 
-extern Uchar* memory;
 extern unsigned char trs_screen[2048];
 
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
@@ -15,8 +14,6 @@ extern unsigned char trs_screen[2048];
 extern int instructionsSinceLastScreenAccess;
 extern int screenWasUpdated;
 #endif
-
-extern int trs_rom_size;
 
 char* get_disk_path(int disk);
 

@@ -57,9 +57,7 @@ public class Model3 extends Hardware {
     public Model3() {
         super(Model.MODEL3);
         font = new Bitmap[256];
-        setMemorySize(128 * 1024 + 1);
         setScreenBuffer(0x3fff - 0x3c00 + 1);
-        loadROM(SettingsActivity.CONF_ROM_MODEL3);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
         setEntryAddress(entryAddr);
         // computeFontDimensions(mainActivity.getWindow());
