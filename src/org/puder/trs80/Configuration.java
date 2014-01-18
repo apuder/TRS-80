@@ -31,6 +31,7 @@ public class Configuration {
     public static final int          KEYBOARD_LAYOUT_GAMING_1 = 2;
     public static final int          KEYBOARD_LAYOUT_GAMING_2 = 3;
     public static final int          KEYBOARD_TILT            = 4;
+    public static final int          KEYBOARD_EXTERNAL        = 5;
 
     private static Configuration[]   configurations;
     private static SharedPreferences globalPrefs;

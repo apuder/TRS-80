@@ -290,7 +290,8 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         View top = this.findViewById(R.id.emulator);
         top.requestFocus();
         logView = (TextView) findViewById(R.id.log);
-        if (getResources().getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
+        int keyboardType = getKeyboardType();
+        if (keyboardType == Configuration.KEYBOARD_EXTERNAL) {
             return;
         }
         final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
@@ -351,6 +352,10 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     }
 
     private int getKeyboardType() {
+        if (getResources().getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
+            return Configuration.KEYBOARD_EXTERNAL;
+        }
+
         int keyboardType;
         switch (orientation) {
         case android.content.res.Configuration.ORIENTATION_LANDSCAPE:

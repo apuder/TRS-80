@@ -52,6 +52,78 @@ import android.view.ViewGroup.MarginLayoutParams;
  */
 public class Key extends View {
 
+    final static int        TK_0                = 0;
+    final static int        TK_1                = 1;
+    final static int        TK_2                = 2;
+    final static int        TK_3                = 3;
+    final static int        TK_4                = 4;
+    final static int        TK_5                = 5;
+    final static int        TK_6                = 6;
+    final static int        TK_7                = 7;
+    final static int        TK_8                = 8;
+    final static int        TK_9                = 9;
+    final static int        TK_A                = 10;
+    final static int        TK_B                = 11;
+    final static int        TK_C                = 12;
+    final static int        TK_D                = 13;
+    final static int        TK_E                = 14;
+    final static int        TK_F                = 15;
+    final static int        TK_G                = 16;
+    final static int        TK_H                = 17;
+    final static int        TK_I                = 18;
+    final static int        TK_J                = 19;
+    final static int        TK_K                = 20;
+    final static int        TK_L                = 21;
+    final static int        TK_M                = 22;
+    final static int        TK_N                = 23;
+    final static int        TK_O                = 24;
+    final static int        TK_P                = 25;
+    final static int        TK_Q                = 26;
+    final static int        TK_R                = 27;
+    final static int        TK_S                = 28;
+    final static int        TK_T                = 29;
+    final static int        TK_U                = 30;
+    final static int        TK_V                = 31;
+    final static int        TK_W                = 32;
+    final static int        TK_X                = 33;
+    final static int        TK_Y                = 34;
+    final static int        TK_Z                = 35;
+    final static int        TK_COMMA            = 36;
+    final static int        TK_DOT              = 37;
+    final static int        TK_SLASH            = 38;
+    final static int        TK_SPACE            = 39;
+    final static int        TK_ADD              = 40;
+    final static int        TK_HASH             = 41;
+    final static int        TK_BR_OPEN          = 42;
+    final static int        TK_BR_CLOSE         = 43;
+    final static int        TK_ASTERIX          = 44;
+    final static int        TK_DOLLAR           = 45;
+    final static int        TK_QUESTION         = 46;
+    final static int        TK_LT               = 47;
+    final static int        TK_GT               = 48;
+    final static int        TK_EQUAL            = 49;
+    final static int        TK_PERCENT          = 50;
+    final static int        TK_APOS             = 51;
+    final static int        TK_EXCLAMATION_MARK = 52;
+    final static int        TK_AMP              = 53;
+    final static int        TK_QUOT             = 54;
+    final static int        TK_SEMICOLON        = 55;
+    final static int        TK_ENTER            = 56;
+    final static int        TK_CLEAR            = 57;
+    final static int        TK_CLEAR_SHORT      = 58;
+    final static int        TK_SHIFT_LEFT       = 59;
+    final static int        TK_SHIFT_RIGHT      = 60;
+    final static int        TK_COLON            = 61;
+    final static int        TK_MINUS            = 62;
+    final static int        TK_BREAK            = 63;
+    final static int        TK_BREAK_SHORT      = 64;
+    final static int        TK_UP               = 65;
+    final static int        TK_AT               = 66;
+    final static int        TK_LEFT             = 67;
+    final static int        TK_RIGHT            = 68;
+    final static int        TK_DOWN             = 69;
+    final static int        TK_ALT              = 70;
+
     private int             idNormal;
     private int             idShifted;
 
@@ -75,8 +147,8 @@ public class Key extends View {
     private int             keyHeight;
     private int             keyMargin;
 
-    private int             posX = -1;
-    private int             posY = -1;
+    private int             posX                = -1;
+    private int             posY                = -1;
 
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -92,7 +164,7 @@ public class Key extends View {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
         idNormal = ta.getInt(R.styleable.Keyboard_id, -1);
         idShifted = ta.getInt(R.styleable.Keyboard_idShifted, -1);
-        if (idNormal == 70 /* key_ALT */) {
+        if (idNormal == TK_ALT) {
             labelNormal = "Alt";
         } else {
             KeyMap keyMap = keyboard.getKeyMap(idNormal);
@@ -106,14 +178,14 @@ public class Key extends View {
             labelShifted = keyMap.label;
             keyboard.addShiftableKey(this);
         }
-        isShiftKey = labelNormal.equals("SHIFT");
+        isShiftKey = idNormal == TK_SHIFT_LEFT || idNormal == TK_SHIFT_RIGHT;
         if (isShiftKey) {
             labelShifted = labelNormal;
             keyboard.addShiftableKey(this);
         }
         isShifted = false;
         isPressed = false;
-        isAltKey = labelNormal.equals("Alt");
+        isAltKey = idNormal == TK_ALT;
         paint = new Paint();
         paint.setTypeface(TRS80Application.getTypeface());
         paint.setAntiAlias(true);

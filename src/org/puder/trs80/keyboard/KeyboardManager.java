@@ -32,12 +32,6 @@ import android.view.KeyEvent;
 
 public class KeyboardManager {
 
-    private static int          KEY_SPACE;
-    private static int          KEY_LEFT;
-    private static int          KEY_RIGHT;
-    private static int          KEY_DOWN;
-    private static int          KEY_UP;
-
     private List<Key>           shiftableKeys;
 
     private static List<KeyMap> keyboardMapping;
@@ -46,13 +40,6 @@ public class KeyboardManager {
 
     static {
         keyboardMapping = parseKeyMap(R.xml.keymap_us);
-        // enum values from attrs.xml
-        KEY_SPACE = 39;
-        KEY_LEFT = 67;
-        KEY_RIGHT = 68;
-        KEY_DOWN = 69;
-        KEY_UP = 65;
-
     }
 
     static private List<KeyMap> parseKeyMap(int keyMapLayout) {
@@ -123,34 +110,34 @@ public class KeyboardManager {
     }
 
     public void allCursorKeysUp() {
-        keyUp(KEY_LEFT);
-        keyUp(KEY_RIGHT);
-        keyUp(KEY_UP);
-        keyUp(KEY_DOWN);
+        keyUp(Key.TK_LEFT);
+        keyUp(Key.TK_RIGHT);
+        keyUp(Key.TK_UP);
+        keyUp(Key.TK_DOWN);
     }
 
     public void pressKeyDown() {
-        keyDown(KEY_DOWN);
+        keyDown(Key.TK_DOWN);
     }
 
     public void pressKeyUp() {
-        keyDown(KEY_UP);
+        keyDown(Key.TK_UP);
     }
 
     public void pressKeyLeft() {
-        keyDown(KEY_LEFT);
+        keyDown(Key.TK_LEFT);
     }
 
     public void pressKeyRight() {
-        keyDown(KEY_RIGHT);
+        keyDown(Key.TK_RIGHT);
     }
 
     public void pressKeySpace() {
-        keyDown(KEY_SPACE);
+        keyDown(Key.TK_SPACE);
     }
 
     public void unpressKeySpace() {
-        keyUp(KEY_SPACE);
+        keyUp(Key.TK_SPACE);
     }
 
     public void keyDown(int keyId) {
@@ -198,6 +185,30 @@ public class KeyboardManager {
     }
 
     private int mapKeyEventToTRS(KeyEvent event) {
+        switch (event.getKeyCode()) {
+        case KeyEvent.KEYCODE_ENTER:
+            return Key.TK_ENTER;
+        case KeyEvent.KEYCODE_DEL:
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+            return Key.TK_LEFT;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+            return Key.TK_RIGHT;
+        case KeyEvent.KEYCODE_DPAD_DOWN:
+            return Key.TK_DOWN;
+        case KeyEvent.KEYCODE_DPAD_UP:
+            return Key.TK_UP;
+        case KeyEvent.KEYCODE_B:
+            if ((event.getMetaState() & KeyEvent.META_CTRL_ON) != 0) {
+                return Key.TK_BREAK;
+            }
+            break;
+        case KeyEvent.KEYCODE_C:
+            if ((event.getMetaState() & KeyEvent.META_CTRL_ON) != 0) {
+                return Key.TK_CLEAR;
+            }
+            break;
+        }
+
         int key = event.getUnicodeChar();
         if (key >= '0' && key <= '9') {
             return key - '0';
@@ -211,53 +222,55 @@ public class KeyboardManager {
         }
         switch (key) {
         case ',':
-            return 36;
+            return Key.TK_COMMA;
         case '.':
-            return 37;
+            return Key.TK_DOT;
         case '/':
-            return 38;
+            return Key.TK_SLASH;
         case ' ':
-            return 39;
+            return Key.TK_SPACE;
         case '+':
-            return 40;
+            return Key.TK_ADD;
         case '#':
-            return 41;
+            return Key.TK_HASH;
         case '(':
-            return 42;
+            return Key.TK_BR_OPEN;
         case ')':
-            return 43;
+            return Key.TK_BR_CLOSE;
         case '*':
-            return 44;
+            return Key.TK_ASTERIX;
         case '$':
-            return 45;
+            return Key.TK_DOLLAR;
         case '?':
-            return 46;
+            return Key.TK_QUESTION;
         case '<':
-            return 47;
+            return Key.TK_LT;
         case '>':
-            return 48;
+            return Key.TK_GT;
         case '=':
-            return 49;
+            return Key.TK_EQUAL;
         case '%':
-            return 50;
+            return Key.TK_PERCENT;
+        case '&':
+            return Key.TK_AMP;
         case '\'':
-            return 51;
+            return Key.TK_APOS;
         case '!':
-            return 52;
+            return Key.TK_EXCLAMATION_MARK;
         case '@':
-            return 53;
+            return Key.TK_AT;
         case '"':
-            return 54;
+            return Key.TK_QUOT;
         case ';':
-            return 55;
+            return Key.TK_SEMICOLON;
         case 0xa:
-            return 56;
+            return Key.TK_ENTER;
         case ':':
-            return 61;
+            return Key.TK_COLON;
         case '-':
-            return 62;
+            return Key.TK_MINUS;
         case 0x8:
-            return 67;
+            return Key.TK_LEFT;
         }
         return -1;
     }
