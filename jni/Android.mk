@@ -27,6 +27,5 @@ LOCAL_SRC_FILES := native.c \
 	z80.c \
 	trs_cassette.c \
 	trs_memory.c \
-	SDL_emu.c \
 	SDL/SDL.c
 include $(BUILD_SHARED_LIBRARY)

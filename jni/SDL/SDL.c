@@ -33,7 +33,7 @@ static void exit_emu()
 
 static struct timeval start_tv;
 static SDL_bool ticks_started = SDL_FALSE;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mutex_kb = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct {
     Uint16 event;
@@ -49,7 +49,7 @@ static KeyBuffer keyBuffer[MAX_KEY_BUFFER];
 
 void add_key_event(Uint16 event, Uint16 sym, Uint16 key)
 {
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex_kb);
     KeyBuffer nextKey;
     nextKey.event = event;
     nextKey.sym = sym;
@@ -59,14 +59,14 @@ void add_key_event(Uint16 event, Uint16 sym, Uint16 key)
     if (keyBufferFirst == keyBufferLast) {
         keyBufferFirst = (keyBufferFirst + 1) % MAX_KEY_BUFFER;
     }
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex_kb);
 }
 
 int SDLCALL SDL_PollEvent(SDL_Event *event)
 {
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex_kb);
     if (keyBufferFirst == keyBufferLast) {
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex_kb);
         return 0;
     }
     KeyBuffer* nextKey = &keyBuffer[keyBufferFirst];
@@ -76,7 +76,7 @@ int SDLCALL SDL_PollEvent(SDL_Event *event)
     event->key.keysym.sym = nextKey->sym;
     event->key.keysym.scancode = nextKey->key;
     event->key.keysym.unicode = nextKey->key;
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex_kb);
     return 1;
 }
 
@@ -275,4 +275,46 @@ void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon)
 int SDLCALL SDL_ShowCursor(int toggle)
 {
     NOT_IMPLEMENTED();
+}
+
+/* Audio */
+
+static SDL_AudioSpec audioSpec;
+static pthread_mutex_t mutex_snd = PTHREAD_MUTEX_INITIALIZER;
+
+
+void fillBuffer(Uint8* stream, int len) {
+    pthread_mutex_lock(&mutex_snd);
+    audioSpec.callback(audioSpec.userdata, stream, len);
+    pthread_mutex_unlock(&mutex_snd);
+}
+
+int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
+{
+    memcpy(obtained, desired, sizeof(SDL_AudioSpec));
+    obtained->format = AUDIO_S16;
+    obtained->silence = 0;
+    memcpy(&audioSpec, obtained, sizeof(SDL_AudioSpec));
+    init_audio(obtained->freq, obtained->channels, obtained->format, obtained->samples);
+    return 0;
+}
+
+void SDL_CloseAudio(void)
+{
+    close_audio();
+}
+
+void SDL_PauseAudio(int pause_on)
+{
+    pause_audio(pause_on);
+}
+
+void SDL_LockAudio(void)
+{
+    pthread_mutex_lock(&mutex_snd);
+}
+
+void SDL_UnlockAudio(void)
+{
+    pthread_mutex_unlock(&mutex_snd);
 }

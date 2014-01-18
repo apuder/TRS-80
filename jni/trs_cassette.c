@@ -59,21 +59,14 @@
 
 #include "trs.h"
 #include "z80.h"
-#ifndef ANDROID
 #include "trs_state_save.h"
-#endif
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "SDL_emu.h"
-#ifdef ANDROID
-#include "SDL_emu.h"
-#else
 #include <SDL/SDL.h>
-#endif
 
 #define CLOSE		0
 #define READ		1
@@ -1344,7 +1337,6 @@ void trs_pause_audio(int pause)
     SDL_PauseAudio(pause);
 }
 
-#ifndef ANDROID
 void 
 trs_cassette_save(FILE *file)
 {
@@ -1428,5 +1420,4 @@ trs_cassette_load(FILE *file)
     }
   }
 }
-#endif
 

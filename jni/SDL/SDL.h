@@ -40,14 +40,9 @@ void SDL_JoystickClose(SDL_Joystick* joy_stick);
 */
 
 
-#if 0
 #define DEFAULT_SAMPLE_RATE 44100
 #define AUDIO_U8 0
 #define AUDIO_S16 1
-
-typedef unsigned char Uint8;
-typedef unsigned short Uint16;
-typedef unsigned int Uint32;
 
 typedef struct{
   int freq;
@@ -65,6 +60,5 @@ void SDL_CloseAudio(void);
 void SDL_PauseAudio(int pause_on);
 void SDL_LockAudio(void);
 void SDL_UnlockAudio(void);
-#endif
 
 #endif /* SDL_H_ */
