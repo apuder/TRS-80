@@ -26,7 +26,6 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.commons.io.IOUtils;
-import org.puder.trs80.Hardware.Model;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -135,7 +134,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
     private void createFirstConfiguration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
         firstConfig.setName("BASIC Interpreter");
-        firstConfig.setModel(Model.MODEL3);
+        firstConfig.setModel(Hardware.MODEL3);
         firstConfig.save();
     }
 }

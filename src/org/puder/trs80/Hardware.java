@@ -16,52 +16,56 @@
 
 package org.puder.trs80;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.view.Window;
 
 abstract public class Hardware {
 
-    public enum Model {
-        NONE(0), MODEL1(1), MODEL3(3), MODEL4(4), MODEL4P(5);
-        private int model;
+    final public static int MODEL_NONE = 0;
+    final public static int MODEL1     = 1;
+    final public static int MODEL3     = 3;
+    final public static int MODEL4     = 4;
+    final public static int MODEL4P    = 5;
 
-        private Model(int model) {
-            this.model = model;
-        }
+    /*
+     * The following fields with prefix "xtrs" are configuration parameters for
+     * xtrs. They are read via JNI within native.c
+     */
+    @SuppressWarnings("unused")
+    private int             xtrsModel;
+    @SuppressWarnings("unused")
+    private String          xtrsRomFile;
+    private byte[]          xtrsScreenBuffer;
+    @SuppressWarnings("unused")
+    private int             xtrsEntryAddr;
+    @SuppressWarnings("unused")
+    private String          xtrsDisk0;
+    @SuppressWarnings("unused")
+    private String          xtrsDisk1;
+    @SuppressWarnings("unused")
+    private String          xtrsDisk2;
+    @SuppressWarnings("unused")
+    private String          xtrsDisk3;
 
-        public int getModelValue() {
-            return model;
-        }
-    };
-
-    protected Model  model;
-    protected byte[] screenBuffer;
-    private int      entryAddr;
-
-    protected Hardware(Model model) {
-        this.model = model;
-    }
-
-    public Model getModel() {
-        return model;
+    protected Hardware(int model, Configuration conf, String xtrsRomFile) {
+        this.xtrsModel = model;
+        this.xtrsRomFile = xtrsRomFile;
+        this.xtrsDisk0 = conf.getDiskPath(0);
+        this.xtrsDisk1 = conf.getDiskPath(1);
+        this.xtrsDisk2 = conf.getDiskPath(2);
+        this.xtrsDisk3 = conf.getDiskPath(3);
     }
 
     protected void setScreenBuffer(int size) {
-        screenBuffer = new byte[size];
+        xtrsScreenBuffer = new byte[size];
     }
 
     public byte[] getScreenBuffer() {
-        return this.screenBuffer;
+        return this.xtrsScreenBuffer;
     }
 
     public void setEntryAddress(int addr) {
-        this.entryAddr = addr;
-    }
-
-    public int getEntryAddress() {
-        return entryAddr;
+        this.xtrsEntryAddr = addr;
     }
 
     abstract public void computeFontDimensions(Window window);

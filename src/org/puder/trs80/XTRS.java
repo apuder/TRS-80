@@ -41,7 +41,7 @@ public class XTRS {
 
     public static native void setRunning(boolean run);
 
-    public static native int init(int model, String romFile, int entryAddr, byte[] screen);
+    public static native int init(Hardware hardware);
 
     public static native void reset();
 
@@ -74,10 +74,6 @@ public class XTRS {
 
     public static boolean isSoundMuted() {
         return soundMuted;
-    }
-
-    public static String getDiskPath(int disk) {
-        return TRS80Application.getCurrentConfiguration().getDiskPath(disk);
     }
 
     public static boolean isRendering() {

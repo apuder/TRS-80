@@ -16,8 +16,6 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.Hardware.Model;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -124,22 +122,22 @@ public class Configuration {
         return id;
     }
 
-    public Hardware.Model getModel() {
+    public int getModel() {
         String model = sharedPrefs.getString(EditConfigurationActivity.CONF_MODEL, null);
         if (model == null) {
-            return Model.NONE;
+            return Hardware.MODEL_NONE;
         }
         switch (Integer.parseInt(model)) {
         case 1:
-            return Model.MODEL1;
+            return Hardware.MODEL1;
         case 3:
-            return Model.MODEL3;
+            return Hardware.MODEL3;
         case 4:
-            return Model.MODEL4;
+            return Hardware.MODEL4;
         case 5:
-            return Model.MODEL4P;
+            return Hardware.MODEL4P;
         }
-        return Model.NONE;
+        return Hardware.MODEL_NONE;
     }
 
     public int getScreenColorAsRGB() {

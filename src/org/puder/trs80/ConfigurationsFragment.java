@@ -18,8 +18,6 @@ package org.puder.trs80;
 
 import java.io.File;
 
-import org.puder.trs80.Hardware.Model;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -273,8 +271,8 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     }
 
     private void userConfirmedStartConfiguration(Configuration conf) {
-        Model model = conf.getModel();
-        if (model != Model.MODEL3) {
+        int model = conf.getModel();
+        if (model != Hardware.MODEL3) {
             Toast.makeText(getActivity(), "Only Model 3 is supported at this time.",
                     Toast.LENGTH_LONG).show();
             return;
@@ -282,16 +280,16 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
 
         String romFile = null;
         switch (model) {
-        case MODEL1:
+        case Hardware.MODEL1:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
             break;
-        case MODEL3:
+        case Hardware.MODEL3:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
             break;
-        case MODEL4:
+        case Hardware.MODEL4:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
             break;
-        case MODEL4P:
+        case Hardware.MODEL4P:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
             break;
         default:
@@ -303,12 +301,10 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             return;
         }
 
-        Hardware hardware = new Model3();
+        Hardware hardware = new Model3(conf, romFile);
         TRS80Application.setCurrentConfiguration(conf);
         TRS80Application.setHardware(hardware);
-        byte[] screenBuffer = hardware.getScreenBuffer();
-        int entryAddr = hardware.getEntryAddress();
-        int err = XTRS.init(conf.getModel().getModelValue(), romFile, entryAddr, screenBuffer);
+        int err = XTRS.init(hardware);
         if (err != 0) {
             showError(err);
             return;

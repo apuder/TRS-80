@@ -6,6 +6,8 @@
 #include "trs_iodefs.h"
 #include "trs_uart.h"
 
+#include <SDL/SDL.h>
+
 #include "atrs.h"
 
 #define DEBUG_TAG "Z80"
@@ -14,7 +16,6 @@
 #define ERR_GET_JVM -1
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
-#define ERR_GET_METHOD_GET_DISK_PATH -4
 #define ERR_GET_METHOD_INIT_AUDIO -5
 #define ERR_GET_METHOD_CLOSE_AUDIO -6
 #define ERR_GET_METHOD_PAUSE_AUDIO -7
@@ -32,7 +33,6 @@ static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
 static jmethodID isRenderingMethodId;
 static jmethodID updateScreenMethodId;
-static jmethodID getDiskPathMethodId;
 static jmethodID initAudioMethodId;
 static jmethodID closeAudioMethodId;
 static jmethodID pauseAudioMethodId;
@@ -85,7 +85,8 @@ static void cleanup_xtrs() {
     emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 }
 
-static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr) {
+static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr,
+                      jstring xtrsDisk0, jstring xtrsDisk1, jstring xtrsDisk2, jstring xtrsDisk3) {
     int debug = FALSE;
 
     /* program_name must be set first because the error
@@ -123,14 +124,31 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_screen_init();
     trs_timer_init();
     trs_reset(1);
-    int i;
-    for (i = 0; i < 4; i++) {
-        char* path = get_disk_path(i);
-        if (path != NULL) {
-            trs_disk_insert(i, path);
-            free(path);
-        }
+    // Disk 0
+    if (xtrsDisk0 != NULL) {
+        path = (*env)->GetStringUTFChars(env, xtrsDisk0, NULL);
+        trs_disk_insert(0, (char*) path);
+        (*env)->ReleaseStringUTFChars(env, xtrsDisk0, path);
     }
+    // Disk 1
+    if (xtrsDisk1 != NULL) {
+        path = (*env)->GetStringUTFChars(env, xtrsDisk1, NULL);
+        trs_disk_insert(1, (char*) path);
+        (*env)->ReleaseStringUTFChars(env, xtrsDisk1, path);
+    }
+    // Disk 2
+    if (xtrsDisk2 != NULL) {
+        path = (*env)->GetStringUTFChars(env, xtrsDisk2, NULL);
+        trs_disk_insert(2, (char*) path);
+        (*env)->ReleaseStringUTFChars(env, xtrsDisk2, path);
+    }
+    // Disk 3
+    if (xtrsDisk3 != NULL) {
+        path = (*env)->GetStringUTFChars(env, xtrsDisk3, NULL);
+        trs_disk_insert(3, (char*) path);
+        (*env)->ReleaseStringUTFChars(env, xtrsDisk3, path);
+    }
+
     trs_disk_init(1);
     z80_state.pc.word = entryAddr;
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
@@ -187,19 +205,6 @@ static void check_for_screen_updates() {
 #endif
 }
 
-char* get_disk_path(int disk) {
-    JNIEnv *env = getEnv();
-    jstring jpath = (*env)->CallStaticObjectMethod(env, clazzXTRS,
-            getDiskPathMethodId, disk);
-    if (jpath == NULL) {
-        return NULL;
-    }
-    const char* path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    char* str = strdup(path);
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
-    return str;
-}
-
 void init_audio(int rate, int channels, int encoding, int bufSize) {
     JNIEnv *env = getEnv();
     (*env)->CallStaticVoidMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
@@ -215,8 +220,7 @@ void pause_audio(int pause_on) {
     (*env)->CallStaticVoidMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
 }
 
-int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jstring romFile,
-                                   jint entryAddr, jbyteArray screen) {
+int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
         return ERR_GET_JVM;
@@ -240,12 +244,6 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jstring 
         return ERR_GET_METHOD_UPDATE_SCREEN;
     }
 
-    getDiskPathMethodId = (*env)->GetStaticMethodID(env, cls, "getDiskPath",
-            "(I)Ljava/lang/String;");
-    if (getDiskPathMethodId == 0) {
-        return ERR_GET_METHOD_GET_DISK_PATH;
-    }
-
     initAudioMethodId = (*env)->GetStaticMethodID(env, cls, "initAudio", "(IIII)V");
     if (initAudioMethodId == 0) {
         return ERR_GET_METHOD_INIT_AUDIO;
@@ -267,14 +265,32 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jint model, jstring 
         return ERR_GET_METHOD_XLOG;
     }
 
+    jclass hardwareClass = (*env)->GetObjectClass(env, hardware);
+    jfieldID xtrsModelID = (*env)->GetFieldID(env, hardwareClass, "xtrsModel", "I");
+    jfieldID xtrsRomFileID = (*env)->GetFieldID(env, hardwareClass, "xtrsRomFile", "Ljava/lang/String;");
+    jfieldID xtrsScreenBufferID = (*env)->GetFieldID(env, hardwareClass, "xtrsScreenBuffer", "[B");
+    jfieldID xtrsEntryAddrID = (*env)->GetFieldID(env, hardwareClass, "xtrsEntryAddr", "I");
+    jfieldID xtrsDisk0ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk0", "Ljava/lang/String;");
+    jfieldID xtrsDisk1ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk1", "Ljava/lang/String;");
+    jfieldID xtrsDisk2ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk2", "Ljava/lang/String;");
+    jfieldID xtrsDisk3ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk3", "Ljava/lang/String;");
+    jint xtrsModel = (*env)->GetIntField(env, hardware, xtrsModelID);
+    jstring xtrsRomFile = (*env)->GetObjectField(env, hardware, xtrsRomFileID);
+    jbyteArray xtrsScreenBuffer = (*env)->GetObjectField(env, hardware, xtrsScreenBufferID);
+    jint xtrsEntryAddr = (*env)->GetIntField(env, hardware, xtrsEntryAddrID);
+    jstring xtrsDisk0 = (*env)->GetObjectField(env, hardware, xtrsDisk0ID);
+    jstring xtrsDisk1 = (*env)->GetObjectField(env, hardware, xtrsDisk1ID);
+    jstring xtrsDisk2 = (*env)->GetObjectField(env, hardware, xtrsDisk2ID);
+    jstring xtrsDisk3 = (*env)->GetObjectField(env, hardware, xtrsDisk3ID);
+
     jboolean isCopy;
-    screenArray = (*env)->NewGlobalRef(env, screen);
-    screenBuffer = (*env)->GetByteArrayElements(env, screen, &isCopy);
+    screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
+    screenBuffer = (*env)->GetByteArrayElements(env, xtrsScreenBuffer, &isCopy);
     if (isCopy) {
         return ERR_SCREEN_IS_NO_COPY;
     }
 
-    init_xtrs(env, model, romFile, entryAddr);
+    init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
 }
 
@@ -292,9 +308,6 @@ void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
     flush_audio_queue();
 }
 
-typedef unsigned char Uint8;
-typedef unsigned short Uint16;
-typedef unsigned int Uint32;
 extern void fillBuffer(Uint8* stream, int len);
 void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
     fillBuffer(audioBuffer, audioBufferSize);

@@ -54,8 +54,8 @@ public class Model3 extends Hardware {
 
     private Bitmap[]    font;
 
-    public Model3() {
-        super(Model.MODEL3);
+    public Model3(Configuration conf, String romFile) {
+        super(Hardware.MODEL3, conf, romFile);
         font = new Bitmap[256];
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");

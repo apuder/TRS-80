@@ -16,14 +16,12 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.Hardware.Model;
-
 import android.content.SharedPreferences.Editor;
 
 public class ConfigurationBackup extends Configuration {
 
     private String   backupName;
-    private Model    backupModel;
+    private int      backupModel;
     private String[] backupDisk = new String[4];
     private boolean  backupMuteSound;
     private int      backupCharacterColor;
@@ -50,7 +48,7 @@ public class ConfigurationBackup extends Configuration {
         this.backupName = name;
     }
 
-    public void setModel(Model model) {
+    public void setModel(int model) {
         this.backupModel = model;
     }
 
@@ -75,16 +73,16 @@ public class ConfigurationBackup extends Configuration {
     private void saveModel() {
         String model = null;
         switch (backupModel) {
-        case MODEL1:
+        case Hardware.MODEL1:
             model = "1";
             break;
-        case MODEL3:
+        case Hardware.MODEL3:
             model = "3";
             break;
-        case MODEL4:
+        case Hardware.MODEL4:
             model = "4";
             break;
-        case MODEL4P:
+        case Hardware.MODEL4P:
             model = "5";
             break;
         default:
