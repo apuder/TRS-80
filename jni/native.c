@@ -111,6 +111,7 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     strncpy(dest, path, FILENAME_MAX);
     (*env)->ReleaseStringUTFChars(env, romFile, path);
     trs_autodelay = 1;
+    trs_emtsafe = 1;
     trs_show_led = 0;
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
