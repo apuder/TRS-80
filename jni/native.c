@@ -126,24 +126,28 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_timer_init();
     trs_reset(1);
     // Disk 0
+    trs_disk_remove(0);
     if (xtrsDisk0 != NULL) {
         path = (*env)->GetStringUTFChars(env, xtrsDisk0, NULL);
         trs_disk_insert(0, (char*) path);
         (*env)->ReleaseStringUTFChars(env, xtrsDisk0, path);
     }
     // Disk 1
+    trs_disk_remove(1);
     if (xtrsDisk1 != NULL) {
         path = (*env)->GetStringUTFChars(env, xtrsDisk1, NULL);
         trs_disk_insert(1, (char*) path);
         (*env)->ReleaseStringUTFChars(env, xtrsDisk1, path);
     }
     // Disk 2
+    trs_disk_remove(2);
     if (xtrsDisk2 != NULL) {
         path = (*env)->GetStringUTFChars(env, xtrsDisk2, NULL);
         trs_disk_insert(2, (char*) path);
         (*env)->ReleaseStringUTFChars(env, xtrsDisk2, path);
     }
     // Disk 3
+    trs_disk_remove(3);
     if (xtrsDisk3 != NULL) {
         path = (*env)->GetStringUTFChars(env, xtrsDisk3, NULL);
         trs_disk_insert(3, (char*) path);
