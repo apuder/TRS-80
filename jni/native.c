@@ -43,12 +43,14 @@ static jbyteArray audioBufferArray;
 static jbyte* audioBuffer;
 static jint audioBufferSize;
 
+#ifdef ANDROID_JAVA_SCREEN_UPDATE
 unsigned char trs_screen[2048];
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
 int instructionsSinceLastScreenAccess;
 int screenWasUpdated;
 #endif
 static int instructionsSinceLastScreenUpdate;
+#endif
 
 
 extern char *program_name;
@@ -156,16 +158,19 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
 
     trs_disk_init(1);
     z80_state.pc.word = entryAddr;
+#ifdef ANDROID_JAVA_SCREEN_UPDATE
 #ifdef ANDROID_BATCHED_SCREEN_UPDATE
     instructionsSinceLastScreenAccess = 0;
     screenWasUpdated = 0;
 #else
     instructionsSinceLastScreenUpdate = 0;
 #endif
+#endif
 
     emulator_status = EMULATOR_STATUS_INITIALIZED;
 }
 
+#ifdef ANDROID_JAVA_SCREEN_UPDATE
 static int trigger_screen_update() {
     JNIEnv *env = getEnv();
     jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
@@ -209,6 +214,7 @@ static void check_for_screen_updates() {
     }
 #endif
 }
+#endif
 
 void init_audio(int rate, int channels, int encoding, int bufSize) {
     JNIEnv *env = getEnv();
@@ -329,7 +335,9 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     }
     while (isRunning) {
         z80_run(0);
+#ifdef ANDROID_JAVA_SCREEN_UPDATE
         check_for_screen_updates();
+#endif
 #ifdef SETITIMER_FIX
         struct timeval tv;
 
