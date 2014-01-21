@@ -34,7 +34,7 @@ import android.view.Window;
  * asset/fonts/DejaVuSansMono.ttf is used (see generateASCIIFont()). For the
  * Model 3 pseudo-graphics we compute the bitmaps for the 2x3-per character
  * pseudo pixel graphics (see generateGraphicsFont()).
- * 
+ *
  */
 public class Model3 extends Hardware {
 
@@ -55,7 +55,7 @@ public class Model3 extends Hardware {
     private Bitmap[]    font;
 
     public Model3(Configuration conf, String romFile) {
-        super(Hardware.MODEL3, conf, romFile);
+        super(conf.getModel(), conf, romFile);
         font = new Bitmap[256];
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
