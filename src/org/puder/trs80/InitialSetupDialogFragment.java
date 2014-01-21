@@ -17,6 +17,7 @@
 package org.puder.trs80;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
 
@@ -43,6 +46,7 @@ import com.actionbarsherlock.app.SherlockDialogFragment;
 public class InitialSetupDialogFragment extends SherlockDialogFragment {
     final private static String PATH           = "/TRS-80/";
 
+    final private static String URL_ROM_MODEL1 = "http://www.classic-computers.org.nz/system-80/s80-roms.zip";
     final private static String URL_ROM_MODEL3 = "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom";
 
     private MainFragment        mainFrag;
@@ -72,63 +76,154 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
     }
 
     private void doInitialSetup() {
+        File sdcard = Environment.getExternalStorageDirectory();
+        final String dirName = sdcard.getAbsolutePath() + PATH;
+        File dir = new File(dirName);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         progressDialog.setCancelable(true);
         progressDialog.setMessage("Downloading...");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.show();
-        new Thread(new Runnable() {
 
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    download();
-                    createFirstConfiguration();
-                    mainFrag.handler.post(new Runnable() {
+                boolean result;
 
+                // Download Model 1 ROM
+                try {
+                    String destFilePath = dirName + "model1.rom";
+                    result = download(URL_ROM_MODEL1, "1",
+                                      true, "trs80model1.rom", destFilePath);
+                } catch (IOException e) {
+                    result = false;
+                }
+
+                if (result) {
+                    mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
+                            //progressDialog.dismiss();
                             mainFrag.romDownloaded();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download succeeded!",
+                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 1 ROM succeeded!",
                                     Toast.LENGTH_LONG).show();
                         }
                     });
-                } catch (IOException e) {
+                } else {
                     mainFrag.handler.post(new Runnable() {
-
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download failed!",
+                            //progressDialog.dismiss();
+                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 1 ROM failed!",
                                     Toast.LENGTH_LONG).show();
                         }
                     });
                 }
+
+                // Download Model 3 ROM
+                try {
+                    String destFilePath = dirName + "model3.rom";
+                    result = download(URL_ROM_MODEL3, "3",
+                                      false, "", destFilePath);
+
+                    createFirstConfiguration();
+                } catch (IOException e) {
+                    result = false;
+                }
+
+                if (result) {
+                    mainFrag.handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            mainFrag.romDownloaded();
+                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 3 ROM succeeded!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } else {
+                    mainFrag.handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 3 ROM failed!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+
+                // Calling this here seems to cause some exceptions,
+                // so we call it in the run() methods of the final
+                // ROM loader above, as it was when only the Model 3 ROM
+                // loader code was implemented...
+                //progressDialog.dismiss();
             }
         }).start();
     }
 
-    private void download() throws IOException {
-        File sdcard = Environment.getExternalStorageDirectory();
-        File dir = new File(sdcard.getAbsolutePath() + PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        String fn = dir.getAbsolutePath() + "/model3.rom";
-        File file = new File(fn);
-        OutputStream out = new FileOutputStream(file);
-        URL url = new URL(URL_ROM_MODEL3);
+    private boolean download(String URL, String model,
+                             boolean isZipped, String fileInZip,
+                             String destFilePath) throws IOException {
+        boolean result = false;
+
+        URL url = new URL(URL);
         URLConnection urlConnection = url.openConnection();
         InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-        IOUtils.copy(in, out);
+
+        if (isZipped) {
+            ZipInputStream zis = new ZipInputStream(in);
+            try {
+                ZipEntry ze;
+                while ((ze = zis.getNextEntry()) != null) {
+                    if (ze.getName().equals(fileInZip)) {
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        byte[] buffer = new byte[1024];
+                        int count;
+                        while ((count = zis.read(buffer)) != -1) {
+                           baos.write(buffer, 0, count);
+                        }
+                        byte[] bytes = baos.toByteArray();
+
+                        File destFile = new File(destFilePath);
+                        OutputStream out = new FileOutputStream(destFile);
+                        out.write(bytes);
+                        out.close();
+
+                        result = true;
+                        break;
+                    }
+                }
+            } finally {
+               zis.close();
+            }
+        } else {
+            File destFile = new File(destFilePath);
+            OutputStream out = new FileOutputStream(destFile);
+            IOUtils.copy(in, out);
+            out.close();
+
+            result = true;
+        }
+
         in.close();
-        out.close();
-        SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(
-                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        Editor editor = sharedPrefs.edit();
-        editor.putString(SettingsActivity.CONF_ROM_MODEL3, fn);
-        editor.commit();
+
+        if (result) {
+            // Perhaps this belongs in caller?
+            SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            Editor editor = sharedPrefs.edit();
+            if (model.equals("1")) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL1, destFilePath);
+            } else if (model.equals("3")) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL3, destFilePath);
+            }
+            editor.commit();
+        }
+
+        return result;
     }
 
     private void createFirstConfiguration() {
