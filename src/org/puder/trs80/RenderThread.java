@@ -23,6 +23,8 @@ import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
+    private int           model;
+
     private int           trsScreenCols;
     private int           trsScreenRows;
     private int           trsCharWidth;
@@ -38,6 +40,7 @@ public class RenderThread extends Thread {
     public RenderThread(SurfaceHolder holder) {
         this.surfaceHolder = holder;
         Hardware h = TRS80Application.getHardware();
+        model = h.getModel();
         screenBuffer = h.getScreenBuffer();
         trsScreenCols = h.getScreenCols();
         trsScreenRows = h.getScreenRows();
@@ -79,6 +82,10 @@ public class RenderThread extends Thread {
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols; col++) {
                 int ch = screenBuffer[i] & 0xff;
+                // Emulate Radio Shack lowercase mod (for Model 1)
+                if (this.model == Hardware.MODEL1 && ch < 0x20) {
+                    ch += 0x40;
+                }
                 int startx = trsCharWidth * col;
                 int starty = trsCharHeight * row;
                 if (font[ch] == null) {

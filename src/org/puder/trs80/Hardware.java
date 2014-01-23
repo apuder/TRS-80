@@ -56,6 +56,10 @@ abstract public class Hardware {
         this.xtrsDisk3 = conf.getDiskPath(3);
     }
 
+    protected int getModel() {
+        return this.xtrsModel;
+    }
+
     protected void setScreenBuffer(int size) {
         xtrsScreenBuffer = new byte[size];
     }
