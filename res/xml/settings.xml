@@ -4,12 +4,12 @@
         android:key="conf_roms">
 
         <Preference
-            android:title="Model 1"
-            android:summary="ROM to use for Model 1"
+            android:title="Model I"
+            android:summary="ROM to use for Model I"
             android:key="conf_rom_model1" />
         <Preference
-            android:title="Model 3"
-            android:summary="ROM to use for Model 3"
+            android:title="Model III"
+            android:summary="ROM to use for Model III"
             android:key="conf_rom_model3" />
         <Preference
             android:title="Model 4"

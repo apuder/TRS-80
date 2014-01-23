@@ -161,7 +161,11 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
         }
         val = sharedPrefs.getString(CONF_MODEL, null);
         if (val != null) {
-            if (val.equals("5")) {
+            if (val.equals("1")) {
+                val = "I";
+            } else if (val.equals("3")) {
+                val = "III";
+            } else if (val.equals("5")) {
                 val = "4P";
             }
             model.setSummary("Model " + val);

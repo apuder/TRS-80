@@ -237,14 +237,14 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
     private void createModel1Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName("BASIC Interpreter (Model 1)");
+        firstConfig.setName("Model I - no disks");
         firstConfig.setModel(Hardware.MODEL1);
         firstConfig.save();
     }
 
     private void createModel3Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName("BASIC Interpreter (Model 3)");
+        firstConfig.setName("Model III - no disks");
         firstConfig.setModel(Hardware.MODEL3);
         firstConfig.save();
     }

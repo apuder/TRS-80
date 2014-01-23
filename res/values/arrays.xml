@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="conf_trs_model">
-        <item>Model 1</item>
-        <item>Model 3</item>
+        <item>Model I</item>
+        <item>Model III</item>
         <item>Model 4</item>
         <item>Model 4P</item>
     </string-array>

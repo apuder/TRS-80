@@ -274,7 +274,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         Hardware hardware;
         int model = conf.getModel();
         if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {
-            Toast.makeText(getActivity(), "Only Model 1 and Model 3 are supported at this time.",
+            Toast.makeText(getActivity(), "Only Model I and Model III are supported at this time.",
                     Toast.LENGTH_LONG).show();
             return;
         }
