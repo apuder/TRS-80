@@ -271,6 +271,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     }
 
     private void userConfirmedStartConfiguration(Configuration conf) {
+        Hardware hardware;
         int model = conf.getModel();
         if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {
             Toast.makeText(getActivity(), "Only Model 1 and Model 3 are supported at this time.",
@@ -282,17 +283,25 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
         switch (model) {
         case Hardware.MODEL1:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
+            hardware = new Model1(conf, romFile);
             break;
         case Hardware.MODEL3:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
+            hardware = new Model3(conf, romFile);
             break;
         case Hardware.MODEL4:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
+            // Change this to correct model when implemented
+            hardware = new Model1(conf, romFile);
             break;
         case Hardware.MODEL4P:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
+            // Change this to correct model when implemented
+            hardware = new Model1(conf, romFile);
             break;
         default:
+            // Change this to correct model when implemented
+            hardware = new Model1(conf, romFile);
             break;
         }
         if (romFile == null || !new File(romFile).exists()) {
@@ -301,7 +310,6 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             return;
         }
 
-        Hardware hardware = new Model3(conf, romFile);
         TRS80Application.setCurrentConfiguration(conf);
         TRS80Application.setHardware(hardware);
         int err = XTRS.init(hardware);

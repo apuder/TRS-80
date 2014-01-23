@@ -25,7 +25,7 @@ import android.graphics.Typeface;
 import android.view.Window;
 
 /**
- * Class Model3 defines the hardware characteristics of a TRS-80 Model 3. In
+ * Class Model1 defines the hardware characteristics of a TRS-80 Model 3. In
  * particular, it computes bitmaps for the Model 3 font. The size of the font is
  * determined by the size of the screen and whether the emulator runs in
  * landscape or portrait mode. The goal is to scale the size nicely for
@@ -36,7 +36,7 @@ import android.view.Window;
  * pseudo pixel graphics (see generateGraphicsFont()).
  *
  */
-public class Model3 extends Hardware {
+public class Model1 extends Hardware {
 
     final private int   trsScreenCols = 64;
     final private int   trsScreenRows = 16;
@@ -54,8 +54,8 @@ public class Model3 extends Hardware {
 
     private Bitmap[]    font;
 
-    public Model3(Configuration conf, String romFile) {
-        super(Hardware.MODEL3, conf, romFile);
+    public Model1(Configuration conf, String romFile) {
+        super(Hardware.MODEL1, conf, romFile);
         font = new Bitmap[256];
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         int entryAddr = 0;// memory.loadCmdFile("defense.cmd");
