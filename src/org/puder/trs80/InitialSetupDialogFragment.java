@@ -44,11 +44,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
 public class InitialSetupDialogFragment extends SherlockDialogFragment {
-    final private static String PATH           = "/TRS-80/";
-
-    final private static String URL_ROM_MODEL1 = "http://www.classic-computers.org.nz/system-80/s80-roms.zip";
-    final private static String URL_ROM_MODEL3 = "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom";
-
     private MainFragment        mainFrag;
 
     public static InitialSetupDialogFragment newInstance(MainFragment mainFrag) {
@@ -76,8 +71,18 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
     }
 
     private void doInitialSetup() {
+        final String model1_rom_url = this.getString(R.string.model1_rom_url);
+        final String model1_rom_file_in_zip = this.getString(R.string.model1_rom_file_in_zip);
+        final String model3_rom_url = this.getString(R.string.model3_rom_url);
+        final String model1_rom_filename = this.getString(R.string.model1_rom_filename);
+        final String model3_rom_filename = this.getString(R.string.model3_rom_filename);
+        final String model1_rom_success_msg = this.getString(R.string.model1_rom_success_msg);
+        final String model1_rom_failure_msg = this.getString(R.string.model1_rom_failure_msg);
+        final String model3_rom_success_msg = this.getString(R.string.model3_rom_success_msg);
+        final String model3_rom_failure_msg = this.getString(R.string.model3_rom_failure_msg);
+
         File sdcard = Environment.getExternalStorageDirectory();
-        final String dirName = sdcard.getAbsolutePath() + PATH;
+        final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir) + "/";
         File dir = new File(dirName);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -96,21 +101,23 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
                 // Download Model 1 ROM
                 try {
-                    String destFilePath = dirName + "model1.rom";
-                    result = download(URL_ROM_MODEL1, "1",
-                                      true, "trs80model1.rom", destFilePath);
+                    result = download(model1_rom_url, "1",
+                                      true, model1_rom_file_in_zip,
+                                      dirName + model1_rom_filename);
                 } catch (IOException e) {
                     result = false;
                 }
 
                 if (result) {
+                    createModel1Configuration();
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
                             //progressDialog.dismiss();
                             mainFrag.romDownloaded();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 1 ROM succeeded!",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                           model1_rom_success_msg,
+                                           Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -118,31 +125,32 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                         @Override
                         public void run() {
                             //progressDialog.dismiss();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 1 ROM failed!",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                           model1_rom_failure_msg,
+                                           Toast.LENGTH_LONG).show();
                         }
                     });
                 }
 
                 // Download Model 3 ROM
                 try {
-                    String destFilePath = dirName + "model3.rom";
-                    result = download(URL_ROM_MODEL3, "3",
-                                      false, "", destFilePath);
-
-                    createFirstConfiguration();
+                    result = download(model3_rom_url, "3",
+                                      false, "",
+                                      dirName + model3_rom_filename);
                 } catch (IOException e) {
                     result = false;
                 }
 
                 if (result) {
+                    createModel3Configuration();
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
                             progressDialog.dismiss();
                             mainFrag.romDownloaded();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 3 ROM succeeded!",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                           model3_rom_success_msg,
+                                           Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -150,8 +158,9 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                         @Override
                         public void run() {
                             progressDialog.dismiss();
-                            Toast.makeText(mainFrag.getApplicationContext(), "Download of Model 3 ROM failed!",
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                           model3_rom_failure_msg,
+                                           Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -226,9 +235,16 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
         return result;
     }
 
-    private void createFirstConfiguration() {
+    private void createModel1Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName("BASIC Interpreter");
+        firstConfig.setName("BASIC Interpreter (Model 1)");
+        firstConfig.setModel(Hardware.MODEL1);
+        firstConfig.save();
+    }
+
+    private void createModel3Configuration() {
+        ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
+        firstConfig.setName("BASIC Interpreter (Model 3)");
         firstConfig.setModel(Hardware.MODEL3);
         firstConfig.save();
     }

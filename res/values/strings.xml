@@ -6,6 +6,18 @@
     <string name="path">Path</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+
+    <string name="trs80_dir">TRS-80</string>
+    <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
+    <string name="model1_rom_file_in_zip">trs80model1.rom</string>
+    <string name="model1_rom_filename">model1.rom</string>
+    <string name="model3_rom_url">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
+    <string name="model3_rom_filename">model3.rom</string>
+    <string name="model1_rom_success_msg">Download of Model 1 ROM succeeded</string>
+    <string name="model1_rom_failure_msg">Download of Model 1 ROM failed!</string>
+    <string name="model3_rom_success_msg">Download of Model 3 ROM succeeded</string>
+    <string name="model3_rom_failure_msg">Download of Model 3 ROM failed!</string>
+
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
@@ -13,25 +25,28 @@
                          Do you want to launch new configuration?</string>
     <string name="alert_dialog_confirm_stop_emu">Emulator currently runs configuration \'%1$s\'.
                          Do you want to stop emulation?</string>
+
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
     <string name="emulator_not_running">Emulator is currently not running!</string>
     <string name="currently_running">Currently running:</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>
+
     <string name="title_initial_setup">Initial Setup</string>
     <string name="initial_setup">For copyright reasons this emulator does not contain ROM
                         images. However, you have the option to download the required ROM
                         files from well-known locations from the Internet. Would you like
                         to download the ROM images?</string>
+
     <string name="help_title_configurations">Help: Configurations</string>
     <string name="help_configurations">Tap on the \'+\' icon to create a new configuration.
                         A configuration defines the TRS-80 model and the disk images used for
                         the emulation. Click on a configuration and then the Play icon to run it.
-                        Note that currently only Model 3 emulation is supported.</string>
+                        Note that currently only Model 1 and Model 3 emulation is supported.</string>
     <string name="help_title_edit_configuration">Help: Edit Configuration</string>
     <string name="help_edit_configuration">A configuration defines the parameters used by the
                         emulator. Select the TRS-80 model to emulate.
-                        Note that currently only Model 3 emulation is supported.
+                        Note that currently only Model 1 and Model 3 emulation is supported.
                         If no disk images are defined,
                         the TRS-80 ROM will launch the Basic interpreter. Disk images need to be
                         copied to the SD card. This app does not contain disk images for copyright
@@ -56,5 +71,5 @@
                         For copyright reasons this app does not bundle ROM images. You can find
                         them on the Internet (for example
                         <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">here</a>).</string>
-    
+
 </resources>
