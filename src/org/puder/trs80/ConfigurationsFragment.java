@@ -291,19 +291,25 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
             break;
         case Hardware.MODEL4:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
-            // Change this to correct model when implemented
-            hardware = new Model1(conf, romFile);
+            //TODO Change this to correct model when implemented
+            hardware = null;
             break;
         case Hardware.MODEL4P:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
-            // Change this to correct model when implemented
-            hardware = new Model1(conf, romFile);
+            //TODO Change this to correct model when implemented
+            hardware = null;
             break;
         default:
-            // Change this to correct model when implemented
-            hardware = new Model1(conf, romFile);
+            hardware = null;
             break;
         }
+
+        if (hardware == null) {
+            Toast.makeText(getActivity(), "Model not supported.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (romFile == null || !new File(romFile).exists()) {
             Toast.makeText(getActivity(), "No valid ROM found. Please use Settings to set ROM.",
                     Toast.LENGTH_LONG).show();

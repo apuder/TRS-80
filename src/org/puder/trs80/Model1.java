@@ -25,14 +25,14 @@ import android.graphics.Typeface;
 import android.view.Window;
 
 /**
- * Class Model1 defines the hardware characteristics of a TRS-80 Model 3. In
- * particular, it computes bitmaps for the Model 3 font. The size of the font is
+ * Class Model1 defines the hardware characteristics of a TRS-80 Model 1. In
+ * particular, it computes bitmaps for the Model 1 font. The size of the font is
  * determined by the size of the screen and whether the emulator runs in
  * landscape or portrait mode. The goal is to scale the size nicely for
  * different screen resolutions. Each bitmap of 'font' represents one character
  * of the ASCII code. For alphanumeric characters the bundled font
  * asset/fonts/DejaVuSansMono.ttf is used (see generateASCIIFont()). For the
- * Model 3 pseudo-graphics we compute the bitmaps for the 2x3-per character
+ * Model 1 pseudo-graphics we compute the bitmaps for the 2x3-per character
  * pseudo pixel graphics (see generateGraphicsFont()).
  *
  */

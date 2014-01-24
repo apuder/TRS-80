@@ -101,7 +101,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
                 // Download Model 1 ROM
                 try {
-                    result = download(model1_rom_url, "1",
+                    result = download(model1_rom_url, Hardware.MODEL1,
                                       true, model1_rom_file_in_zip,
                                       dirName + model1_rom_filename);
                 } catch (IOException e) {
@@ -113,7 +113,6 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            //progressDialog.dismiss();
                             mainFrag.romDownloaded();
                             Toast.makeText(mainFrag.getApplicationContext(),
                                            model1_rom_success_msg,
@@ -124,7 +123,6 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            //progressDialog.dismiss();
                             Toast.makeText(mainFrag.getApplicationContext(),
                                            model1_rom_failure_msg,
                                            Toast.LENGTH_LONG).show();
@@ -134,7 +132,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
                 // Download Model 3 ROM
                 try {
-                    result = download(model3_rom_url, "3",
+                    result = download(model3_rom_url, Hardware.MODEL3,
                                       false, "",
                                       dirName + model3_rom_filename);
                 } catch (IOException e) {
@@ -146,7 +144,6 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
                             mainFrag.romDownloaded();
                             Toast.makeText(mainFrag.getApplicationContext(),
                                            model3_rom_success_msg,
@@ -157,24 +154,23 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     mainFrag.handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
                             Toast.makeText(mainFrag.getApplicationContext(),
                                            model3_rom_failure_msg,
                                            Toast.LENGTH_LONG).show();
                         }
                     });
                 }
-
-                // Calling this here seems to cause some exceptions,
-                // so we call it in the run() methods of the final
-                // ROM loader above, as it was when only the Model 3 ROM
-                // loader code was implemented...
-                //progressDialog.dismiss();
+                mainFrag.handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressDialog.dismiss();
+                    }
+                });
             }
         }).start();
     }
 
-    private boolean download(String URL, String model,
+    private boolean download(String URL, int model,
                              boolean isZipped, String fileInZip,
                              String destFilePath) throws IOException {
         boolean result = false;
@@ -224,9 +220,9 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
             // Perhaps this belongs in caller?
             SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             Editor editor = sharedPrefs.edit();
-            if (model.equals("1")) {
+            if (model == Hardware.MODEL1) {
                 editor.putString(SettingsActivity.CONF_ROM_MODEL1, destFilePath);
-            } else if (model.equals("3")) {
+            } else if (model == Hardware.MODEL3) {
                 editor.putString(SettingsActivity.CONF_ROM_MODEL3, destFilePath);
             }
             editor.commit();
