@@ -29,7 +29,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -37,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -47,7 +47,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
-public class EmulatorActivity extends SherlockFragmentActivity implements SensorEventListener {
+public class EmulatorActivity extends SherlockFragmentActivity implements SensorEventListener,
+        OnKeyListener {
 
     private Thread             cpuThread;
     private TextView           logView;
@@ -241,25 +242,14 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.getRepeatCount() > 0) {
-            return true;
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            return keyboardManager.keyDown(event);
         }
-        if (keyboardManager.keyDown(event)) {
-            return true;
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            return keyboardManager.keyUp(event);
         }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, final KeyEvent event) {
-        if (event.getRepeatCount() > 0) {
-            return true;
-        }
-        if (keyboardManager.keyUp(event)) {
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
+        return false;
     }
 
     public void onScreenRotationClick(View view) {
@@ -288,6 +278,9 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     private void initView() {
         setContentView(R.layout.emulator);
         View top = this.findViewById(R.id.emulator);
+        top.setFocusable(true);
+        top.setFocusableInTouchMode(true);
+        top.setOnKeyListener(this);
         top.requestFocus();
         logView = (TextView) findViewById(R.id.log);
         int keyboardType = getKeyboardType();
