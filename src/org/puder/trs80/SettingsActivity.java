@@ -42,7 +42,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 
     public static final String SHARED_PREF_NAME = "Settings";
 
-    public static final String CONF_FRIST_TIME  = "conf_first_time";
+    public static final String CONF_FIRST_TIME  = "conf_first_time";
     public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
     public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
     public static final String CONF_ROM_MODEL4  = "conf_rom_model4";

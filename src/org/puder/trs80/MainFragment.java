@@ -75,24 +75,32 @@ public class MainFragment extends SherlockFragmentActivity {
     public void onResume() {
         super.onResume();
 
-        if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FRIST_TIME, true)) {
+        if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)) {
             return;
         }
         Editor editor = sharedPrefs.edit();
-        editor.putBoolean(SettingsActivity.CONF_FRIST_TIME, false);
+        editor.putBoolean(SettingsActivity.CONF_FIRST_TIME, false);
         editor.commit();
-        if (!hasROM()) {
+        if (!hasROMs()) {
             doDownload();
         }
     }
 
-    public boolean hasROM() {
+    public boolean hasROMs() {
+        return hasModel1ROM() && hasModel3ROM();
+    }
+
+    public boolean hasModel1ROM() {
+        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL1, null) != null;
+    }
+
+    public boolean hasModel3ROM() {
         return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null) != null;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!hasROM()) {
+        if (!hasROMs()) {
             downloadMenuItem = menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Download");
             downloadMenuItem.setIcon(R.drawable.download_icon).setShowAsAction(
                     MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -129,7 +137,7 @@ public class MainFragment extends SherlockFragmentActivity {
              * Came back from SettingsActivity. Check if download icon can be
              * disabled.
              */
-            if (downloadMenuItem != null && hasROM()) {
+            if (downloadMenuItem != null && hasROMs()) {
                 downloadMenuItem.setVisible(false);
             }
         } else {
@@ -137,7 +145,7 @@ public class MainFragment extends SherlockFragmentActivity {
         }
     }
 
-    public void romDownloaded() {
+    public void romsDownloaded() {
         downloadMenuItem.setVisible(false);
         ConfigurationsFragment fragment = (ConfigurationsFragment) mTabsAdapter.getFragment(0);
         if (fragment != null) {

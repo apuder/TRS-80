@@ -44,7 +44,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
 public class InitialSetupDialogFragment extends SherlockDialogFragment {
-    private MainFragment        mainFrag;
+    private MainFragment mainFrag;
 
     public static InitialSetupDialogFragment newInstance(MainFragment mainFrag) {
         InitialSetupDialogFragment frag = new InitialSetupDialogFragment();
@@ -76,13 +76,12 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
         final String model3_rom_url = this.getString(R.string.model3_rom_url);
         final String model1_rom_filename = this.getString(R.string.model1_rom_filename);
         final String model3_rom_filename = this.getString(R.string.model3_rom_filename);
-        final String model1_rom_success_msg = this.getString(R.string.model1_rom_success_msg);
-        final String model1_rom_failure_msg = this.getString(R.string.model1_rom_failure_msg);
-        final String model3_rom_success_msg = this.getString(R.string.model3_rom_success_msg);
-        final String model3_rom_failure_msg = this.getString(R.string.model3_rom_failure_msg);
+        final String roms_download_success_msg = this.getString(R.string.roms_downlaod_success_msg);
+        final String roms_download_failure_msg = this.getString(R.string.roms_download_failure_msg);
 
         File sdcard = Environment.getExternalStorageDirectory();
-        final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir) + "/";
+        final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir)
+                + "/";
         File dir = new File(dirName);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -97,83 +96,55 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                boolean result;
+                boolean ok;
 
-                // Download Model 1 ROM
-                try {
-                    result = download(model1_rom_url, Hardware.MODEL1,
-                                      true, model1_rom_file_in_zip,
-                                      dirName + model1_rom_filename);
-                } catch (IOException e) {
-                    result = false;
+                if (!mainFrag.hasModel1ROM()) {
+                    // Download Model 1 ROM
+                    try {
+                        ok = download(model1_rom_url, Hardware.MODEL1, true,
+                                model1_rom_file_in_zip, dirName + model1_rom_filename);
+                    } catch (IOException e) {
+                        ok = false;
+                    }
+                    if (ok) {
+                        createModel1Configuration();
+                    }
                 }
 
-                if (result) {
-                    createModel1Configuration();
-                    mainFrag.handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mainFrag.romDownloaded();
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                           model1_rom_success_msg,
-                                           Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    mainFrag.handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                           model1_rom_failure_msg,
-                                           Toast.LENGTH_LONG).show();
-                        }
-                    });
+                if (!mainFrag.hasModel3ROM()) {
+                    // Download Model 3 ROM
+                    try {
+                        ok = download(model3_rom_url, Hardware.MODEL3, false, "", dirName
+                                + model3_rom_filename);
+                    } catch (IOException e) {
+                        ok = false;
+                    }
+                    if (ok) {
+                        createModel3Configuration();
+                    }
                 }
 
-                // Download Model 3 ROM
-                try {
-                    result = download(model3_rom_url, Hardware.MODEL3,
-                                      false, "",
-                                      dirName + model3_rom_filename);
-                } catch (IOException e) {
-                    result = false;
-                }
-
-                if (result) {
-                    createModel3Configuration();
-                    mainFrag.handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mainFrag.romDownloaded();
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                           model3_rom_success_msg,
-                                           Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    mainFrag.handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                           model3_rom_failure_msg,
-                                           Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
                 mainFrag.handler.post(new Runnable() {
                     @Override
                     public void run() {
                         progressDialog.dismiss();
+                        if (mainFrag.hasROMs()) {
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                    roms_download_success_msg, Toast.LENGTH_LONG).show();
+                            mainFrag.romsDownloaded();
+                        } else {
+                            Toast.makeText(mainFrag.getApplicationContext(),
+                                    roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
             }
         }).start();
     }
 
-    private boolean download(String URL, int model,
-                             boolean isZipped, String fileInZip,
-                             String destFilePath) throws IOException {
-        boolean result = false;
+    private boolean download(String URL, int model, boolean isZipped, String fileInZip,
+            String destFilePath) throws IOException {
+        boolean ok = false;
 
         URL url = new URL(URL);
         URLConnection urlConnection = url.openConnection();
@@ -189,7 +160,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                         byte[] buffer = new byte[1024];
                         int count;
                         while ((count = zis.read(buffer)) != -1) {
-                           baos.write(buffer, 0, count);
+                            baos.write(buffer, 0, count);
                         }
                         byte[] bytes = baos.toByteArray();
 
@@ -198,12 +169,12 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                         out.write(bytes);
                         out.close();
 
-                        result = true;
+                        ok = true;
                         break;
                     }
                 }
             } finally {
-               zis.close();
+                zis.close();
             }
         } else {
             File destFile = new File(destFilePath);
@@ -211,24 +182,31 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
             IOUtils.copy(in, out);
             out.close();
 
-            result = true;
+            ok = true;
         }
 
         in.close();
 
-        if (result) {
+        if (ok) {
             // Perhaps this belongs in caller?
-            SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            Editor editor = sharedPrefs.edit();
-            if (model == Hardware.MODEL1) {
-                editor.putString(SettingsActivity.CONF_ROM_MODEL1, destFilePath);
-            } else if (model == Hardware.MODEL3) {
-                editor.putString(SettingsActivity.CONF_ROM_MODEL3, destFilePath);
+            String pref = null;
+            switch (model) {
+            case Hardware.MODEL1:
+                pref = SettingsActivity.CONF_ROM_MODEL1;
+                break;
+            case Hardware.MODEL3:
+                pref = SettingsActivity.CONF_ROM_MODEL3;
+                break;
             }
+
+            SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(
+                    SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            Editor editor = sharedPrefs.edit();
+            editor.putString(pref, destFilePath);
             editor.commit();
         }
 
-        return result;
+        return ok;
     }
 
     private void createModel1Configuration() {
