@@ -253,7 +253,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     }
 
     public void onScreenRotationClick(View view) {
-        view.setEnabled(false);
+        view.setVisibility(View.GONE);
         stopAccelerometer();
         orientationManager.disable();
         keyboardManager.allCursorKeysUp();
