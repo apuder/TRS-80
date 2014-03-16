@@ -127,14 +127,22 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                 mainFrag.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        progressDialog.dismiss();
-                        if (mainFrag.hasROMs()) {
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                    roms_download_success_msg, Toast.LENGTH_LONG).show();
-                            mainFrag.romsDownloaded();
-                        } else {
-                            Toast.makeText(mainFrag.getApplicationContext(),
-                                    roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                        try {
+                            progressDialog.dismiss();
+                            if (mainFrag.hasROMs()) {
+                                Toast.makeText(mainFrag.getApplicationContext(),
+                                        roms_download_success_msg, Toast.LENGTH_LONG).show();
+                                mainFrag.romsDownloaded();
+                            } else {
+                                Toast.makeText(mainFrag.getApplicationContext(),
+                                        roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (IllegalArgumentException ex) {
+                            /*
+                             * If the Activity has gone away before
+                             * progressDialog.dismiss() is called, we will get
+                             * this exception. Simply ignore it.
+                             */
                         }
                     }
                 });
