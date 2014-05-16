@@ -16,7 +16,10 @@
 
 package org.puder.trs80;
 
+import java.io.File;
+
 import android.graphics.Bitmap;
+import android.os.Environment;
 import android.view.Window;
 
 abstract public class Hardware {
@@ -26,6 +29,8 @@ abstract public class Hardware {
     final public static int MODEL3     = 3;
     final public static int MODEL4     = 4;
     final public static int MODEL4P    = 5;
+
+    private int             configurationID;
 
     /*
      * The following fields with prefix "xtrs" are configuration parameters for
@@ -48,6 +53,7 @@ abstract public class Hardware {
     private String          xtrsDisk3;
 
     protected Hardware(int model, Configuration conf, String xtrsRomFile) {
+        this.configurationID = conf.getId();
         this.xtrsModel = model;
         this.xtrsRomFile = xtrsRomFile;
         this.xtrsDisk0 = conf.getDiskPath(0);
@@ -70,6 +76,26 @@ abstract public class Hardware {
 
     public void setEntryAddress(int addr) {
         this.xtrsEntryAddr = addr;
+    }
+
+    private String getStateFileName() {
+        File sdcard = Environment.getExternalStorageDirectory();
+        String dirName = sdcard.getAbsolutePath() + "/"
+                + TRS80Application.getAppContext().getString(R.string.trs80_dir) + "/";
+        dirName += Integer.toString(configurationID) + "/";
+        File dir = new File(dirName);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dirName + "state";
+    }
+
+    public void saveState() {
+        XTRS.saveState(getStateFileName());
+    }
+
+    public void loadState() {
+        XTRS.loadState(getStateFileName());
     }
 
     abstract public void computeFontDimensions(Window window);

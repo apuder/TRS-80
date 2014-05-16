@@ -37,7 +37,6 @@ static unsigned stateVersionNumber = 1;
 
 void trs_state_save(char *filename)
 {
-#ifndef ANDROID
   FILE *file;
   
   file = fopen(filename, "wb");
@@ -52,17 +51,17 @@ void trs_state_save(char *filename)
     trs_io_save(file);
     trs_mem_save(file);
     trs_keyboard_save(file);
+#ifndef ANDROID
     trs_uart_save(file);
+#endif
     trs_z80_save(file);
     trs_imp_exp_save(file);
     fclose(file);
   }
-#endif
 }
 
 void trs_state_load(char *filename)
 {
-#ifndef ANDROID
   FILE *file;
   char banner[80];
   unsigned version;
@@ -88,12 +87,13 @@ void trs_state_load(char *filename)
     trs_io_load(file);
     trs_mem_load(file);
     trs_keyboard_load(file);
+#ifndef ANDROID
     trs_uart_load(file);
+#endif
     trs_z80_load(file);
     trs_imp_exp_load(file);
     fclose(file);
   }
-#endif
 }
 
 void trs_save_uchar(FILE *file, unsigned char *buffer, int count)
@@ -335,8 +335,10 @@ void trs_save_filename(FILE *file, char *filename)
 
   getcwd(dirname, FILENAME_MAX);
   
+#ifndef ANDROID
   if (strncmp(filename, dirname, strlen(dirname)) == 0)
     filename = &filename[strlen(dirname)+1];
+#endif
   length = strlen(filename);
  
   trs_save_uint16(file, &length, 1);

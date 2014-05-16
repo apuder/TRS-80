@@ -43,6 +43,10 @@ public class XTRS {
 
     public static native int init(Hardware hardware);
 
+    public static native void saveState(String fileName);
+
+    public static native void loadState(String fileName);
+
     public static native void reset();
 
     public static native int setAudioBuffer(byte[] data);

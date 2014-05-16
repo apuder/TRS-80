@@ -5,6 +5,8 @@
 #include "trs_disk.h"
 #include "trs_iodefs.h"
 #include "trs_uart.h"
+#include "trs_state_save.h"
+
 
 #include <SDL/SDL.h>
 
@@ -303,6 +305,18 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
 
     init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
+}
+
+void Java_org_puder_trs80_XTRS_saveState(JNIEnv* env, jclass cls, jstring fileName) {
+    const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    trs_state_save(fn);
+    (*env)->ReleaseStringUTFChars(env, fileName, fn);
+}
+
+void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileName) {
+    const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    trs_state_load(fn);
+    (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 
 void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArray buffer) {
