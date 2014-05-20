@@ -16,6 +16,9 @@
 
 package org.puder.trs80;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -24,15 +27,15 @@ import android.preference.PreferenceManager;
 
 public class Configuration {
 
-    public static final int          KEYBOARD_LAYOUT_ORIGINAL = 0;
-    public static final int          KEYBOARD_LAYOUT_COMPACT  = 1;
-    public static final int          KEYBOARD_LAYOUT_GAMING_1 = 2;
-    public static final int          KEYBOARD_LAYOUT_GAMING_2 = 3;
-    public static final int          KEYBOARD_TILT            = 4;
-    public static final int          KEYBOARD_EXTERNAL        = 5;
+    public static final int            KEYBOARD_LAYOUT_ORIGINAL = 0;
+    public static final int            KEYBOARD_LAYOUT_COMPACT  = 1;
+    public static final int            KEYBOARD_LAYOUT_GAMING_1 = 2;
+    public static final int            KEYBOARD_LAYOUT_GAMING_2 = 3;
+    public static final int            KEYBOARD_TILT            = 4;
+    public static final int            KEYBOARD_EXTERNAL        = 5;
 
-    private static Configuration[]   configurations;
-    private static SharedPreferences globalPrefs;
+    private static List<Configuration> configurations;
+    private static SharedPreferences   globalPrefs;
 
     static {
         globalPrefs = PreferenceManager.getDefaultSharedPreferences(TRS80Application
@@ -42,16 +45,16 @@ public class Configuration {
         if (!configs.equals("")) {
             configurationIds = configs.split(",");
         }
-        configurations = new Configuration[configurationIds.length];
+        configurations = new ArrayList<Configuration>(configurationIds.length);
         for (int i = 0; i < configurationIds.length; i++) {
-            configurations[i] = new Configuration(Integer.parseInt(configurationIds[i]));
+            configurations.add(new Configuration(Integer.parseInt(configurationIds[i])));
         }
     }
 
-    protected SharedPreferences      sharedPrefs;
-    protected int                    id;
+    protected SharedPreferences        sharedPrefs;
+    protected int                      id;
 
-    public static Configuration[] getConfigurations() {
+    public static List<Configuration> getConfigurations() {
         return configurations;
     }
 
@@ -70,24 +73,27 @@ public class Configuration {
         e.commit();
 
         Configuration newConfig = new Configuration(nextId);
-        int len = configurations.length + 1;
-        Configuration[] newConfigurations = new Configuration[len];
-        System.arraycopy(configurations, 0, newConfigurations, 0, len - 1);
-        newConfigurations[len - 1] = newConfig;
-        configurations = newConfigurations;
+        configurations.add(newConfig);
         return newConfig;
     }
 
     public void delete() {
         // Delete ID
         Editor e = globalPrefs.edit();
-        String configurationIds = globalPrefs.getString("CONFIGURATIONS", "");
+        String[] configurationIds = globalPrefs.getString("CONFIGURATIONS", "").split(",");
+        String newConfigurationIds = "";
 
         String ids = Integer.toString(id);
-        configurationIds = configurationIds.replace(ids + ",", "");
-        configurationIds = configurationIds.replace("," + ids, "");
-        configurationIds = configurationIds.replace(ids, "");
-        e.putString("CONFIGURATIONS", configurationIds);
+        for (int i = 0; i < configurationIds.length; i++) {
+            if (configurationIds[i].equals(ids)) {
+                continue;
+            }
+            if (!newConfigurationIds.equals("")) {
+                newConfigurationIds += ",";
+            }
+            newConfigurationIds += configurationIds[i];
+        }
+        e.putString("CONFIGURATIONS", newConfigurationIds);
         e.commit();
 
         // Delete shared preferences
@@ -96,16 +102,12 @@ public class Configuration {
         e.commit();
 
         // Delete configuration
-        int len = configurations.length - 1;
-        Configuration[] newConfigurations = new Configuration[len];
-        int k = 0;
-        for (int i = 0; i < configurations.length; i++) {
-            if (configurations[i].getId() == getId()) {
-                continue;
+        for (int i = 0; i < configurations.size(); i++) {
+            if (configurations.get(i).getId() == getId()) {
+                configurations.remove(i);
+                break;
             }
-            newConfigurations[k++] = configurations[i];
         }
-        configurations = newConfigurations;
     }
 
     protected Configuration(int id) {

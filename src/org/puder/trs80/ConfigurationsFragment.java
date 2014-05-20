@@ -157,7 +157,7 @@ public class ConfigurationsFragment extends SherlockFragment implements OnItemCl
     public void updateView() {
         View withoutConfigurationsView = getView().findViewById(R.id.without_configurations);
         View withConfigurationsView = getView().findViewById(R.id.with_configurations);
-        configurations = Configuration.getConfigurations();
+        configurations = new Configuration[0];//Configuration.getConfigurations();
         if (configurations.length == 0) {
             withoutConfigurationsView.setVisibility(View.VISIBLE);
             withConfigurationsView.setVisibility(View.GONE);
