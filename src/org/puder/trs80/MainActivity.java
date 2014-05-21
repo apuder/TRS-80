@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -41,14 +42,15 @@ import com.actionbarsherlock.view.Menu;
 
 public class MainActivity extends SherlockFragmentActivity implements OnItemClickListener {
 
-    private static final int    REQUEST_CODE_EDIT_CONFIG  = 1;
-    private static final int    REQUEST_CODE_RUN_EMULATOR = 2;
+    private static final int    REQUEST_CODE_EDIT_CONFIG   = 1;
+    private static final int    REQUEST_CODE_RUN_EMULATOR  = 2;
+    private static final int    REQUEST_CODE_EDIT_SETTINGS = 3;
 
-    private static final int    MENU_OPTION_START         = 0;
-    private static final int    MENU_OPTION_RESUME        = 1;
-    private static final int    MENU_OPTION_STOP          = 2;
-    private static final int    MENU_OPTION_EDIT          = 3;
-    private static final int    MENU_OPTION_DELETE        = 4;
+    private static final int    MENU_OPTION_START          = 0;
+    private static final int    MENU_OPTION_RESUME         = 1;
+    private static final int    MENU_OPTION_STOP           = 2;
+    private static final int    MENU_OPTION_EDIT           = 3;
+    private static final int    MENU_OPTION_DELETE         = 4;
 
     private List<Configuration> configurations;
     private ConfigurationBackup backup;
@@ -91,6 +93,10 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Add").setIcon(R.drawable.add_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Help").setIcon(R.drawable.help_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
@@ -104,6 +110,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         CharSequence title = item.getTitle();
         if ("Add".equals(title)) {
             addConfiguration();
+            return true;
+        }
+        if ("Help".equals(title)) {
+            showHelp();
+            return true;
+        }
+        if ("Settings".equals(title)) {
+            showSettings();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -286,6 +300,34 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         View view = inflater.inflate(R.layout.initialization_error, null, false);
         TextView t = (TextView) view.findViewById(R.id.error_text);
         t.setText(this.getString(R.string.error_init, err));
+        builder.setView(view);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showSettings() {
+        startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
+    }
+
+    private void showHelp() {
+        int titleId = R.string.help_title_configurations;
+        int layoutId = R.layout.help_configurations;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(titleId);
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(layoutId, null, false);
+        TextView t = (TextView) view.findViewById(R.id.help_text);
+        t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 

@@ -79,6 +79,9 @@ public class EmulatorState {
     }
 
     public static Bitmap loadScreenshot(int configurationID) {
+        if (!hasSavedState(configurationID)) {
+            return null;
+        }
         String fn = getScreenshotFileName(configurationID);
         if (!new File(fn).exists()) {
             return null;

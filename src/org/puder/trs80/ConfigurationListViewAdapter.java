@@ -68,7 +68,7 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
         // Name
         holder.name.setText(conf.getName());
 
-        // Model
+        // Hardware
         String model = "-";
         switch (conf.getModel()) {
         case Hardware.MODEL1:
