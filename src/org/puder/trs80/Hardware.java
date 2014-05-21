@@ -78,26 +78,6 @@ abstract public class Hardware {
         this.xtrsEntryAddr = addr;
     }
 
-    private String getStateFileName() {
-        File sdcard = Environment.getExternalStorageDirectory();
-        String dirName = sdcard.getAbsolutePath() + "/"
-                + TRS80Application.getAppContext().getString(R.string.trs80_dir) + "/";
-        dirName += Integer.toString(configurationID) + "/";
-        File dir = new File(dirName);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        return dirName + "state";
-    }
-
-    public void saveState() {
-        XTRS.saveState(getStateFileName());
-    }
-
-    public void loadState() {
-        XTRS.loadState(getStateFileName());
-    }
-
     abstract public void computeFontDimensions(Window window);
 
     abstract public int getScreenCols();
