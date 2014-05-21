@@ -79,9 +79,13 @@ public class EmulatorState {
     }
 
     public static Bitmap loadScreenshot(int configurationID) {
+        String fn = getScreenshotFileName(configurationID);
+        if (!new File(fn).exists()) {
+            return null;
+        }
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        return BitmapFactory.decodeFile(getScreenshotFileName(configurationID), options);
+        return BitmapFactory.decodeFile(fn, options);
     }
 
     public static void deleteSavedState(int configurationID) {

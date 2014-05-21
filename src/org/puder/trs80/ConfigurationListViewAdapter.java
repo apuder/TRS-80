@@ -20,17 +20,23 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
 
     class Holder {
-        TextView name;
-        TextView model;
+        TextView  name;
+        TextView  model;
+        TextView  disks;
+        TextView  sound;
+        TextView  keyboards;
+        ImageView screenshot;
     }
 
     Context context;
@@ -50,13 +56,76 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
             convertView = mInflater.inflate(R.layout.configuration_item, null);
             holder.name = (TextView) convertView.findViewById(R.id.configuration_name);
             holder.model = (TextView) convertView.findViewById(R.id.configuration_model);
+            holder.disks = (TextView) convertView.findViewById(R.id.configuration_disks);
+            holder.sound = (TextView) convertView.findViewById(R.id.configuration_sound);
+            holder.keyboards = (TextView) convertView.findViewById(R.id.configuration_keyboards);
+            holder.screenshot = (ImageView) convertView.findViewById(R.id.configuration_screenshot);
             convertView.setTag(holder);
         } else {
             holder = (Holder) convertView.getTag();
         }
 
+        // Name
         holder.name.setText(conf.getName());
 
+        // Model
+        String model = "-";
+        switch (conf.getModel()) {
+        case Hardware.MODEL1:
+            model = "Model I";
+            break;
+        case Hardware.MODEL3:
+            model = "Model III";
+            break;
+        case Hardware.MODEL4:
+            model = "Model 4";
+            break;
+        case Hardware.MODEL4P:
+            model = "Model 4P";
+            break;
+        }
+        holder.model.setText(model);
+
+        // Disks
+        int count = 0;
+        for (int i = 0; i < 4; i++) {
+            if (conf.getDiskPath(i) != null) {
+                count++;
+            }
+        }
+        holder.disks.setText(Integer.toString(count));
+
+        // Sound
+        holder.sound.setText(conf.muteSound() ? "disabled" : "enabled");
+
+        // Keyboards
+        String keyboards = getKeyboardLabel(conf.getKeyboardLayoutPortrait());
+        keyboards += "/";
+        keyboards += getKeyboardLabel(conf.getKeyboardLayoutLandscape());
+        holder.keyboards.setText(keyboards);
+
+        // Screenshot
+        Bitmap screenshot = EmulatorState.loadScreenshot(conf.getId());
+        if (screenshot != null) {
+            holder.screenshot.setImageBitmap(screenshot);
+            holder.screenshot.setVisibility(View.VISIBLE);
+        } else {
+            holder.screenshot.setVisibility(View.INVISIBLE);
+        }
         return convertView;
+    }
+
+    private String getKeyboardLabel(int type) {
+        switch (type) {
+        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+            return "original";
+        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+            return "compact";
+        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
+            return "gaming";
+        case Configuration.KEYBOARD_TILT:
+            return "tilt";
+        }
+        return "-";
     }
 }

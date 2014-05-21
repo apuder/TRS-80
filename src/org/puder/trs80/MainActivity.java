@@ -142,6 +142,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             break;
         case MENU_OPTION_STOP:
             EmulatorState.deleteSavedState(confID);
+            updateView();
             break;
         case MENU_OPTION_EDIT:
             editConfiguration(conf, false);
