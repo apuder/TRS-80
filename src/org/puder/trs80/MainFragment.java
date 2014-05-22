@@ -158,9 +158,9 @@ public class MainFragment extends SherlockFragmentActivity {
     }
 
     private void doDownload() {
-        InitialSetupDialogFragment dialog = InitialSetupDialogFragment.newInstance(this);
-        // dialog.setTargetFragment(this, 0);
-        dialog.show(getSupportFragmentManager(), "dialog");
+//        InitialSetupDialogFragment dialog = InitialSetupDialogFragment.newInstance(this);
+//        // dialog.setTargetFragment(this, 0);
+//        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     private void doHelp() {

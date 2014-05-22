@@ -25,11 +25,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -39,17 +40,28 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
 public class InitialSetupDialogFragment extends SherlockDialogFragment {
-    private MainFragment mainFrag;
 
-    public static InitialSetupDialogFragment newInstance(MainFragment mainFrag) {
-        InitialSetupDialogFragment frag = new InitialSetupDialogFragment();
-        frag.mainFrag = mainFrag;
-        return frag;
+    public interface DownloadCompletionListener {
+        public void onDownloadCompleted();
+    }
+
+    DownloadCompletionListener listener;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            listener = (DownloadCompletionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement DownloadCompletionListener");
+        }
     }
 
     @Override
@@ -93,12 +105,14 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.show();
 
+        final Handler handler = new Handler();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 boolean ok;
 
-                if (!mainFrag.hasModel1ROM()) {
+                if (!ROMs.hasModel1ROM()) {
                     // Download Model 1 ROM
                     try {
                         ok = download(model1_rom_url, Hardware.MODEL1, true,
@@ -111,7 +125,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     }
                 }
 
-                if (!mainFrag.hasModel3ROM()) {
+                if (!ROMs.hasModel3ROM()) {
                     // Download Model 3 ROM
                     try {
                         ok = download(model3_rom_url, Hardware.MODEL3, false, "", dirName
@@ -124,17 +138,17 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                     }
                 }
 
-                mainFrag.handler.post(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             progressDialog.dismiss();
-                            if (mainFrag.hasROMs()) {
-                                Toast.makeText(mainFrag.getApplicationContext(),
+                            if (ROMs.hasROMs()) {
+                                Toast.makeText(TRS80Application.getAppContext(),
                                         roms_download_success_msg, Toast.LENGTH_LONG).show();
-                                mainFrag.romsDownloaded();
+                                listener.onDownloadCompleted();
                             } else {
-                                Toast.makeText(mainFrag.getApplicationContext(),
+                                Toast.makeText(TRS80Application.getAppContext(),
                                         roms_download_failure_msg, Toast.LENGTH_LONG).show();
                             }
                         } catch (IllegalArgumentException ex) {
@@ -207,7 +221,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                 break;
             }
 
-            SharedPreferences sharedPrefs = this.mainFrag.getSharedPreferences(
+            SharedPreferences sharedPrefs = TRS80Application.getAppContext().getSharedPreferences(
                     SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             Editor editor = sharedPrefs.edit();
             editor.putString(pref, destFilePath);

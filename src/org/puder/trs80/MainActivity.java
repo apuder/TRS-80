@@ -24,12 +24,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -39,8 +40,10 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
-public class MainActivity extends SherlockFragmentActivity implements OnItemClickListener {
+public class MainActivity extends SherlockFragmentActivity implements OnItemClickListener,
+        InitialSetupDialogFragment.DownloadCompletionListener {
 
     private static final int    REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int    REQUEST_CODE_RUN_EMULATOR  = 2;
@@ -55,10 +58,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     private List<Configuration> configurations;
     private ConfigurationBackup backup;
     private ListView            configurationListView;
+    private SharedPreferences   sharedPrefs;
+    private MenuItem            downloadMenuItem           = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
+                Context.MODE_PRIVATE);
         this.setContentView(R.layout.main_activity);
     }
 
@@ -66,6 +73,15 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     public void onResume() {
         super.onResume();
         updateView();
+        if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)) {
+            return;
+        }
+        Editor editor = sharedPrefs.edit();
+        editor.putBoolean(SettingsActivity.CONF_FIRST_TIME, false);
+        editor.commit();
+        if (!ROMs.hasROMs()) {
+            downloadROMs();
+        }
     }
 
     public void updateView() {
@@ -91,6 +107,11 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        if (!ROMs.hasROMs()) {
+            downloadMenuItem = menu.add("Download");
+            downloadMenuItem.setIcon(R.drawable.download_icon).setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
         menu.add("Add").setIcon(R.drawable.add_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Help").setIcon(R.drawable.help_icon)
@@ -108,6 +129,10 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     @Override
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         CharSequence title = item.getTitle();
+        if ("Download".equals(title)) {
+            downloadROMs();
+            return true;
+        }
         if ("Add".equals(title)) {
             addConfiguration();
             return true;
@@ -140,7 +165,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(android.view.MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
 
@@ -368,5 +393,16 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void downloadROMs() {
+        InitialSetupDialogFragment dialog = new InitialSetupDialogFragment();
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onDownloadCompleted() {
+        downloadMenuItem.setVisible(false);
+        updateView();
     }
 }
