@@ -102,7 +102,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        runConfiguration(configurations.get(position));
+        runEmulator(configurations.get(position));
     }
 
     @Override
@@ -149,14 +149,13 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         switch (item.getItemId()) {
         case MENU_OPTION_START:
             EmulatorState.deleteSavedState(confID);
-            runConfiguration(conf);
+            runEmulator(conf);
             break;
         case MENU_OPTION_RESUME:
-            runConfiguration(conf);
+            runEmulator(conf);
             break;
         case MENU_OPTION_STOP:
-            EmulatorState.deleteSavedState(confID);
-            updateView();
+            stopEmulator(conf);
             break;
         case MENU_OPTION_EDIT:
             editConfiguration(conf, false);
@@ -235,7 +234,36 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         dialog.show();
     }
 
-    private void runConfiguration(Configuration conf) {
+    private void stopEmulator(final Configuration conf) {
+        String msg = this.getString(R.string.alert_dialog_confirm_stop_emu, conf.getName());
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(msg);
+        builder.setIcon(R.drawable.warning_icon);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                EmulatorState.deleteSavedState(conf.getId());
+                updateView();
+            }
+
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void runEmulator(Configuration conf) {
         Hardware hardware;
         int model = conf.getModel();
         if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {

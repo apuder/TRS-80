@@ -21,8 +21,7 @@
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
     <string name="alert_dialog_confirm_launch_new_config">Emulator currently runs configuration \'%1$s\'.
                          Do you want to launch new configuration?</string>
-    <string name="alert_dialog_confirm_stop_emu">Emulator currently runs configuration \'%1$s\'.
-                         Do you want to stop emulation?</string>
+    <string name="alert_dialog_confirm_stop_emu">Do you want to stop emulation for configuration \'%1$s\'?</string>
 
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
     <string name="emulator_not_running">Emulator is currently not running!</string>
