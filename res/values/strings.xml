@@ -19,13 +19,9 @@
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
-    <string name="alert_dialog_confirm_launch_new_config">Emulator currently runs configuration \'%1$s\'.
-                         Do you want to launch new configuration?</string>
     <string name="alert_dialog_confirm_stop_emu">Do you want to stop emulation for configuration \'%1$s\'?</string>
 
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
-    <string name="emulator_not_running">Emulator is currently not running!</string>
-    <string name="currently_running">Currently running:</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>
 
@@ -57,11 +53,6 @@
                         The gaming layout offers a joystick control.
                         The tilt interface uses the accelerometer to control the cursor keys.
                         Touching the screen anywhere triggers the SPACE key.</string>
-    <string name="help_title_emulator">Help: Emulator</string>
-    <string name="help_emulator">The Emulator tab shows the currently running emulator.
-                        To launch the emulator, switch to the Configurations tab and select
-                        a configuration. Use the Play icon to play/resume the emulator.
-                        Use the Stop icon to end the current emulation.</string>
     <string name="help_title_settings">Help: Settings</string>
     <string name="help_settings">The emulator requires the original ROM images of the
                         various TRS-80 models. ROM images for the TRS-80 need to be copied
