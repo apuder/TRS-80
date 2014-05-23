@@ -21,6 +21,14 @@
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
     <string name="alert_dialog_confirm_stop_emu">Do you want to stop emulation for configuration \'%1$s\'?</string>
 
+    <string name="context_menu_start">Start</string>
+    <string name="context_menu_resume">Resume</string>
+    <string name="context_menu_stop">Stop</string>
+    <string name="context_menu_edit">Edit</string>
+    <string name="context_menu_delete">Delete</string>
+    <string name="context_menu_up">Move up</string>
+    <string name="context_menu_down">Move down</string>
+
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
         Please report error code and your device model to mobile@puder.org.</string>

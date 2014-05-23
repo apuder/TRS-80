@@ -54,6 +54,8 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     private static final int    MENU_OPTION_STOP           = 2;
     private static final int    MENU_OPTION_EDIT           = 3;
     private static final int    MENU_OPTION_DELETE         = 4;
+    private static final int    MENU_OPTION_UP             = 5;
+    private static final int    MENU_OPTION_DOWN           = 6;
 
     private List<Configuration> configurations;
     private ConfigurationBackup backup;
@@ -155,13 +157,21 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         Configuration conf = configurations.get((int) info.id);
         menu.setHeaderTitle(conf.getName());
         if (EmulatorState.hasSavedState(conf.getId())) {
-            menu.add(0, MENU_OPTION_RESUME, 0, "Resume");
-            menu.add(0, MENU_OPTION_STOP, 0, "Stop");
+            menu.add(0, MENU_OPTION_RESUME, 0, this.getString(R.string.context_menu_resume));
+            menu.add(0, MENU_OPTION_STOP, 0, this.getString(R.string.context_menu_stop));
         } else {
-            menu.add(0, MENU_OPTION_START, 0, "Start");
+            menu.add(0, MENU_OPTION_START, 0, this.getString(R.string.context_menu_start));
         }
-        menu.add(0, MENU_OPTION_EDIT, 0, "Edit");
-        menu.add(0, MENU_OPTION_DELETE, 0, "Delete");
+        menu.add(0, MENU_OPTION_EDIT, 0, this.getString(R.string.context_menu_edit));
+        menu.add(0, MENU_OPTION_DELETE, 0, this.getString(R.string.context_menu_delete));
+        if (Configuration.getConfigurations().size() > 1) {
+            if (!conf.isFirst()) {
+                menu.add(0, MENU_OPTION_UP, 0, this.getString(R.string.context_menu_up));
+            }
+            if (!conf.isLast()) {
+                menu.add(0, MENU_OPTION_DOWN, 0, this.getString(R.string.context_menu_down));
+            }
+        }
     }
 
     @Override
@@ -187,6 +197,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             break;
         case MENU_OPTION_DELETE:
             deleteConfiguration(conf);
+            break;
+        case MENU_OPTION_UP:
+            conf.moveUp();
+            updateView();
+            break;
+        case MENU_OPTION_DOWN:
+            conf.moveDown();
+            updateView();
             break;
         default:
             return false;
@@ -240,7 +258,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                EmulatorState.deleteSavedState(conf.getId());
                 conf.delete();
                 updateView();
             }

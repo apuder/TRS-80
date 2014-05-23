@@ -54,6 +54,19 @@ public class Configuration {
     protected SharedPreferences        sharedPrefs;
     protected int                      id;
 
+    private static void saveConfigurationIDs() {
+        String ids = "";
+        for (Configuration conf : configurations) {
+            if (!ids.equals("")) {
+                ids += ",";
+                ids += Integer.toString(conf.getId());
+            }
+        }
+        Editor e = globalPrefs.edit();
+        e.putString("CONFIGURATIONS", ids);
+        e.commit();
+    }
+
     public static List<Configuration> getConfigurations() {
         return configurations;
     }
@@ -63,44 +76,14 @@ public class Configuration {
         nextId++;
         Editor e = globalPrefs.edit();
         e.putInt("NEXT_ID", nextId);
-        String configurationIds = globalPrefs.getString("CONFIGURATIONS", "");
-
-        if (!configurationIds.equals("")) {
-            configurationIds += ",";
-        }
-        configurationIds += Integer.toString(nextId);
-        e.putString("CONFIGURATIONS", configurationIds);
         e.commit();
-
         Configuration newConfig = new Configuration(nextId);
         configurations.add(newConfig);
+        saveConfigurationIDs();
         return newConfig;
     }
 
     public void delete() {
-        // Delete ID
-        Editor e = globalPrefs.edit();
-        String[] configurationIds = globalPrefs.getString("CONFIGURATIONS", "").split(",");
-        String newConfigurationIds = "";
-
-        String ids = Integer.toString(id);
-        for (int i = 0; i < configurationIds.length; i++) {
-            if (configurationIds[i].equals(ids)) {
-                continue;
-            }
-            if (!newConfigurationIds.equals("")) {
-                newConfigurationIds += ",";
-            }
-            newConfigurationIds += configurationIds[i];
-        }
-        e.putString("CONFIGURATIONS", newConfigurationIds);
-        e.commit();
-
-        // Delete shared preferences
-        e = sharedPrefs.edit();
-        e.clear();
-        e.commit();
-
         // Delete configuration
         for (int i = 0; i < configurations.size(); i++) {
             if (configurations.get(i).getId() == getId()) {
@@ -108,6 +91,15 @@ public class Configuration {
                 break;
             }
         }
+        saveConfigurationIDs();
+
+        // Delete shared preferences
+        Editor e = sharedPrefs.edit();
+        e.clear();
+        e.commit();
+
+        // Delete state
+        EmulatorState.deleteSavedState(getId());
     }
 
     protected Configuration(int id) {
@@ -198,5 +190,35 @@ public class Configuration {
 
     public boolean muteSound() {
         return sharedPrefs.getBoolean(EditConfigurationActivity.CONF_MUTE_SOUND, false);
+    }
+
+    public boolean isFirst() {
+        return configurations.get(0).getId() == getId();
+    }
+
+    public boolean isLast() {
+        return configurations.get(configurations.size() - 1).getId() == getId();
+    }
+
+    public void moveUp() {
+        if (isFirst()) {
+            return;
+        }
+        int self = configurations.indexOf(this);
+        Configuration tmp = configurations.get(self - 1);
+        configurations.set(self - 1, this);
+        configurations.set(self, tmp);
+        saveConfigurationIDs();
+    }
+
+    public void moveDown() {
+        if (isLast()) {
+            return;
+        }
+        int self = configurations.indexOf(this);
+        Configuration tmp = configurations.get(self + 1);
+        configurations.set(self + 1, this);
+        configurations.set(self, tmp);
+        saveConfigurationIDs();
     }
 }
