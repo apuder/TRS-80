@@ -37,6 +37,39 @@
     <string name="config_name_model1">Model I - no disks</string>
     <string name="config_name_model3">Model III - no disks</string>
 
+    <!-- EditConfigurationActivity -->
+    <string name="pref_title">General</string>
+    <string name="pref_name_title">Name</string>
+    <string name="pref_name_summary">Name of the configuration</string>
+    <string name="pref_trs_model_title">TRS-80 Model</string>
+    <string name="pref_trs_model_summary">The TRS-80 Model that will be emulated</string>
+    <string name="pref_disk1_title">Disk 1</string>
+    <string name="pref_disk1_summary">File to use for disk 1</string>
+    <string name="pref_disk2_title">Disk 2</string>
+    <string name="pref_disk2_summary">File to use for disk 2</string>
+    <string name="pref_disk3_title">Disk 3</string>
+    <string name="pref_disk3_summary">File to use for disk 3</string>
+    <string name="pref_disk4_title">Disk 4</string>
+    <string name="pref_disk4_summary">File to use for disk 4</string>
+    <string name="pref_character_color_title">Character color</string>
+    <string name="pref_character_color_summary">The color used to render characters on the screen</string>
+    <string name="pref_mute_sound_title">Mute</string>
+    <string name="pref_mute_sound_summary_on">All game sounds will be muted</string>
+    <string name="pref_mute_sound_summary_off">Play game sounds</string>
+    <string name="pref_portrait_title">Portrait Mode</string>
+    <string name="pref_keyboard_portrait_title">Keyboard type</string>
+    <string name="pref_keyboard_portrait_summary">The keyboard type to be used in portrait mode</string>
+    <string name="pref_landscape_title">Landscape Mode</string>
+    <string name="pref_keyboard_landscape_title">Keyboard type</string>
+    <string name="pref_keyboard_landscape_summary">The keyboard type to be used in landscape mode</string>
+    <string name="green">Green</string>
+    <string name="white">White</string>
+    <string name="keyboard_original">Original layout</string>
+    <string name="keyboard_compact">Compact layout</string>
+    <string name="keyboard_gaming_1">Gaming layout</string>
+    <string name="keyboard_gaming_2">NOT USED</string>
+    <string name="keyboard_tilt">Tilt interface</string>
+
     <!-- SettingActivity -->
     <string name="menu_done">Done</string>
 

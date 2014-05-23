@@ -50,6 +50,11 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
     public static final String CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape";
     public static final String CONF_MUTE_SOUND         = "conf_mute_sound";
 
+    // Action Menu
+    private static final int   MENU_OPTION_DONE        = 0;
+    private static final int   MENU_OPTION_CANCEL      = 1;
+    private static final int   MENU_OPTION_HELP        = 2;
+
     private SharedPreferences  sharedPrefs;
     private Handler            handler;
 
@@ -118,26 +123,25 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Cancel").setIcon(R.drawable.cancel_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add("Done").setIcon(R.drawable.ok_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add("Help").setIcon(R.drawable.help_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
+                .setIcon(R.drawable.cancel_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE, this.getString(R.string.menu_done))
+                .setIcon(R.drawable.ok_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
+                .setIcon(R.drawable.help_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if ("Done".equals(item.getTitle())) {
+        switch (item.getItemId()) {
+        case MENU_OPTION_DONE:
             doneEditing(false);
             return true;
-        }
-        if ("Cancel".equals(item.getTitle())) {
+        case MENU_OPTION_CANCEL:
             doneEditing(true);
             return true;
-        }
-        if ("Help".equals(item.getTitle())) {
+        case MENU_OPTION_HELP:
             doHelp();
             return true;
         }
@@ -213,10 +217,10 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
             return;
         }
         if ("0".equals(val)) {
-            characterColor.setSummary("Green");
+            characterColor.setSummary(this.getString(R.string.green));
         }
         if ("1".equals(val)) {
-            characterColor.setSummary("White");
+            characterColor.setSummary(this.getString(R.string.white));
         }
     }
 
@@ -225,20 +229,19 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
             return;
         }
         if ("0".equals(val)) {
-            pref.setSummary("Original layout");
+            pref.setSummary(this.getString(R.string.keyboard_original));
         }
         if ("1".equals(val)) {
-            pref.setSummary("Compact layout");
+            pref.setSummary(this.getString(R.string.keyboard_compact));
         }
         if ("2".equals(val)) {
-            // pref.setSummary("Gaming layout 1");
-            pref.setSummary("Gaming layout");
+            pref.setSummary(this.getString(R.string.keyboard_gaming_1));
         }
         if ("3".equals(val)) {
-            pref.setSummary("Gaming layout 2");
+            pref.setSummary(this.getString(R.string.keyboard_gaming_2));
         }
         if ("4".equals(val)) {
-            pref.setSummary("Tilt interface");
+            pref.setSummary(this.getString(R.string.keyboard_tilt));
         }
     }
 

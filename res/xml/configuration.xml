@@ -1,63 +1,63 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="General"
+        android:title="@string/pref_title"
         android:key="conf_general">
         <EditTextPreference
             android:key="conf_name"
-            android:title="Name"
-            android:summary="Name of the configuration" />
+            android:title="@string/pref_name_title"
+            android:summary="@string/pref_name_summary" />
         <ListPreference
             android:entries="@array/conf_trs_model"
-            android:title="TRS-80 Model"
-            android:summary="The TRS-80 Model that will be emulated"
+            android:title="@string/pref_trs_model_title"
+            android:summary="@string/pref_trs_model_summary"
             android:key="conf_model"
             android:entryValues="@array/conf_trs_model_values" />
 
         <Preference
-            android:title="Disk 1"
-            android:summary="File to use for disk 1"
+            android:title="@string/pref_disk1_title"
+            android:summary="@string/pref_disk1_summary"
             android:key="conf_disk1" />
         <Preference
-            android:title="Disk 2"
-            android:summary="File to use for disk 2"
+            android:title="@string/pref_disk2_title"
+            android:summary="@string/pref_disk2_summary"
             android:key="conf_disk2" />
         <Preference
-            android:title="Disk 3"
-            android:summary="File to use for disk 3"
+            android:title="@string/pref_disk3_title"
+            android:summary="@string/pref_disk3_summary"
             android:key="conf_disk3" />
         <Preference
-            android:title="Disk 4"
-            android:summary="File to use for disk 4"
+            android:title="@string/pref_disk4_title"
+            android:summary="@string/pref_disk4_summary"
             android:key="conf_disk4" />
         <ListPreference
             android:entries="@array/conf_character_color"
-            android:title="Character color"
-            android:summary="The color used to render characters on the screen"
+            android:title="@string/pref_character_color_title"
+            android:summary="@string/pref_character_color_summary"
             android:key="conf_character_color"
             android:entryValues="@array/conf_character_color_values" />
         <CheckBoxPreference
-            android:title="Mute"
-            android:summaryOn="All game sounds will be muted"
-            android:summaryOff="Play game sounds"
+            android:title="@string/pref_mute_sound_title"
+            android:summaryOn="@string/pref_mute_sound_summary_on"
+            android:summaryOff="@string/pref_mute_sound_summary_off"
             android:key="conf_mute_sound" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Portrait Mode"
+        android:title="@string/pref_portrait_title"
         android:key="conf_portrait">
         <ListPreference
             android:entries="@array/conf_keyboard_type"
-            android:title="Keyboard type"
-            android:summary="The keyboard type to be used in portrait"
+            android:title="@string/pref_keyboard_portrait_title"
+            android:summary="@string/pref_keyboard_portrait_summary"
             android:key="conf_keyboard_portrait"
             android:entryValues="@array/conf_keyboard_type_values" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Landscape Mode"
+        android:title="@string/pref_landscape_title"
         android:key="conf_landscape">
         <ListPreference
             android:entries="@array/conf_keyboard_type"
-            android:title="Keyboard type"
-            android:summary="The keyboard type to be used in landscape"
+            android:title="@string/pref_keyboard_landscape_title"
+            android:summary="@string/pref_keyboard_landscape_summary"
             android:key="conf_keyboard_landscape"
             android:entryValues="@array/conf_keyboard_type_values" />
     </PreferenceCategory>
