@@ -35,34 +35,40 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class FileBrowserActivity extends SherlockListActivity {
 
-    private List<String> items;
-    private String       pathPrefix;
-    private TextView     pathLabel;
-    private String       currentPath;
+    // Action Menu
+    private static final int MENU_OPTION_CANCEL = 0;
+
+    private List<String>     items;
+    private String           pathPrefix;
+    private TextView         pathLabel;
+    private String           currentPath;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.file_browser);
-        int id = this.getResources().getIdentifier("path", "string", "org.puder.trs80");
-        pathPrefix = this.getString(id) + ": ";
+        pathPrefix = this.getString(R.string.path) + ": ";
         pathLabel = (TextView) this.findViewById(R.id.path);
         getFiles(Environment.getExternalStorageDirectory().getPath());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("cancel").setIcon(R.drawable.cancel_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
+                .setIcon(R.drawable.cancel_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        setResult(RESULT_CANCELED, getIntent());
-        finish();
-        return true;
+        switch (item.getItemId()) {
+        case MENU_OPTION_CANCEL:
+            setResult(RESULT_CANCELED, getIntent());
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
