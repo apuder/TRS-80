@@ -21,11 +21,13 @@
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
     <string name="alert_dialog_confirm_stop_emu">Do you want to stop emulation for configuration \'%1$s\'?</string>
 
+    <!-- MainActivity -->
     <string name="menu_download">Download</string>
     <string name="menu_add">Add</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_help">Help</string>
 
+    <!-- Context Menu in MainActivity -->
     <string name="menu_start">Start</string>
     <string name="menu_resume">Resume</string>
     <string name="menu_stop">Stop</string>
@@ -33,6 +35,12 @@
     <string name="menu_delete">Delete</string>
     <string name="menu_up">Move up</string>
     <string name="menu_down">Move down</string>
+
+    <!-- EmulatorActivity -->
+    <string name="menu_pause">Pause</string>
+    <string name="menu_reset">Reset</string>
+    <string name="menu_sound_on">Sound On</string>
+    <string name="menu_sound_off">Sound Off</string>
 
     <string name="error_model_not_supported">Only Model I and Model III are supported at this time.</string>
     <string name="error_no_rom">No valid ROM found. Please use Settings to set ROM.</string>

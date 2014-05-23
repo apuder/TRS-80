@@ -50,12 +50,18 @@ import com.actionbarsherlock.view.MenuItem;
 public class EmulatorActivity extends SherlockFragmentActivity implements SensorEventListener,
         OnKeyListener {
 
+    // Action Menu
+    private static final int   MENU_OPTION_PAUSE     = 0;
+    private static final int   MENU_OPTION_RESET     = 1;
+    private static final int   MENU_OPTION_SOUND_ON  = 2;
+    private static final int   MENU_OPTION_SOUND_OFF = 3;
+
     private Thread             cpuThread;
     private TextView           logView;
     private int                orientation;
     private MenuItem           muteMenuItem;
     private MenuItem           unmuteMenuItem;
-    private SensorManager      sensorManager = null;
+    private SensorManager      sensorManager         = null;
     private Sensor             sensorAccelerometer;
     private KeyboardManager    keyboardManager;
     private int                rotation;
@@ -196,20 +202,22 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Pause").setIcon(R.drawable.pause_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add("Reset").setIcon(R.drawable.reset_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE, this.getString(R.string.menu_pause))
+                .setIcon(R.drawable.pause_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE, this.getString(R.string.menu_reset))
+                .setIcon(R.drawable.reset_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             XTRS.setSoundMuted(true);
         } else {
-            muteMenuItem = menu.add("Sound Off");
+            muteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_OFF, Menu.NONE,
+                    this.getString(R.string.menu_sound_off));
             muteMenuItem.setIcon(R.drawable.sound_off_icon).setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_ALWAYS);
-            unmuteMenuItem = menu.add("Sound On");
+                    MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            unmuteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_ON, Menu.NONE,
+                    this.getString(R.string.menu_sound_on));
             unmuteMenuItem.setIcon(R.drawable.sound_on_icon).setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+                    MenuItem.SHOW_AS_ACTION_IF_ROOM);
             updateMuteSoundIcons();
         }
         return true;
@@ -217,22 +225,19 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        CharSequence title = item.getTitle();
-        if ("Pause".equals(title)) {
+        switch (item.getItemId()) {
+        case MENU_OPTION_PAUSE:
             pauseEmulator();
             return true;
-        }
-        if ("Reset".equals(title)) {
+        case MENU_OPTION_RESET:
             XTRS.reset();
             return true;
-        }
-        if ("Sound On".equals(title)) {
+        case MENU_OPTION_SOUND_ON:
             XTRS.setSoundMuted(true);
             XTRS.flushAudioQueue();
             updateMuteSoundIcons();
             return true;
-        }
-        if ("Sound Off".equals(title)) {
+        case MENU_OPTION_SOUND_OFF:
             XTRS.setSoundMuted(false);
             XTRS.flushAudioQueue();
             updateMuteSoundIcons();
