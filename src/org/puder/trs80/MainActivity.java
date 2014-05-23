@@ -49,6 +49,13 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     private static final int    REQUEST_CODE_RUN_EMULATOR  = 2;
     private static final int    REQUEST_CODE_EDIT_SETTINGS = 3;
 
+    // Action Menu
+    private static final int    MENU_OPTION_DOWNLOAD       = 0;
+    private static final int    MENU_OPTION_ADD            = 1;
+    private static final int    MENU_OPTION_HELP           = 2;
+    private static final int    MENU_OPTION_SETTINGS       = 3;
+
+    // Context Menu
     private static final int    MENU_OPTION_START          = 0;
     private static final int    MENU_OPTION_RESUME         = 1;
     private static final int    MENU_OPTION_STOP           = 2;
@@ -110,15 +117,18 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!ROMs.hasROMs()) {
-            downloadMenuItem = menu.add("Download");
+            downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD, Menu.NONE,
+                    this.getString(R.string.menu_download));
             downloadMenuItem.setIcon(R.drawable.download_icon).setShowAsAction(
                     MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
-        menu.add("Add").setIcon(R.drawable.add_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Help").setIcon(R.drawable.help_icon)
+        menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE, this.getString(R.string.menu_add))
+                .setIcon(R.drawable.add_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.CATEGORY_SYSTEM,
+                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        menu.add(Menu.NONE, 1, Menu.CATEGORY_SYSTEM, "Settings").setIcon(R.drawable.settings_icon)
+        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.CATEGORY_SYSTEM,
+                this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
@@ -130,20 +140,17 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
 
     @Override
     public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
-        CharSequence title = item.getTitle();
-        if ("Download".equals(title)) {
+        switch (item.getItemId()) {
+        case MENU_OPTION_DOWNLOAD:
             downloadROMs();
             return true;
-        }
-        if ("Add".equals(title)) {
+        case MENU_OPTION_ADD:
             addConfiguration();
             return true;
-        }
-        if ("Help".equals(title)) {
+        case MENU_OPTION_HELP:
             showHelp();
             return true;
-        }
-        if ("Settings".equals(title)) {
+        case MENU_OPTION_SETTINGS:
             showSettings();
             return true;
         }
@@ -157,19 +164,19 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         Configuration conf = configurations.get((int) info.id);
         menu.setHeaderTitle(conf.getName());
         if (EmulatorState.hasSavedState(conf.getId())) {
-            menu.add(0, MENU_OPTION_RESUME, 0, this.getString(R.string.context_menu_resume));
-            menu.add(0, MENU_OPTION_STOP, 0, this.getString(R.string.context_menu_stop));
+            menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
+            menu.add(Menu.NONE, MENU_OPTION_STOP, Menu.NONE, this.getString(R.string.menu_stop));
         } else {
-            menu.add(0, MENU_OPTION_START, 0, this.getString(R.string.context_menu_start));
+            menu.add(Menu.NONE, MENU_OPTION_START, Menu.NONE, this.getString(R.string.menu_start));
         }
-        menu.add(0, MENU_OPTION_EDIT, 0, this.getString(R.string.context_menu_edit));
-        menu.add(0, MENU_OPTION_DELETE, 0, this.getString(R.string.context_menu_delete));
+        menu.add(Menu.NONE, MENU_OPTION_EDIT, Menu.NONE, this.getString(R.string.menu_edit));
+        menu.add(Menu.NONE, MENU_OPTION_DELETE, Menu.NONE, this.getString(R.string.menu_delete));
         if (Configuration.getConfigurations().size() > 1) {
             if (!conf.isFirst()) {
-                menu.add(0, MENU_OPTION_UP, 0, this.getString(R.string.context_menu_up));
+                menu.add(Menu.NONE, MENU_OPTION_UP, Menu.NONE, this.getString(R.string.menu_up));
             }
             if (!conf.isLast()) {
-                menu.add(0, MENU_OPTION_DOWN, 0, this.getString(R.string.context_menu_down));
+                menu.add(Menu.NONE, MENU_OPTION_DOWN, Menu.NONE, this.getString(R.string.menu_down));
             }
         }
     }
@@ -306,13 +313,8 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     }
 
     private void runEmulator(Configuration conf) {
-        Hardware hardware;
+        Hardware hardware = null;
         int model = conf.getModel();
-        if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {
-            Toast.makeText(this, "Only Model I and Model III are supported at this time.",
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
 
         String romFile = null;
         switch (model) {
@@ -340,13 +342,12 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         }
 
         if (hardware == null) {
-            Toast.makeText(this, "Model not supported.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.error_model_not_supported, Toast.LENGTH_LONG).show();
             return;
         }
 
         if (romFile == null || !new File(romFile).exists()) {
-            Toast.makeText(this, "No valid ROM found. Please use Settings to set ROM.",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.error_no_rom, Toast.LENGTH_LONG).show();
             return;
         }
 
