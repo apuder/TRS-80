@@ -1,23 +1,23 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="ROMs"
+        android:title="@string/pref_roms"
         android:key="conf_roms">
 
         <Preference
-            android:title="Model I"
-            android:summary="ROM to use for Model I"
+            android:title="@string/pref_rom_model1_title"
+            android:summary="@string/pref_rom_model1_summary"
             android:key="conf_rom_model1" />
         <Preference
-            android:title="Model III"
-            android:summary="ROM to use for Model III"
+            android:title="@string/pref_rom_model3_title"
+            android:summary="@string/pref_rom_model3_summary"
             android:key="conf_rom_model3" />
         <Preference
-            android:title="Model 4"
-            android:summary="ROM to use for Model 4"
+            android:title="@string/pref_rom_model4_title"
+            android:summary="@string/pref_rom_model4_summary"
             android:key="conf_rom_model4" />
         <Preference
-            android:title="Model 4P"
-            android:summary="ROM to use for Model 4P"
+            android:title="@string/pref_rom_model4p_title"
+            android:summary="@string/pref_rom_model4p_summary"
             android:key="conf_rom_model4p" />
     </PreferenceCategory>
 </PreferenceScreen>

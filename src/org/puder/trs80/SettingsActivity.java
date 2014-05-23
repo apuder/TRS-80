@@ -42,6 +42,10 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 
     public static final String SHARED_PREF_NAME = "Settings";
 
+    // Action Menu
+    private static final int   MENU_OPTION_DONE = 0;
+    private static final int   MENU_OPTION_HELP = 1;
+
     public static final String CONF_FIRST_TIME  = "conf_first_time";
     public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
     public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
@@ -97,21 +101,21 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Done").setIcon(R.drawable.ok_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        menu.add("Help").setIcon(R.drawable.help_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE, this.getString(R.string.menu_done))
+                .setIcon(R.drawable.ok_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
+                .setIcon(R.drawable.help_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if ("Done".equals(item.getTitle())) {
+        switch (item.getItemId()) {
+        case MENU_OPTION_DONE:
             doDone();
             return true;
-        }
-        if ("Help".equals(item.getTitle())) {
+        case MENU_OPTION_HELP:
             doHelp();
             return true;
         }
@@ -152,7 +156,6 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
         if (resultCode == RESULT_OK) {
             String newValue = data.getStringExtra("PATH");
             SharedPreferences.Editor editor = sharedPrefs.edit();
-            String key;
             if (CONF_ROM_MODEL1.hashCode() == requestCode) {
                 editor.putString(CONF_ROM_MODEL1, newValue);
             }

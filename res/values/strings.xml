@@ -36,6 +36,19 @@
     <string name="menu_up">Move up</string>
     <string name="menu_down">Move down</string>
 
+    <!-- SettingActivity -->
+    <string name="menu_done">Done</string>
+
+    <string name="pref_roms">ROMs</string>
+    <string name="pref_rom_model1_title">Model I</string>
+    <string name="pref_rom_model1_summary">ROM to use for Model I</string>
+    <string name="pref_rom_model3_title">Model III</string>
+    <string name="pref_rom_model3_summary">ROM to use for Model III</string>
+    <string name="pref_rom_model4_title">Model 4</string>
+    <string name="pref_rom_model4_summary">ROM to use for Model 4</string>
+    <string name="pref_rom_model4p_title">Model 4P</string>
+    <string name="pref_rom_model4p_summary">ROM to use for Model 4P</string>
+
     <!-- EmulatorActivity -->
     <string name="menu_pause">Pause</string>
     <string name="menu_reset">Reset</string>
