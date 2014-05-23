@@ -188,7 +188,7 @@ public class SettingsActivity extends SherlockPreferenceActivity implements
         TextView t = (TextView) view.findViewById(R.id.help_text);
         t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {

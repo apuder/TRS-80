@@ -2,17 +2,8 @@
 <resources>
 
     <string name="app_name">TRS-80</string>
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
 
     <string name="trs80_dir">TRS-80</string>
-    <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
-    <string name="model1_rom_file_in_zip">trs80model1.rom</string>
-    <string name="model1_rom_filename">model1.rom</string>
-    <string name="model3_rom_url">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
-    <string name="model3_rom_filename">model3.rom</string>
-    <string name="roms_downlaod_success_msg">All ROMs successfully downloaded</string>
-    <string name="roms_download_failure_msg">Not all ROMs could be downloaded!</string>
 
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
@@ -33,6 +24,18 @@
     <string name="menu_delete">Delete</string>
     <string name="menu_up">Move up</string>
     <string name="menu_down">Move down</string>
+
+    <!-- InitialSetupDialogFragment -->
+    <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
+    <string name="model1_rom_file_in_zip">trs80model1.rom</string>
+    <string name="model1_rom_filename">model1.rom</string>
+    <string name="model3_rom_url">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
+    <string name="model3_rom_filename">model3.rom</string>
+    <string name="downloading">Downloading&#8230;</string>
+    <string name="roms_downlaod_success_msg">All ROMs successfully downloaded</string>
+    <string name="roms_download_failure_msg">Not all ROMs could be downloaded!</string>
+    <string name="config_name_model1">Model I - no disks</string>
+    <string name="config_name_model3">Model III - no disks</string>
 
     <!-- SettingActivity -->
     <string name="menu_done">Done</string>

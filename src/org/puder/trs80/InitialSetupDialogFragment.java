@@ -88,8 +88,6 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
         final String model3_rom_url = this.getString(R.string.model3_rom_url);
         final String model1_rom_filename = this.getString(R.string.model1_rom_filename);
         final String model3_rom_filename = this.getString(R.string.model3_rom_filename);
-        final String roms_download_success_msg = this.getString(R.string.roms_downlaod_success_msg);
-        final String roms_download_failure_msg = this.getString(R.string.roms_download_failure_msg);
 
         File sdcard = Environment.getExternalStorageDirectory();
         final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir)
@@ -101,7 +99,7 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         progressDialog.setCancelable(true);
-        progressDialog.setMessage("Downloading...");
+        progressDialog.setMessage(this.getString(R.string.downloading));
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.show();
 
@@ -145,11 +143,13 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
                             progressDialog.dismiss();
                             if (ROMs.hasROMs()) {
                                 Toast.makeText(TRS80Application.getAppContext(),
-                                        roms_download_success_msg, Toast.LENGTH_LONG).show();
+                                        R.string.roms_downlaod_success_msg, Toast.LENGTH_LONG)
+                                        .show();
                                 listener.onDownloadCompleted();
                             } else {
                                 Toast.makeText(TRS80Application.getAppContext(),
-                                        roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                                        R.string.roms_download_failure_msg, Toast.LENGTH_LONG)
+                                        .show();
                             }
                         } catch (IllegalArgumentException ex) {
                             /*
@@ -233,14 +233,14 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
     private void createModel1Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName("Model I - no disks");
+        firstConfig.setName(this.getString(R.string.config_name_model1));
         firstConfig.setModel(Hardware.MODEL1);
         firstConfig.save();
     }
 
     private void createModel3Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName("Model III - no disks");
+        firstConfig.setName(this.getString(R.string.config_name_model3));
         firstConfig.setModel(Hardware.MODEL3);
         firstConfig.save();
     }

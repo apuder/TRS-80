@@ -260,7 +260,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         builder.setTitle(R.string.app_name);
         builder.setMessage(msg);
         builder.setIcon(R.drawable.warning_icon);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -270,7 +270,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             }
 
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -289,7 +289,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         builder.setTitle(R.string.app_name);
         builder.setMessage(msg);
         builder.setIcon(R.drawable.warning_icon);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -299,7 +299,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             }
 
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -372,7 +372,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         TextView t = (TextView) view.findViewById(R.id.error_text);
         t.setText(this.getString(R.string.error_init, err));
         builder.setView(view);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -400,7 +400,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         TextView t = (TextView) view.findViewById(R.id.help_text);
         t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
