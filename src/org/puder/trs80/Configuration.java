@@ -59,8 +59,8 @@ public class Configuration {
         for (Configuration conf : configurations) {
             if (!ids.equals("")) {
                 ids += ",";
-                ids += Integer.toString(conf.getId());
             }
+            ids += Integer.toString(conf.getId());
         }
         Editor e = globalPrefs.edit();
         e.putString("CONFIGURATIONS", ids);
