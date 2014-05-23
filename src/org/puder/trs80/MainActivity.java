@@ -124,12 +124,12 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         }
         menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE, this.getString(R.string.menu_add))
                 .setIcon(R.drawable.add_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.CATEGORY_SYSTEM,
-                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.CATEGORY_SYSTEM,
+        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
                 this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
