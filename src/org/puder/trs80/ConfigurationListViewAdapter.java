@@ -49,6 +49,7 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
     public View getView(int position, View convertView, ViewGroup parent) {
         Holder holder = new Holder();
         Configuration conf = getItem(position);
+        Context context = TRS80Application.getAppContext();
 
         LayoutInflater mInflater = (LayoutInflater) context
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -96,7 +97,8 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
         holder.disks.setText(Integer.toString(count));
 
         // Sound
-        holder.sound.setText(conf.muteSound() ? "disabled" : "enabled");
+        holder.sound.setText(conf.muteSound() ? context.getString(R.string.sound_disabled)
+                : context.getString(R.string.sound_enabled));
 
         // Keyboards
         String keyboards = getKeyboardLabel(conf.getKeyboardLayoutPortrait());
@@ -116,16 +118,23 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
     }
 
     private String getKeyboardLabel(int type) {
+        int id;
         switch (type) {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
-            return "original";
+            id = R.string.keyboard_abbrev_original;
+            break;
         case Configuration.KEYBOARD_LAYOUT_COMPACT:
-            return "compact";
+            id = R.string.keyboard_abbrev_compact;
+            break;
         case Configuration.KEYBOARD_LAYOUT_GAMING_1:
-            return "gaming";
+            id = R.string.keyboard_abbrev_gaming_1;
+            break;
         case Configuration.KEYBOARD_TILT:
-            return "tilt";
+            id = R.string.keyboard_abbrev_tilt;
+            break;
+        default:
+            return "-";
         }
-        return "-";
+        return TRS80Application.getAppContext().getString(id);
     }
 }

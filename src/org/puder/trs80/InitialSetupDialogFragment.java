@@ -233,14 +233,14 @@ public class InitialSetupDialogFragment extends SherlockDialogFragment {
 
     private void createModel1Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName(this.getString(R.string.config_name_model1));
+        firstConfig.setName(TRS80Application.getAppContext().getString(R.string.config_name_model1));
         firstConfig.setModel(Hardware.MODEL1);
         firstConfig.save();
     }
 
     private void createModel3Configuration() {
         ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName(this.getString(R.string.config_name_model3));
+        firstConfig.setName(TRS80Application.getAppContext().getString(R.string.config_name_model3));
         firstConfig.setModel(Hardware.MODEL3);
         firstConfig.save();
     }

@@ -15,8 +15,6 @@
     <string name="menu_add">Add</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_help">Help</string>
-
-    <!-- Context Menu in MainActivity -->
     <string name="menu_start">Start</string>
     <string name="menu_resume">Resume</string>
     <string name="menu_stop">Stop</string>
@@ -24,6 +22,12 @@
     <string name="menu_delete">Delete</string>
     <string name="menu_up">Move up</string>
     <string name="menu_down">Move down</string>
+    <string name="sound_enabled">enabled</string>
+    <string name="sound_disabled">disabled</string>
+    <string name="keyboard_abbrev_original">original</string>
+    <string name="keyboard_abbrev_compact">compact</string>
+    <string name="keyboard_abbrev_gaming_1">gaming</string>
+    <string name="keyboard_abbrev_tilt">tilt</string>
 
     <!-- InitialSetupDialogFragment -->
     <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
