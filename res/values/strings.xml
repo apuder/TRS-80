@@ -28,6 +28,10 @@
     <string name="keyboard_abbrev_compact">compact</string>
     <string name="keyboard_abbrev_gaming_1">gaming</string>
     <string name="keyboard_abbrev_tilt">tilt</string>
+    <string name="conf_item_hardware">Hardware:</string>
+    <string name="conf_item_disks">Disks:</string>
+    <string name="conf_item_sound">Sound:</string>
+    <string name="conf_item_keyboards">Keyboards:</string>
 
     <!-- InitialSetupDialogFragment -->
     <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>

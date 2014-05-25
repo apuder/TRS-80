@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@android:style/TextAppearance.Small"
                     android:paddingRight="5dp"
-                    android:text="Hardware:"/>
+                    android:text="@string/conf_item_hardware"/>
                 <TextView
                     android:id="@+id/configuration_model"
                     android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@android:style/TextAppearance.Small"
                     android:paddingRight="5dp"
-                    android:text="Disks:"/>
+                    android:text="@string/conf_item_disks"/>
                 <TextView
                     android:id="@+id/configuration_disks"
                     android:layout_width="wrap_content"
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@android:style/TextAppearance.Small"
                     android:paddingRight="5dp"
-                    android:text="Sound:"/>
+                    android:text="@string/conf_item_sound"/>
                 <TextView
                     android:id="@+id/configuration_sound"
                     android:layout_width="wrap_content"
@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@android:style/TextAppearance.Small"
                     android:paddingRight="5dp"
-                    android:text="Keyboards:"/>
+                    android:text="@string/conf_item_keyboards"/>
                 <TextView
                     android:id="@+id/configuration_keyboards"
                     android:layout_width="wrap_content"
