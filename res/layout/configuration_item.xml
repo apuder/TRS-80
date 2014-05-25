@@ -100,12 +100,14 @@
 
         <org.puder.trs80.ScreenshotView
             android:id="@+id/configuration_screenshot"
-            android:background="@drawable/border"
+            android:background="@drawable/emulator"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:padding="7dp" />
+            android:layout_margin="3dp" />
 
     </RelativeLayout>
 </LinearLayout>
