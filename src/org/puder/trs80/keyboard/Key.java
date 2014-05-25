@@ -35,6 +35,7 @@ import android.view.ViewGroup.MarginLayoutParams;
 
 public class Key extends View {
 
+    final static int        TK_NONE             = -1;
     final static int        TK_0                = 0;
     final static int        TK_1                = 1;
     final static int        TK_2                = 2;
@@ -195,7 +196,7 @@ public class Key extends View {
                     }
                     return true;
                 }
-                if (action == MotionEvent.ACTION_DOWN) {
+                if (action == MotionEvent.ACTION_DOWN && !isShiftKey) {
                     if (isShifted && idShifted != -1) {
                         keyboard.keyDown(idShifted);
                     } else {
@@ -205,9 +206,11 @@ public class Key extends View {
                 if (action == MotionEvent.ACTION_UP) {
                     if (isShiftKey) {
                         if (!isShifted) {
-                            keyboard.shiftKeys();
+                            keyboard.shiftKeys(idNormal);
+                            keyboard.keyDown(idNormal);
                         } else {
                             keyboard.unshiftKeys();
+                            keyboard.keyUp(idNormal);
                         }
                     } else {
                         if (isShifted && idShifted != -1) {
@@ -215,7 +218,16 @@ public class Key extends View {
                         } else {
                             keyboard.keyUp(idNormal);
                         }
-                        keyboard.unshiftKeys();
+                        switch (keyboard.getPressedShiftKey()) {
+                        case TK_SHIFT_LEFT:
+                            keyboard.unshiftKeys();
+                            keyboard.keyUp(TK_SHIFT_LEFT);
+                            break;
+                        case TK_SHIFT_RIGHT:
+                            keyboard.unshiftKeys();
+                            keyboard.keyUp(TK_SHIFT_RIGHT);
+                            break;
+                        }
                     }
                 }
                 return true;

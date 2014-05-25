@@ -33,6 +33,7 @@ import android.view.KeyEvent;
 public class KeyboardManager {
 
     private List<Key>           shiftableKeys;
+    private int                 pressedShiftKey;
 
     private static List<KeyMap> keyboardMapping;
 
@@ -87,6 +88,7 @@ public class KeyboardManager {
 
     public KeyboardManager() {
         shiftableKeys = new ArrayList<Key>();
+        pressedShiftKey = Key.TK_NONE;
     }
 
     public KeyMap getKeyMap(int id) {
@@ -97,16 +99,22 @@ public class KeyboardManager {
         shiftableKeys.add(key);
     }
 
-    public void shiftKeys() {
+    public void shiftKeys(int shiftKey) {
+        pressedShiftKey = shiftKey;
         for (Key key : shiftableKeys) {
             key.shift();
         }
     }
 
     public void unshiftKeys() {
+        pressedShiftKey = Key.TK_NONE;
         for (Key key : shiftableKeys) {
             key.unshift();
         }
+    }
+
+    public int getPressedShiftKey() {
+        return pressedShiftKey;
     }
 
     public void allCursorKeysUp() {
@@ -162,7 +170,7 @@ public class KeyboardManager {
 
     public boolean keyDown(KeyEvent event) {
         int key = mapKeyEventToTRS(event);
-        if (key == -1) {
+        if (key == Key.TK_NONE) {
             return false;
         }
         keyDown(key);
@@ -171,7 +179,7 @@ public class KeyboardManager {
 
     public boolean keyUp(KeyEvent event) {
         final int key = mapKeyEventToTRS(event);
-        if (key == -1) {
+        if (key == Key.TK_NONE) {
             return false;
         }
         handler.postDelayed(new Runnable() {
@@ -272,6 +280,6 @@ public class KeyboardManager {
         case 0x8:
             return Key.TK_LEFT;
         }
-        return -1;
+        return Key.TK_NONE;
     }
 }
