@@ -103,11 +103,10 @@
             android:background="@drawable/emulator"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="3dp" />
+            android:layout_centerVertical="true" />
 
     </RelativeLayout>
 </LinearLayout>
