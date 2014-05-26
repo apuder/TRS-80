@@ -2085,8 +2085,11 @@ void trs_screen_expanded(int flag)
   int bit = flag ? EXPANDED : 0;
   if ((currentmode ^ bit) & EXPANDED) {
     currentmode ^= EXPANDED;
+#ifndef ANDROID
+    //TODO need to tell the Java layer about the expanded mode
 	SDL_FillRect(screen,NULL,background);
     trs_screen_refresh();
+#endif
   }
 }
 
