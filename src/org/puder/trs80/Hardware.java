@@ -16,21 +16,34 @@
 
 package org.puder.trs80;
 
-import java.io.File;
-
 import android.graphics.Bitmap;
-import android.os.Environment;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.view.Window;
 
 abstract public class Hardware {
 
-    final public static int MODEL_NONE = 0;
-    final public static int MODEL1     = 1;
-    final public static int MODEL3     = 3;
-    final public static int MODEL4     = 4;
-    final public static int MODEL4P    = 5;
+    final private float     maxKeyBoxSize = 55; // 55dp
 
-    private int             configurationID;
+    final public static int MODEL_NONE    = 0;
+    final public static int MODEL1        = 1;
+    final public static int MODEL3        = 3;
+    final public static int MODEL4        = 4;
+    final public static int MODEL4P       = 5;
+
+    private int             trsScreenWidth;
+    private int             trsScreenHeight;
+    private int             trsCharWidth;
+    private int             trsCharHeight;
+
+    private int             keyWidth;
+    private int             keyHeight;
+    private int             keyMargin;
+
+    private Bitmap[]        font;
 
     /*
      * The following fields with prefix "xtrs" are configuration parameters for
@@ -53,14 +66,21 @@ abstract public class Hardware {
     private String          xtrsDisk3;
 
     protected Hardware(int model, Configuration conf, String xtrsRomFile) {
-        this.configurationID = conf.getId();
         this.xtrsModel = model;
         this.xtrsRomFile = xtrsRomFile;
         this.xtrsDisk0 = conf.getDiskPath(0);
         this.xtrsDisk1 = conf.getDiskPath(1);
         this.xtrsDisk2 = conf.getDiskPath(2);
         this.xtrsDisk3 = conf.getDiskPath(3);
+
+        font = new Bitmap[256];
     }
+
+    abstract public int getScreenCols();
+
+    abstract public int getScreenRows();
+
+    abstract public float getAspectRatio();
 
     protected int getModel() {
         return this.xtrsModel;
@@ -74,30 +94,224 @@ abstract public class Hardware {
         return this.xtrsScreenBuffer;
     }
 
-    public void setEntryAddress(int addr) {
+    public int getScreenWidth() {
+        return trsScreenWidth;
+    }
+
+    public int getScreenHeight() {
+        return trsScreenHeight;
+    }
+
+    public int getCharWidth() {
+        return trsCharWidth;
+    }
+
+    public int getCharHeight() {
+        return trsCharHeight;
+    }
+
+    public int getKeyWidth() {
+        return keyWidth;
+    }
+
+    public int getKeyHeight() {
+        return keyHeight;
+    }
+
+    public int getKeyMargin() {
+        return keyMargin;
+    }
+
+    protected void setEntryAddress(int addr) {
         this.xtrsEntryAddr = addr;
     }
 
-    abstract public void computeFontDimensions(Window window);
+    public Bitmap[] getFont() {
+        return font;
+    }
 
-    abstract public int getScreenCols();
+    public void computeFontDimensions(Window window) {
+        Rect rect = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rect);
+        int StatusBarHeight = rect.top;
+        int contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+        int TitleBarHeight = contentViewTop - StatusBarHeight;
+        int contentHeight = rect.bottom - contentViewTop;
+        int contentWidth = rect.right;
+        if ((contentWidth / getScreenCols()) * getAspectRatio() > (contentHeight / getScreenRows())) {
+            // Screen height is not sufficient to let the TRS80 screen span the
+            // whole width
+            trsCharHeight = contentHeight / getScreenRows();
+            // Make sure trsCharHeight is divisible by 3
+            while (trsCharHeight % 3 != 0) {
+                trsCharHeight--;
+            }
+            trsScreenHeight = trsCharHeight * getScreenRows();
+            trsCharWidth = (int) (trsCharHeight / getAspectRatio());
+            trsScreenWidth = trsCharWidth * getScreenCols();
+        } else {
+            // Screen width is not sufficient to let the TRS80 screen span the
+            // whole height
+            trsCharWidth = contentWidth / getScreenCols();
+            while (trsCharWidth % 2 != 0) {
+                trsCharWidth--;
+            }
+            trsScreenWidth = trsCharWidth * getScreenCols();
+            trsCharHeight = (int) (trsCharWidth * getAspectRatio());
+            trsScreenHeight = trsCharHeight * getScreenRows();
+        }
 
-    abstract public int getScreenRows();
+        // Compute size of keyboard keys
+        int orientation = TRS80Application.getAppContext().getResources().getConfiguration().orientation;
+        int keyboardLayout;
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            keyboardLayout = TRS80Application.getCurrentConfiguration()
+                    .getKeyboardLayoutLandscape();
+        } else {
+            keyboardLayout = TRS80Application.getCurrentConfiguration().getKeyboardLayoutPortrait();
+        }
+        // The maximum number of key "boxes" per row
+        int maxKeyBoxes = 15;
+        switch (keyboardLayout) {
+        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+            maxKeyBoxes = 10;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+            maxKeyBoxes = 15;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
+            maxKeyBoxes = 8;
+            break;
+        case Configuration.KEYBOARD_LAYOUT_GAMING_2:
+            maxKeyBoxes = 8;
+            break;
+        }
+        int boxWidth = rect.right / maxKeyBoxes;
+        float threshold = pxFromDp(maxKeyBoxSize);
+        if (boxWidth > threshold) {
+            boxWidth = (int) threshold;
+        }
+        keyWidth = keyHeight = (int) (boxWidth * 0.9f);
+        keyMargin = (boxWidth - keyWidth) / 2;
 
-    abstract public int getScreenWidth();
+        generateGraphicsFont();
+        generateASCIIFont();
+    }
 
-    abstract public int getScreenHeight();
+    private void generateASCIIFont() {
+        String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+        Configuration config = TRS80Application.getCurrentConfiguration();
+        Paint p = new Paint();
+        p.setTextAlign(Align.CENTER);
+        Typeface tf = TRS80Application.getTypeface();
+        p.setTypeface(tf);
+        p.setTextScaleX(1.0f);
+        p.setColor(config.getCharacterColorAsRGB());
+        p.setAntiAlias(true);
+        setFontSize(p);
+        int xPos = trsCharWidth / 2;
+        int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
+        for (int i = 0; i < ascii.length(); i++) {
+            Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
+            Canvas c = new Canvas(b);
+            c.drawColor(config.getScreenColorAsRGB());
+            c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
+            font[i + 32] = b;
+        }
+        // Use space for all other characters
+        for (int i = 0; i < font.length; i++) {
+            if (font[i] == null) {
+                font[i] = font[32];
+            }
+        }
+    }
 
-    abstract public int getCharWidth();
+    /**
+     * Compute the correct font size. The font size designates the height of the
+     * font. trsCharHeight will be much bigger than trsCharWidth because of the
+     * aspect ration. For this reason we cannot use trsCharHeight as the font
+     * size. Instead we measure the width of string "X" and incrementally
+     * increase the font size until we hit trsCharWidth.
+     */
+    private void setFontSize(Paint p) {
+        float fontSize = trsCharWidth;
+        final float delta = 0.1f;
+        float width;
+        do {
+            fontSize += delta;
+            p.setTextSize(fontSize);
+            width = p.measureText("X");
+        } while (width <= trsCharWidth);
+        p.setTextSize(fontSize - delta);
+    }
 
-    abstract public int getCharHeight();
+    private void generateGraphicsFont() {
+        Configuration config = TRS80Application.getCurrentConfiguration();
+        Paint p = new Paint();
+        for (int i = 128; i <= 191; i++) {
+            Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
+            Canvas c = new Canvas(b);
+            c.drawColor(config.getScreenColorAsRGB());
+            p.setColor(config.getCharacterColorAsRGB());
+            Rect r = new Rect();
+            // Top-left
+            if ((i & 1) != 0) {
+                r.left = r.top = 0;
+                r.right = trsCharWidth / 2;
+                r.bottom = trsCharHeight / 3;
+                c.drawRect(r, p);
+            }
 
-    abstract public int getKeyHeight();
+            // Top-right
+            if ((i & 2) != 0) {
+                r.left = trsCharWidth / 2;
+                r.right = trsCharWidth;
+                r.top = 0;
+                r.bottom = trsCharHeight / 3;
+                c.drawRect(r, p);
+            }
 
-    abstract public int getKeyWidth();
+            // Middle-left
+            if ((i & 4) != 0) {
+                r.left = 0;
+                r.right = trsCharWidth / 2;
+                r.top = trsCharHeight / 3;
+                r.bottom = trsCharHeight / 3 * 2;
+                c.drawRect(r, p);
+            }
 
-    abstract public int getKeyMargin();
+            // Middle-right
+            if ((i & 8) != 0) {
+                r.left = trsCharWidth / 2;
+                r.right = trsCharWidth;
+                r.top = trsCharHeight / 3;
+                r.bottom = trsCharHeight / 3 * 2;
+                c.drawRect(r, p);
+            }
 
-    abstract public Bitmap[] getFont();
+            // Bottom-left
+            if ((i & 16) != 0) {
+                r.left = 0;
+                r.right = trsCharWidth / 2;
+                r.top = trsCharHeight / 3 * 2;
+                r.bottom = trsCharHeight;
+                c.drawRect(r, p);
+            }
 
+            // Bottom-right
+            if ((i & 32) != 0) {
+                r.left = trsCharWidth / 2;
+                r.right = trsCharWidth;
+                r.top = trsCharHeight / 3 * 2;
+                r.bottom = trsCharHeight;
+                c.drawRect(r, p);
+            }
+
+            font[i] = b;
+        }
+    }
+
+    private float pxFromDp(float dp) {
+        return dp * TRS80Application.getAppContext().getResources().getDisplayMetrics().density;
+    }
 }
