@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import org.acra.ACRA;
+
 /**
  * Class XTRS acts as a gateway to the native layer. The native methods declared
  * in this class are implemented in jni/native.c. Note that XTRS also handles
@@ -126,5 +128,9 @@ public class XTRS {
         if (emulator != null) {
             emulator.log(msg);
         }
+    }
+
+    public static void notImplemented(String msg) {
+        emulator.notImplemented(msg);
     }
 }

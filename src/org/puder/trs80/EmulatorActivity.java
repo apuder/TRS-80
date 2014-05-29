@@ -16,6 +16,7 @@
 
 package org.puder.trs80;
 
+import org.acra.ACRA;
 import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.annotation.SuppressLint;
@@ -29,6 +30,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -66,6 +68,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     private KeyboardManager    keyboardManager;
     private int                rotation;
     private OrientationChanged orientationManager;
+    private Handler            handler               = new Handler();
 
     class OrientationChanged extends OrientationEventListener {
 
@@ -133,6 +136,8 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TRS80Application.setCrashedFlag(false);
 
         if (TRS80Application.getCurrentConfiguration() == null) {
             /*
@@ -427,5 +432,17 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         } else if (yValue > ACCELEROMETER_THRESHOLD) {
             keyboardManager.pressKeyUp();
         }
+    }
+
+    public void notImplemented(final String msg) {
+        handler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                TRS80Application.setCrashedFlag(true);
+                ACRA.getErrorReporter().handleException(new NotImplementedException(msg));
+                finish();
+            }
+        });
     }
 }

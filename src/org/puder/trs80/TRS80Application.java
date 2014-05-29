@@ -19,6 +19,7 @@ package org.puder.trs80;
 import java.util.HashMap;
 
 import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.keyboard.KeyboardManager;
 
@@ -27,7 +28,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 
-@ReportsCrashes(formKey = "", formUri = "")
+@ReportsCrashes(formKey = "", formUri = "", mode = ReportingInteractionMode.DIALOG, resToastText = R.string.crash_toast_text, resDialogText = R.string.crash_dialog_text, resDialogIcon = android.R.drawable.ic_dialog_info, resDialogTitle = R.string.crash_dialog_title, resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, resDialogOkToast = R.string.crash_dialog_ok_toast)
 public class TRS80Application extends Application {
 
     private static Context         context;
@@ -35,6 +36,7 @@ public class TRS80Application extends Application {
     private static KeyboardManager keyboard;
     private static Configuration   configuration;
     private static Bitmap          screenshot;
+    private static boolean         hasCrashed = false;
 
     public void onCreate() {
         super.onCreate();
@@ -86,5 +88,13 @@ public class TRS80Application extends Application {
 
     public static Typeface getTypefaceBold() {
         return Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono-Bold.ttf");
+    }
+
+    public static boolean hasCrashed() {
+        return hasCrashed;
+    }
+
+    public static void setCrashedFlag(boolean flag) {
+        hasCrashed = flag;
     }
 }

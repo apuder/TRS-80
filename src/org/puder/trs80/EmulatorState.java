@@ -64,6 +64,10 @@ public class EmulatorState {
 
     public static void saveScreenshot(int configurationID) {
         Bitmap screenshot = TRS80Application.getScreenshot();
+        if (screenshot == null) {
+            // Can happen when NotImplementedException is thrown
+            return;
+        }
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(getScreenshotFileName(configurationID));

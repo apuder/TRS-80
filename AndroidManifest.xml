@@ -30,6 +30,12 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".EmulatorActivity" />
         <activity android:name=".browser.FileBrowserActivity" />
+        <activity
+            android:name="org.acra.CrashReportDialog"
+            android:theme="@android:style/Theme.Dialog"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true" />
     </application>
 
 </manifest>

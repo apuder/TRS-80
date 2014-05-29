@@ -23,6 +23,7 @@ void pause_audio(int pause_on);
 void flush_audio_queue();
 
 void xlog(const char* msg);
+void not_implemented(const char* msg);
 
 #ifdef SETITIMER_FIX
 #include <time.h>

@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <android/log.h>
+#include <setjmp.h>
 #include "trs.h"
 #include "trs_disk.h"
 #include "trs_iodefs.h"
@@ -22,8 +23,9 @@
 #define ERR_GET_METHOD_CLOSE_AUDIO -6
 #define ERR_GET_METHOD_PAUSE_AUDIO -7
 #define ERR_GET_METHOD_XLOG -8
-#define ERR_MEMORY_IS_NO_COPY -9
-#define ERR_SCREEN_IS_NO_COPY -10
+#define ERR_GET_METHOD_NOT_IMPLEMENTED -9
+#define ERR_MEMORY_IS_NO_COPY -10
+#define ERR_SCREEN_IS_NO_COPY -11
 
 int isRunning = 0;
 
@@ -39,11 +41,14 @@ static jmethodID initAudioMethodId;
 static jmethodID closeAudioMethodId;
 static jmethodID pauseAudioMethodId;
 static jmethodID xlogMethodId;
+static jmethodID notImplementedMethodId;
 static jbyte* screenBuffer;
 static jbyteArray screenArray;
 static jbyteArray audioBufferArray;
 static jbyte* audioBuffer;
 static jint audioBufferSize;
+
+static jmp_buf ex_buf;
 
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
 unsigned char trs_screen[2048];
@@ -278,6 +283,12 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
         return ERR_GET_METHOD_XLOG;
     }
 
+    notImplementedMethodId = (*env)->GetStaticMethodID(env, cls, "notImplemented",
+            "(Ljava/lang/String;)V");
+    if (notImplementedMethodId == 0) {
+        return ERR_GET_METHOD_NOT_IMPLEMENTED;
+    }
+
     jclass hardwareClass = (*env)->GetObjectClass(env, hardware);
     jfieldID xtrsModelID = (*env)->GetFieldID(env, hardwareClass, "xtrsModel", "I");
     jfieldID xtrsRomFileID = (*env)->GetFieldID(env, hardwareClass, "xtrsRomFile", "Ljava/lang/String;");
@@ -347,19 +358,23 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     if (emulator_status == EMULATOR_STATUS_NOT_INITIALIZED) {
         return;
     }
-    while (isRunning) {
-        z80_run(0);
+    if (!setjmp(ex_buf)) {
+        while (isRunning) {
+            z80_run(0);
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
-        check_for_screen_updates();
+            check_for_screen_updates();
 #endif
 #ifdef SETITIMER_FIX
-        struct timeval tv;
+            struct timeval tv;
 
-        gettimeofday(&tv, NULL);
-        if ((tv.tv_sec*1000000 + tv.tv_usec) >= next_timer) {
-            trs_timer_event(0);
-        }
+            gettimeofday(&tv, NULL);
+            if ((tv.tv_sec*1000000 + tv.tv_usec) >= next_timer) {
+                trs_timer_event(0);
+            }
 #endif
+        }
+    } else {
+        // Got not implemented exception
     }
 }
 
@@ -380,4 +395,12 @@ void xlog(const char* msg) {
     jstring jmsg = (*env)->NewStringUTF(env, msg);
     (*env)->CallStaticVoidMethod(env, clazzXTRS, xlogMethodId, jmsg);
     (*env)->DeleteLocalRef(env, jmsg);
+}
+
+void not_implemented(const char* msg) {
+    JNIEnv *env = getEnv();
+    jstring jmsg = (*env)->NewStringUTF(env, msg);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, notImplementedMethodId, jmsg);
+    (*env)->DeleteLocalRef(env, jmsg);
+    longjmp(ex_buf, 1);
 }

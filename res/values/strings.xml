@@ -3,6 +3,13 @@
 
     <string name="app_name">TRS-80</string>
 
+    <string name="crash_toast_text">TRS-80 has crashed!</string>
+    <string name="crash_dialog_title">TRS-80 has crashed</string>
+    <string name="crash_dialog_text">The emulator has crashed forcing the application to stop.
+                Please help us fix this by sending us error data, all you have to do is click OK.</string>
+    <string name="crash_dialog_comment_prompt">Which TRS-80 application did you try to run?</string>
+    <string name="crash_dialog_ok_toast">Thank you!</string>
+
     <string name="trs80_dir">TRS-80</string>
 
     <string name="alert_dialog_ok">OK</string>

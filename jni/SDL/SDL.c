@@ -23,13 +23,10 @@
 #define DEBUG_TAG "TRS80"
 
 #define NOT_IMPLEMENTED() \
-    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NOT_IMPLEMENTED: %s:%d", __FILE__, __LINE__); \
-    exit_emu();
-
-static void exit_emu()
-{
-    exit(-1);
-}
+    char buf[1024]; \
+    sprintf(buf, "%s:%d", __FILE__, __LINE__); \
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NOT_IMPLEMENTED: %s", buf); \
+    not_implemented(buf);
 
 static struct timeval start_tv;
 static SDL_bool ticks_started = SDL_FALSE;

@@ -124,12 +124,10 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         }
         menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE, this.getString(R.string.menu_add))
                 .setIcon(R.drawable.add_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
-                this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
-                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE, this.getString(R.string.menu_settings))
+                .setIcon(R.drawable.settings_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
+                .setIcon(R.drawable.help_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
@@ -235,7 +233,12 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         }
 
         if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
-            int id = TRS80Application.getCurrentConfiguration().getId();
+            if (TRS80Application.hasCrashed()) {
+                finish();
+                return;
+            }
+            Configuration conf = TRS80Application.getCurrentConfiguration();
+            int id = conf.getId();
             EmulatorState.saveScreenshot(id);
             EmulatorState.saveState(id);
         }
@@ -270,14 +273,15 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             }
 
         });
-        builder.setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.alert_dialog_cancel,
+                new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
 
-        });
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -299,14 +303,15 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
             }
 
         });
-        builder.setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.alert_dialog_cancel,
+                new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
 
-        });
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -400,14 +405,15 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
         TextView t = (TextView) view.findViewById(R.id.help_text);
         t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
-        builder.setPositiveButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.alert_dialog_cancel,
+                new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
 
-        });
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
