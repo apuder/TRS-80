@@ -42,8 +42,8 @@ public class RenderThread extends Thread {
         Hardware h = TRS80Application.getHardware();
         model = h.getModel();
         screenBuffer = h.getScreenBuffer();
-        trsScreenCols = h.getScreenCols();
-        trsScreenRows = h.getScreenRows();
+        trsScreenCols = h.getScreenConfiguration().trsScreenCols;
+        trsScreenRows = h.getScreenConfiguration().trsScreenRows;
         trsCharWidth = h.getCharWidth();
         trsCharHeight = h.getCharHeight();
         font = h.getFont();

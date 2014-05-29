@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import org.puder.trs80.Hardware.ScreenConfiguration;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -25,6 +27,18 @@ import android.graphics.Typeface;
 import android.view.Window;
 
 abstract public class Hardware {
+
+    class ScreenConfiguration {
+        public ScreenConfiguration(int trsScreenCols, int trsScreenRows, float aspectRatio) {
+            this.trsScreenCols = trsScreenCols;
+            this.trsScreenRows = trsScreenRows;
+            this.aspectRatio = aspectRatio;
+        }
+
+        public int   trsScreenCols;
+        public int   trsScreenRows;
+        public float aspectRatio;
+    }
 
     final private float     maxKeyBoxSize = 55; // 55dp
 
@@ -38,6 +52,8 @@ abstract public class Hardware {
     private int             trsScreenHeight;
     private int             trsCharWidth;
     private int             trsCharHeight;
+
+    private boolean         hasHalfWidthMode;
 
     private int             keyWidth;
     private int             keyHeight;
@@ -76,11 +92,9 @@ abstract public class Hardware {
         font = new Bitmap[256];
     }
 
-    abstract public int getScreenCols();
+    abstract protected ScreenConfiguration getScreenConfiguration();
 
-    abstract public int getScreenRows();
-
-    abstract public float getAspectRatio();
+    abstract protected boolean hasHalfWidthMode();
 
     protected int getModel() {
         return this.xtrsModel;
@@ -131,6 +145,7 @@ abstract public class Hardware {
     }
 
     public void computeFontDimensions(Window window) {
+        ScreenConfiguration screenConfig = getScreenConfiguration();
         Rect rect = new Rect();
         window.getDecorView().getWindowVisibleDisplayFrame(rect);
         int StatusBarHeight = rect.top;
@@ -138,27 +153,27 @@ abstract public class Hardware {
         int TitleBarHeight = contentViewTop - StatusBarHeight;
         int contentHeight = rect.bottom - contentViewTop;
         int contentWidth = rect.right;
-        if ((contentWidth / getScreenCols()) * getAspectRatio() > (contentHeight / getScreenRows())) {
+        if ((contentWidth / screenConfig.trsScreenCols) * screenConfig.aspectRatio > (contentHeight / screenConfig.trsScreenRows)) {
             // Screen height is not sufficient to let the TRS80 screen span the
             // whole width
-            trsCharHeight = contentHeight / getScreenRows();
+            trsCharHeight = contentHeight / screenConfig.trsScreenRows;
             // Make sure trsCharHeight is divisible by 3
             while (trsCharHeight % 3 != 0) {
                 trsCharHeight--;
             }
-            trsScreenHeight = trsCharHeight * getScreenRows();
-            trsCharWidth = (int) (trsCharHeight / getAspectRatio());
-            trsScreenWidth = trsCharWidth * getScreenCols();
+            trsScreenHeight = trsCharHeight * screenConfig.trsScreenRows;
+            trsCharWidth = (int) (trsCharHeight / screenConfig.aspectRatio);
+            trsScreenWidth = trsCharWidth * screenConfig.trsScreenCols;
         } else {
             // Screen width is not sufficient to let the TRS80 screen span the
             // whole height
-            trsCharWidth = contentWidth / getScreenCols();
+            trsCharWidth = contentWidth / screenConfig.trsScreenCols;
             while (trsCharWidth % 2 != 0) {
                 trsCharWidth--;
             }
-            trsScreenWidth = trsCharWidth * getScreenCols();
-            trsCharHeight = (int) (trsCharWidth * getAspectRatio());
-            trsScreenHeight = trsCharHeight * getScreenRows();
+            trsScreenWidth = trsCharWidth * screenConfig.trsScreenCols;
+            trsCharHeight = (int) (trsCharWidth * screenConfig.aspectRatio);
+            trsScreenHeight = trsCharHeight * screenConfig.trsScreenRows;
         }
 
         // Compute size of keyboard keys

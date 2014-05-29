@@ -16,7 +16,6 @@
 
 package org.puder.trs80;
 
-
 /**
  * Class Model1 defines the hardware characteristics of a TRS-80 Model 3. In
  * particular, it computes bitmaps for the Model 3 font. The size of the font is
@@ -31,9 +30,10 @@ package org.puder.trs80;
  */
 public class Model1 extends Hardware {
 
-    final private int   trsScreenCols = 64;
-    final private int   trsScreenRows = 16;
-    final private float aspectRatio   = 3f;
+    final private static int     trsScreenCols    = 64;
+    final private static int     trsScreenRows    = 16;
+    final private static float   aspectRatio      = 3f;
+    final private static boolean hasHalfWidthMode = true;
 
     public Model1(Configuration conf, String romFile) {
         super(Hardware.MODEL1, conf, romFile);
@@ -43,17 +43,12 @@ public class Model1 extends Hardware {
     }
 
     @Override
-    public int getScreenCols() {
-        return trsScreenCols;
+    protected ScreenConfiguration getScreenConfiguration() {
+        return new ScreenConfiguration(trsScreenCols, trsScreenRows, aspectRatio);
     }
 
     @Override
-    public int getScreenRows() {
-        return trsScreenRows;
-    }
-
-    @Override
-    public float getAspectRatio() {
-        return aspectRatio;
+    protected boolean hasHalfWidthMode() {
+        return hasHalfWidthMode;
     }
 }
