@@ -79,8 +79,13 @@ public class RenderThread extends Thread {
 
     public synchronized void renderScreen(Canvas canvas) {
         int i = 0;
+        boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+        int d = expandedMode ? 2 : 1;
+        if (expandedMode) {
+            canvas.scale(2, 1);
+        }
         for (int row = 0; row < trsScreenRows; row++) {
-            for (int col = 0; col < trsScreenCols; col++) {
+            for (int col = 0; col < trsScreenCols / d; col++) {
                 int ch = screenBuffer[i] & 0xff;
                 // Emulate Radio Shack lowercase mod (for Model 1)
                 if (this.model == Hardware.MODEL1 && ch < 0x20) {
@@ -93,7 +98,7 @@ public class RenderThread extends Thread {
                     continue;
                 }
                 canvas.drawBitmap(font[ch], startx, starty, null);
-                i++;
+                i += d;
             }
         }
     }

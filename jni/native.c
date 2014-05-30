@@ -22,10 +22,11 @@
 #define ERR_GET_METHOD_INIT_AUDIO -5
 #define ERR_GET_METHOD_CLOSE_AUDIO -6
 #define ERR_GET_METHOD_PAUSE_AUDIO -7
-#define ERR_GET_METHOD_XLOG -8
-#define ERR_GET_METHOD_NOT_IMPLEMENTED -9
-#define ERR_MEMORY_IS_NO_COPY -10
-#define ERR_SCREEN_IS_NO_COPY -11
+#define ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE -8
+#define ERR_GET_METHOD_XLOG -9
+#define ERR_GET_METHOD_NOT_IMPLEMENTED -10
+#define ERR_MEMORY_IS_NO_COPY -11
+#define ERR_SCREEN_IS_NO_COPY -12
 
 int isRunning = 0;
 
@@ -40,6 +41,7 @@ static jmethodID updateScreenMethodId;
 static jmethodID initAudioMethodId;
 static jmethodID closeAudioMethodId;
 static jmethodID pauseAudioMethodId;
+static jmethodID setExpandedScreenModeMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
 static jbyte* screenBuffer;
@@ -277,6 +279,11 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
         return ERR_GET_METHOD_PAUSE_AUDIO;
     }
 
+    setExpandedScreenModeMethodId = (*env)->GetStaticMethodID(env, cls, "setExpandedScreenMode", "(Z)V");
+    if (setExpandedScreenModeMethodId == 0) {
+        return ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE;
+    }
+
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
             "(Ljava/lang/String;)V");
     if (xlogMethodId == 0) {
@@ -388,6 +395,11 @@ void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass clazz) {
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
     isRunning = run;
+}
+
+void set_expanded_screen_mode(int flag) {
+    JNIEnv *env = getEnv();
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, setExpandedScreenModeMethodId, (jboolean) flag);
 }
 
 void xlog(const char* msg) {

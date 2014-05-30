@@ -16,39 +16,18 @@
 
 package org.puder.trs80;
 
-/**
- * Class Model3 defines the hardware characteristics of a TRS-80 Model 3. In
- * particular, it computes bitmaps for the Model 3 font. The size of the font is
- * determined by the size of the screen and whether the emulator runs in
- * landscape or portrait mode. The goal is to scale the size nicely for
- * different screen resolutions. Each bitmap of 'font' represents one character
- * of the ASCII code. For alphanumeric characters the bundled font
- * asset/fonts/DejaVuSansMono.ttf is used (see generateASCIIFont()). For the
- * Model 3 pseudo-graphics we compute the bitmaps for the 2x3-per character
- * pseudo pixel graphics (see generateGraphicsFont()).
- * 
- */
 public class Model3 extends Hardware {
 
     final private static int     trsScreenCols    = 64;
     final private static int     trsScreenRows    = 16;
     final private static float   aspectRatio      = 3f;
-    final private static boolean hasHalfWidthMode = true;
 
     public Model3(Configuration conf, String romFile) {
         super(Hardware.MODEL3, conf, romFile);
-        setScreenBuffer(0x3fff - 0x3c00 + 1);
-        int entryAddr = 0;
-        setEntryAddress(entryAddr);
     }
 
     @Override
     protected ScreenConfiguration getScreenConfiguration() {
         return new ScreenConfiguration(trsScreenCols, trsScreenRows, aspectRatio);
-    }
-
-    @Override
-    protected boolean hasHalfWidthMode() {
-        return hasHalfWidthMode;
     }
 }

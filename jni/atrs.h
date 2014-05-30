@@ -21,6 +21,7 @@ void init_audio(int rate, int channels, int encoding, int bufSize);
 void close_audio();
 void pause_audio(int pause_on);
 void flush_audio_queue();
+void set_expanded_screen_mode(int flag);
 
 void xlog(const char* msg);
 void not_implemented(const char* msg);

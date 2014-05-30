@@ -16,8 +16,6 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.Hardware.ScreenConfiguration;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -26,6 +24,18 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.view.Window;
 
+/**
+ * Class Hardware is the base class for the various different TRS-80 models. It
+ * encapsulates various hardware characteristics of different TRS-80 models. In
+ * particular, it computes bitmaps to be used during rendering. The size of the
+ * font is determined by the size of the screen and whether the emulator runs in
+ * landscape or portrait mode. The goal is to scale the size nicely for
+ * different screen resolutions. Each bitmap of 'font' represents one character
+ * of the ASCII code. For alphanumeric characters the bundled font
+ * asset/fonts/DejaVuSansMono.ttf is used (see generateASCIIFont()). For the
+ * TRS-80 pseudo-graphics we compute the bitmaps for the 2x3-per character
+ * pseudo pixel graphics (see generateGraphicsFont()).
+ */
 abstract public class Hardware {
 
     class ScreenConfiguration {
@@ -53,7 +63,7 @@ abstract public class Hardware {
     private int             trsCharWidth;
     private int             trsCharHeight;
 
-    private boolean         hasHalfWidthMode;
+    private boolean         expandedScreenMode;
 
     private int             keyWidth;
     private int             keyHeight;
@@ -89,15 +99,26 @@ abstract public class Hardware {
         this.xtrsDisk2 = conf.getDiskPath(2);
         this.xtrsDisk3 = conf.getDiskPath(3);
 
+        expandedScreenMode = false;
+
         font = new Bitmap[256];
+
+        setScreenBuffer(0x3fff - 0x3c00 + 1);
+        setEntryAddress(0);
     }
 
     abstract protected ScreenConfiguration getScreenConfiguration();
 
-    abstract protected boolean hasHalfWidthMode();
-
     protected int getModel() {
         return this.xtrsModel;
+    }
+
+    public void setExpandedScreenMode(boolean flag) {
+        expandedScreenMode = flag;
+    }
+
+    public boolean getExpandedScreenMode() {
+        return expandedScreenMode;
     }
 
     protected void setScreenBuffer(int size) {

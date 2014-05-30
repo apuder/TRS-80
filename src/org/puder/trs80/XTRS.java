@@ -124,6 +124,10 @@ public class XTRS {
         }
     }
 
+    public static void setExpandedScreenMode(boolean flag) {
+        TRS80Application.getHardware().setExpandedScreenMode(flag);
+    }
+
     public static void xlog(String msg) {
         if (emulator != null) {
             emulator.log(msg);
