@@ -80,6 +80,9 @@ public class Configuration {
         Configuration newConfig = new Configuration(nextId);
         configurations.add(newConfig);
         saveConfigurationIDs();
+        // Delete any state that might be present from a previous install
+        // of this app
+        EmulatorState.deleteSavedState(nextId);
         return newConfig;
     }
 
