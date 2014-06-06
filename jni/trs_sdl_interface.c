@@ -3439,6 +3439,9 @@ void trs_main_load(FILE *file)
   trs_load_int(file,&col_chars,1);
   trs_load_int(file,&row_chars,1);
   trs_load_int(file,&currentmode,1);
+#ifdef ANDROID
+  set_expanded_screen_mode(currentmode);
+#endif
   trs_load_int(file,&text80x24,1);
   trs_load_int(file,&screen640x240,1);
   trs_load_int(file,&trs_charset,1);
