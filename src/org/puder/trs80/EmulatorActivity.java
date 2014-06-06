@@ -409,28 +409,55 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
     /**
      * negateX, negateY, xSrc, ySrc
      */
-    final static int[][] axisSwap                = { { 1, -1, 0, 1 }, // ROTATION_0
+    final static int[][] axisSwap                        = { { 1, -1, 0, 1 }, // ROTATION_0
             { -1, -1, 1, 0 }, // ROTATION_90
             { -1, 1, 0, 1 }, // ROTATION_180
-            { 1, 1, 1, 0 }                      };     // ROTATION_270
+            { 1, 1, 1, 0 }                              };      // ROTATION_270
 
-    final static float   ACCELEROMETER_THRESHOLD = 1.5f;
+    final static float   ACCELEROMETER_PRESS_THRESHOLD   = 1.0f;
+    final static float   ACCELEROMETER_UNPRESS_THRESHOLD = 0.3f;
+
+    private boolean      leftKeyPressed                  = false;
+    private boolean      rightKeyPressed                 = false;
+    private boolean      upKeyPressed                    = false;
+    private boolean      downKeyPressed                  = false;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         int[] as = axisSwap[rotation];
         float xValue = (float) as[0 /* negateX */] * event.values[as[2/* xSrc */]];
         float yValue = (float) as[1 /* negateY */] * event.values[as[3 /* ySrc */]];
-        keyboardManager.allCursorKeysUp();
-        if (xValue < -ACCELEROMETER_THRESHOLD) {
+        if (xValue < -ACCELEROMETER_PRESS_THRESHOLD && !rightKeyPressed) {
+            rightKeyPressed = true;
             keyboardManager.pressKeyRight();
-        } else if (xValue > ACCELEROMETER_THRESHOLD) {
+        }
+        if (xValue > -ACCELEROMETER_UNPRESS_THRESHOLD && rightKeyPressed) {
+            rightKeyPressed = false;
+            keyboardManager.unpressKeyRight();
+        }
+        if (xValue > ACCELEROMETER_PRESS_THRESHOLD && !leftKeyPressed) {
+            leftKeyPressed = true;
             keyboardManager.pressKeyLeft();
         }
-        if (yValue < -ACCELEROMETER_THRESHOLD) {
+        if (xValue < ACCELEROMETER_UNPRESS_THRESHOLD && leftKeyPressed) {
+            leftKeyPressed = false;
+            keyboardManager.unpressKeyLeft();
+        }
+        if (yValue < -ACCELEROMETER_PRESS_THRESHOLD && !downKeyPressed) {
+            downKeyPressed = true;
             keyboardManager.pressKeyDown();
-        } else if (yValue > ACCELEROMETER_THRESHOLD) {
+        }
+        if (yValue > -ACCELEROMETER_UNPRESS_THRESHOLD && downKeyPressed) {
+            downKeyPressed = false;
+            keyboardManager.unpressKeyDown();
+        }
+        if (yValue > ACCELEROMETER_PRESS_THRESHOLD && !upKeyPressed) {
+            upKeyPressed = true;
             keyboardManager.pressKeyUp();
+        }
+        if (yValue < ACCELEROMETER_UNPRESS_THRESHOLD && upKeyPressed) {
+            upKeyPressed = false;
+            keyboardManager.unpressKeyUp();
         }
     }
 

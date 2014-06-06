@@ -144,6 +144,22 @@ public class KeyboardManager {
         keyDown(Key.TK_SPACE);
     }
 
+    public void unpressKeyDown() {
+        keyUp(Key.TK_DOWN);
+    }
+
+    public void unpressKeyUp() {
+        keyUp(Key.TK_UP);
+    }
+
+    public void unpressKeyLeft() {
+        keyUp(Key.TK_LEFT);
+    }
+
+    public void unpressKeyRight() {
+        keyUp(Key.TK_RIGHT);
+    }
+
     public void unpressKeySpace() {
         keyUp(Key.TK_SPACE);
     }
