@@ -126,8 +126,8 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
         case Configuration.KEYBOARD_LAYOUT_COMPACT:
             id = R.string.keyboard_abbrev_compact;
             break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
-            id = R.string.keyboard_abbrev_gaming_1;
+        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+            id = R.string.keyboard_abbrev_joystick;
             break;
         case Configuration.KEYBOARD_TILT:
             id = R.string.keyboard_abbrev_tilt;

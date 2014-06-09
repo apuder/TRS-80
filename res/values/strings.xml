@@ -33,7 +33,7 @@
     <string name="sound_disabled">disabled</string>
     <string name="keyboard_abbrev_original">original</string>
     <string name="keyboard_abbrev_compact">compact</string>
-    <string name="keyboard_abbrev_gaming_1">gaming</string>
+    <string name="keyboard_abbrev_joystick">joystick</string>
     <string name="keyboard_abbrev_tilt">tilt</string>
     <string name="conf_item_hardware">Hardware:</string>
     <string name="conf_item_disks">Disks:</string>

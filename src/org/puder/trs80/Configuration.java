@@ -29,7 +29,7 @@ public class Configuration {
 
     public static final int            KEYBOARD_LAYOUT_ORIGINAL = 0;
     public static final int            KEYBOARD_LAYOUT_COMPACT  = 1;
-    public static final int            KEYBOARD_LAYOUT_GAMING_1 = 2;
+    public static final int            KEYBOARD_LAYOUT_JOYSTICK = 2;
     public static final int            KEYBOARD_LAYOUT_GAMING_2 = 3;
     public static final int            KEYBOARD_TILT            = 4;
     public static final int            KEYBOARD_EXTERNAL        = 5;

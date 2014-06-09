@@ -312,11 +312,8 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             layoutId = R.layout.keyboard_original;
             break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
-            layoutId = R.layout.keyboard_gaming_1;
-            break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING_2:
-            layoutId = R.layout.keyboard_gaming_2;
+        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+            layoutId = R.layout.keyboard_joystick;
             break;
         case Configuration.KEYBOARD_TILT:
             layoutId = R.layout.keyboard_tilt;

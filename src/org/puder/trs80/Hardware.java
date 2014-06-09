@@ -215,7 +215,7 @@ abstract public class Hardware {
         case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
             maxKeyBoxes = 15;
             break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING_1:
+        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
             maxKeyBoxes = 8;
             break;
         case Configuration.KEYBOARD_LAYOUT_GAMING_2:
