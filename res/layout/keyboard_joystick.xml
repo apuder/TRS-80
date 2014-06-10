@@ -14,8 +14,8 @@
 
     <org.puder.trs80.keyboard.JoystickView
         android:id="@+id/key_joystick"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
 

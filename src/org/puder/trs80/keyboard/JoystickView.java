@@ -48,6 +48,7 @@ public class JoystickView extends View {
     private float             circleStrokeWidth = 10;
     private float             triangleSideLength;
     private Bitmap            joystickBitmap;
+    private boolean           joystickIsPressed;
 
     protected Paint           paint;
     protected KeyboardManager keyboardManager;
@@ -57,9 +58,8 @@ public class JoystickView extends View {
 
         paint = new Paint();
         paint.setAntiAlias(true);
-        paint.setAlpha(100);
 
-        radiusButton = pxFromDp(30);
+        radiusButton = pxFromDp(40);
         triangleSideLength = pxFromDp(15);
 
         this.setOnTouchListener(new OnTouchListener() {
@@ -71,10 +71,12 @@ public class JoystickView extends View {
                     unpressAllKeys();
                     joystickX = -1;
                     joystickY = -1;
+                    joystickIsPressed = false;
                     invalidate();
                     return true;
                 }
 
+                joystickIsPressed = true;
                 joystickX = event.getX();
                 joystickY = event.getY();
                 invalidate();
@@ -355,14 +357,23 @@ public class JoystickView extends View {
             joystickY = cy;
         }
         createJoystickBitmap();
+
+        paint.setColor(joystickIsPressed ? Color.LTGRAY : Color.GRAY);
+        paint.setAlpha(100);
         canvas.drawBitmap(joystickBitmap, 0, 0, paint);
 
-        //TODO constrict location of button to outer radius
         float x = joystickX - cx;
         float y = joystickY - cy;
         double dist = Math.sqrt(x * x + y * y);
-
-        canvas.drawCircle(joystickX, joystickY, radiusButton, paint);
+        if (dist > radiusJoystick) {
+            canvas.translate(cx, cy);
+            double dx = joystickX - cx;
+            double dy = cy - joystickY;
+            canvas.rotate(-(float) computeAngle(dx, dy));
+            canvas.drawCircle(radiusJoystick, 0, radiusButton, paint);
+        } else {
+            canvas.drawCircle(joystickX, joystickY, radiusButton, paint);
+        }
     }
 
     private void createJoystickBitmap() {
