@@ -23,7 +23,7 @@
     <string-array name="conf_keyboard_type">
         <item>Original layout</item>
         <item>Compact layout</item>
-        <item>Gaming layout</item>
+        <item>Joystick control</item>
         <item>Tilt interface</item>
         </string-array>
     <string-array name="conf_keyboard_type_values">

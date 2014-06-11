@@ -81,8 +81,7 @@
     <string name="white">White</string>
     <string name="keyboard_original">Original layout</string>
     <string name="keyboard_compact">Compact layout</string>
-    <string name="keyboard_gaming_1">Gaming layout</string>
-    <string name="keyboard_gaming_2">NOT USED</string>
+    <string name="keyboard_joystick">Joystick control</string>
     <string name="keyboard_tilt">Tilt interface</string>
 
     <!-- SettingActivity -->

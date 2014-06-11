@@ -235,10 +235,10 @@ public class EditConfigurationActivity extends SherlockPreferenceActivity implem
             pref.setSummary(this.getString(R.string.keyboard_compact));
         }
         if ("2".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_gaming_1));
+            pref.setSummary(this.getString(R.string.keyboard_joystick));
         }
         if ("3".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_gaming_2));
+            pref.setSummary("unused");
         }
         if ("4".equals(val)) {
             pref.setSummary(this.getString(R.string.keyboard_tilt));
