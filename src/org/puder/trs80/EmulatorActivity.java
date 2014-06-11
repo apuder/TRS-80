@@ -21,7 +21,11 @@ import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -305,7 +309,7 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
         // root.setMotionEventSplittingEnabled(true);
         // }
         int layoutId = 0;
-        switch (getKeyboardType()) {
+        switch (keyboardType) {
         case Configuration.KEYBOARD_LAYOUT_COMPACT:
             layoutId = R.layout.keyboard_compact;
             break;
@@ -320,6 +324,8 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
             break;
         }
         inflater.inflate(layoutId, root);
+        showKeyboardHint(keyboardType);
+
         /*
          * The following code is a hack to work around a problem with the
          * keyboard layout in Android. The second keyboard should have
@@ -344,6 +350,50 @@ public class EmulatorActivity extends SherlockFragmentActivity implements Sensor
                 obs.removeGlobalOnLayoutListener(this);
             }
         });
+    }
+
+    private void showKeyboardHint(int keyboardType) {
+        int layoutId = -1;
+        String key = null;
+        switch (keyboardType) {
+        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+            layoutId = R.layout.hint_keyboard_joystick;
+            key = "conf_hint_keyb_joystick_shown";
+            break;
+        case Configuration.KEYBOARD_TILT:
+            layoutId = R.layout.hint_keyboard_tilt;
+            key = "conf_hint_keyb_tilt_shown";
+            break;
+        }
+        if (layoutId == -1) {
+            return;
+        }
+        SharedPreferences sharedPrefs = this.getSharedPreferences(
+                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        if (!sharedPrefs.getBoolean(key, true)) {
+            return;
+        }
+        Editor editor = sharedPrefs.edit();
+        editor.putBoolean(key, false);
+        editor.commit();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.hint_title);
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(layoutId, null, false);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.hint_ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
