@@ -1,9 +1,9 @@
 
 TRS-80 Emulator for Android
----------------------------
+===========================
 
-This is the first version of a TRS-80 Emulator for Android. It is
-based on sdltrs [1] that is itself derived from the popular xtrs emulator [2]
+This is the first version of a [TRS-80 Emulator for Android]. It is
+based on [sdltrs] that is itself derived from the popular [xtrs] emulator
 originally written for X-Windows. This port adds a layer for Android.
 
 
@@ -15,14 +15,19 @@ need to install the Android SDK and NDK. You should also install the
 accompanying ADT plugin for Eclipse (be sure to check "NDK" when
 installing the ADT for Android in Eclipse).
 
-The TRS-80 emulator depends on a project called ActionBarSherlock
-[3]. Note that ActionBarSherlock is designed as an Android Library project.
+The TRS-80 emulator depends on a project called [ActionBarSherlock].
+Note that ActionBarSherlock is designed as an Android Library project.
 It cannot be bundled with the emulator. You need to import ActioBarSherlock as a
-separate Eclipse project into your workspace. Next download an import
-the sources of TRS-80 into Eclipse. Since your directory structure
-will be different, you need to edit the location of
+separate Eclipse project into your workspace. Next clone the TRS-80
+Emulator sources via git:
+
+```sh
+git clone git clone git://git.code.sf.net/p/trs80/code trs80
+```
+
+Since your directory structure will be different, you need to edit the location of
 ActionBarSherlock. In Eclipse, right-click on TRS-80 > Preferences >
-Android. In the bottom edit the path to ActioBarSherlock.
+Android. In the bottom edit the path to ActionBarSherlock.
 
 At this point you should be able to compile the sources. Note that
 running the TRS-80 emulator inside the Android emulator is very
@@ -36,25 +41,25 @@ Quick Overview
 The original C sources of sdltrs reside in the 'jni' folder. The Android
 layer uses JNI (Java Native Interface) to access the C sources from
 Java. Whenever I made a change to the original sdltrs sources, I used
-#ifdef ANDROID to annotate my changes. This should make it easy to see
+\#ifdef ANDROID to annotate my changes. This should make it easy to see
 what was changed.
 
 Some of the key files:
 
-- MainActivity.java: main entry point of the Android app
-- EmulatorActivity.java: this is the Android activity that
-  runs the emulator
-- XTRS: this class is the gateway to the C sources of xtrs/sdltrs.
+* MainActivity.java: main entry point of the Android app.
+* EmulatorActivity.java: this is the Android activity that
+  runs the emulator.
+* XTRS: this class is the gateway to the C sources of xtrs/sdltrs.
   All down-calls and up-calls to the C code will go through
   this class. The native methods declared in XTRS are implemented
   in jni/native.c. Folder jni/SDL contains a SDL emulation to
   facilitate integration of the sdltrs sources.
-- Hardware: defines the hardware characteristics of the TRS machine
+* Hardware: defines the hardware characteristics of the TRS machine
   (e.g., TRS Model, disks to be mounted, etc). An instance of class
   Hardware is passed to XTRS.init() to initialize the native layer.
-- keyboard_original.xml: Android XML layout that defines the
+* keyboard_original.xml: Android XML layout that defines the
   original Model 3 keyboard layout.
-- Key.java: the accompanying Android custom widget that implements
+* Key.java: the accompanying Android custom widget that implements
   the behavior of one key of the keyboard.
 
 
@@ -62,14 +67,14 @@ Details of the keyboard
 -----------------------
 
 The emulator features different keyboard layouts (original, compact, etc).
-The XML layout resources can be found in res/layout/keyboard_*.xml. Class Key
+The XML layout resources can be found in res/layout/keyboard_\*.xml. Class Key
 implements the behavior of one key of the keyboard. Class Key is a custom
 Android widget that is referenced from the aforementioned XML layout files.
 Whenever the user 'clicks' on a key, class Key uses the KeyboardManager to
 add a key event which will eventually be delivered to xtrs via SDL_PollEvent.
 File res/values/attrs.xml defines an enum for all the keys available on a TRS
-machine. The TK_* constants in class Key mirror the definitions in attrs.xml.
-When a user presses a key, the TK_* ID needs to be mapped to a
+machine. The TK_\* constants in class Key mirror the definitions in attrs.xml.
+When a user presses a key, the TK_\* ID needs to be mapped to a
 SDL_KeyboardEvent. Specifically, the SDL virtual key code and the unicode
 character are needed to populate SDL_KeyboardEvent. This mapping is achieved
 with file res/xml/keymap_us.xml. Once the virtual key code and unicode
@@ -82,11 +87,21 @@ External Resources
 
 The following resources have been used for this project:
 
-[1] http://sdltrs.sourceforge.net/
-[2] http://www.tim-mann.org/xtrs.html
-[3] http://actionbarsherlock.com/
-[4] http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
-[5] http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
-[6] http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-mime-2-icon.html
-[7] ACRA: http://acra.ch/
-[8] ACRA Mailer: https://github.com/d-a-n/acra-mailer
+* [sdltrs]
+* [xtrs]
+* [ActionBarSherlock]
+* [Font Squirrel]
+* [Icons 1]
+* [Icons 2]
+* [ACRA]
+* [ACRA Mailer]
+
+[TRS-80 Emulator for Android]:https://play.google.com/store/apps/details?id=org.puder.trs80
+[sdltrs]:http://sdltrs.sourceforge.net/
+[xtrs]:http://www.tim-mann.org/xtrs.html
+[ActionBarSherlock]:http://actionbarsherlock.com/
+[Font Squirrel]:http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
+[Icons 1]:http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
+[Icons 2]:http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-mime-2-icon.html
+[ACRA]:http://acra.ch/
+[ACRA Mailer]:https://github.com/d-a-n/acra-mailer
