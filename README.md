@@ -2,8 +2,8 @@
 TRS-80 Emulator for Android
 ===========================
 
-This is the first version of a [TRS-80 Emulator for Android]. It is
-based on [sdltrs] that is itself derived from the popular [xtrs] emulator
+This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for Android]. It is
+based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs] emulator
 originally written for X-Windows. This port adds a layer for Android.
 
 
@@ -15,7 +15,7 @@ need to install the Android SDK and NDK. You should also install the
 accompanying ADT plugin for Eclipse (be sure to check "NDK" when
 installing the ADT for Android in Eclipse).
 
-The TRS-80 emulator depends on a project called [ActionBarSherlock].
+The TRS-80 emulator depends on a project called [ActionBarSherlock][ActionBarSherlock].
 Note that ActionBarSherlock is designed as an Android Library project.
 It cannot be bundled with the emulator. You need to import ActioBarSherlock as a
 separate Eclipse project into your workspace. Next clone the TRS-80
@@ -87,14 +87,14 @@ External Resources
 
 The following resources have been used for this project:
 
-* [sdltrs]
-* [xtrs]
-* [ActionBarSherlock]
-* [Font Squirrel]
-* [Icons 1]
-* [Icons 2]
-* [ACRA]
-* [ACRA Mailer]
+* [sdltrs][sdltrs]
+* [xtrs][xtrs]
+* [ActionBarSherlock][ActionBarSherlock]
+* [Font Squirrel][Font Squirrel]
+* [Icons 1][Icons 1]
+* [Icons 2][Icons 2]
+* [ACRA][ACRA]
+* [ACRA Mailer][ACRA Mailer]
 
 [TRS-80 Emulator for Android]:https://play.google.com/store/apps/details?id=org.puder.trs80
 [sdltrs]:http://sdltrs.sourceforge.net/
