@@ -27,16 +27,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.PreferenceActivity;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-
-public class EditConfigurationActivity extends SherlockPreferenceActivity implements
+public class EditConfigurationActivity extends PreferenceActivity  implements
         OnPreferenceChangeListener {
 
     public static final String CONF_NAME               = "conf_name";

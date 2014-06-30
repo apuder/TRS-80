@@ -41,11 +41,10 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
-
-public class InitialSetupDialogFragment extends SherlockDialogFragment {
+public class InitialSetupDialogFragment extends DialogFragment {
 
     public interface DownloadCompletionListener {
         public void onDownloadCompleted();

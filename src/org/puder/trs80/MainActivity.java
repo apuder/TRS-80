@@ -27,10 +27,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -38,11 +42,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 
-public class MainActivity extends SherlockFragmentActivity implements OnItemClickListener,
+public class MainActivity extends ActionBarActivity implements OnItemClickListener,
         InitialSetupDialogFragment.DownloadCompletionListener {
 
     private static final int    REQUEST_CODE_EDIT_CONFIG   = 1;
@@ -117,17 +118,21 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!ROMs.hasROMs()) {
-            downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD, Menu.NONE,
-                    this.getString(R.string.menu_download));
-            downloadMenuItem.setIcon(R.drawable.download_icon).setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_ALWAYS);
+            downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD,
+                    Menu.NONE, this.getString(R.string.menu_download));
+            downloadMenuItem.setIcon(R.drawable.download_icon);
+            MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         }
-        menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE, this.getString(R.string.menu_add))
-                .setIcon(R.drawable.add_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE, this.getString(R.string.menu_settings))
-                .setIcon(R.drawable.settings_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
-                .setIcon(R.drawable.help_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
+                this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
+                this.getString(R.string.menu_settings))
+                .setIcon(R.drawable.settings_icon), MenuItemCompat.SHOW_AS_ACTION_NEVER);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                this.getString(R.string.menu_help))
+                .setIcon(R.drawable.help_icon), MenuItemCompat.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
@@ -137,7 +142,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnItemClic
     }
 
     @Override
-    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MENU_OPTION_DOWNLOAD:
             downloadROMs();
