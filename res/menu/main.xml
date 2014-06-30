@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_cast"
+        android:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        android:actionViewClass="android.support.v7.app.MediaRouteButton"
+        android:showAsAction="always"
+        android:title="@string/start_casting"/>
+
+</menu>

@@ -26,8 +26,7 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-//@ReportsCrashes(formKey = "", formUri = "", mode = ReportingInteractionMode.DIALOG, resToastText = R.string.crash_toast_text, resDialogText = R.string.crash_dialog_text, resDialogIcon = android.R.drawable.ic_dialog_info, resDialogTitle = R.string.crash_dialog_title, resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, resDialogOkToast = R.string.crash_dialog_ok_toast)
-@ReportsCrashes(formKey = "", formUri = "")
+// @ReportsCrashes(formKey = "", formUri = "")
 public class TRS80Application extends Application {
 
     private static Context         context;
@@ -40,9 +39,9 @@ public class TRS80Application extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        ACRA.init(this);
-        HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+//        ACRA.init(this);
+//        HashMap<String, String> ACRAData = new HashMap<String, String>();
+//        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {

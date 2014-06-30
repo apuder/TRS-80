@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html manifest="cache.manifest">
+<head>
+<title>TRS 80</title>
+<meta http-equiv="Cache-Control"
+	content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script
+	src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+
+<script type="text/javascript">
+
+
+	window.addEventListener('load', function() {
+		window.console.log('# Load #');
+	    window.mediaManager = new cast.receiver.MediaManager(mediaElement);	    
+	    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+	    window.castReceiverManager.start();
+	    
+/* 	    var customMessageBus =
+	    	window.castReceiverManager.getCastMessageBus(
+	    			'urn:x-cast:de.haeberling.saschacast');
+	    customMessageBus.onMessage = function(event) {
+	       console.log('DBG>>> Got a message: ' + event);
+	    };
+ */
+ 	});
+
+</script>
+</head>
+<style>
+html {
+	background: url(http://upload.wikimedia.org/wikipedia/commons/e/ea/TRS-80_Model_3_01.jpg);
+	background-size: cover;
+}
+
+
+</style>
+<body>
+	<div id="title">TRS 80</div>
+</body>
+</html>

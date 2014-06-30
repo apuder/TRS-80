@@ -104,7 +104,7 @@ public class RenderThread extends Thread {
     }
 
     public synchronized void triggerScreenUpdate() {
-        this.notify();
-    }
+		this.notify();
+	}
 
 }
