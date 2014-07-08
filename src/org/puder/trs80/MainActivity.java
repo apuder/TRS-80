@@ -19,6 +19,8 @@ package org.puder.trs80;
 import java.io.File;
 import java.util.List;
 
+import org.puder.trs80.cast.CastMessageSender;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;

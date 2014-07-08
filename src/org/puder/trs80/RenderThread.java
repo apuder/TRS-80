@@ -37,6 +37,7 @@ public class RenderThread extends Thread {
     private SurfaceHolder surfaceHolder;
     private byte[]        screenBuffer;
 
+
     public RenderThread(SurfaceHolder holder) {
         this.surfaceHolder = holder;
         Hardware h = TRS80Application.getHardware();
@@ -104,7 +105,7 @@ public class RenderThread extends Thread {
     }
 
     public synchronized void triggerScreenUpdate() {
-		this.notify();
-	}
+        this.notify();
+    }
 
 }
