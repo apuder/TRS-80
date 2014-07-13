@@ -16,30 +16,69 @@
 
 	window.addEventListener('load', function() {
 		window.console.log('# Load #');
-	    window.mediaManager = new cast.receiver.MediaManager(mediaElement);	    
+	    // window.mediaManager = new cast.receiver.MediaManager(mediaElement);	    
 	    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
-	    window.castReceiverManager.start();
-	    
-/* 	    var customMessageBus =
+ 	    var customMessageBus =
 	    	window.castReceiverManager.getCastMessageBus(
-	    			'urn:x-cast:de.haeberling.saschacast');
-	    customMessageBus.onMessage = function(event) {
-	       console.log('DBG>>> Got a message: ' + event);
-	    };
- */
+	    			'urn:x-cast:org.puder.trs80');
+	    window.screenWrapper = document.getElementById('screenWrapper');
+
+		customMessageBus.onMessage = function(event) {
+			var data = event.data;
+			// TODO: Support different kinds of data.
+			// TODO: Support different kinds of screens.
+			
+			var preContent = "";
+			for (var i = 0; i < data.length; ++i) {
+				if (i % 64 == 0 && i > 0) {
+					preContent += "\n";
+				}
+				preContent += data[i];
+			}
+			$('#screen').text(preContent);
+		};
+	    window.castReceiverManager.start();
  	});
 
 </script>
-</head>
 <style>
+
+@font-face {
+	font-family: 'TreasureMIII64C';
+	src: url('AnotherMansTreasureMIII64C.ttf');
+}
+@font-face {
+	font-family: 'TreasureMIII32C';
+	src: url('AnotherMansTreasureMIII32C.ttf');
+}
+
 html {
-	background: url(http://upload.wikimedia.org/wikipedia/commons/e/ea/TRS-80_Model_3_01.jpg);
-	background-size: cover;
+	background-color: black;
+	height:100%;
+}
+
+body {
+	text-align:center;
+	background:#221;
+	height:100%;
+	border:0;
+	margin:0;
+}
+
+#screen {
+  color:#3c3;
+  text-align: center;
+  font-family:'TreasureMIII64C';
+  font-size:36px;
+  display:inline-block;
+  background:black;
+  border:0;
 }
 
 
 </style>
+</head>
 <body>
-	<div id="title">TRS 80</div>
+	<div id="screenWrapper"><pre id="screen"></pre></div>
 </body>
 </html>

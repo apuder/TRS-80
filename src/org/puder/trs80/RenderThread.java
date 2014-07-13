@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import org.puder.trs80.cast.CastMessageSender;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Log;
@@ -23,19 +25,22 @@ import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    private int           model;
+    private int               model;
 
-    private int           trsScreenCols;
-    private int           trsScreenRows;
-    private int           trsCharWidth;
-    private int           trsCharHeight;
+    private int               trsScreenCols;
+    private int               trsScreenRows;
+    private int               trsCharWidth;
+    private int               trsCharHeight;
 
-    private Bitmap        font[];
+    private Bitmap            font[];
 
-    private boolean       run         = false;
-    private boolean       isRendering = false;
-    private SurfaceHolder surfaceHolder;
-    private byte[]        screenBuffer;
+    private boolean           run         = false;
+    private boolean           isRendering = false;
+    private SurfaceHolder     surfaceHolder;
+    private byte[]            screenBuffer;
+
+    private char[]            screenCharBuffer;
+    private CastMessageSender castMessageSender;
 
 
     public RenderThread(SurfaceHolder holder) {
@@ -48,6 +53,8 @@ public class RenderThread extends Thread {
         trsCharWidth = h.getCharWidth();
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
+        screenCharBuffer = new char[trsScreenCols * trsScreenRows];
+        castMessageSender = CastMessageSender.get();
     }
 
     public void setRunning(boolean run) {
@@ -79,12 +86,13 @@ public class RenderThread extends Thread {
     }
 
     public synchronized void renderScreen(Canvas canvas) {
-        int i = 0;
         boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
         int d = expandedMode ? 2 : 1;
         if (expandedMode) {
             canvas.scale(2, 1);
         }
+
+        int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols / d; col++) {
                 int ch = screenBuffer[i] & 0xff;
@@ -99,9 +107,14 @@ public class RenderThread extends Thread {
                     continue;
                 }
                 canvas.drawBitmap(font[ch], startx, starty, null);
+
+                // TODO: Choose encoding based on current model.
+                screenCharBuffer[(row * trsScreenCols) + col] = CharMapping.m3toUnicode[ch];
                 i += d;
             }
         }
+
+        castMessageSender.sendScreenUpdate(String.valueOf(screenCharBuffer));
     }
 
     public synchronized void triggerScreenUpdate() {

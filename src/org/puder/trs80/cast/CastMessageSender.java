@@ -39,6 +39,17 @@ public class CastMessageSender {
     private String                        sessionId;
     private TRS80Channel                  activeChannel;
     private Context                       appContext;
+    private boolean                       readyToSend;
+
+    private static CastMessageSender instance;
+
+    public static void initSingleton(String chromcastAppId, Context context) {
+        instance = (new CastMessageSender(context)).init(chromcastAppId);
+    }
+
+    public static CastMessageSender get() {
+        return instance;
+    }
 
 
     public CastMessageSender(Context appContext) {
@@ -62,7 +73,23 @@ public class CastMessageSender {
         mediaRouter.removeCallback(mediaRouterCallback);
     }
 
-    public void sendMessage(String message) {
+    public void sendScreenUpdate(String screenBuffer) {
+        // TODO: CHange this to use a Message format so we can send different kind of messages.
+        sendMessage(screenBuffer);
+    }
+
+    /**
+     * Returns whether we're ready to send messages to the Cast receiver app.
+     */
+    public boolean isReadyToSend() {
+        return readyToSend;
+    }
+
+    private void sendMessage(String message) {
+        if (!readyToSend) {
+            return;
+        }
+
         Cast.CastApi.sendMessage(apiClient, activeChannel.getNamespace(), message);
     }
 
@@ -170,6 +197,7 @@ public class CastMessageSender {
             try {
                 Cast.CastApi.setMessageReceivedCallbacks(apiClient, activeChannel.getNamespace(),
                         activeChannel);
+                readyToSend = true;
             } catch (IOException e) {
                 activeChannel = null;
                 String message = "Exception while creating channel" + e.getMessage();
@@ -189,12 +217,14 @@ public class CastMessageSender {
     private class GmsConnectionCallbacks implements ConnectionCallbacks {
         @Override
         public void onConnectionSuspended(int cause) {
+            readyToSend = false;
             Log.d(TAG, "onConnectionSuspended()");
             waitingForReconnect = true;
         }
 
         @Override
         public void onConnected(Bundle connectionHint) {
+            readyToSend = false;
             Log.d(TAG, "Play Services connected.");
 
             if (waitingForReconnect) {
@@ -225,6 +255,7 @@ public class CastMessageSender {
     private class GmsConnectionFailedListener implements OnConnectionFailedListener {
         @Override
         public void onConnectionFailed(ConnectionResult result) {
+            readyToSend = false;
             Log.d(TAG, "onConnectionFailed");
             // try
             // {
@@ -251,6 +282,7 @@ public class CastMessageSender {
      * Tears down the whole connection stack as cleanly as possible.
      */
     private void teardown() {
+        readyToSend = false;
         Log.d(TAG, "teardown");
         if (apiClient != null) {
             if (applicationStarted) {

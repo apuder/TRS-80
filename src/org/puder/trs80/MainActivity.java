@@ -85,9 +85,7 @@ public class MainActivity extends FragmentActivity
 		sharedPrefs = this.getSharedPreferences(
 				SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 		this.setContentView(R.layout.main_activity);
-		String chromcastAppId = this.getResources().getString(
-                R.string.chromecast_app_id);
-		castMessageSender = new CastMessageSender(getApplicationContext()).init(chromcastAppId);
+		castMessageSender = CastMessageSender.get();
 	}
 
 	@Override
@@ -170,7 +168,7 @@ public class MainActivity extends FragmentActivity
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-	    castMessageSender.sendMessage("Hello Chromecast!!!");
+	    castMessageSender.sendScreenUpdate("Hello Chromecast!!!");
 		runEmulator(configurations.get(position));
 	}
 	
