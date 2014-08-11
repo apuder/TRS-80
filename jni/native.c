@@ -25,14 +25,8 @@
 #define ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE -8
 #define ERR_GET_METHOD_XLOG -9
 #define ERR_GET_METHOD_NOT_IMPLEMENTED -10
-#define ERR_MEMORY_IS_NO_COPY -11
-#define ERR_SCREEN_IS_NO_COPY -12
 
 int isRunning = 0;
-
-#define EMULATOR_STATUS_NOT_INITIALIZED 0
-#define EMULATOR_STATUS_INITIALIZED     1
-static int emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 
 static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
@@ -44,10 +38,8 @@ static jmethodID pauseAudioMethodId;
 static jmethodID setExpandedScreenModeMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
-static jbyte* screenBuffer;
-static jbyteArray screenArray;
-static jbyteArray audioBufferArray;
-static jbyte* audioBuffer;
+static jbyteArray screenArray = NULL;
+static jbyteArray audioBufferArray = NULL;
 static jint audioBufferSize;
 
 static jmp_buf ex_buf;
@@ -83,17 +75,6 @@ static JNIEnv* getEnv() {
     JNIEnv *env;
     (*jvm)->AttachCurrentThread(jvm, (JNIEnv **) &env, NULL);
     return env;
-}
-
-static void cleanup_xtrs() {
-    if (emulator_status == EMULATOR_STATUS_NOT_INITIALIZED) {
-        return;
-    }
-    JNIEnv *env = getEnv();
-    (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer,
-            JNI_COMMIT);
-    (*env)->DeleteGlobalRef(env, screenArray);
-    emulator_status = EMULATOR_STATUS_NOT_INITIALIZED;
 }
 
 static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr,
@@ -175,8 +156,6 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     instructionsSinceLastScreenUpdate = 0;
 #endif
 #endif
-
-    emulator_status = EMULATOR_STATUS_INITIALIZED;
 }
 
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
@@ -187,7 +166,9 @@ static int trigger_screen_update() {
     if (isRendering) {
         return 0;
     }
+    jbyte* screenBuffer = (*env)->GetByteArrayElements(env, screenArray, NULL);
     memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
+    (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
     (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
     return 1;
 }
@@ -249,8 +230,6 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     if (clazzXTRS == NULL) {
         clazzXTRS = (*env)->NewGlobalRef(env, cls);
     }
-
-    cleanup_xtrs();
 
     isRenderingMethodId = (*env)->GetStaticMethodID(env, cls, "isRendering",
             "()Z");
@@ -314,12 +293,10 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jstring xtrsDisk2 = (*env)->GetObjectField(env, hardware, xtrsDisk2ID);
     jstring xtrsDisk3 = (*env)->GetObjectField(env, hardware, xtrsDisk3ID);
 
-    jboolean isCopy;
-    screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
-    screenBuffer = (*env)->GetByteArrayElements(env, xtrsScreenBuffer, &isCopy);
-    if (isCopy) {
-        return ERR_SCREEN_IS_NO_COPY;
+    if (screenArray != NULL) {
+        (*env)->DeleteGlobalRef(env, screenArray);
     }
+    screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
 
     init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
@@ -338,13 +315,11 @@ void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileNa
 }
 
 void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArray buffer) {
-    jboolean isCopy;
-    audioBufferArray = (*env)->NewGlobalRef(env, buffer);
-    audioBuffer = (Uchar*) (*env)->GetByteArrayElements(env, buffer, &isCopy);
-    audioBufferSize = (*env)->GetArrayLength(env, buffer);
-    if (isCopy) {
-        // TODO error
+    if (audioBufferArray != NULL) {
+        (*env)->DeleteGlobalRef(env, audioBufferArray);
     }
+    audioBufferArray = (*env)->NewGlobalRef(env, buffer);
+    audioBufferSize = (*env)->GetArrayLength(env, buffer);
 }
 
 void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
@@ -353,7 +328,9 @@ void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
 
 extern void fillBuffer(Uint8* stream, int len);
 void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
+    Uint8* audioBuffer = (Uint8*) (*env)->GetByteArrayElements(env, audioBufferArray, NULL);
     fillBuffer(audioBuffer, audioBufferSize);
+    (*env)->ReleaseByteArrayElements(env, audioBufferArray, audioBuffer, JNI_COMMIT);
 }
 
 extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
@@ -362,9 +339,6 @@ void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, 
 }
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
-    if (emulator_status == EMULATOR_STATUS_NOT_INITIALIZED) {
-        return;
-    }
     if (!setjmp(ex_buf)) {
         while (isRunning) {
             z80_run(0);
@@ -387,10 +361,6 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
     z80_reset();
-}
-
-void Java_org_puder_trs80_XTRS_cleanup(JNIEnv* env, jclass clazz) {
-    cleanup_xtrs();
 }
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {

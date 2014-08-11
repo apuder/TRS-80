@@ -57,8 +57,6 @@ public class XTRS {
 
     public static native void flushAudioQueue();
 
-    public static native void cleanup();
-
     public static native void addKeyEvent(int event, int mod, int key);
 
     public static native void run();
