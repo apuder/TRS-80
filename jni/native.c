@@ -168,7 +168,7 @@ static int trigger_screen_update() {
     }
     jbyte* screenBuffer = (*env)->GetByteArrayElements(env, screenArray, NULL);
     memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-    (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
+    (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, 0);
     (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
     return 1;
 }
@@ -330,7 +330,7 @@ extern void fillBuffer(Uint8* stream, int len);
 void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
     Uint8* audioBuffer = (Uint8*) (*env)->GetByteArrayElements(env, audioBufferArray, NULL);
     fillBuffer(audioBuffer, audioBufferSize);
-    (*env)->ReleaseByteArrayElements(env, audioBufferArray, audioBuffer, JNI_COMMIT);
+    (*env)->ReleaseByteArrayElements(env, audioBufferArray, audioBuffer, 0);
 }
 
 extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
