@@ -239,7 +239,7 @@ abstract public class Hardware {
         Configuration config = TRS80Application.getCurrentConfiguration();
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
-        Typeface tf = TRS80Application.getTypeface();
+        Typeface tf = Fonts.getTypeface(config.getModel());
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
         p.setColor(config.getCharacterColorAsRGB());

@@ -82,14 +82,6 @@ public class TRS80Application extends Application {
         return keyboard;
     }
 
-    public static Typeface getTypeface() {
-        return Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono.ttf");
-    }
-
-    public static Typeface getTypefaceBold() {
-        return Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono-Bold.ttf");
-    }
-
     public static boolean hasCrashed() {
         return hasCrashed;
     }

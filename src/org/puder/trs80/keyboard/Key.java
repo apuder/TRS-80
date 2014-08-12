@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -171,7 +172,7 @@ public class Key extends View {
         isPressed = false;
         isAltKey = idNormal == TK_ALT;
         paint = new Paint();
-        paint.setTypeface(TRS80Application.getTypeface());
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono.ttf"));
         paint.setAntiAlias(true);
         float textSizeScale = labelNormal.length() > 1 ? 0.4f : 0.6f;
         paint.setTextSize(keyHeight * textSizeScale);
