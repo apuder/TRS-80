@@ -38,9 +38,15 @@ static jmethodID pauseAudioMethodId;
 static jmethodID setExpandedScreenModeMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
+
 static jbyteArray screenArray = NULL;
-static jbyteArray audioBufferArray = NULL;
+static jbyte* screenBuffer;
+static jboolean screenBufferIsCopy;
+
+static jbyteArray audioArray = NULL;
 static jint audioBufferSize;
+static jbyte* audioBuffer;
+static jboolean audioBufferIsCopy;
 
 static jmp_buf ex_buf;
 
@@ -166,9 +172,10 @@ static int trigger_screen_update() {
     if (isRendering) {
         return 0;
     }
-    jbyte* screenBuffer = (*env)->GetByteArrayElements(env, screenArray, NULL);
     memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-    (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, 0);
+    if (screenBufferIsCopy) {
+        (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
+    }
     (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
     return 1;
 }
@@ -294,9 +301,11 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jstring xtrsDisk3 = (*env)->GetObjectField(env, hardware, xtrsDisk3ID);
 
     if (screenArray != NULL) {
+        (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_ABORT);
         (*env)->DeleteGlobalRef(env, screenArray);
     }
     screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
+    screenBuffer = (*env)->GetByteArrayElements(env, screenArray, &screenBufferIsCopy);
 
     init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
@@ -315,10 +324,12 @@ void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileNa
 }
 
 void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArray buffer) {
-    if (audioBufferArray != NULL) {
-        (*env)->DeleteGlobalRef(env, audioBufferArray);
+    if (audioArray != NULL) {
+        (*env)->ReleaseByteArrayElements(env, audioArray, audioBuffer, JNI_ABORT);
+        (*env)->DeleteGlobalRef(env, audioArray);
     }
-    audioBufferArray = (*env)->NewGlobalRef(env, buffer);
+    audioArray = (*env)->NewGlobalRef(env, buffer);
+    audioBuffer = (*env)->GetByteArrayElements(env, audioArray, &audioBufferIsCopy);
     audioBufferSize = (*env)->GetArrayLength(env, buffer);
 }
 
@@ -328,9 +339,10 @@ void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
 
 extern void fillBuffer(Uint8* stream, int len);
 void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
-    Uint8* audioBuffer = (Uint8*) (*env)->GetByteArrayElements(env, audioBufferArray, NULL);
     fillBuffer(audioBuffer, audioBufferSize);
-    (*env)->ReleaseByteArrayElements(env, audioBufferArray, audioBuffer, 0);
+    if (audioBufferIsCopy) {
+        (*env)->ReleaseByteArrayElements(env, audioArray, audioBuffer, JNI_COMMIT);
+    }
 }
 
 extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
