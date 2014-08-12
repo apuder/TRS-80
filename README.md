@@ -2,9 +2,9 @@
 TRS-80 Emulator for Android
 ===========================
 
-This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for Android]. It is
-based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs] emulator
-originally written for X-Windows. This port adds a layer for Android.
+This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for Android].
+It is based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs]
+emulator originally written for X-Windows. This port adds a layer for Android.
 
 
 Compiling from Source
@@ -15,24 +15,29 @@ need to install the Android SDK and NDK. You should also install the
 accompanying ADT plugin for Eclipse (be sure to check "NDK" when
 installing the ADT for Android in Eclipse).
 
-The TRS-80 emulator depends on a project called [ActionBarSherlock][ActionBarSherlock].
-Note that ActionBarSherlock is designed as an Android Library project.
-It cannot be bundled with the emulator. You need to import ActioBarSherlock as a
-separate Eclipse project into your workspace. Next clone the TRS-80
-Emulator sources via git:
+Next clone the TRS-80 Emulator sources via git:
 
-```sh
+```
 git clone git clone git://git.code.sf.net/p/trs80/code trs80
 ```
 
-Since your directory structure will be different, you need to edit the location of
-ActionBarSherlock. In Eclipse, right-click on TRS-80 > Preferences >
-Android. In the bottom edit the path to ActionBarSherlock.
+The TRS-80 emulator depends on Android's [Support Library][Support Library].
+In order to make the project independent of user-specific directory layouts,
+the v7 version of the Support Library needs to be copied to the parent
+directory where the emulator sources were cloned:
 
-At this point you should be able to compile the sources. Note that
-running the TRS-80 emulator inside the Android emulator is very
-slow. It is recommended to use a real device for testing and
-debugging.
+```
+cp -r <android-sdk-root>/extras/android/support/v7/appcompat/*
+      <parent-dir-of-git-repo>/android-support-v7-appcompat/
+```
+
+Note that the Support Library is designed as an Android Library project and
+cannot be bundled with the emulator. It needs to be imported as a separate
+Eclipse project into your workspace.
+
+At this point you should be able to compile the sources. Note that running
+the TRS-80 emulator inside the Android emulator is very slow. It is recommended
+to use a real device for testing and debugging.
 
 
 Quick Overview
@@ -89,7 +94,6 @@ The following resources have been used for this project:
 
 * [sdltrs][sdltrs]
 * [xtrs][xtrs]
-* [ActionBarSherlock][ActionBarSherlock]
 * [Retro Fonts][Retro Fonts]
 * [Font Squirrel][Font Squirrel]
 * [Icons 1][Icons 1]
@@ -100,7 +104,7 @@ The following resources have been used for this project:
 [TRS-80 Emulator for Android]:https://play.google.com/store/apps/details?id=org.puder.trs80
 [sdltrs]:http://sdltrs.sourceforge.net/
 [xtrs]:http://www.tim-mann.org/xtrs.html
-[ActionBarSherlock]:http://actionbarsherlock.com/
+[Support Library]:http://developer.android.com/tools/support-library/setup.html
 [Retro Fonts]:http://www.kreativekorp.com/software/fonts/index.shtml#retro
 [Font Squirrel]:http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
 [Icons 1]:http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
