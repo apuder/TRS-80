@@ -35,6 +35,7 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Display;
@@ -210,22 +211,22 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE, this.getString(R.string.menu_pause))
-                .setIcon(R.drawable.pause_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE, this.getString(R.string.menu_reset))
-                .setIcon(R.drawable.reset_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE, this.getString(R.string.menu_pause))
+                .setIcon(R.drawable.pause_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE, this.getString(R.string.menu_reset))
+                .setIcon(R.drawable.reset_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             XTRS.setSoundMuted(true);
         } else {
             muteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_OFF, Menu.NONE,
                     this.getString(R.string.menu_sound_off));
-            muteMenuItem.setIcon(R.drawable.sound_off_icon).setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            MenuItemCompat.setShowAsAction(muteMenuItem.setIcon(R.drawable.sound_off_icon),
+                    MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
             unmuteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_ON, Menu.NONE,
                     this.getString(R.string.menu_sound_on));
-            unmuteMenuItem.setIcon(R.drawable.sound_on_icon).setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            MenuItemCompat.setShowAsAction(unmuteMenuItem.setIcon(R.drawable.sound_on_icon),
+                    MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
             updateMuteSoundIcons();
         }
         return true;
@@ -471,8 +472,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onSensorChanged(SensorEvent event) {
         int[] as = axisSwap[rotation];
-        float xValue = (float) as[0 /* negateX */] * event.values[as[2/* xSrc */]];
-        float yValue = (float) as[1 /* negateY */] * event.values[as[3 /* ySrc */]];
+        float xValue = as[0 /* negateX */] * event.values[as[2/* xSrc */]];
+        float yValue = as[1 /* negateY */] * event.values[as[3 /* ySrc */]];
         if (xValue < -ACCELEROMETER_PRESS_THRESHOLD && !rightKeyPressed) {
             rightKeyPressed = true;
             keyboardManager.pressKeyRight();
