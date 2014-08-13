@@ -19,16 +19,15 @@ package org.puder.trs80;
 import java.util.HashMap;
 
 import org.acra.ACRA;
-import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 
-@ReportsCrashes(formKey = "", formUri = "", mode = ReportingInteractionMode.DIALOG, resToastText = R.string.crash_toast_text, resDialogText = R.string.crash_dialog_text, resDialogIcon = android.R.drawable.ic_dialog_info, resDialogTitle = R.string.crash_dialog_title, resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, resDialogOkToast = R.string.crash_dialog_ok_toast)
+//@ReportsCrashes(formKey = "", formUri = "", mode = ReportingInteractionMode.DIALOG, resToastText = R.string.crash_toast_text, resDialogText = R.string.crash_dialog_text, resDialogIcon = android.R.drawable.ic_dialog_info, resDialogTitle = R.string.crash_dialog_title, resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, resDialogOkToast = R.string.crash_dialog_ok_toast)
+@ReportsCrashes(formKey = "", formUri = "")
 public class TRS80Application extends Application {
 
     private static Context         context;
