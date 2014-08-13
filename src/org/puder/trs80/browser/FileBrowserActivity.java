@@ -26,6 +26,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,8 +54,8 @@ public class FileBrowserActivity extends ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
-                .setIcon(R.drawable.cancel_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
+                .setIcon(R.drawable.cancel_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }

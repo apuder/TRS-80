@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
+import android.support.v4.view.MenuItemCompat;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -122,12 +123,12 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
-                .setIcon(R.drawable.cancel_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE, this.getString(R.string.menu_done))
-                .setIcon(R.drawable.ok_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
-                .setIcon(R.drawable.help_icon).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
+                .setIcon(R.drawable.cancel_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE, this.getString(R.string.menu_done))
+                .setIcon(R.drawable.ok_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
+                .setIcon(R.drawable.help_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         return true;
     }
 
