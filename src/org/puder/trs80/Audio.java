@@ -19,6 +19,7 @@ package org.puder.trs80;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 class Audio implements Runnable {
 
@@ -33,6 +34,7 @@ class Audio implements Runnable {
                 : AudioFormat.CHANNEL_CONFIGURATION_STEREO;
         encoding = (encoding == 1) ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
 
+        Log.d("DBG>>>", "Channels:" + channels + " encoding:" + encoding + " Hz:" + rate);
         audioBufSize = bufSize;
 
         // int min = AudioTrack.getMinBufferSize( rate, channels, encoding );
@@ -74,6 +76,7 @@ class Audio implements Runnable {
         while (isRunning) {
             XTRS.fillAudioBuffer();
             audioTrack.write(audioBuffer, 0, audioBufSize);
+            AudioHttpServer.get().write(audioBuffer, 0, audioBufSize);
         }
     }
 

@@ -33,7 +33,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -93,6 +92,7 @@ public class MainActivity extends FragmentActivity
 		super.onResume();
 		updateView();
         castMessageSender.start();
+        AudioHttpServer.get().start();
 
 		if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)) {
 			return;
@@ -104,11 +104,12 @@ public class MainActivity extends FragmentActivity
 			downloadROMs();
 		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 	    if (isFinishing()) {
 	        castMessageSender.stop();
+	        AudioHttpServer.get().stop();
 	    }
 		super.onPause();
 	}
@@ -144,14 +145,14 @@ public class MainActivity extends FragmentActivity
 	    MediaRouteButton mediaRouteButton = (MediaRouteButton) mediaRouteItem
 	        .getActionView();
 	    mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
-	    
+
 		if (!ROMs.hasROMs()) {
 			downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD,
 					Menu.NONE, this.getString(R.string.menu_download));
 			downloadMenuItem.setIcon(R.drawable.download_icon);
 			MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		}
-		
+
 
 		MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
 				this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon),
@@ -171,7 +172,7 @@ public class MainActivity extends FragmentActivity
 	    castMessageSender.sendScreenUpdate("Hello Chromecast!!!");
 		runEmulator(configurations.get(position));
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
