@@ -17,7 +17,6 @@
 package org.puder.trs80;
 
 import java.io.File;
-import java.util.List;
 
 import org.puder.trs80.cast.CastMessageSender;
 
@@ -48,32 +47,32 @@ import android.widget.Toast;
 public class MainActivity extends FragmentActivity implements OnItemClickListener,
         InitialSetupDialogFragment.DownloadCompletionListener {
 
-    private static final int    REQUEST_CODE_EDIT_CONFIG   = 1;
-    private static final int    REQUEST_CODE_RUN_EMULATOR  = 2;
-    private static final int    REQUEST_CODE_EDIT_SETTINGS = 3;
+    private static final int             REQUEST_CODE_EDIT_CONFIG   = 1;
+    private static final int             REQUEST_CODE_RUN_EMULATOR  = 2;
+    private static final int             REQUEST_CODE_EDIT_SETTINGS = 3;
 
     // Action Menu
-    private static final int    MENU_OPTION_DOWNLOAD       = 0;
-    private static final int    MENU_OPTION_ADD            = 1;
-    private static final int    MENU_OPTION_HELP           = 2;
-    private static final int    MENU_OPTION_SETTINGS       = 3;
+    private static final int             MENU_OPTION_DOWNLOAD       = 0;
+    private static final int             MENU_OPTION_ADD            = 1;
+    private static final int             MENU_OPTION_HELP           = 2;
+    private static final int             MENU_OPTION_SETTINGS       = 3;
 
     // Context Menu
-    private static final int    MENU_OPTION_START          = 0;
-    private static final int    MENU_OPTION_RESUME         = 1;
-    private static final int    MENU_OPTION_STOP           = 2;
-    private static final int    MENU_OPTION_EDIT           = 3;
-    private static final int    MENU_OPTION_DELETE         = 4;
-    private static final int    MENU_OPTION_UP             = 5;
-    private static final int    MENU_OPTION_DOWN           = 6;
+    private static final int             MENU_OPTION_START          = 0;
+    private static final int             MENU_OPTION_RESUME         = 1;
+    private static final int             MENU_OPTION_STOP           = 2;
+    private static final int             MENU_OPTION_EDIT           = 3;
+    private static final int             MENU_OPTION_DELETE         = 4;
+    private static final int             MENU_OPTION_UP             = 5;
+    private static final int             MENU_OPTION_DOWN           = 6;
 
-    private List<Configuration> configurations;
-    private ConfigurationBackup backup;
-    private ListView            configurationListView;
-    private SharedPreferences   sharedPrefs;
-    private MenuItem            downloadMenuItem           = null;
+    private ConfigurationBackup          backup;
+    private ListView                     configurationListView;
+    private ConfigurationListViewAdapter configurationListViewAdapter;
+    private SharedPreferences            sharedPrefs;
+    private MenuItem                     downloadMenuItem           = null;
 
-    private CastMessageSender   castMessageSender;
+    private CastMessageSender            castMessageSender;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +81,11 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
                 Context.MODE_PRIVATE);
         this.setContentView(R.layout.main_activity);
         castMessageSender = CastMessageSender.get();
+        configurationListViewAdapter = new ConfigurationListViewAdapter(this,
+                Configuration.getConfigurations());
+        configurationListView = (ListView) this.findViewById(R.id.list_configurations);
+        configurationListView.setAdapter(configurationListViewAdapter);
+        configurationListView.setOnItemClickListener(this);
     }
 
     @Override
@@ -116,8 +120,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
     public void updateView() {
         View withoutConfigurationsView = this.findViewById(R.id.without_configurations);
         View withConfigurationsView = this.findViewById(R.id.with_configurations);
-        configurations = Configuration.getConfigurations();
-        if (configurations.size() == 0) {
+        if (Configuration.getConfigurations().size() == 0) {
             withoutConfigurationsView.setVisibility(View.VISIBLE);
             withConfigurationsView.setVisibility(View.GONE);
             return;
@@ -126,12 +129,8 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
         withoutConfigurationsView.setVisibility(View.GONE);
         withConfigurationsView.setVisibility(View.VISIBLE);
 
-        configurationListView = (ListView) this.findViewById(R.id.list_configurations);
-        ConfigurationListViewAdapter confList = new ConfigurationListViewAdapter(this,
-                configurations);
-        configurationListView.setAdapter(confList);
-        configurationListView.setOnItemClickListener(this);
         registerForContextMenu(configurationListView);
+        configurationListViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -166,7 +165,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         castMessageSender.sendScreenUpdate("Hello Chromecast!!!");
-        runEmulator(configurations.get(position));
+        runEmulator(Configuration.getConfiguration(position));
     }
 
     @Override
@@ -192,7 +191,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Configuration conf = configurations.get((int) info.id);
+        Configuration conf = Configuration.getConfiguration((int) info.id);
         menu.setHeaderTitle(conf.getName());
         if (EmulatorState.hasSavedState(conf.getId())) {
             menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
@@ -217,7 +216,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
 
-        Configuration conf = configurations.get(info.position);
+        Configuration conf = Configuration.getConfiguration(info.position);
         int confID = conf.getId();
         switch (item.getItemId()) {
         case MENU_OPTION_START:

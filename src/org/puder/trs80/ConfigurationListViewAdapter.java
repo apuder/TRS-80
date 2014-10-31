@@ -47,7 +47,7 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        Holder holder = new Holder();
+        Holder holder = null;
         Configuration conf = getItem(position);
         Context context = TRS80Application.getAppContext();
 
@@ -55,6 +55,7 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
                 .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.configuration_item, null);
+            holder = new Holder();
             holder.name = (TextView) convertView.findViewById(R.id.configuration_name);
             holder.model = (TextView) convertView.findViewById(R.id.configuration_model);
             holder.disks = (TextView) convertView.findViewById(R.id.configuration_disks);

@@ -71,6 +71,10 @@ public class Configuration {
         return configurations;
     }
 
+    public static Configuration getConfiguration(int id) {
+        return configurations.get(id);
+    }
+
     public static Configuration newConfiguration() {
         int nextId = globalPrefs.getInt("NEXT_ID", 0);
         nextId++;
