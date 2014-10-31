@@ -18,6 +18,7 @@ package org.puder.trs80.browser;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.puder.trs80.R;
@@ -97,9 +98,6 @@ public class FileBrowserActivity extends ListActivity {
         pathLabel.setText(pathPrefix + currentPath);
         File[] files = new File(path).listFiles();
         items = new ArrayList<String>();
-        if (!path.equals("/")) {
-            items.add("..");
-        }
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
@@ -111,6 +109,10 @@ public class FileBrowserActivity extends ListActivity {
                     items.add(file.getPath());
                 }
             }
+        }
+        Collections.sort(items);
+        if (!path.equals("/")) {
+            items.add(0, "..");
         }
         BrowserListViewAdapter fileList = new BrowserListViewAdapter(this, items);
         setListAdapter(fileList);
