@@ -22,7 +22,7 @@
 					<folderInfo id="com.android.toolchain.gcc.678051712.1292176168" name="/" resourcePath="">
 						<toolChain id="com.android.toolchain.gcc.1715589208" name="com.android.toolchain.gcc" superClass="com.android.toolchain.gcc">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="com.android.targetPlatform.1120886130" isAbstract="false" superClass="com.android.targetPlatform"/>
-							<builder arguments="APP_MIN_PLATFORM_LEVEL=99 NDK_DEBUG=1" autoBuildTarget="" cleanBuildTarget="clean" command="/Users/haeberling/Downloads/android-ndk-r9d/ndk-build" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="com.android.builder.326521217" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
+							<builder autoBuildTarget="" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="com.android.builder.326521217" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="obj"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libs"/>
