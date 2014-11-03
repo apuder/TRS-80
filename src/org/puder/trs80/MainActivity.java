@@ -92,7 +92,8 @@ public class MainActivity extends FragmentActivity
 		super.onResume();
 		updateView();
         castMessageSender.start();
-        AudioHttpServer.get().start();
+        // TODO: Enable once fully supported.
+        // AudioHttpServer.get().start();
 
 		if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)) {
 			return;
@@ -105,14 +106,15 @@ public class MainActivity extends FragmentActivity
 		}
 	}
 
-	@Override
-	protected void onPause() {
-	    if (isFinishing()) {
-	        castMessageSender.stop();
-	        AudioHttpServer.get().stop();
-	    }
-		super.onPause();
-	}
+    @Override
+    protected void onPause() {
+        if (isFinishing()) {
+            castMessageSender.stop();
+            // TODO: Enable once fully supported.
+            // AudioHttpServer.get().stop();
+        }
+        super.onPause();
+    }
 
 	public void updateView() {
 		View withoutConfigurationsView = this

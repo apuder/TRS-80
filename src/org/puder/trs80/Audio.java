@@ -76,7 +76,8 @@ class Audio implements Runnable {
         while (isRunning) {
             XTRS.fillAudioBuffer();
             audioTrack.write(audioBuffer, 0, audioBufSize);
-            AudioHttpServer.get().write(audioBuffer, 0, audioBufSize);
+            // TODO: Enable once fully supported.
+            // AudioHttpServer.get().write(audioBuffer, 0, audioBufSize);
         }
     }
 
