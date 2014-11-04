@@ -28,8 +28,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
@@ -44,7 +44,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity implements OnItemClickListener,
+public class MainActivity extends ActionBarActivity implements OnItemClickListener,
         InitialSetupDialogFragment.DownloadCompletionListener {
 
     private static final int             REQUEST_CODE_EDIT_CONFIG   = 1;
@@ -80,6 +80,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
         this.setContentView(R.layout.main_activity);
+
         castMessageSender = CastMessageSender.get();
         configurationListViewAdapter = new ConfigurationListViewAdapter(this,
                 Configuration.getConfigurations());
@@ -136,7 +137,7 @@ public class MainActivity extends FragmentActivity implements OnItemClickListene
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        MenuItem mediaRouteItem = menu.findItem(R.id.action_cast);
+        MenuItem mediaRouteItem = menu.findItem(R.id.action_cast_trs80);
         MediaRouteButton mediaRouteButton = (MediaRouteButton) mediaRouteItem.getActionView();
         mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
 

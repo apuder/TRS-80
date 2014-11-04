@@ -1,10 +1,11 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_cast"
-        android:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-        android:actionViewClass="android.support.v7.app.MediaRouteButton"
-        android:showAsAction="always"
+        android:id="@+id/action_cast_trs80"
+        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        app:actionViewClass="android.support.v7.app.MediaRouteButton"
+        app:showAsAction="always"
         android:title="@string/start_casting"/>
 
 </menu>
