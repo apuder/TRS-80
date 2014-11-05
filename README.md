@@ -21,23 +21,31 @@ Next clone the TRS-80 Emulator sources via git:
 git clone git clone git://git.code.sf.net/p/trs80/code trs80
 ```
 
-The TRS-80 emulator depends on Android's [Support Library][Support Library].
+The TRS-80 emulator depends on two [Support Libraries][Support Library]
+(v7 appcompat and media router libraries) as well as the
+[Google Play Services][Google Play Services]. 
 In order to make the project independent of user-specific directory layouts,
-the v7 version of the Support Library needs to be copied to the parent
-directory where the emulator sources were cloned:
+those Libraries need to be copied to the parent directory where the emulator
+sources were cloned:
 
 ```
 cp -r <android-sdk-root>/extras/android/support/v7/appcompat/*
       <parent-dir-of-git-repo>/android-support-v7-appcompat/
+cp -r <android-sdk-root>/extras/android/support/v7/mediarouter/*
+      <parent-dir-of-git-repo>/android-support-v7-mediarouter/
+cp -r <android-sdk-root>/extras/google/google_play_services/libproject/*
+      <parent-dir-of-git-repo>/google-play-services_lib/
+
 ```
 
-Note that the Support Library is designed as an Android Library project and
-cannot be bundled with the emulator. It needs to be imported as a separate
-Eclipse project into your workspace.
+Note that these libraries need to be imported as Android Library projects in
+Eclipse, otherwise there will be compile errors with the TRS-80 emulator
+sources.
 
 At this point you should be able to compile the sources. Note that running
-the TRS-80 emulator inside the Android emulator is very slow. It is recommended
-to use a real device for testing and debugging.
+the TRS-80 emulator inside the Android emulator is very slow and Chromecast
+is also not supported by the Android emulator. It is recommended to use a real
+device for testing and debugging.
 
 
 Quick Overview
@@ -105,6 +113,7 @@ The following resources have been used for this project:
 [sdltrs]:http://sdltrs.sourceforge.net/
 [xtrs]:http://www.tim-mann.org/xtrs.html
 [Support Library]:http://developer.android.com/tools/support-library/setup.html
+[Google Play Services]:http://developer.android.com/google/play-services/setup.html
 [Retro Fonts]:http://www.kreativekorp.com/software/fonts/index.shtml#retro
 [Font Squirrel]:http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
 [Icons 1]:http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html
