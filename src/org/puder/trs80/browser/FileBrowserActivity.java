@@ -37,12 +37,13 @@ import android.widget.TextView;
 public class FileBrowserActivity extends ListActivity {
 
     // Action Menu
-    private static final int MENU_OPTION_CANCEL = 0;
+    private static final int       MENU_OPTION_CANCEL = 0;
 
-    private List<String>     items;
-    private String           pathPrefix;
-    private TextView         pathLabel;
-    private String           currentPath;
+    private List<String>           items              = new ArrayList<String>();
+    private String                 pathPrefix;
+    private TextView               pathLabel;
+    private String                 currentPath;
+    private BrowserListViewAdapter fileListAdapter;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -50,13 +51,17 @@ public class FileBrowserActivity extends ListActivity {
         setContentView(R.layout.file_browser);
         pathPrefix = this.getString(R.string.path) + ": ";
         pathLabel = (TextView) this.findViewById(R.id.path);
+        fileListAdapter = new BrowserListViewAdapter(this, items);
+        setListAdapter(fileListAdapter);
         getFiles(Environment.getExternalStorageDirectory().getPath());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
-                .setIcon(R.drawable.cancel_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE,
+                        this.getString(R.string.menu_cancel)).setIcon(R.drawable.cancel_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }
@@ -97,7 +102,7 @@ public class FileBrowserActivity extends ListActivity {
         currentPath = path;
         pathLabel.setText(pathPrefix + currentPath);
         File[] files = new File(path).listFiles();
-        items = new ArrayList<String>();
+        items.clear();
         if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
@@ -114,8 +119,8 @@ public class FileBrowserActivity extends ListActivity {
         if (!path.equals("/")) {
             items.add(0, "..");
         }
-        BrowserListViewAdapter fileList = new BrowserListViewAdapter(this, items);
-        setListAdapter(fileList);
+
+        fileListAdapter.notifyDataSetChanged();
     }
 
     @Override
