@@ -27,7 +27,7 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-// @ReportsCrashes(formKey = "", formUri = "")
+@ReportsCrashes(formKey = "", formUri = "")
 public class TRS80Application extends Application {
 
     private static Context           context;
