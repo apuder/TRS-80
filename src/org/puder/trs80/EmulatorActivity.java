@@ -169,6 +169,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
 
         orientationManager = new OrientationChanged(this);
         orientationManager.enable();
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -207,6 +209,11 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         }
         XTRS.closeAudio();
         XTRS.flushAudioQueue();
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
