@@ -138,7 +138,8 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         MenuItem mediaRouteItem = menu.findItem(R.id.action_cast_trs80);
-        MediaRouteButton mediaRouteButton = (MediaRouteButton) mediaRouteItem.getActionView();
+        MediaRouteButton mediaRouteButton = (MediaRouteButton) MenuItemCompat
+                .getActionView(mediaRouteItem);
         mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
 
         if (!ROMs.hasROMs()) {
@@ -165,7 +166,6 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        castMessageSender.sendScreenUpdate("Hello Chromecast!!!");
         runEmulator(Configuration.getConfiguration(position));
     }
 

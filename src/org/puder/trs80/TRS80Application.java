@@ -30,25 +30,23 @@ import android.graphics.Bitmap;
 @ReportsCrashes(formKey = "", formUri = "")
 public class TRS80Application extends Application {
 
-    private static Context           context;
-    private static Hardware          hardware;
-    private static KeyboardManager   keyboard;
-    private static Configuration     configuration;
-    private static Bitmap            screenshot;
-    private static boolean           hasCrashed = false;
+    private static Context         context;
+    private static Hardware        hardware;
+    private static KeyboardManager keyboard;
+    private static Configuration   configuration;
+    private static Bitmap          screenshot;
+    private static boolean         hasCrashed = false;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        String chromcastAppId = this.getResources().getString(
-                R.string.chromecast_app_id);
+        String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         ACRA.init(this);
         HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new
-        ACRAPostSender(ACRAData));
+        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {

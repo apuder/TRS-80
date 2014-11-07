@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014, Sascha Haeberling
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.puder.trs80.cast;
 
 import java.io.IOException;
@@ -41,7 +57,8 @@ public class CastMessageSender {
     private Context                       appContext;
     private boolean                       readyToSend;
 
-    private static CastMessageSender instance;
+    private static CastMessageSender      instance;
+
 
     public static void initSingleton(String chromcastAppId, Context context) {
         instance = (new CastMessageSender(context)).init(chromcastAppId);
@@ -50,7 +67,6 @@ public class CastMessageSender {
     public static CastMessageSender get() {
         return instance;
     }
-
 
     public CastMessageSender(Context appContext) {
         this.appContext = appContext;
@@ -73,11 +89,6 @@ public class CastMessageSender {
         mediaRouter.removeCallback(mediaRouterCallback);
     }
 
-    public void sendScreenUpdate(String screenBuffer) {
-        // TODO: CHange this to use a Message format so we can send different kind of messages.
-        sendMessage(screenBuffer);
-    }
-
     /**
      * Returns whether we're ready to send messages to the Cast receiver app.
      */
@@ -85,11 +96,12 @@ public class CastMessageSender {
         return readyToSend;
     }
 
-    private void sendMessage(String message) {
+    /** Send the given message to the receiver. */
+    public void sendMessage(String message) {
         if (!readyToSend) {
+            Log.w(TAG, "Sender not ready to send, message discarded.");
             return;
         }
-
         Cast.CastApi.sendMessage(apiClient, activeChannel.getNamespace(), message);
     }
 

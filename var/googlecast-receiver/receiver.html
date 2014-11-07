@@ -12,10 +12,25 @@
 	src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
 
 <script type="text/javascript">
-
+	var TYPE_START_SESSION      = '1';
+	var TYPE_END_SESSION        = '2';
+	var TYPE_SEND_SCREEN_BUFFER = '3';
+	var TYPE_SET_EXPANDED_MODE  = '4';
+	var TYPE_SEND_CONFIGURATION = '5';
+	
+	window.setScreenBuffer = function(data) {
+		var preContent = "";
+		for (var i = 0; i < data.length; ++i) {
+			if (i % 64 == 0 && i > 0) {
+				preContent += "\n";
+			}
+			preContent += data[i];
+		}
+		$('#screen').text(preContent);
+	}
 
 	window.addEventListener('load', function() {
-		window.console.log('# Load #');
+		window.console.log('# Loading #');
 	    // window.mediaManager = new cast.receiver.MediaManager(mediaElement);	    
 	    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
  	    var customMessageBus =
@@ -24,22 +39,27 @@
 	    window.screenWrapper = document.getElementById('screenWrapper');
 
 		customMessageBus.onMessage = function(event) {
-			var data = event.data;
-			// TODO: Support different kinds of data.
-			// TODO: Support different kinds of screens.
-			
-			var preContent = "";
-			for (var i = 0; i < data.length; ++i) {
-				if (i % 64 == 0 && i > 0) {
-					preContent += "\n";
-				}
-				preContent += data[i];
+			var message = event.data;
+			console.log('Message received: ' + message);
+			if (message[1] != ':') {
+				console.error('Invalid message: ' + message);
+				return;
 			}
-			$('#screen').text(preContent);
+			var messageType = message[0];
+			var payload = message.substring(2);
+			
+			if (messageType == TYPE_START_SESSION) {
+			} else if (messageType == TYPE_END_SESSION) {
+			} else if (messageType == TYPE_SEND_SCREEN_BUFFER) {
+				setScreenBuffer(payload);
+			} else if (messageType == TYPE_SET_EXPANDED_MODE) {
+			} else if (messageType == TYPE_SEND_CONFIGURATION) {
+			} else {
+				console.error('Unsupported message type: ' + message);
+				return;
+			}
 		};
 	    window.castReceiverManager.start();
-	    
- 
 
 
     var m3toUnicode =[

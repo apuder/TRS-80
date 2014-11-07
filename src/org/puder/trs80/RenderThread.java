@@ -17,6 +17,8 @@
 package org.puder.trs80;
 
 import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.cast.RemoteDisplayChannel;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -25,22 +27,22 @@ import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    private int               model;
+    private int                  model;
 
-    private int               trsScreenCols;
-    private int               trsScreenRows;
-    private int               trsCharWidth;
-    private int               trsCharHeight;
+    private int                  trsScreenCols;
+    private int                  trsScreenRows;
+    private int                  trsCharWidth;
+    private int                  trsCharHeight;
 
-    private Bitmap            font[];
+    private Bitmap               font[];
 
-    private boolean           run         = false;
-    private boolean           isRendering = false;
-    private SurfaceHolder     surfaceHolder;
-    private byte[]            screenBuffer;
+    private boolean              run         = false;
+    private boolean              isRendering = false;
+    private SurfaceHolder        surfaceHolder;
+    private byte[]               screenBuffer;
 
-    private char[]            screenCharBuffer;
-    private CastMessageSender castMessageSender;
+    private char[]               screenCharBuffer;
+    private RemoteDisplayChannel remoteDisplay;
 
 
     public RenderThread(SurfaceHolder holder) {
@@ -54,7 +56,7 @@ public class RenderThread extends Thread {
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
         screenCharBuffer = new char[trsScreenCols * trsScreenRows];
-        castMessageSender = CastMessageSender.get();
+        remoteDisplay = new RemoteCastScreen(CastMessageSender.get());
     }
 
     public void setRunning(boolean run) {
@@ -113,8 +115,7 @@ public class RenderThread extends Thread {
                 i += d;
             }
         }
-
-        castMessageSender.sendScreenUpdate(String.valueOf(screenCharBuffer));
+        remoteDisplay.sendScreenBuffer(String.valueOf(screenCharBuffer));
     }
 
     public synchronized void triggerScreenUpdate() {
