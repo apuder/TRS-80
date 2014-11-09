@@ -19,6 +19,7 @@ package org.puder.trs80.keyboard;
 import org.puder.trs80.Hardware;
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
+import org.puder.trs80.TypefaceCache;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -134,10 +135,10 @@ public class Key extends View {
 
     private int             posX                = -1;
     private int             posY                = -1;
-
+    
     public Key(Context context, AttributeSet attrs) {
         super(context, attrs);
-
+        
         this.setBackgroundResource(R.drawable.key_background);
 
         Hardware h = TRS80Application.getHardware();
@@ -172,7 +173,7 @@ public class Key extends View {
         isPressed = false;
         isAltKey = idNormal == TK_ALT;
         paint = new Paint();
-        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/DejaVuSansMono.ttf"));
+        paint.setTypeface(TypefaceCache.get().getTypeface("fonts/DejaVuSansMono.ttf", context));
         paint.setAntiAlias(true);
         float textSizeScale = labelNormal.length() > 1 ? 0.4f : 0.6f;
         paint.setTextSize(keyHeight * textSizeScale);

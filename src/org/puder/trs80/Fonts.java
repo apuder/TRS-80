@@ -29,7 +29,6 @@ public class Fonts {
             fontName = "fonts/AnotherMansTreasureMIII64C.ttf";
             break;
         }
-        return Typeface.createFromAsset(TRS80Application.getAppContext().getAssets(), fontName);
+        return TypefaceCache.get().getTypeface(fontName, TRS80Application.getAppContext());
     }
-
 }
