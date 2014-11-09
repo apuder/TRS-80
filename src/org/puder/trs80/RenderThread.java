@@ -124,8 +124,6 @@ public class RenderThread extends Thread {
             }
         }
         remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
-        Log.d("DBG>>>", "trsScreenCols: " + trsScreenCols + " trsCharWidth: " + trsCharWidth
-                + " trsCharHeight: " + trsCharHeight + " trsScreenRows: " + trsScreenRows);
     }
 
     public synchronized void triggerScreenUpdate() {
