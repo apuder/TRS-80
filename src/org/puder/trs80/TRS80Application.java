@@ -16,6 +16,10 @@
 
 package org.puder.trs80;
 
+import java.util.HashMap;
+
+import org.acra.ACRA;
+import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
