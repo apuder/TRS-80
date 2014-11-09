@@ -26,14 +26,24 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
     private static final int        TYPE_START_SESSION      = 1;
     private static final int        TYPE_END_SESSION        = 2;
     private static final int        TYPE_SEND_SCREEN_BUFFER = 3;
-    private static final int        TYPE_SET_EXPANDED_MODE  = 4;
-    private static final int        TYPE_SEND_CONFIGURATION = 5;
+    private static final int        TYPE_SEND_CONFIGURATION = 4;
     private static final String     MESSAGE_FORMAT          = "%d:%s";
+    private static final String     SCREEN_BUFFER_FORMAT    = "%s:%s";
+
+    private static RemoteCastScreen instance;
 
     private final CastMessageSender sender;
 
 
-    public RemoteCastScreen(CastMessageSender sender) {
+    public static void initSingleton(CastMessageSender sender) {
+        instance = new RemoteCastScreen(sender);
+    }
+
+    public static RemoteCastScreen get() {
+        return instance;
+    }
+
+    private RemoteCastScreen(CastMessageSender sender) {
         if (sender == null) {
             throw new IllegalArgumentException("Null sender not allowed.");
         }
@@ -51,13 +61,9 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
     }
 
     @Override
-    public void sendScreenBuffer(String buffer) {
-        sendMessage(TYPE_SEND_SCREEN_BUFFER, buffer);
-    }
-
-    @Override
-    public void setExpandedMode(boolean expanded) {
-        sendMessage(TYPE_SET_EXPANDED_MODE, expanded ? "1" : "0");
+    public void sendScreenBuffer(boolean expandedMode, String buffer) {
+        sendMessage(TYPE_SEND_SCREEN_BUFFER,
+                String.format(Locale.US, SCREEN_BUFFER_FORMAT, expandedMode ? "1" : "0", buffer));
     }
 
     @Override
@@ -68,6 +74,9 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
     }
 
     private void sendMessage(int type, Object payload) {
+        if (!sender.isReadyToSend()) {
+            return;
+        }
         this.sender.sendMessage(createMessage(type, payload));
     }
 

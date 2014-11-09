@@ -16,7 +16,6 @@
 
 package org.puder.trs80.cast;
 
-
 /**
  * Defines a protocol for communicating with a remote TRS80 display.
  */
@@ -36,18 +35,13 @@ public interface RemoteDisplayChannel {
     /**
      * Updates the screen buffer. Ony has an effect during an active session.
      *
+     * @param expandedMode
+     *            whether the buffer is to be displayed in expanded mode (wide
+     *            characters).
      * @param buffer
      *            the contents of the screen, row-priority.
      */
-    public void sendScreenBuffer(String buffer);
-
-    /**
-     * Set the expanded mode. Default is off.
-     *
-     * @param expanded
-     *            whether the screen should be rendered in expanded mode.
-     */
-    public void setExpandedMode(boolean expanded);
+    public void sendScreenBuffer(boolean expandedMode, String buffer);
 
     /**
      * Sends an initial configuration to the remote display.

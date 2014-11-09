@@ -16,11 +16,8 @@
 
 package org.puder.trs80;
 
-import java.util.HashMap;
-
-import org.acra.ACRA;
-import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.app.Application;
@@ -44,9 +41,11 @@ public class TRS80Application extends Application {
         context = getApplicationContext();
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
+        RemoteCastScreen.initSingleton(CastMessageSender.get());
         ACRA.init(this);
         HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+        ACRA.getErrorReporter().setReportSender(new
+        ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {

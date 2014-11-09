@@ -16,7 +16,6 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.cast.RemoteDisplayChannel;
 
@@ -56,7 +55,7 @@ public class RenderThread extends Thread {
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
         screenCharBuffer = new char[trsScreenCols * trsScreenRows];
-        remoteDisplay = new RemoteCastScreen(CastMessageSender.get());
+        remoteDisplay = RemoteCastScreen.get();
     }
 
     public void setRunning(boolean run) {
@@ -115,7 +114,7 @@ public class RenderThread extends Thread {
                 i += d;
             }
         }
-        remoteDisplay.sendScreenBuffer(String.valueOf(screenCharBuffer));
+        remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
     }
 
     public synchronized void triggerScreenUpdate() {

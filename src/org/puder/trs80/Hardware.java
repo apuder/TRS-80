@@ -37,8 +37,7 @@ import android.view.Window;
  * pseudo pixel graphics (see generateGraphicsFont()).
  */
 abstract public class Hardware {
-
-    class ScreenConfiguration {
+    static class ScreenConfiguration {
         public ScreenConfiguration(int trsScreenCols, int trsScreenRows, float aspectRatio) {
             this.trsScreenCols = trsScreenCols;
             this.trsScreenRows = trsScreenRows;
@@ -90,7 +89,7 @@ abstract public class Hardware {
     private String          xtrsDisk2;
     @SuppressWarnings("unused")
     private String          xtrsDisk3;
-
+    
     protected Hardware(int model, Configuration conf, String xtrsRomFile) {
         this.xtrsModel = model;
         this.xtrsRomFile = xtrsRomFile;
@@ -112,7 +111,7 @@ abstract public class Hardware {
     protected int getModel() {
         return this.xtrsModel;
     }
-
+    
     public void setExpandedScreenMode(boolean flag) {
         expandedScreenMode = flag;
     }
@@ -350,4 +349,5 @@ abstract public class Hardware {
     private float pxFromDp(float dp) {
         return dp * TRS80Application.getAppContext().getResources().getDisplayMetrics().density;
     }
+
 }
