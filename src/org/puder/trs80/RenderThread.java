@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import java.util.Arrays;
+
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.cast.RemoteDisplayChannel;
 
@@ -35,11 +37,12 @@ public class RenderThread extends Thread {
 
     private Bitmap               font[];
 
-    private boolean              run         = false;
-    private boolean              isRendering = false;
+    private boolean              run              = false;
+    private boolean              isRendering      = false;
     private SurfaceHolder        surfaceHolder;
     private byte[]               screenBuffer;
 
+    private boolean              lastExpandedMode = false;
     private char[]               screenCharBuffer;
     private RemoteDisplayChannel remoteDisplay;
 
@@ -93,6 +96,12 @@ public class RenderThread extends Thread {
             canvas.scale(2, 1);
         }
 
+        // Clear buffer when expanded mode changes.
+        if (expandedMode != lastExpandedMode) {
+            Arrays.fill(screenCharBuffer, (char) 0);
+            lastExpandedMode = expandedMode;
+        }
+
         int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols / d; col++) {
@@ -115,6 +124,8 @@ public class RenderThread extends Thread {
             }
         }
         remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
+        Log.d("DBG>>>", "trsScreenCols: " + trsScreenCols + " trsCharWidth: " + trsCharWidth
+                + " trsCharHeight: " + trsCharHeight + " trsScreenRows: " + trsScreenRows);
     }
 
     public synchronized void triggerScreenUpdate() {
