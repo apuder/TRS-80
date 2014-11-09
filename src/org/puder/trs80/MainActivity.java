@@ -271,6 +271,12 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                 return;
             }
             Configuration conf = TRS80Application.getCurrentConfiguration();
+
+            if (conf == null) {
+                // If the application was killed/crashed in the meantime there
+                // is not configuration.
+                return;
+            }
             int id = conf.getId();
             EmulatorState.saveScreenshot(id);
             EmulatorState.saveState(id);
