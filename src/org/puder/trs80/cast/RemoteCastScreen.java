@@ -18,6 +18,8 @@ package org.puder.trs80.cast;
 
 import java.util.Locale;
 
+import org.puder.trs80.Configuration;
+
 /**
  * A remote display channel that controls a remote screen using the google cast
  * protocol.
@@ -67,9 +69,9 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
     }
 
     @Override
-    public void sendConfiguration(int foregroundColor, int backgroundColor) {
-        String fgColor = colorToWebFormat(foregroundColor);
-        String bgColor = colorToWebFormat(backgroundColor);
+    public void sendConfiguration(Configuration configuration) {
+        String fgColor = colorToWebFormat(configuration.getCharacterColorAsRGB());
+        String bgColor = colorToWebFormat(configuration.getScreenColorAsRGB());
         sendMessage(TYPE_SEND_CONFIGURATION, fgColor + ':' + bgColor);
     }
 

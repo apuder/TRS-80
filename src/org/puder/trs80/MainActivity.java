@@ -19,6 +19,7 @@ package org.puder.trs80;
 import java.io.File;
 
 import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.cast.RemoteCastScreen;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -402,6 +403,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
             showError(err);
             return;
         }
+        RemoteCastScreen.get().sendConfiguration(conf);
         EmulatorState.loadState(conf.getId());
         Intent i = new Intent(this, EmulatorActivity.class);
         startActivityForResult(i, REQUEST_CODE_RUN_EMULATOR);

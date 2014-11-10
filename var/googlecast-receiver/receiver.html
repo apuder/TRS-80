@@ -73,6 +73,9 @@ TRS80.loadApp = function() {
 		} else if (messageType == TRS80.TYPE_SEND_SCREEN_BUFFER) {
 			TRS80.setScreenBuffer(payload);
 		} else if (messageType == TRS80.TYPE_SEND_CONFIGURATION) {
+			var colors = payload.split(':');
+			$('#screen').css('color', colors[0]);
+			$('#screen').css('background-color', colors[1]);
 		} else {
 			console.error('Unsupported message type: ' + message);
 			return;
@@ -105,19 +108,19 @@ html {
 
 body {
 	text-align:center;
-	background:#221;
+	background:black;
 	height:100%;
 	border:0;
 	margin:0;
 }
 
 #screen {
-  color:#3c3;
+  color:#FFF;
+  background:black;
   text-align: center;
   font-family:'TreasureMIII64C';
   font-size:36px;
   display:inline-block;
-  background:black;
   border:0;
 }
 

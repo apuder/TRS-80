@@ -16,6 +16,8 @@
 
 package org.puder.trs80.cast;
 
+import org.puder.trs80.Configuration;
+
 /**
  * Defines a protocol for communicating with a remote TRS80 display.
  */
@@ -45,11 +47,11 @@ public interface RemoteDisplayChannel {
 
     /**
      * Sends an initial configuration to the remote display.
-     *
-     * @param foregroundColor
-     *            the foreground color for displaying the characters.
-     * @param backgroundColor
-     *            the background color of the screen.
+     * 
+     * @param configuration
+     *            the configuration of the emulator currently running or about
+     *            to be run. Contains information such as the background and
+     *            foreground colors.
      */
-    public void sendConfiguration(int foregroundColor, int backgroundColor);
+    public void sendConfiguration(Configuration configuration);
 }
