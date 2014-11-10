@@ -49,6 +49,10 @@ public class EmulatorState {
         return createBaseDir(getBaseDir(configurationID)) + "screenshot.png";
     }
 
+    public static String getDefaultCassettePath(int configurationID) {
+        return createBaseDir(getBaseDir(configurationID)) + "cassette.cas";
+    }
+
     public static void saveState(int configurationID) {
         XTRS.saveState(getStateFileName(configurationID));
     }

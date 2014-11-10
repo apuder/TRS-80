@@ -83,7 +83,7 @@ static JNIEnv* getEnv() {
     return env;
 }
 
-static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr,
+static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr, jstring xtrsCassette,
                       jstring xtrsDisk0, jstring xtrsDisk1, jstring xtrsDisk2, jstring xtrsDisk3) {
     int debug = FALSE;
 
@@ -114,7 +114,7 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
-//    cassette_default_sample_rate = 0;
+    cassette_default_sample_rate = 0;
     trs_uart_name = "UART";
     trs_uart_switches = 0;
     trs_kb_bracket(0);
@@ -123,6 +123,13 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_screen_init();
     trs_timer_init();
     trs_reset(1);
+    // Cassette
+    trs_cassette_remove();
+    if (xtrsCassette != NULL) {
+        path = (*env)->GetStringUTFChars(env, xtrsCassette, NULL);
+        trs_cassette_insert((char*) path);
+        (*env)->ReleaseStringUTFChars(env, xtrsCassette, path);
+    }
     // Disk 0
     trs_disk_remove(0);
     if (xtrsDisk0 != NULL) {
@@ -287,6 +294,7 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jfieldID xtrsRomFileID = (*env)->GetFieldID(env, hardwareClass, "xtrsRomFile", "Ljava/lang/String;");
     jfieldID xtrsScreenBufferID = (*env)->GetFieldID(env, hardwareClass, "xtrsScreenBuffer", "[B");
     jfieldID xtrsEntryAddrID = (*env)->GetFieldID(env, hardwareClass, "xtrsEntryAddr", "I");
+    jfieldID xtrsCassetteID = (*env)->GetFieldID(env, hardwareClass, "xtrsCassette", "Ljava/lang/String;");
     jfieldID xtrsDisk0ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk0", "Ljava/lang/String;");
     jfieldID xtrsDisk1ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk1", "Ljava/lang/String;");
     jfieldID xtrsDisk2ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk2", "Ljava/lang/String;");
@@ -295,6 +303,7 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jstring xtrsRomFile = (*env)->GetObjectField(env, hardware, xtrsRomFileID);
     jbyteArray xtrsScreenBuffer = (*env)->GetObjectField(env, hardware, xtrsScreenBufferID);
     jint xtrsEntryAddr = (*env)->GetIntField(env, hardware, xtrsEntryAddrID);
+    jstring xtrsCassette = (*env)->GetObjectField(env, hardware, xtrsCassetteID);
     jstring xtrsDisk0 = (*env)->GetObjectField(env, hardware, xtrsDisk0ID);
     jstring xtrsDisk1 = (*env)->GetObjectField(env, hardware, xtrsDisk1ID);
     jstring xtrsDisk2 = (*env)->GetObjectField(env, hardware, xtrsDisk2ID);
@@ -307,12 +316,13 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
     screenBuffer = (*env)->GetByteArrayElements(env, screenArray, &screenBufferIsCopy);
 
-    init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
+    init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsCassette, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
 }
 
 void Java_org_puder_trs80_XTRS_saveState(JNIEnv* env, jclass cls, jstring fileName) {
     const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    trs_cassette_reset();
     trs_state_save(fn);
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
@@ -373,6 +383,10 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
     z80_reset();
+}
+
+void Java_org_puder_trs80_XTRS_rewindCassette(JNIEnv* env, jclass cls) {
+    trs_set_cassette_position(0);
 }
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {

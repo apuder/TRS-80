@@ -22,6 +22,7 @@ public class ConfigurationBackup extends Configuration {
 
     private String   backupName;
     private int      backupModel;
+    private String   backupCassette;
     private String[] backupDisk = new String[4];
     private boolean  backupMuteSound;
     private int      backupCharacterColor;
@@ -34,6 +35,7 @@ public class ConfigurationBackup extends Configuration {
         super(other.id);
         this.backupName = other.getName();
         this.backupModel = other.getModel();
+        this.backupCassette = other.getCassettePath();
         this.backupDisk[0] = other.getDiskPath(0);
         this.backupDisk[1] = other.getDiskPath(1);
         this.backupDisk[2] = other.getDiskPath(2);
@@ -56,6 +58,7 @@ public class ConfigurationBackup extends Configuration {
         editor = sharedPrefs.edit();
         saveName();
         saveModel();
+        saveCassettePath();
         saveDiskPath(0);
         saveDiskPath(1);
         saveDiskPath(2);
@@ -93,6 +96,10 @@ public class ConfigurationBackup extends Configuration {
         } else {
             editor.putString(EditConfigurationActivity.CONF_MODEL, model);
         }
+    }
+
+    private void saveCassettePath() {
+        editor.putString(EditConfigurationActivity.CONF_CASSETTE, backupCassette);
     }
 
     private void saveDiskPath(int disk) {

@@ -36,11 +36,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-public class EditConfigurationActivity extends PreferenceActivity  implements
+public class EditConfigurationActivity extends PreferenceActivity implements
         OnPreferenceChangeListener {
 
     public static final String CONF_NAME               = "conf_name";
     public static final String CONF_MODEL              = "conf_model";
+    public static final String CONF_CASSETTE           = "conf_cassette";
     public static final String CONF_DISK1              = "conf_disk1";
     public static final String CONF_DISK2              = "conf_disk2";
     public static final String CONF_DISK3              = "conf_disk3";
@@ -60,6 +61,7 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
 
     private Preference         model;
     private Preference         name;
+    private Preference         cassette;
     private Preference         disk1;
     private Preference         disk2;
     private Preference         disk3;
@@ -83,13 +85,23 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
             @Override
             public boolean onPreferenceClick(Preference pref) {
                 String key = pref.getKey();
-                int disk = Integer.parseInt(key.substring(key.length() - 1));
+                int requestCode;
+                if (key.equals(CONF_CASSETTE)) {
+                    requestCode = 0;
+                } else {
+                    requestCode = Integer.parseInt(key.substring(key.length() - 1));
+                }
                 Intent intent = new Intent(EditConfigurationActivity.this,
                         FileBrowserActivity.class);
-                startActivityForResult(intent, disk);
+                startActivityForResult(intent, requestCode);
                 return true;
             }
         };
+
+        cassette = (Preference) findPreference(CONF_CASSETTE);
+        cassette.setOnPreferenceChangeListener(this);
+        cassette.setOnPreferenceClickListener(listener);
+
         disk1 = (Preference) findPreference(CONF_DISK1);
         disk1.setOnPreferenceChangeListener(this);
         disk1.setOnPreferenceClickListener(listener);
@@ -123,12 +135,20 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE, this.getString(R.string.menu_cancel))
-                .setIcon(R.drawable.cancel_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE, this.getString(R.string.menu_done))
-                .setIcon(R.drawable.ok_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
-                .setIcon(R.drawable.help_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE,
+                        this.getString(R.string.menu_cancel)).setIcon(R.drawable.cancel_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE,
+                                this.getString(R.string.menu_done)).setIcon(R.drawable.ok_icon),
+                        MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
+                        MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         return true;
     }
 
@@ -173,6 +193,12 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
                 val = "4P";
             }
             model.setSummary("Model " + val);
+        }
+
+        // Cassette
+        val = sharedPrefs.getString(CONF_CASSETTE, null);
+        if (val != null) {
+            cassette.setSummary(val);
         }
 
         // Disk 1
@@ -250,7 +276,13 @@ public class EditConfigurationActivity extends PreferenceActivity  implements
         if (resultCode == RESULT_OK) {
             String newValue = data.getStringExtra("PATH");
             SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putString("conf_disk" + requestCode, newValue);
+            String key;
+            if (requestCode == 0) {
+                key = CONF_CASSETTE;
+            } else {
+                key = "conf_disk" + requestCode;
+            }
+            editor.putString(key, newValue);
             editor.commit();
             updateSummaries();
         }

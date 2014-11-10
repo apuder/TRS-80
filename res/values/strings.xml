@@ -60,6 +60,8 @@
     <string name="pref_name_summary">Name of the configuration</string>
     <string name="pref_trs_model_title">TRS-80 Model</string>
     <string name="pref_trs_model_summary">The TRS-80 Model that will be emulated</string>
+    <string name="pref_cassette_title">Cassette</string>
+    <string name="pref_cassette_summary">Default blank tape</string>
     <string name="pref_disk1_title">Disk 1</string>
     <string name="pref_disk1_summary">File to use for disk 1</string>
     <string name="pref_disk2_title">Disk 2</string>
@@ -101,9 +103,11 @@
 
     <!-- EmulatorActivity -->
     <string name="menu_pause">Pause</string>
+    <string name="menu_rewind">Rewind</string>
     <string name="menu_reset">Reset</string>
     <string name="menu_sound_on">Sound On</string>
     <string name="menu_sound_off">Sound Off</string>
+    <string name="rewinding_cassette">Rewinding cassette...</string>
 
     <!-- FileBrowserActivity -->
     <string name="menu_cancel">Cancel</string>

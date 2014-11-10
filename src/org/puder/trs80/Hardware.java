@@ -16,12 +16,15 @@
 
 package org.puder.trs80;
 
+import java.io.File;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Environment;
 import android.view.Window;
 
 /**
@@ -82,6 +85,8 @@ abstract public class Hardware {
     @SuppressWarnings("unused")
     private int             xtrsEntryAddr;
     @SuppressWarnings("unused")
+    private String          xtrsCassette;
+    @SuppressWarnings("unused")
     private String          xtrsDisk0;
     @SuppressWarnings("unused")
     private String          xtrsDisk1;
@@ -89,10 +94,14 @@ abstract public class Hardware {
     private String          xtrsDisk2;
     @SuppressWarnings("unused")
     private String          xtrsDisk3;
-    
+
     protected Hardware(int model, Configuration conf, String xtrsRomFile) {
         this.xtrsModel = model;
         this.xtrsRomFile = xtrsRomFile;
+        this.xtrsCassette = conf.getCassettePath();
+        if (this.xtrsCassette == null) {
+            this.xtrsCassette = EmulatorState.getDefaultCassettePath(conf.getId());
+        }
         this.xtrsDisk0 = conf.getDiskPath(0);
         this.xtrsDisk1 = conf.getDiskPath(1);
         this.xtrsDisk2 = conf.getDiskPath(2);
@@ -111,7 +120,7 @@ abstract public class Hardware {
     protected int getModel() {
         return this.xtrsModel;
     }
-    
+
     public void setExpandedScreenMode(boolean flag) {
         expandedScreenMode = flag;
     }

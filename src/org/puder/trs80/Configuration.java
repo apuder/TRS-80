@@ -160,6 +160,10 @@ public class Configuration {
                 EditConfigurationActivity.CONF_CHARACTER_COLOR, "0"));
     }
 
+    public String getCassettePath() {
+        return sharedPrefs.getString(EditConfigurationActivity.CONF_CASSETTE, null);
+    }
+
     public String getDiskPath(int disk) {
         String key;
         switch (disk) {

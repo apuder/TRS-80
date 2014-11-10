@@ -14,6 +14,10 @@
             android:entryValues="@array/conf_trs_model_values" />
 
         <Preference
+            android:title="@string/pref_cassette_title"
+            android:summary="@string/pref_cassette_summary"
+            android:key="conf_cassette" />
+        <Preference
             android:title="@string/pref_disk1_title"
             android:summary="@string/pref_disk1_summary"
             android:key="conf_disk1" />

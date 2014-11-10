@@ -51,6 +51,8 @@ public class XTRS {
 
     public static native void reset();
 
+    public static native void rewindCassette();
+
     public static native int setAudioBuffer(byte[] data);
 
     public static native void fillAudioBuffer();

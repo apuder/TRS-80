@@ -52,15 +52,17 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EmulatorActivity extends ActionBarActivity implements SensorEventListener,
         OnKeyListener {
 
     // Action Menu
     private static final int   MENU_OPTION_PAUSE     = 0;
-    private static final int   MENU_OPTION_RESET     = 1;
-    private static final int   MENU_OPTION_SOUND_ON  = 2;
-    private static final int   MENU_OPTION_SOUND_OFF = 3;
+    private static final int   MENU_OPTION_REWIND    = 1;
+    private static final int   MENU_OPTION_RESET     = 2;
+    private static final int   MENU_OPTION_SOUND_ON  = 3;
+    private static final int   MENU_OPTION_SOUND_OFF = 4;
 
     private Thread             cpuThread;
     private TextView           logView;
@@ -220,6 +222,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE, this.getString(R.string.menu_pause))
                 .setIcon(R.drawable.pause_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE, this.getString(R.string.menu_rewind))
+                .setIcon(R.drawable.rewind_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE, this.getString(R.string.menu_reset))
                 .setIcon(R.drawable.reset_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
@@ -244,6 +248,10 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         switch (item.getItemId()) {
         case MENU_OPTION_PAUSE:
             pauseEmulator();
+            return true;
+        case MENU_OPTION_REWIND:
+            Toast.makeText(this, R.string.rewinding_cassette, Toast.LENGTH_SHORT).show();
+            XTRS.rewindCassette();
             return true;
         case MENU_OPTION_RESET:
             XTRS.reset();
