@@ -41,7 +41,7 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
         instance = new RemoteCastScreen(sender);
     }
 
-    public static RemoteCastScreen get() {
+    public static RemoteDisplayChannel get() {
         return instance;
     }
 

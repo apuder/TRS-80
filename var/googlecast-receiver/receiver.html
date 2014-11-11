@@ -6,6 +6,7 @@
 	content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
+<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300' rel='stylesheet' type='text/css'>
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script
@@ -22,6 +23,19 @@ TRS80.TYPE_SEND_CONFIGURATION = '4';
 // Wide-character mode.
 TRS80.expandedMode = false;
 TRS80.expandedModeCssClass = 'expandedMode';
+
+TRS80.startSession = function() {
+	TRS80.switchSplashScreen(false);
+};
+
+TRS80.endSession = function() {
+	TRS80.switchSplashScreen(true);
+};
+
+TRS80.switchSplashScreen = function(visible) {
+	$('#splashScreen').css('display', visible ? '' : 'none');
+	$('#screenWrapper').css('display', visible ? 'none' : '');
+};
 
 TRS80.setScreenBuffer = function(data) {
 	if (data[1] != ':') {
@@ -55,6 +69,10 @@ TRS80.setExpandedMode = function(expanded) {
 
 TRS80.loadApp = function() {
 	window.console.log('# Loading #');
+	
+	// Only show the screen once a session starts.
+	$('#screenWrapper').css('display', 'none');
+	
     var castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
     var customMessageBus =
     	castReceiverManager.getCastMessageBus('urn:x-cast:org.puder.trs80');
@@ -69,7 +87,9 @@ TRS80.loadApp = function() {
 		var payload = message.substring(2);
 		
 		if (messageType == TRS80.TYPE_START_SESSION) {
+			TRS80.startSession();
 		} else if (messageType == TRS80.TYPE_END_SESSION) {
+			TRS80.endSession();
 		} else if (messageType == TRS80.TYPE_SEND_SCREEN_BUFFER) {
 			TRS80.setScreenBuffer(payload);
 		} else if (messageType == TRS80.TYPE_SEND_CONFIGURATION) {
@@ -128,10 +148,33 @@ body {
   font-family:'TreasureMIII32C' !important;
 }
 
+#splashText {
+  font-family:'Roboto Condensed';
+  color:white;
+  font-size:2em;  
+}
+
+#splashScreen {
+  position:absolute;
+  top:50%;
+  left:50%;
+  margin-left:-396px;
+  margin-top:-300px;
+}
+
+#splashLogo, #splashScreen {
+  width:791px;
+  height:550px;
+}
+
 
 </style>
 </head>
 <body>
-	<div id="screenWrapper"><pre id="screen"></pre></div>
+  <div id="splashScreen">
+    <img id="splashLogo" src="splash_logo.png" />
+    <span id="splashText">Start or resume an emulator on your device ...</span>
+  </div>
+  <div id="screenWrapper"><pre id="screen"></pre></div>
 </body>
 </html>

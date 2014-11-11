@@ -17,6 +17,7 @@
 package org.puder.trs80;
 
 import org.acra.ACRA;
+import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
 import android.annotation.SuppressLint;
@@ -178,6 +179,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onResume() {
         super.onResume();
+        RemoteCastScreen.get().startSession();
+
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             startAccelerometer();
         }
@@ -196,6 +199,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onPause() {
         super.onPause();
+        RemoteCastScreen.get().endSession();
         orientationManager.disable();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
@@ -213,6 +217,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         XTRS.flushAudioQueue();
     }
 
+    @Override
     public void onDestroy() {
         super.onDestroy();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
