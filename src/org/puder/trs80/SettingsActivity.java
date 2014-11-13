@@ -45,8 +45,6 @@ public class SettingsActivity extends ActionBarActivity {
     public static final String CONF_ROM_MODEL4  = "conf_rom_model4";
     public static final String CONF_ROM_MODEL4P = "conf_rom_model4p";
 
-    private SettingsFragment   settingsFragment;
-
     public static String getSetting(String key) {
         SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
                 SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -58,9 +56,8 @@ public class SettingsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         // Dummy view. Will be replaced by SettingsFragment.
         setContentView(new View(this));
-        settingsFragment = new SettingsFragment();
-        getFragmentManager().beginTransaction().replace(android.R.id.content, settingsFragment)
-                .commit();
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment()).commit();
     }
 
     @Override

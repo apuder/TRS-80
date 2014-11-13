@@ -29,26 +29,18 @@ import android.preference.PreferenceManager;
 
 public class SettingsFragment extends PreferenceFragment implements OnPreferenceChangeListener {
 
-    public static final String SHARED_PREF_NAME = "Settings";
-
-    public static final String CONF_FIRST_TIME  = "conf_first_time";
-    public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
-    public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
-    public static final String CONF_ROM_MODEL4  = "conf_rom_model4";
-    public static final String CONF_ROM_MODEL4P = "conf_rom_model4p";
-
-    private SharedPreferences  sharedPrefs;
-    private Preference         romModel1;
-    private Preference         romModel3;
-    private Preference         romModel4;
-    private Preference         romModel4p;
+    private SharedPreferences sharedPrefs;
+    private Preference        romModel1;
+    private Preference        romModel3;
+    private Preference        romModel4;
+    private Preference        romModel4p;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings);
         PreferenceManager mgr = this.getPreferenceManager();
-        mgr.setSharedPreferencesName(SHARED_PREF_NAME);
+        mgr.setSharedPreferencesName(SettingsActivity.SHARED_PREF_NAME);
         sharedPrefs = mgr.getSharedPreferences();
         Preference.OnPreferenceClickListener listener = new Preference.OnPreferenceClickListener() {
             @Override
@@ -59,19 +51,19 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
                 return true;
             }
         };
-        romModel1 = (Preference) findPreference(CONF_ROM_MODEL1);
+        romModel1 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL1);
         romModel1.setOnPreferenceChangeListener(this);
         romModel1.setOnPreferenceClickListener(listener);
 
-        romModel3 = (Preference) findPreference(CONF_ROM_MODEL3);
+        romModel3 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL3);
         romModel3.setOnPreferenceChangeListener(this);
         romModel3.setOnPreferenceClickListener(listener);
 
-        romModel4 = (Preference) findPreference(CONF_ROM_MODEL4);
+        romModel4 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4);
         romModel4.setOnPreferenceChangeListener(this);
         romModel4.setOnPreferenceClickListener(listener);
 
-        romModel4p = (Preference) findPreference(CONF_ROM_MODEL4P);
+        romModel4p = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4P);
         romModel4p.setOnPreferenceChangeListener(this);
         romModel4p.setOnPreferenceClickListener(listener);
 
@@ -79,19 +71,19 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
     }
 
     private void updateSummaries() {
-        String val = sharedPrefs.getString(CONF_ROM_MODEL1, null);
+        String val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL1, null);
         if (val != null) {
             romModel1.setSummary(val);
         }
-        val = sharedPrefs.getString(CONF_ROM_MODEL3, null);
+        val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null);
         if (val != null) {
             romModel3.setSummary(val);
         }
-        val = sharedPrefs.getString(CONF_ROM_MODEL4, null);
+        val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4, null);
         if (val != null) {
             romModel4.setSummary(val);
         }
-        val = sharedPrefs.getString(CONF_ROM_MODEL4P, null);
+        val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4P, null);
         if (val != null) {
             romModel4p.setSummary(val);
         }
@@ -102,17 +94,17 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         if (resultCode == Activity.RESULT_OK) {
             String path = data.getStringExtra("PATH");
             SharedPreferences.Editor editor = sharedPrefs.edit();
-            if (CONF_ROM_MODEL1.hashCode() == requestCode) {
-                editor.putString(CONF_ROM_MODEL1, path);
+            if (SettingsActivity.CONF_ROM_MODEL1.hashCode() == requestCode) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL1, path);
             }
-            if (CONF_ROM_MODEL3.hashCode() == requestCode) {
-                editor.putString(CONF_ROM_MODEL3, path);
+            if (SettingsActivity.CONF_ROM_MODEL3.hashCode() == requestCode) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL3, path);
             }
-            if (CONF_ROM_MODEL4.hashCode() == requestCode) {
-                editor.putString(CONF_ROM_MODEL4, path);
+            if (SettingsActivity.CONF_ROM_MODEL4.hashCode() == requestCode) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL4, path);
             }
-            if (CONF_ROM_MODEL4P.hashCode() == requestCode) {
-                editor.putString(CONF_ROM_MODEL4P, path);
+            if (SettingsActivity.CONF_ROM_MODEL4P.hashCode() == requestCode) {
+                editor.putString(SettingsActivity.CONF_ROM_MODEL4P, path);
             }
             editor.commit();
             updateSummaries();
