@@ -23,18 +23,20 @@ import java.util.List;
 
 import org.puder.trs80.R;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class FileBrowserActivity extends ListActivity {
+public class FileBrowserActivity extends ActionBarActivity implements OnItemClickListener {
 
     // Action Menu
     private static final int       MENU_OPTION_CANCEL = 0;
@@ -52,7 +54,9 @@ public class FileBrowserActivity extends ListActivity {
         pathPrefix = this.getString(R.string.path) + ": ";
         pathLabel = (TextView) this.findViewById(R.id.path);
         fileListAdapter = new BrowserListViewAdapter(this, items);
-        setListAdapter(fileListAdapter);
+        ListView listView = (ListView) this.findViewById(R.id.file_list);
+        listView.setAdapter(fileListAdapter);
+        listView.setOnItemClickListener(this);
         getFiles(Environment.getExternalStorageDirectory().getPath());
     }
 
@@ -78,7 +82,7 @@ public class FileBrowserActivity extends ListActivity {
     }
 
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
         String file = items.get((int) id);
         if (file.equals("..")) {
             int idx = currentPath.lastIndexOf("/");
