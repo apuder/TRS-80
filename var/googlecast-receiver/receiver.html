@@ -47,9 +47,11 @@ TRS80.setScreenBuffer = function(data) {
 		TRS80.setExpandedMode(expanded);
 	}
 	
+	var d = expanded ? 2 : 1;
+	
 	data = data.substring(2);
 	var preContent = "";
-	for (var i = 0; i < data.length; ++i) {
+	for (var i = 0; i < data.length; i += d) {
 		if (i % 64 == 0 && i > 0) {
 			preContent += "\n";
 		}

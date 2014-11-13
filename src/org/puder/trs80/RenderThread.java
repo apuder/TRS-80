@@ -42,7 +42,6 @@ public class RenderThread extends Thread {
     private SurfaceHolder        surfaceHolder;
     private byte[]               screenBuffer;
 
-    private boolean              lastExpandedMode = false;
     private char[]               screenCharBuffer;
     private RemoteDisplayChannel remoteDisplay;
 
@@ -96,12 +95,6 @@ public class RenderThread extends Thread {
             canvas.scale(2, 1);
         }
 
-        // Clear buffer when expanded mode changes.
-        if (expandedMode != lastExpandedMode) {
-            Arrays.fill(screenCharBuffer, (char) 0);
-            lastExpandedMode = expandedMode;
-        }
-
         int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols / d; col++) {
@@ -119,7 +112,7 @@ public class RenderThread extends Thread {
                 canvas.drawBitmap(font[ch], startx, starty, null);
 
                 // TODO: Choose encoding based on current model.
-                screenCharBuffer[(row * trsScreenCols) + col] = CharMapping.m3toUnicode[ch];
+                screenCharBuffer[i] = CharMapping.m3toUnicode[ch];
                 i += d;
             }
         }
