@@ -35,6 +35,11 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
     private Preference        romModel4;
     private Preference        romModel4p;
 
+    private CharSequence      defaultRomModel1Summary;
+    private CharSequence      defaultRomModel3Summary;
+    private CharSequence      defaultRomModel4Summary;
+    private CharSequence      defaultRomModel4PSummary;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,39 +59,35 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         romModel1 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL1);
         romModel1.setOnPreferenceChangeListener(this);
         romModel1.setOnPreferenceClickListener(listener);
+        defaultRomModel1Summary = romModel1.getSummary();
 
         romModel3 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL3);
         romModel3.setOnPreferenceChangeListener(this);
         romModel3.setOnPreferenceClickListener(listener);
+        defaultRomModel3Summary = romModel3.getSummary();
 
         romModel4 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4);
         romModel4.setOnPreferenceChangeListener(this);
         romModel4.setOnPreferenceClickListener(listener);
+        defaultRomModel4Summary = romModel4.getSummary();
 
         romModel4p = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4P);
         romModel4p.setOnPreferenceChangeListener(this);
         romModel4p.setOnPreferenceClickListener(listener);
+        defaultRomModel4PSummary = romModel4p.getSummary();
 
         updateSummaries();
     }
 
     private void updateSummaries() {
         String val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL1, null);
-        if (val != null) {
-            romModel1.setSummary(val);
-        }
+        romModel1.setSummary(val != null ? val : defaultRomModel1Summary);
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null);
-        if (val != null) {
-            romModel3.setSummary(val);
-        }
+        romModel3.setSummary(val != null ? val : defaultRomModel3Summary);
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4, null);
-        if (val != null) {
-            romModel4.setSummary(val);
-        }
+        romModel4.setSummary(val != null ? val : defaultRomModel4Summary);
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4P, null);
-        if (val != null) {
-            romModel4p.setSummary(val);
-        }
+        romModel4p.setSummary(val != null ? val : defaultRomModel4PSummary);
     }
 
     @Override

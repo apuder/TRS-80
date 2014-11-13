@@ -44,6 +44,12 @@ public class EditConfigurationFragment extends PreferenceFragment implements
     private Preference        keyboardPortrait;
     private Preference        keyboardLandscape;
 
+    private CharSequence      defaultCassetteSummary;
+    private CharSequence      defaultDisk1Summary;
+    private CharSequence      defaultDisk2Summary;
+    private CharSequence      defaultDisk3Summary;
+    private CharSequence      defaultDisk4Summary;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,22 +80,27 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         cassette = (Preference) findPreference(EditConfigurationActivity.CONF_CASSETTE);
         cassette.setOnPreferenceChangeListener(this);
         cassette.setOnPreferenceClickListener(listener);
+        defaultCassetteSummary = cassette.getSummary();
 
         disk1 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK1);
         disk1.setOnPreferenceChangeListener(this);
         disk1.setOnPreferenceClickListener(listener);
+        defaultDisk1Summary = disk1.getSummary();
 
         disk2 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK2);
         disk2.setOnPreferenceChangeListener(this);
         disk2.setOnPreferenceClickListener(listener);
+        defaultDisk2Summary = disk2.getSummary();
 
         disk3 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK3);
         disk3.setOnPreferenceChangeListener(this);
         disk3.setOnPreferenceClickListener(listener);
+        defaultDisk3Summary = disk3.getSummary();
 
         disk4 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK4);
         disk4.setOnPreferenceChangeListener(this);
         disk4.setOnPreferenceClickListener(listener);
+        defaultDisk4Summary = disk4.getSummary();
 
         model = (Preference) findPreference(EditConfigurationActivity.CONF_MODEL);
         model.setOnPreferenceChangeListener(this);
@@ -125,33 +136,23 @@ public class EditConfigurationFragment extends PreferenceFragment implements
 
         // Cassette
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_CASSETTE, null);
-        if (val != null) {
-            cassette.setSummary(val);
-        }
+        cassette.setSummary(val != null ? val : defaultCassetteSummary);
 
         // Disk 1
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK1, null);
-        if (val != null) {
-            disk1.setSummary(val);
-        }
+        disk1.setSummary(val != null ? val : defaultDisk1Summary);
 
         // Disk 2
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK2, null);
-        if (val != null) {
-            disk2.setSummary(val);
-        }
+        disk2.setSummary(val != null ? val : defaultDisk2Summary);
 
         // Disk 3
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK3, null);
-        if (val != null) {
-            disk3.setSummary(val);
-        }
+        disk3.setSummary(val != null ? val : defaultDisk3Summary);
 
         // Disk 4
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK4, null);
-        if (val != null) {
-            disk4.setSummary(val);
-        }
+        disk4.setSummary(val != null ? val : defaultDisk4Summary);
 
         // Character color
         val = sharedPrefs.getString(EditConfigurationActivity.CONF_CHARACTER_COLOR, null);

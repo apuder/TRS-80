@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.puder.trs80.R;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,6 +42,7 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
 
     // Action Menu
     private static final int       MENU_OPTION_CANCEL = 0;
+    private static final int       MENU_OPTION_EJECT  = 1;
 
     private List<String>           items              = new ArrayList<String>();
     private String                 pathPrefix;
@@ -63,10 +66,13 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_EJECT, Menu.NONE,
+                        this.getString(R.string.menu_eject)).setIcon(R.drawable.eject_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE,
                         this.getString(R.string.menu_cancel)).setIcon(R.drawable.cancel_icon),
                 MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-
         return true;
     }
 
@@ -76,6 +82,9 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
         case MENU_OPTION_CANCEL:
             setResult(RESULT_CANCELED, getIntent());
             finish();
+            return true;
+        case MENU_OPTION_EJECT:
+            eject();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -100,6 +109,37 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
         i.putExtra("PATH", file);
         setResult(RESULT_OK, i);
         finish();
+    }
+
+    private void eject() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(R.string.alert_dialog_confirm_eject);
+        builder.setIcon(R.drawable.warning_icon);
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Intent i = getIntent();
+                i.putExtra("PATH", (String) null);
+                setResult(RESULT_OK, i);
+                finish();
+            }
+
+        });
+        builder.setNegativeButton(R.string.alert_dialog_cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void getFiles(String path) {

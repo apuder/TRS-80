@@ -107,11 +107,13 @@
     <string name="menu_reset">Reset</string>
     <string name="menu_sound_on">Sound On</string>
     <string name="menu_sound_off">Sound Off</string>
-    <string name="rewinding_cassette">Rewinding cassette...</string>
+    <string name="rewinding_cassette">Rewinding cassette&#8230;</string>
 
     <!-- FileBrowserActivity -->
     <string name="menu_cancel">Cancel</string>
+    <string name="menu_eject">Eject</string>
     <string name="path">Path</string>
+    <string name="alert_dialog_confirm_eject">Do you want to eject the currently mounted file?</string>
 
     <string name="error_model_not_supported">Only Model I and Model III are supported at this time.</string>
     <string name="error_no_rom">No valid ROM found. Please use Settings to set ROM.</string>
