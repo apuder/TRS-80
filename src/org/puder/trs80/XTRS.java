@@ -67,6 +67,10 @@ public class XTRS {
         renderer = r;
     }
 
+    public static RenderThread getRenderer() {
+        return renderer;
+    }
+
     public static void setEmulatorActivity(EmulatorActivity activity) {
         emulator = activity;
     }

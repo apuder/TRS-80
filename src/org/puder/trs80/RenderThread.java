@@ -16,38 +16,35 @@
 
 package org.puder.trs80;
 
-import java.util.Arrays;
-
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.cast.RemoteDisplayChannel;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    private int                  model;
+    private int           model;
 
-    private int                  trsScreenCols;
-    private int                  trsScreenRows;
-    private int                  trsCharWidth;
-    private int                  trsCharHeight;
+    private int           trsScreenCols;
+    private int           trsScreenRows;
+    private int           trsCharWidth;
+    private int           trsCharHeight;
 
-    private Bitmap               font[];
+    private Bitmap        font[];
 
-    private boolean              run              = false;
-    private boolean              isRendering      = false;
-    private SurfaceHolder        surfaceHolder;
-    private byte[]               screenBuffer;
+    private boolean       run         = false;
+    private boolean       isRendering = false;
+    private SurfaceHolder surfaceHolder;
+    private byte[]        screenBuffer;
 
-    private char[]               screenCharBuffer;
-    private RemoteDisplayChannel remoteDisplay;
+    private char[]        screenCharBuffer;
 
-
-    public RenderThread(SurfaceHolder holder) {
-        this.surfaceHolder = holder;
+    public RenderThread() {
+        surfaceHolder = null;
         Hardware h = TRS80Application.getHardware();
         model = h.getModel();
         screenBuffer = h.getScreenBuffer();
@@ -57,7 +54,10 @@ public class RenderThread extends Thread {
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
         screenCharBuffer = new char[trsScreenCols * trsScreenRows];
-        remoteDisplay = RemoteCastScreen.get();
+    }
+
+    public void setSurfaceHolder(SurfaceHolder holder) {
+        surfaceHolder = holder;
     }
 
     public void setRunning(boolean run) {
@@ -78,20 +78,25 @@ public class RenderThread extends Thread {
                 return;
             }
             isRendering = true;
-            Canvas c = surfaceHolder.lockCanvas();
-            if (c == null) {
-                Log.d("Z80", "Canvas is null");
-                continue;
+
+            if (surfaceHolder != null) {
+                Canvas c = surfaceHolder.lockCanvas();
+                if (c == null) {
+                    Log.d("Z80", "Canvas is null");
+                    continue;
+                }
+                renderScreen(c, null);
+                surfaceHolder.unlockCanvasAndPost(c);
+            } else {
+                renderScreen(null, RemoteCastScreen.get());
             }
-            renderScreen(c);
-            surfaceHolder.unlockCanvasAndPost(c);
         }
     }
 
-    public synchronized void renderScreen(Canvas canvas) {
+    private void renderScreen(Canvas canvas, RemoteDisplayChannel remoteDisplay) {
         boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
         int d = expandedMode ? 2 : 1;
-        if (expandedMode) {
+        if (canvas != null && expandedMode) {
             canvas.scale(2, 1);
         }
 
@@ -103,24 +108,33 @@ public class RenderThread extends Thread {
                 if (this.model == Hardware.MODEL1 && ch < 0x20) {
                     ch += 0x40;
                 }
-                int startx = trsCharWidth * col;
-                int starty = trsCharHeight * row;
-                if (font[ch] == null) {
-                    Log.d("Z80", "font[" + ch + "] == null");
-                    continue;
-                }
-                canvas.drawBitmap(font[ch], startx, starty, null);
 
+                if (canvas != null) {
+                    int startx = trsCharWidth * col;
+                    int starty = trsCharHeight * row;
+                    canvas.drawBitmap(font[ch], startx, starty, null);
+                }
                 // TODO: Choose encoding based on current model.
                 screenCharBuffer[i] = CharMapping.m3toUnicode[ch];
                 i += d;
             }
         }
-        remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
+        if (remoteDisplay != null) {
+            remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
+        }
     }
 
     public synchronized void triggerScreenUpdate() {
         this.notify();
     }
 
+    public synchronized Bitmap takeScreenshot() {
+        Hardware h = TRS80Application.getHardware();
+        Bitmap screenshot = Bitmap.createBitmap(h.getScreenWidth(), h.getScreenHeight(),
+                Config.RGB_565);
+        Canvas c = new Canvas(screenshot);
+        c.drawColor(TRS80Application.getCurrentConfiguration().getScreenColorAsRGB());
+        renderScreen(c, null);
+        return screenshot;
+    }
 }

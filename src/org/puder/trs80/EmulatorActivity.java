@@ -66,6 +66,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private static final int   MENU_OPTION_SOUND_OFF = 4;
 
     private Thread             cpuThread;
+    private RenderThread       renderThread;
     private TextView           logView;
     private int                orientation;
     private MenuItem           muteMenuItem;
@@ -168,6 +169,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         keyboardManager = new KeyboardManager();
         TRS80Application.setKeyboardManager(keyboardManager);
         XTRS.flushAudioQueue();
+
+        startRenderThread();
         initView();
 
         orientationManager = new OrientationChanged(this);
@@ -184,16 +187,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             startAccelerometer();
         }
-        cpuThread = new Thread(new Runnable() {
 
-            @Override
-            public void run() {
-                XTRS.run();
-            }
-        });
-        XTRS.setRunning(true);
-        cpuThread.setPriority(Thread.MAX_PRIORITY);
-        cpuThread.start();
+        startCPUThread();
     }
 
     @Override
@@ -204,15 +199,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
         }
-        boolean retry = true;
-        XTRS.setRunning(false);
-        while (retry) {
-            try {
-                cpuThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-            }
-        }
+        stopCPUThread();
         XTRS.closeAudio();
         XTRS.flushAudioQueue();
     }
@@ -221,16 +208,23 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     public void onDestroy() {
         super.onDestroy();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        stopRenderThread();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE, this.getString(R.string.menu_pause))
-                .setIcon(R.drawable.pause_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE, this.getString(R.string.menu_rewind))
-                .setIcon(R.drawable.rewind_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
-        MenuItemCompat.setShowAsAction(menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE, this.getString(R.string.menu_reset))
-                .setIcon(R.drawable.reset_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE,
+                        this.getString(R.string.menu_pause)).setIcon(R.drawable.pause_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE,
+                        this.getString(R.string.menu_rewind)).setIcon(R.drawable.rewind_icon),
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE,
+                        this.getString(R.string.menu_reset)).setIcon(R.drawable.reset_icon),
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             XTRS.setSoundMuted(true);
@@ -293,6 +287,54 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         keyboardManager.allCursorKeysUp();
         keyboardManager.unpressKeySpace();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    private void startRenderThread() {
+        renderThread = new RenderThread();
+        renderThread.setRunning(true);
+        renderThread.start();
+        XTRS.setRenderer(renderThread);
+    }
+
+    private void stopRenderThread() {
+        boolean retry = true;
+        XTRS.setRenderer(null);
+        renderThread.setRunning(false);
+        renderThread.interrupt();
+        while (retry) {
+            try {
+                renderThread.join();
+                retry = false;
+            } catch (InterruptedException e) {
+            }
+        }
+        renderThread = null;
+    }
+
+    private void startCPUThread() {
+        cpuThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                XTRS.run();
+            }
+        });
+        XTRS.setRunning(true);
+        cpuThread.setPriority(Thread.MAX_PRIORITY);
+        cpuThread.start();
+    }
+
+    private void stopCPUThread() {
+        boolean retry = true;
+        XTRS.setRunning(false);
+        while (retry) {
+            try {
+                cpuThread.join();
+                retry = false;
+            } catch (InterruptedException e) {
+            }
+        }
+        cpuThread = null;
     }
 
     private void startAccelerometer() {
@@ -445,8 +487,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     }
 
     private void takeScreenshot() {
-        Screen screen = (Screen) findViewById(R.id.screen);
-        TRS80Application.setScreenshot(screen.takeScreenshot());
+        TRS80Application.setScreenshot(renderThread.takeScreenshot());
     }
 
     private void updateMuteSoundIcons() {
