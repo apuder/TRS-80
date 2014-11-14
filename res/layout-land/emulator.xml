@@ -8,9 +8,18 @@
 
     <org.puder.trs80.Screen
         android:id="@+id/screen"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal" />
+
+    <ImageView
+        android:id="@+id/cast_icon"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/cast_icon"/>
 
     <TextView
         android:id="@+id/log"

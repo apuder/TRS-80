@@ -17,6 +17,7 @@
 package org.puder.trs80;
 
 import org.acra.ACRA;
+import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
@@ -52,6 +53,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -359,6 +361,15 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         top.setOnKeyListener(this);
         top.requestFocus();
         logView = (TextView) findViewById(R.id.log);
+
+        if (CastMessageSender.get().isReadyToSend()) {
+            ImageView castIcon = (ImageView) findViewById(R.id.cast_icon);
+            castIcon.setVisibility(View.VISIBLE);
+        } else {
+            Screen screen = (Screen) findViewById(R.id.screen);
+            screen.setVisibility(View.VISIBLE);
+        }
+
         int keyboardType = getKeyboardType();
         if (keyboardType == Configuration.KEYBOARD_EXTERNAL) {
             return;
