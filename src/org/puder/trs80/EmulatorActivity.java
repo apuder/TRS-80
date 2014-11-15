@@ -159,7 +159,8 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         }
 
         orientation = getResources().getConfiguration().orientation;
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                && !CastMessageSender.get().isReadyToSend()) {
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
