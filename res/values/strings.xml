@@ -152,6 +152,8 @@
                         reasons. You can search the Internet for
                         \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk
                         images</a>\'.
+                        A default blank cassette tape is created for each new configuration.
+                        A different file can be mounted as the cassette image file.
                         Different keyboard types can be configured for portrait and landscape
                         orientation. The original keyboard mimics the layout of the TRS-80
                         keyboard. The compact layout is appropriate for smaller screen sizes.
