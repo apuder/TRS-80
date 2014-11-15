@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">TRS-80</string>
-    <string name="chromecast_app_id">2867975C</string>
+    <string name="chromecast_app_id">E0F0F42C</string>
     <string name="start_casting">Start Casting</string>
 
     <string name="crash_toast_text">TRS-80 has crashed!</string>
