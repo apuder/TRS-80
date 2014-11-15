@@ -114,7 +114,6 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
-    cassette_default_sample_rate = 0;
     trs_uart_name = "UART";
     trs_uart_switches = 0;
     trs_kb_bracket(0);
