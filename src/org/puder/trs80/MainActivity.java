@@ -268,6 +268,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
         if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
             if (TRS80Application.hasCrashed()) {
+                crashAlert();
                 finish();
                 return;
             }
@@ -276,6 +277,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
             if (conf == null) {
                 // If the application was killed/crashed in the meantime there
                 // is not configuration.
+                crashAlert();
                 return;
             }
             int id = conf.getId();
@@ -433,6 +435,25 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
     private void showSettings() {
         startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
+    }
+
+    private void crashAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(R.string.alert_dialog_inform_crash);
+        builder.setIcon(R.drawable.warning_icon);
+        builder.setNegativeButton(R.string.alert_dialog_cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void showHelp() {
