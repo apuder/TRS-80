@@ -3,7 +3,6 @@ include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog
 LOCAL_MODULE := xtrs
 LOCAL_CFLAGS := -I$(LOCAL_PATH) -I$(LOCAL_PATH)/SDL -fsigned-char -DDISKDIR='"."' -DANDROID -D__WORDSIZE=32 -DANDROID_JAVA_SCREEN_UPDATE -g
-# -DSETITIMER_FIX
 LOCAL_SRC_FILES := native.c \
 	blit.c \
 	trs_chars.c \

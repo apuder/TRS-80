@@ -19,9 +19,4 @@ void set_expanded_screen_mode(int flag);
 void xlog(const char* msg);
 void not_implemented(const char* msg);
 
-#ifdef SETITIMER_FIX
-#include <time.h>
-extern suseconds_t next_timer;
-#endif
-
 #endif

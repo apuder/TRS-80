@@ -341,14 +341,6 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
             check_for_screen_updates();
 #endif
-#ifdef SETITIMER_FIX
-            struct timeval tv;
-
-            gettimeofday(&tv, NULL);
-            if ((tv.tv_sec*1000000 + tv.tv_usec) >= next_timer) {
-                trs_timer_event(0);
-            }
-#endif
         }
     } else {
         // Got not implemented exception
