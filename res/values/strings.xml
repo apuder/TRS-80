@@ -19,7 +19,8 @@
     <string name="alert_dialog_confirm_delete">Do you want to delete configuration \'%1$s\'?</string>
     <string name="alert_dialog_confirm_stop_emu">Do you want to stop emulation for configuration \'%1$s\'?</string>
     <string name="alert_dialog_inform_crash">The emulator has crashed. It would be very helpful if you could
-                email mobile@puder.org with the name of the TRS-80 app you were trying to run.</string>
+                email <a href="mailto:mobile@puder.org">mobile@puder.org</a> with the name of the TRS-80 app
+                you were trying to run.</string>
 
     <!-- MainActivity -->
     <string name="menu_download">Download</string>

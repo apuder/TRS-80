@@ -103,14 +103,8 @@ public class EditConfigurationActivity extends ActionBarActivity {
     }
 
     private void doHelp() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.help_title_edit_configuration);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.help_edit_configuration, null, false);
-        TextView t = (TextView) view.findViewById(R.id.help_text);
-        t.setMovementMethod(LinkMovementMethod.getInstance());
-        builder.setView(view);
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
+                R.string.help_title_edit_configuration, -1, R.string.help_edit_configuration);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override

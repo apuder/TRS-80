@@ -427,19 +427,19 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     }
 
     private void showKeyboardHint(int keyboardType) {
-        int layoutId = -1;
+        int messageId = -1;
         String key = null;
         switch (keyboardType) {
         case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
-            layoutId = R.layout.hint_keyboard_joystick;
+            messageId = R.string.hint_keyboard_joystick;
             key = "conf_hint_keyb_joystick_shown";
             break;
         case Configuration.KEYBOARD_TILT:
-            layoutId = R.layout.hint_keyboard_tilt;
+            messageId = R.string.hint_keyboard_tilt;
             key = "conf_hint_keyb_tilt_shown";
             break;
         }
-        if (layoutId == -1) {
+        if (messageId == -1) {
             return;
         }
         SharedPreferences sharedPrefs = this.getSharedPreferences(
@@ -453,10 +453,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.hint_title);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(layoutId, null, false);
-        builder.setView(view);
+        builder.setMessage(messageId);
         builder.setPositiveButton(R.string.hint_ok, new DialogInterface.OnClickListener() {
 
             @Override

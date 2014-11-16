@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
-import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -412,14 +411,8 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     }
 
     private void showError(int err) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.initialization_error, null, false);
-        TextView t = (TextView) view.findViewById(R.id.error_text);
-        t.setText(this.getString(R.string.error_init, err));
-        builder.setView(view);
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
+                -1, this.getString(R.string.error_init, err));
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
@@ -438,44 +431,32 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     }
 
     private void crashAlert() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
-        builder.setMessage(R.string.alert_dialog_inform_crash);
-        builder.setIcon(R.drawable.warning_icon);
-        builder.setNegativeButton(R.string.alert_dialog_cancel,
-                new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
+                R.drawable.warning_icon, R.string.alert_dialog_inform_crash);
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
 
-                });
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
     private void showHelp() {
-        int titleId = R.string.help_title_configurations;
-        int layoutId = R.layout.help_configurations;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(titleId);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(layoutId, null, false);
-        TextView t = (TextView) view.findViewById(R.id.help_text);
-        t.setMovementMethod(LinkMovementMethod.getInstance());
-        builder.setView(view);
-        builder.setPositiveButton(R.string.alert_dialog_cancel,
-                new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
+                R.string.help_title_configurations, -1, R.string.help_configurations);
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
 
-                });
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
