@@ -52,10 +52,6 @@ static jmp_buf ex_buf;
 
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
 unsigned char trs_screen[2048];
-#ifdef ANDROID_BATCHED_SCREEN_UPDATE
-int instructionsSinceLastScreenAccess;
-int screenWasUpdated;
-#endif
 static int instructionsSinceLastScreenUpdate;
 #endif
 
@@ -161,12 +157,7 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_disk_init(1);
     z80_state.pc.word = entryAddr;
 #ifdef ANDROID_JAVA_SCREEN_UPDATE
-#ifdef ANDROID_BATCHED_SCREEN_UPDATE
-    instructionsSinceLastScreenAccess = 0;
-    screenWasUpdated = 0;
-#else
     instructionsSinceLastScreenUpdate = 0;
-#endif
 #endif
 }
 
@@ -196,26 +187,10 @@ static int trigger_screen_update() {
  * of Z80 instructions, irrespective whether the screen was updated or not.
  */
 static void check_for_screen_updates() {
-#ifdef ANDROID_BATCHED_SCREEN_UPDATE
-    instructionsSinceLastScreenAccess++;
-    if ((instructionsSinceLastScreenAccess % SCREEN_FORCED_UPDATE_INTERVAL) == 0) {
-        if (trigger_screen_update()) {
-            screenWasUpdated = 0;
-        }
-    }
-    if (instructionsSinceLastScreenAccess >= SCREEN_UPDATE_THRESHOLD) {
-        if (screenWasUpdated) {
-            if (trigger_screen_update()) {
-                screenWasUpdated = 0;
-            }
-        }
-    }
-#else
     if (instructionsSinceLastScreenUpdate++ > SCREEN_UPDATE_THRESHOLD) {
         instructionsSinceLastScreenUpdate = 0;
         trigger_screen_update();
     }
-#endif
 }
 #endif
 
