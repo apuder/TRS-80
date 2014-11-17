@@ -212,6 +212,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         super.onDestroy();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         stopRenderThread();
+        XTRS.setEmulatorActivity(null);
     }
 
     @Override
@@ -295,6 +296,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private void startRenderThread() {
         renderThread = new RenderThread();
         renderThread.setRunning(true);
+        renderThread.setPriority(Thread.MAX_PRIORITY);
         renderThread.start();
         XTRS.setRenderer(renderThread);
     }

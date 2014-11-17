@@ -135,7 +135,7 @@ int trs_charset4 = 8;
 int trs_emu_mouse = FALSE;
 
 /* Private data */
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
+#ifdef ANDROID
 extern
 #else
 static
@@ -1163,7 +1163,7 @@ void trs_screen_init()
     top_margin = border_width;
   }
 
-#ifndef ANDROID_JAVA_SCREEN_UPDATE
+#ifndef ANDROID
   if (fullscreen) {
      screen = SDL_SetVideoMode(OrigWidth, OrigHeight, 0, 
                                SDL_ANYFORMAT | SDL_FULLSCREEN);
@@ -2531,8 +2531,9 @@ void trs_hard_led(int drive, int on_off)
 
 void trs_screen_write_char(int position, int char_index)
 {
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
+#ifdef ANDROID
   trs_screen[position] = char_index;
+  trigger_screen_update();
 #else
   int row,col,destx,desty;
   int plane;
@@ -2781,7 +2782,9 @@ void trs_screen_scroll()
   for (i = row_chars; i < screen_chars; i++)
     trs_screen[i-row_chars] = trs_screen[i];
 
-#ifndef ANDROID_JAVA_SCREEN_UPDATE
+#ifdef ANDROID
+  trigger_screen_update();
+#else
   if (grafyx_enable) {
     if (grafyx_overlay) {
       trs_screen_refresh();

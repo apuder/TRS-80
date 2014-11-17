@@ -38,7 +38,6 @@ public class TRS80Application extends Application {
     private static Bitmap          screenshot;
     private static boolean         hasCrashed = false;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,8 +47,7 @@ public class TRS80Application extends Application {
         RemoteCastScreen.initSingleton(CastMessageSender.get());
         ACRA.init(this);
         HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new
-        ACRAPostSender(ACRAData));
+        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {

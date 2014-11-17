@@ -130,6 +130,9 @@ public class XTRS {
 
     public static void setExpandedScreenMode(boolean flag) {
         TRS80Application.getHardware().setExpandedScreenMode(flag);
+        if (renderer != null) {
+            renderer.forceScreenUpdate();
+        }
     }
 
     public static void xlog(String msg) {

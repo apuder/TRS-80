@@ -50,10 +50,8 @@ static jboolean audioBufferIsCopy;
 
 static jmp_buf ex_buf;
 
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
 unsigned char trs_screen[2048];
-static int instructionsSinceLastScreenUpdate;
-#endif
+static int screenUpdateRequired = 0;
 
 
 extern char *program_name;
@@ -156,13 +154,10 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
 
     trs_disk_init(1);
     z80_state.pc.word = entryAddr;
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
-    instructionsSinceLastScreenUpdate = 0;
-#endif
 }
 
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
-static int trigger_screen_update() {
+int trigger_screen_update() {
+    screenUpdateRequired = 1;
     JNIEnv *env = getEnv();
     jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
             isRenderingMethodId);
@@ -174,25 +169,9 @@ static int trigger_screen_update() {
         (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
     }
     (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
+    screenUpdateRequired = 0;
     return 1;
 }
-
-/*
- * This function gets called after each Z80 instruction. The original idea
- * for screen updates was to wait until a certain number of Z80 instructions
- * had passed during which no screen updates occurred (SCREEN_UPDATE_THRESHOLD).
- * This worked reasonably well when only few screen updates happened, but it
- * didn't work so well for arcade games that frequently updated the screen.
- * For that reason the screen update is now triggered after a certain number
- * of Z80 instructions, irrespective whether the screen was updated or not.
- */
-static void check_for_screen_updates() {
-    if (instructionsSinceLastScreenUpdate++ > SCREEN_UPDATE_THRESHOLD) {
-        instructionsSinceLastScreenUpdate = 0;
-        trigger_screen_update();
-    }
-}
-#endif
 
 void init_audio(int rate, int channels, int encoding, int bufSize) {
     JNIEnv *env = getEnv();
@@ -336,11 +315,12 @@ void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, 
 
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     if (!setjmp(ex_buf)) {
+        screenUpdateRequired = 1;
         while (isRunning) {
             z80_run(0);
-#ifdef ANDROID_JAVA_SCREEN_UPDATE
-            check_for_screen_updates();
-#endif
+            if (screenUpdateRequired) {
+                trigger_screen_update();
+            }
         }
     } else {
         // Got not implemented exception

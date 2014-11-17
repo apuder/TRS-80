@@ -16,32 +16,42 @@
 
 package org.puder.trs80;
 
+import java.util.Arrays;
+
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.cast.RemoteDisplayChannel;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.util.Log;
+import android.graphics.Rect;
 import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    private int           model;
+    private int             model;
 
-    private int           trsScreenCols;
-    private int           trsScreenRows;
-    private int           trsCharWidth;
-    private int           trsCharHeight;
+    private int             trsScreenCols;
+    private int             trsScreenRows;
+    private int             trsCharWidth;
+    private int             trsCharHeight;
 
-    private Bitmap        font[];
+    private int             dirtyRectTop;
+    private int             dirtyRectLeft;
+    private int             dirtyRectBottom;
+    private int             dirtyRectRight;
+    final private Rect      clipRect;
+    final private Rect      adjustedClipRect;
 
-    private boolean       run         = false;
-    private boolean       isRendering = false;
-    private SurfaceHolder surfaceHolder;
-    private byte[]        screenBuffer;
+    final private Bitmap    font[];
 
-    private char[]        screenCharBuffer;
+    private boolean         run         = false;
+    private boolean         isRendering = true;
+    protected SurfaceHolder surfaceHolder;
+    private byte[]          screenBuffer;
+    private short[]         lastScreenBuffer;
+
+    private char[]          screenCharBuffer;
 
     public RenderThread() {
         surfaceHolder = null;
@@ -54,10 +64,15 @@ public class RenderThread extends Thread {
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
         screenCharBuffer = new char[trsScreenCols * trsScreenRows];
+        lastScreenBuffer = new short[trsScreenCols * trsScreenRows];
+        Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
+        clipRect = new Rect();
+        adjustedClipRect = new Rect();
     }
 
-    public void setSurfaceHolder(SurfaceHolder holder) {
+    public synchronized void setSurfaceHolder(SurfaceHolder holder) {
         surfaceHolder = holder;
+        forceScreenUpdate();
     }
 
     public void setRunning(boolean run) {
@@ -79,26 +94,65 @@ public class RenderThread extends Thread {
             }
             isRendering = true;
 
+            boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+
             if (surfaceHolder != null) {
-                Canvas c = surfaceHolder.lockCanvas();
-                if (c == null) {
-                    Log.d("Z80", "Canvas is null");
+                int d = expandedMode ? 2 : 1;
+                computeDirtyRect(d);
+                if (dirtyRectBottom == -1) {
+                    // Nothing to update
                     continue;
                 }
-                renderScreen(c, null);
-                surfaceHolder.unlockCanvasAndPost(c);
+                /*
+                 * The Android documentation does not mention that lockCanvas()
+                 * may adjust the clip rect due to double buffering. Since the
+                 * dirty rect might differ from the one that was computed in
+                 * computeDirtyRect() we simply invalidate the whole TRS screen
+                 * when this happens.
+                 */
+                Canvas canvas = surfaceHolder.lockCanvas(adjustedClipRect);
+                if (canvas == null) {
+                    continue;
+                }
+                if (adjustedClipRect.left != clipRect.left || adjustedClipRect.top != clipRect.top
+                        || adjustedClipRect.right != clipRect.right
+                        || adjustedClipRect.bottom != clipRect.bottom) {
+                    dirtyRectLeft = dirtyRectTop = 0;
+                    dirtyRectRight = trsScreenCols / d - 1;
+                    dirtyRectBottom = trsScreenRows - 1;
+                }
+                renderScreenToCanvas(canvas, expandedMode);
+                surfaceHolder.unlockCanvasAndPost(canvas);
             } else {
-                renderScreen(null, RemoteCastScreen.get());
+                renderScreenToCast(RemoteCastScreen.get(), expandedMode);
             }
         }
     }
 
-    private void renderScreen(Canvas canvas, RemoteDisplayChannel remoteDisplay) {
-        boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
-        int d = expandedMode ? 2 : 1;
-        if (canvas != null && expandedMode) {
+    private void renderScreenToCanvas(Canvas canvas, boolean expandedMode) {
+        if (expandedMode) {
             canvas.scale(2, 1);
         }
+        int d = expandedMode ? 2 : 1;
+
+        for (int row = dirtyRectTop; row <= dirtyRectBottom; row++) {
+            for (int col = dirtyRectLeft; col <= dirtyRectRight; col++) {
+                int i = row * trsScreenCols + col * d;
+                int ch = screenBuffer[i] & 0xff;
+                // Emulate Radio Shack lowercase mod (for Model 1)
+                if (this.model == Hardware.MODEL1 && ch < 0x20) {
+                    ch += 0x40;
+                }
+                int startx = trsCharWidth * col;
+                int starty = trsCharHeight * row;
+                canvas.drawBitmap(font[ch], startx, starty, null);
+            }
+        }
+
+    }
+
+    private void renderScreenToCast(RemoteDisplayChannel remoteDisplay, boolean expandedMode) {
+        int d = expandedMode ? 2 : 1;
 
         int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
@@ -109,22 +163,53 @@ public class RenderThread extends Thread {
                     ch += 0x40;
                 }
 
-                if (canvas != null) {
-                    int startx = trsCharWidth * col;
-                    int starty = trsCharHeight * row;
-                    canvas.drawBitmap(font[ch], startx, starty, null);
-                }
                 // TODO: Choose encoding based on current model.
                 screenCharBuffer[i] = CharMapping.m3toUnicode[ch];
                 i += d;
             }
         }
-        if (remoteDisplay != null) {
-            remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
+        remoteDisplay.sendScreenBuffer(expandedMode, String.valueOf(screenCharBuffer));
+    }
+
+    private void computeDirtyRect(int d) {
+        dirtyRectTop = dirtyRectLeft = Integer.MAX_VALUE;
+        dirtyRectBottom = dirtyRectRight = -1;
+        int i = 0;
+        for (int row = 0; row < trsScreenRows; row++) {
+            for (int col = 0; col < trsScreenCols / d; col++) {
+                if (lastScreenBuffer[i] != screenBuffer[i]) {
+                    if (dirtyRectTop > row) {
+                        dirtyRectTop = row;
+                    }
+                    if (dirtyRectBottom < row) {
+                        dirtyRectBottom = row;
+                    }
+                    if (dirtyRectLeft > col) {
+                        dirtyRectLeft = col;
+                    }
+                    if (dirtyRectRight < col) {
+                        dirtyRectRight = col;
+                    }
+                    lastScreenBuffer[i] = screenBuffer[i];
+                }
+                i += d;
+            }
         }
+        if (dirtyRectBottom == -1) {
+            return;
+        }
+        clipRect.left = adjustedClipRect.left = trsCharWidth * dirtyRectLeft * d;
+        clipRect.right = adjustedClipRect.right = trsCharWidth * (dirtyRectRight + 1) * d;
+        clipRect.top = adjustedClipRect.top = trsCharHeight * dirtyRectTop;
+        clipRect.bottom = adjustedClipRect.bottom = trsCharHeight * (dirtyRectBottom + 1);
     }
 
     public synchronized void triggerScreenUpdate() {
+        this.notify();
+    }
+
+    public synchronized void forceScreenUpdate() {
+        Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
         this.notify();
     }
 
@@ -132,9 +217,13 @@ public class RenderThread extends Thread {
         Hardware h = TRS80Application.getHardware();
         Bitmap screenshot = Bitmap.createBitmap(h.getScreenWidth(), h.getScreenHeight(),
                 Config.RGB_565);
+        boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+        int d = expandedMode ? 2 : 1;
+        dirtyRectLeft = dirtyRectTop = 0;
+        dirtyRectRight = trsScreenCols / d - 1;
+        dirtyRectBottom = trsScreenRows - 1;
         Canvas c = new Canvas(screenshot);
-        c.drawColor(TRS80Application.getCurrentConfiguration().getScreenColorAsRGB());
-        renderScreen(c, null);
+        renderScreenToCanvas(c, expandedMode);
         return screenshot;
     }
 }
