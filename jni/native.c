@@ -30,7 +30,7 @@ int isRunning = 0;
 
 static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
-static jmethodID isRenderingMethodId;
+static jmethodID rendererIsReadyMethodId;
 static jmethodID updateScreenMethodId;
 static jmethodID initAudioMethodId;
 static jmethodID closeAudioMethodId;
@@ -156,13 +156,13 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     z80_state.pc.word = entryAddr;
 }
 
-int trigger_screen_update() {
+void trigger_screen_update() {
     screenUpdateRequired = 1;
     JNIEnv *env = getEnv();
-    jboolean isRendering = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
-            isRenderingMethodId);
-    if (isRendering) {
-        return 0;
+    jboolean isReady = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
+            rendererIsReadyMethodId);
+    if (!isReady) {
+        return;
     }
     memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
     if (screenBufferIsCopy) {
@@ -170,7 +170,6 @@ int trigger_screen_update() {
     }
     (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
     screenUpdateRequired = 0;
-    return 1;
 }
 
 void init_audio(int rate, int channels, int encoding, int bufSize) {
@@ -198,9 +197,9 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
         clazzXTRS = (*env)->NewGlobalRef(env, cls);
     }
 
-    isRenderingMethodId = (*env)->GetStaticMethodID(env, cls, "isRendering",
+    rendererIsReadyMethodId = (*env)->GetStaticMethodID(env, cls, "rendererIsReady",
             "()Z");
-    if (isRenderingMethodId == 0) {
+    if (rendererIsReadyMethodId == 0) {
         return ERR_GET_METHOD_IS_RENDERING;
     }
 

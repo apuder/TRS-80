@@ -13,7 +13,7 @@ void close_audio();
 void pause_audio(int pause_on);
 void flush_audio_queue();
 void set_expanded_screen_mode(int flag);
-int trigger_screen_update();
+void trigger_screen_update();
 
 void xlog(const char* msg);
 void not_implemented(const char* msg);

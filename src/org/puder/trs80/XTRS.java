@@ -16,7 +16,6 @@
 
 package org.puder.trs80;
 
-import org.acra.ACRA;
 
 /**
  * Class XTRS acts as a gateway to the native layer. The native methods declared
@@ -86,8 +85,8 @@ public class XTRS {
         return soundMuted;
     }
 
-    public static boolean isRendering() {
-        return (renderer == null) ? true : renderer.isRendering();
+    public static boolean rendererIsReady() {
+        return (renderer == null) ? false : !renderer.isRendering();
     }
 
     public static void updateScreen() {
