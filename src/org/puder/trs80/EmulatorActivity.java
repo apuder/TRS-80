@@ -71,6 +71,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private RenderThread       renderThread;
     private TextView           logView;
     private int                orientation;
+    private boolean            soundMuted            = false;
     private MenuItem           muteMenuItem;
     private MenuItem           unmuteMenuItem;
     private SensorManager      sensorManager         = null;
@@ -171,7 +172,6 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         hardware.computeFontDimensions(getWindow());
         keyboardManager = new KeyboardManager();
         TRS80Application.setKeyboardManager(keyboardManager);
-        XTRS.flushAudioQueue();
 
         startRenderThread();
         initView();
@@ -203,8 +203,6 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
             stopAccelerometer();
         }
         stopCPUThread();
-        XTRS.closeAudio();
-        XTRS.flushAudioQueue();
     }
 
     @Override
@@ -231,7 +229,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
                 MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
-            XTRS.setSoundMuted(true);
+            setSoundMuted(true);
         } else {
             muteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_OFF, Menu.NONE,
                     this.getString(R.string.menu_sound_off));
@@ -260,13 +258,11 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
             XTRS.reset();
             return true;
         case MENU_OPTION_SOUND_ON:
-            XTRS.setSoundMuted(true);
-            XTRS.flushAudioQueue();
+            setSoundMuted(true);
             updateMuteSoundIcons();
             return true;
         case MENU_OPTION_SOUND_OFF:
-            XTRS.setSoundMuted(false);
-            XTRS.flushAudioQueue();
+            setSoundMuted(false);
             updateMuteSoundIcons();
             return true;
         }
@@ -497,12 +493,17 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         finish();
     }
 
+    private void setSoundMuted(boolean muted) {
+        this.soundMuted = muted;
+        XTRS.setSoundMuted(muted);
+    }
+
     private void takeScreenshot() {
         TRS80Application.setScreenshot(renderThread.takeScreenshot());
     }
 
     private void updateMuteSoundIcons() {
-        if (XTRS.isSoundMuted()) {
+        if (soundMuted) {
             muteMenuItem.setVisible(true);
             unmuteMenuItem.setVisible(false);
         } else {

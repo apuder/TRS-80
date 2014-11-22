@@ -497,7 +497,6 @@ static void trs_sdl_sound_update(void *userdata, Uint8 * stream, int len)
 	}
 	sound_ring_count -= num_to_read;
   }
-
 }
 
 static int

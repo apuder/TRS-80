@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <android/log.h>
 #include "atrs.h"
+#include "opensl.h"
 
 #define DEBUG_TAG "TRS80"
 
@@ -276,13 +277,15 @@ int SDLCALL SDL_ShowCursor(int toggle)
 
 /* Audio */
 
+int sdl_audio_muted = 0;
+
 static SDL_AudioSpec audioSpec;
 static pthread_mutex_t mutex_snd = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mutex_engine = PTHREAD_MUTEX_INITIALIZER;
 
-
-void fillBuffer(Uint8* stream, int len) {
+static void fillBuffer(char *buffer, int buffer_size) {
     pthread_mutex_lock(&mutex_snd);
-    audioSpec.callback(audioSpec.userdata, stream, len);
+    audioSpec.callback(audioSpec.userdata, buffer, buffer_size);
     pthread_mutex_unlock(&mutex_snd);
 }
 
@@ -290,20 +293,29 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
     memcpy(obtained, desired, sizeof(SDL_AudioSpec));
     obtained->format = AUDIO_S16;
+    obtained->channels = 1;
     obtained->silence = 0;
     memcpy(&audioSpec, obtained, sizeof(SDL_AudioSpec));
-    init_audio(obtained->freq, obtained->channels, obtained->format, obtained->samples);
-    return 0;
+    if (sdl_audio_muted) {
+        return 0;
+    }
+    pthread_mutex_lock(&mutex_engine);
+    int result = OpenSLWrap_Init(fillBuffer) == 1 ? 0 : -1;
+    pthread_mutex_unlock(&mutex_engine);
+    return result;
 }
 
 void SDL_CloseAudio(void)
 {
-    close_audio();
+    // Can be called from different threads
+    pthread_mutex_lock(&mutex_engine);
+    OpenSLWrap_Shutdown();
+    pthread_mutex_unlock(&mutex_engine);
 }
 
 void SDL_PauseAudio(int pause_on)
 {
-    pause_audio(pause_on);
+    // Do nothing
 }
 
 void SDL_LockAudio(void)

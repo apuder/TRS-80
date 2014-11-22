@@ -12,6 +12,7 @@
 #include <SDL/SDL.h>
 
 #include "atrs.h"
+#include "opensl.h"
 
 #define DEBUG_TAG "Z80"
 
@@ -19,11 +20,8 @@
 #define ERR_GET_JVM -1
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
-#define ERR_GET_METHOD_INIT_AUDIO -5
-#define ERR_GET_METHOD_CLOSE_AUDIO -6
-#define ERR_GET_METHOD_PAUSE_AUDIO -7
-#define ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE -8
-#define ERR_GET_METHOD_XLOG -9
+#define ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE -4
+#define ERR_GET_METHOD_XLOG -5
 #define ERR_GET_METHOD_NOT_IMPLEMENTED -10
 
 int isRunning = 0;
@@ -32,9 +30,6 @@ static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
 static jmethodID rendererIsReadyMethodId;
 static jmethodID updateScreenMethodId;
-static jmethodID initAudioMethodId;
-static jmethodID closeAudioMethodId;
-static jmethodID pauseAudioMethodId;
 static jmethodID setExpandedScreenModeMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
@@ -42,11 +37,6 @@ static jmethodID notImplementedMethodId;
 static jbyteArray screenArray = NULL;
 static jbyte* screenBuffer;
 static jboolean screenBufferIsCopy;
-
-static jbyteArray audioArray = NULL;
-static jint audioBufferSize;
-static jbyte* audioBuffer;
-static jboolean audioBufferIsCopy;
 
 static jmp_buf ex_buf;
 
@@ -172,21 +162,6 @@ void trigger_screen_update() {
     screenUpdateRequired = 0;
 }
 
-void init_audio(int rate, int channels, int encoding, int bufSize) {
-    JNIEnv *env = getEnv();
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, initAudioMethodId, rate, channels, encoding, bufSize);
-}
-
-void close_audio() {
-    JNIEnv *env = getEnv();
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, closeAudioMethodId);
-}
-
-void pause_audio(int pause_on) {
-    JNIEnv *env = getEnv();
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, pauseAudioMethodId, pause_on);
-}
-
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
@@ -207,21 +182,6 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
             "()V");
     if (updateScreenMethodId == 0) {
         return ERR_GET_METHOD_UPDATE_SCREEN;
-    }
-
-    initAudioMethodId = (*env)->GetStaticMethodID(env, cls, "initAudio", "(IIII)V");
-    if (initAudioMethodId == 0) {
-        return ERR_GET_METHOD_INIT_AUDIO;
-    }
-
-    closeAudioMethodId = (*env)->GetStaticMethodID(env, cls, "closeAudio", "()V");
-    if (closeAudioMethodId == 0) {
-        return ERR_GET_METHOD_CLOSE_AUDIO;
-    }
-
-    pauseAudioMethodId = (*env)->GetStaticMethodID(env, cls, "pauseAudio", "(I)V");
-    if (pauseAudioMethodId == 0) {
-        return ERR_GET_METHOD_PAUSE_AUDIO;
     }
 
     setExpandedScreenModeMethodId = (*env)->GetStaticMethodID(env, cls, "setExpandedScreenMode", "(Z)V");
@@ -285,28 +245,6 @@ void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileNa
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 
-void Java_org_puder_trs80_XTRS_setAudioBuffer(JNIEnv* env, jclass cls, jbyteArray buffer) {
-    if (audioArray != NULL) {
-        (*env)->ReleaseByteArrayElements(env, audioArray, audioBuffer, JNI_ABORT);
-        (*env)->DeleteGlobalRef(env, audioArray);
-    }
-    audioArray = (*env)->NewGlobalRef(env, buffer);
-    audioBuffer = (*env)->GetByteArrayElements(env, audioArray, &audioBufferIsCopy);
-    audioBufferSize = (*env)->GetArrayLength(env, buffer);
-}
-
-void Java_org_puder_trs80_XTRS_flushAudioQueue(JNIEnv* env, jclass cls) {
-    flush_audio_queue();
-}
-
-extern void fillBuffer(Uint8* stream, int len);
-void Java_org_puder_trs80_XTRS_fillAudioBuffer(JNIEnv* env, jclass cls) {
-    fillBuffer(audioBuffer, audioBufferSize);
-    if (audioBufferIsCopy) {
-        (*env)->ReleaseByteArrayElements(env, audioArray, audioBuffer, JNI_COMMIT);
-    }
-}
-
 extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
 void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, jint sym, jint key) {
     add_key_event(event, sym, key);
@@ -324,6 +262,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     } else {
         // Got not implemented exception
     }
+    OpenSLWrap_Shutdown();
 }
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
@@ -332,6 +271,14 @@ void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
 
 void Java_org_puder_trs80_XTRS_rewindCassette(JNIEnv* env, jclass cls) {
     trs_set_cassette_position(0);
+}
+
+void Java_org_puder_trs80_XTRS_setSoundMuted(JNIEnv* e, jclass clazz, jboolean muted) {
+    sdl_audio_muted = muted;
+    if (muted) {
+        SDL_CloseAudio();
+    }
+    flush_audio_queue();
 }
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
