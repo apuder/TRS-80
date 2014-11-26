@@ -34,14 +34,12 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements OnItemClickListener,
@@ -71,6 +69,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     private ConfigurationListViewAdapter configurationListViewAdapter;
     private SharedPreferences            sharedPrefs;
     private MenuItem                     downloadMenuItem           = null;
+    private AlertDialog                  dialog                     = null;
 
     private CastMessageSender            castMessageSender;
 
@@ -110,6 +109,10 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
     @Override
     protected void onPause() {
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
         if (isFinishing()) {
             castMessageSender.stop();
             // TODO: Enable once fully supported.
@@ -307,8 +310,9 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
                 conf.delete();
                 updateView();
             }
@@ -318,13 +322,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                 new DialogInterface.OnClickListener() {
 
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(DialogInterface d, int which) {
                         dialog.dismiss();
+                        dialog = null;
                     }
 
                 });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 
@@ -337,8 +342,9 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
                 EmulatorState.deleteSavedState(conf.getId());
                 updateView();
             }
@@ -348,13 +354,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                 new DialogInterface.OnClickListener() {
 
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(DialogInterface d, int which) {
                         dialog.dismiss();
+                        dialog = null;
                     }
 
                 });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 
@@ -416,13 +423,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 
@@ -436,13 +444,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 
@@ -452,13 +461,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 

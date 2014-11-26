@@ -80,6 +80,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private int                rotation;
     private OrientationChanged orientationManager;
     private Handler            handler               = new Handler();
+    private AlertDialog        dialog                = null;
 
     class OrientationChanged extends OrientationEventListener {
 
@@ -197,6 +198,10 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onPause() {
         super.onPause();
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
         RemoteCastScreen.get().endSession();
         orientationManager.disable();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
@@ -455,13 +460,14 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         builder.setPositiveButton(R.string.hint_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 

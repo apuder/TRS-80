@@ -17,17 +17,13 @@
 package org.puder.trs80;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.text.method.LinkMovementMethod;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 public class EditConfigurationActivity extends ActionBarActivity {
 
@@ -48,6 +44,8 @@ public class EditConfigurationActivity extends ActionBarActivity {
     private static final int   MENU_OPTION_CANCEL      = 1;
     private static final int   MENU_OPTION_HELP        = 2;
 
+    private AlertDialog        dialog                  = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +53,15 @@ public class EditConfigurationActivity extends ActionBarActivity {
         setContentView(new View(this));
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new EditConfigurationFragment()).commit();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
     }
 
     @Override
@@ -108,13 +115,14 @@ public class EditConfigurationActivity extends ActionBarActivity {
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 }

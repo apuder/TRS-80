@@ -24,12 +24,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.text.method.LinkMovementMethod;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 public class SettingsActivity extends ActionBarActivity {
 
@@ -45,6 +42,8 @@ public class SettingsActivity extends ActionBarActivity {
     public static final String CONF_ROM_MODEL4  = "conf_rom_model4";
     public static final String CONF_ROM_MODEL4P = "conf_rom_model4p";
 
+    private AlertDialog        dialog           = null;
+
     public static String getSetting(String key) {
         SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
                 SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -58,6 +57,15 @@ public class SettingsActivity extends ActionBarActivity {
         setContentView(new View(this));
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment()).commit();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
     }
 
     @Override
@@ -105,13 +113,14 @@ public class SettingsActivity extends ActionBarActivity {
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
             }
 
         });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 }

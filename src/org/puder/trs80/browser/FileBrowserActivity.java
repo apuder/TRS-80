@@ -49,6 +49,7 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
     private TextView               pathLabel;
     private String                 currentPath;
     private BrowserListViewAdapter fileListAdapter;
+    private AlertDialog            dialog             = null;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -61,6 +62,15 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
         listView.setAdapter(fileListAdapter);
         listView.setOnItemClickListener(this);
         getFiles(Environment.getExternalStorageDirectory().getPath());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
     }
 
     @Override
@@ -119,8 +129,9 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface d, int which) {
                 dialog.dismiss();
+                dialog = null;
                 Intent i = getIntent();
                 i.putExtra("PATH", (String) null);
                 setResult(RESULT_OK, i);
@@ -132,13 +143,14 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
                 new DialogInterface.OnClickListener() {
 
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(DialogInterface d, int which) {
                         dialog.dismiss();
+                        dialog = null;
                     }
 
                 });
 
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     }
 
