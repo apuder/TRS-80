@@ -104,8 +104,12 @@ public class EmulatorState {
         File dir = new File(dirName);
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                new File(dir, children[i]).delete();
+            // children should not be null, but we got an ACRA report saying
+            // otherwise
+            if (children != null) {
+                for (int i = 0; i < children.length; i++) {
+                    new File(dir, children[i]).delete();
+                }
             }
             dir.delete();
         }
