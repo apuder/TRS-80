@@ -274,11 +274,12 @@ void Java_org_puder_trs80_XTRS_rewindCassette(JNIEnv* env, jclass cls) {
 }
 
 void Java_org_puder_trs80_XTRS_setSoundMuted(JNIEnv* e, jclass clazz, jboolean muted) {
-    sdl_audio_muted = muted;
     if (muted) {
+        sdl_audio_muted = 1;
         SDL_CloseAudio();
     }
     flush_audio_queue();
+    sdl_audio_muted = muted;
 }
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
