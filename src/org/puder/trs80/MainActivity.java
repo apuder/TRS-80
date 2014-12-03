@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     public void onResume() {
         super.onResume();
         updateView();
-        //castMessageSender.start();
+        castMessageSender.start();
         // TODO: Enable once fully supported.
         // AudioHttpServer.get().start();
 
@@ -114,7 +114,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
             dialog = null;
         }
         if (isFinishing()) {
-            //castMessageSender.stop();
+            castMessageSender.stop();
             // TODO: Enable once fully supported.
             // AudioHttpServer.get().stop();
         }
@@ -139,11 +139,11 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        MenuItem mediaRouteItem = menu.findItem(R.id.action_cast_trs80);
-//        MediaRouteButton mediaRouteButton = (MediaRouteButton) MenuItemCompat
-//                .getActionView(mediaRouteItem);
-//        mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
+        getMenuInflater().inflate(R.menu.main, menu);
+        MenuItem mediaRouteItem = menu.findItem(R.id.action_cast_trs80);
+        MediaRouteButton mediaRouteButton = (MediaRouteButton) MenuItemCompat
+                .getActionView(mediaRouteItem);
+        mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
 
         if (!ROMs.hasROMs()) {
             downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD, Menu.NONE,
