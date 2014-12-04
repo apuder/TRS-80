@@ -23,7 +23,7 @@ public class Fonts {
         String fontName = "fonts/DejaVuSansMono.ttf";
         switch (model) {
         case Hardware.MODEL1:
-            fontName = "fonts/AnotherMansTreasureMIA64C2X3Y.ttf";
+            fontName = "fonts/AnotherMansTreasureMIB64C2X3Y.ttf";
             break;
         case Hardware.MODEL3:
             fontName = "fonts/AnotherMansTreasureMIII64C.ttf";
