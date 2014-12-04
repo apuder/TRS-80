@@ -266,6 +266,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 }
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
+    trs_timer_init();
     z80_reset();
 }
 
