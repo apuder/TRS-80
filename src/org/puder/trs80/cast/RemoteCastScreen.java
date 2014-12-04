@@ -54,32 +54,32 @@ public class RemoteCastScreen implements RemoteDisplayChannel {
 
     @Override
     public void startSession() {
-        sendMessage(TYPE_START_SESSION, null);
+        sendMessage(TYPE_START_SESSION, null, false);
     }
 
     @Override
     public void endSession() {
-        sendMessage(TYPE_END_SESSION, null);
+        sendMessage(TYPE_END_SESSION, null, false);
     }
 
     @Override
     public void sendScreenBuffer(boolean expandedMode, String buffer) {
         sendMessage(TYPE_SEND_SCREEN_BUFFER,
-                String.format(Locale.US, SCREEN_BUFFER_FORMAT, expandedMode ? "1" : "0", buffer));
+                String.format(Locale.US, SCREEN_BUFFER_FORMAT, expandedMode ? "1" : "0", buffer), true);
     }
 
     @Override
     public void sendConfiguration(Configuration configuration) {
         String fgColor = colorToWebFormat(configuration.getCharacterColorAsRGB());
         String bgColor = colorToWebFormat(configuration.getScreenColorAsRGB());
-        sendMessage(TYPE_SEND_CONFIGURATION, fgColor + ':' + bgColor);
+        sendMessage(TYPE_SEND_CONFIGURATION, fgColor + ':' + bgColor, false);
     }
 
-    private void sendMessage(int type, Object payload) {
+    private void sendMessage(int type, Object payload, boolean wait) {
         if (!sender.isReadyToSend()) {
             return;
         }
-        this.sender.sendMessage(createMessage(type, payload));
+        this.sender.sendMessage(createMessage(type, payload), wait);
     }
 
     private static String createMessage(int type, Object payload) {

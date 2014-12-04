@@ -18,6 +18,7 @@ package org.puder.trs80.cast;
 
 import java.io.IOException;
 
+import android.content.BroadcastReceiver.PendingResult;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.media.MediaRouteSelector;
@@ -59,7 +60,6 @@ public class CastMessageSender {
 
     private static CastMessageSender      instance;
 
-
     public static void initSingleton(String chromcastAppId, Context context) {
         instance = (new CastMessageSender(context)).init(chromcastAppId);
     }
@@ -97,18 +97,21 @@ public class CastMessageSender {
     }
 
     /** Send the given message to the receiver. */
-    public void sendMessage(String message) {
+    public void sendMessage(String message, boolean wait) {
         if (!readyToSend) {
             Log.w(TAG, "Sender not ready to send, message discarded.");
             return;
         }
-        Cast.CastApi.sendMessage(apiClient, activeChannel.getNamespace(), message);
+        com.google.android.gms.common.api.PendingResult<Status> result = Cast.CastApi.sendMessage(
+                apiClient, activeChannel.getNamespace(), message);
+        if (wait) {
+            result.await();
+        }
     }
 
     public MediaRouteSelector getRouteSelector() {
         return routeSelector;
     }
-
 
     /**
      * Our custom cast channel which we can use to send and receive messages.
@@ -123,7 +126,6 @@ public class CastMessageSender {
             Log.d(TAG, "onMessageReceived: " + message);
         }
     }
-
 
     /**
      * Listens to event from the cast connection such as status changes.
@@ -151,9 +153,7 @@ public class CastMessageSender {
         }
     }
 
-
     private final Cast.Listener castClientListener = new CastClientListener();
-
 
     /**
      * Callback to inform us when the user has selected a cast device and the
@@ -184,7 +184,6 @@ public class CastMessageSender {
             selectedDevice = null;
         }
     }
-
 
     /**
      * Called back when the connection to the cast app either succeeded or
@@ -219,9 +218,7 @@ public class CastMessageSender {
         }
     }
 
-
     private final ResultCallback<Cast.ApplicationConnectionResult> resultCallback = new CastResultCallback();
-
 
     /**
      * Callbacks to inform us about changes in the Play Services connection.
@@ -254,9 +251,7 @@ public class CastMessageSender {
         }
     }
 
-
     private final ConnectionCallbacks connectionCallbacks = new GmsConnectionCallbacks();
-
 
     /**
      * Listener that is called if a connection to Play Services could not be
@@ -286,9 +281,7 @@ public class CastMessageSender {
         }
     }
 
-
     private final OnConnectionFailedListener connectionFailedListener = new GmsConnectionFailedListener();
-
 
     /**
      * Tears down the whole connection stack as cleanly as possible.
