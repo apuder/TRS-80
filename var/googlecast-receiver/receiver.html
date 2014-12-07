@@ -47,25 +47,21 @@ TRS80.setScreenBuffer = function(data) {
 		TRS80.setExpandedMode(expanded);
 	}
 	
-	var d = expanded ? 2 : 1;
-	
-	data = data.substring(2);
-	var preContent = "";
-	for (var i = 0; i < data.length; i += d) {
-		if (i % 64 == 0 && i > 0) {
-			preContent += "\n";
-		}
-		preContent += data[i];
+	var rows = data.substring(2).split('|');
+	for (var i = 0; i < rows.length; i++) {
+	    if (rows[i].length == 0) {
+	        continue;
+	    }
+	    $('#row' + i).text(rows[i]);
 	}
-	$('#screen').text(preContent);
 };
 
 TRS80.setExpandedMode = function(expanded) {
 	TRS80.expandedMode = expanded;
 	if (expanded) {
-	  $('#screen').addClass(TRS80.expandedModeCssClass);
+	  $('.row').addClass(TRS80.expandedModeCssClass);
     } else {
-      $('#screen').removeClass(TRS80.expandedModeCssClass);
+      $('.row').removeClass(TRS80.expandedModeCssClass);
     }
 };
 
@@ -96,8 +92,8 @@ TRS80.loadApp = function() {
 			TRS80.setScreenBuffer(payload);
 		} else if (messageType == TRS80.TYPE_SEND_CONFIGURATION) {
 			var colors = payload.split(':');
-			$('#screen').css('color', colors[0]);
-			$('#screen').css('background-color', colors[1]);
+			$('.row').css('color', colors[0]);
+			$('.row').css('background-color', colors[1]);
 		} else {
 			console.error('Unsupported message type: ' + message);
 			return;
@@ -136,7 +132,7 @@ body {
 	margin:0;
 }
 
-#screen {
+.row {
   color:#FFF;
   background:black;
   text-align: center;
@@ -144,6 +140,7 @@ body {
   font-size:36px;
   display:inline-block;
   border:0;
+  margin:0;
 }
 
 .expandedMode {
@@ -177,6 +174,21 @@ body {
     <img id="splashLogo" src="splash_logo.png" />
     <span id="splashText">Start or resume an emulator on your device...</span>
   </div>
-  <div id="screenWrapper"><pre id="screen"></pre></div>
+  <div id="screenWrapper"><pre id="row0" class="row"></pre>
+                          <pre id="row1" class="row"></pre>
+                          <pre id="row2" class="row"></pre>
+                          <pre id="row3" class="row"></pre>
+                          <pre id="row4" class="row"></pre>
+                          <pre id="row5" class="row"></pre>
+                          <pre id="row6" class="row"></pre>
+                          <pre id="row7" class="row"></pre>
+                          <pre id="row8" class="row"></pre>
+                          <pre id="row9" class="row"></pre>
+                          <pre id="row10" class="row"></pre>
+                          <pre id="row11" class="row"></pre>
+                          <pre id="row12" class="row"></pre>
+                          <pre id="row13" class="row"></pre>
+                          <pre id="row14" class="row"></pre>
+                          <pre id="row15" class="row"></pre></div>
 </body>
 </html>

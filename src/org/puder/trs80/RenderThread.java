@@ -51,7 +51,7 @@ public class RenderThread extends Thread {
     private byte[]          screenBuffer;
     private short[]         lastScreenBuffer;
 
-    private char[]          screenCharBuffer;
+    private StringBuilder   screenCharBuffer;
 
     public RenderThread() {
         surfaceHolder = null;
@@ -63,7 +63,7 @@ public class RenderThread extends Thread {
         trsCharWidth = h.getCharWidth();
         trsCharHeight = h.getCharHeight();
         font = h.getFont();
-        screenCharBuffer = new char[trsScreenCols * trsScreenRows];
+        screenCharBuffer = new StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows);
         lastScreenBuffer = new short[trsScreenCols * trsScreenRows];
         Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
         clipRect = new Rect();
@@ -95,14 +95,14 @@ public class RenderThread extends Thread {
             isRendering = true;
 
             boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+            int d = expandedMode ? 2 : 1;
+            computeDirtyRect(d);
+            if (dirtyRectBottom == -1) {
+                // Nothing to update
+                continue;
+            }
 
             if (surfaceHolder != null) {
-                int d = expandedMode ? 2 : 1;
-                computeDirtyRect(d);
-                if (dirtyRectBottom == -1) {
-                    // Nothing to update
-                    continue;
-                }
                 /*
                  * The Android documentation does not mention that lockCanvas()
                  * may adjust the clip rect due to double buffering. Since the
@@ -155,7 +155,15 @@ public class RenderThread extends Thread {
         int d = expandedMode ? 2 : 1;
 
         int i = 0;
+        screenCharBuffer.setLength(0);
         for (int row = 0; row < trsScreenRows; row++) {
+            if (row != 0) {
+                screenCharBuffer.append('|');
+            }
+            if (row < dirtyRectTop || row > dirtyRectBottom) {
+                i += trsScreenCols;
+                continue;
+            }
             for (int col = 0; col < trsScreenCols / d; col++) {
                 int ch = screenBuffer[i] & 0xff;
                 // Emulate Radio Shack lowercase mod (for Model 1)
@@ -164,7 +172,7 @@ public class RenderThread extends Thread {
                 }
 
                 // TODO: Choose encoding based on current model.
-                screenCharBuffer[i] = CharMapping.m3toUnicode[ch];
+                screenCharBuffer.append(CharMapping.m3toUnicode[ch]);
                 i += d;
             }
         }
