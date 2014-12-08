@@ -156,6 +156,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
              * We got killed by Android and then re-launched. The only thing we
              * can do is exit.
              */
+            TRS80Application.setCrashedFlag(true);
             finish();
             return;
         }
@@ -186,6 +187,9 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onResume() {
         super.onResume();
+        if (TRS80Application.hasCrashed()) {
+            return;
+        }
         RemoteCastScreen.get().startSession();
 
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
@@ -202,6 +206,9 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
             dialog.dismiss();
             dialog = null;
         }
+        if (TRS80Application.hasCrashed()) {
+            return;
+        }
         RemoteCastScreen.get().endSession();
         orientationManager.disable();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
@@ -213,6 +220,9 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (TRS80Application.hasCrashed()) {
+            return;
+        }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         stopRenderThread();
         XTRS.setEmulatorActivity(null);
