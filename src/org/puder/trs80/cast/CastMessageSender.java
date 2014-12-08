@@ -131,18 +131,18 @@ public class CastMessageSender {
     private class CastClientListener extends Cast.Listener {
         @Override
         public void onApplicationStatusChanged() {
-            if (apiClient != null) {
-                Log.d(TAG,
-                        "onApplicationStatusChanged: "
-                                + Cast.CastApi.getApplicationStatus(apiClient));
-            }
+//            if (apiClient != null) {
+//                Log.d(TAG,
+//                        "onApplicationStatusChanged: "
+//                                + Cast.CastApi.getApplicationStatus(apiClient));
+//            }
         }
 
         @Override
         public void onVolumeChanged() {
-            if (apiClient != null) {
-                Log.d(TAG, "onVolumeChanged: " + Cast.CastApi.getVolume(apiClient));
-            }
+//            if (apiClient != null) {
+//                Log.d(TAG, "onVolumeChanged: " + Cast.CastApi.getVolume(apiClient));
+//            }
         }
 
         @Override
