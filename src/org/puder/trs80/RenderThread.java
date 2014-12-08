@@ -29,29 +29,29 @@ import android.view.SurfaceHolder;
 
 public class RenderThread extends Thread {
 
-    private int             model;
+    private int              model;
 
-    private int             trsScreenCols;
-    private int             trsScreenRows;
-    private int             trsCharWidth;
-    private int             trsCharHeight;
+    private int              trsScreenCols;
+    private int              trsScreenRows;
+    private int              trsCharWidth;
+    private int              trsCharHeight;
 
-    private int             dirtyRectTop;
-    private int             dirtyRectLeft;
-    private int             dirtyRectBottom;
-    private int             dirtyRectRight;
-    final private Rect      clipRect;
-    final private Rect      adjustedClipRect;
+    private int              dirtyRectTop;
+    private int              dirtyRectLeft;
+    private int              dirtyRectBottom;
+    private int              dirtyRectRight;
+    final private Rect       clipRect;
+    final private Rect       adjustedClipRect;
 
-    final private Bitmap    font[];
+    final private Bitmap     font[];
 
-    private boolean         run         = false;
-    private boolean         isRendering = true;
-    protected SurfaceHolder surfaceHolder;
-    private byte[]          screenBuffer;
-    private short[]         lastScreenBuffer;
+    private boolean          run         = false;
+    private volatile boolean isRendering = true;
+    protected SurfaceHolder  surfaceHolder;
+    private byte[]           screenBuffer;
+    private short[]          lastScreenBuffer;
 
-    private StringBuilder   screenCharBuffer;
+    private StringBuilder    screenCharBuffer;
 
     public RenderThread() {
         surfaceHolder = null;
