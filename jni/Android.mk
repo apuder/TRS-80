@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -llog -lOpenSLES
 LOCAL_MODULE := xtrs
-LOCAL_CFLAGS := -I$(LOCAL_PATH) -I$(LOCAL_PATH)/SDL -fsigned-char -DDISKDIR='"."' -DANDROID -D__WORDSIZE=32 -DANDROID_JAVA_SCREEN_UPDATE -g
+LOCAL_CFLAGS := -I$(LOCAL_PATH) -I$(LOCAL_PATH)/SDL -fsigned-char -DDISKDIR='"."' -DANDROID -D__WORDSIZE=32
 LOCAL_SRC_FILES := native.c \
 	blit.c \
 	opensl.c \
