@@ -1,4 +1,65 @@
-apply plugin: "java"
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.+'
+    }
+}
+
+
+apply plugin: 'android'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src"]
+        }
+    }
+}
+
+android {
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+
+        androidTest.setRoot('tests')
+    }
+
+    compileSdkVersion 21
+    buildToolsVersion "21.1.1"
+
+    defaultConfig {
+        minSdkVersion 11
+        targetSdkVersion 21
+        versionCode 17
+        versionName "0.17"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
+            'proguard-rules.txt'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:21+'
+    compile 'com.android.support:mediarouter-v7:21+'
+    compile 'com.google.android.gms:play-services:6.5.+'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
 
 // To create a gradle wrapper.
 task wrapper(type: Wrapper) {

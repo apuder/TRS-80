@@ -6,6 +6,18 @@ This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for
 It is based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs]
 emulator originally written for X-Windows. This port adds a layer for Android.
 
+Compiling with gradle
+---------------------
+-  Create a 'local.properties' file to define your SDK location, e.g.:
+``
+sdk.dir=/Users/haeberling/Downloads/android-sdk-macosx
+``
+-  Change the 'buildToolsVersion' in build.gradle to match your latest version.
+You will find this inside your sdk's ``build-tools`` directory.
+-  Run:
+``
+ ./gradlew assembleRelease 
+``
 
 Compiling from Source
 ---------------------
@@ -17,9 +29,9 @@ installing the ADT for Android in Eclipse).
 
 Next clone the TRS-80 Emulator sources via git:
 
-```
+``
 git clone git clone git://git.code.sf.net/p/trs80/code trs80
-```
+``
 
 The TRS-80 emulator depends on two [Support Libraries][Support Library]
 (v7 appcompat and media router libraries) as well as the
@@ -28,15 +40,13 @@ In order to make the project independent of user-specific directory layouts,
 those Libraries need to be copied to the parent directory where the emulator
 sources were cloned:
 
-```
-cp -r <android-sdk-root>/extras/android/support/v7/appcompat/*
-      <parent-dir-of-git-repo>/android-support-v7-appcompat/
-cp -r <android-sdk-root>/extras/android/support/v7/mediarouter/*
-      <parent-dir-of-git-repo>/android-support-v7-mediarouter/
-cp -r <android-sdk-root>/extras/google/google_play_services/libproject/*
-      <parent-dir-of-git-repo>/google-play-services_lib/
+    cp -r <android-sdk-root>/extras/android/support/v7/appcompat/*
+          <parent-dir-of-git-repo>/android-support-v7-appcompat/
+    cp -r <android-sdk-root>/extras/android/support/v7/mediarouter/*
+          <parent-dir-of-git-repo>/android-support-v7-mediarouter/
+    cp -r <android-sdk-root>/extras/google/google_play_services/libproject/*
+          <parent-dir-of-git-repo>/google-play-services_lib/
 
-```
 
 Note that these libraries need to be imported as Android Library projects in
 Eclipse, otherwise there will be compile errors with the TRS-80 emulator

@@ -6,4 +6,5 @@
 .settings
 .externalToolBuilders
 .gradle/
+local.properties
 
