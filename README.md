@@ -15,7 +15,11 @@ Compiling with Gradle
 You will find this inside your sdk's ``build-tools`` directory.
 -  Run:
 ``
- ./gradlew assembleRelease 
+ ./gradlew assembleDebug
+``
+- Then install:
+``
+adb install -d -r build/outputs/apk/trs80-arm-debug.apk
 ``
 
 Compiling from Source
