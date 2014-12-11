@@ -137,6 +137,7 @@
                         unlock orientation-lock.</string>
     <string name="hint_keyboard_joystick">Use virtual joystick to trigger cursor keys. Press
                         anywhere on screen to fire (space bar).</string>
+    <string name="hint_keyboard_external">Use &lt;Ctrl&gt;-B for BREAK and &lt;Ctrl&gt;-C for CLEAR.</string>
     <string name="hint_ok">Got it!</string>
 
     <string name="help_title_configurations">Help: Configurations</string>

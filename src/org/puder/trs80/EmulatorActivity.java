@@ -385,6 +385,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         }
 
         int keyboardType = getKeyboardType();
+        showKeyboardHint(keyboardType);
         if (keyboardType == Configuration.KEYBOARD_EXTERNAL) {
             return;
         }
@@ -411,7 +412,6 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
             break;
         }
         inflater.inflate(layoutId, root);
-        showKeyboardHint(keyboardType);
 
         /*
          * The following code is a hack to work around a problem with the
@@ -450,6 +450,10 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         case Configuration.KEYBOARD_TILT:
             messageId = R.string.hint_keyboard_tilt;
             key = "conf_hint_keyb_tilt_shown";
+            break;
+        case Configuration.KEYBOARD_EXTERNAL:
+            messageId = R.string.hint_keyboard_external;
+            key = "conf_hint_keyb_external_shown";
             break;
         }
         if (messageId == -1) {
