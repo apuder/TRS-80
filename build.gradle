@@ -1,0 +1,6 @@
+apply plugin: "java"
+
+// To create a gradle wrapper.
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2'
+}

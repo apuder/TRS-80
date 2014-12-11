@@ -1,6 +1,9 @@
 /bin
+/build
 /obj
 /gen
 .DS_Store
 .settings
 .externalToolBuilders
+.gradle/
+
