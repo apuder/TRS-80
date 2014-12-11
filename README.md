@@ -6,12 +6,11 @@ This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for
 It is based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs]
 emulator originally written for X-Windows. This port adds a layer for Android.
 
-Compiling with gradle
+Compiling with Gradle
 ---------------------
--  Create a 'local.properties' file to define your SDK location, e.g.:
-``
-sdk.dir=/Users/haeberling/Downloads/android-sdk-macosx
-``
+-  Create a 'local.properties' file to define your SDK and NDK locations, e.g.:
+``sdk.dir=/Users/johndoe/Downloads/android-sdk-macosx``
+``ndk.dir=/Users/johndoe/Downloads/android-ndk-r9d``
 -  Change the 'buildToolsVersion' in build.gradle to match your latest version.
 You will find this inside your sdk's ``build-tools`` directory.
 -  Run:
