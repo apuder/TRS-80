@@ -8,11 +8,24 @@ emulator originally written for X-Windows. This port adds a layer for Android.
 
 Compiling with Gradle
 ---------------------
+- Download an unpack the Android SDK and Android NDK.
+- Run the Android SDK Manager and make sure you have the following installed:
+    - Android SDK Tools
+    - Android SDK Platform-tools
+    - Android SDK Built-tools (latest version, write down the revision number)
+    - The latest SDK Platform
+    - Under 'Extras':
+        - Android Support Repository
+        - Android Support Library
+        - Google Play services
+        - Google Repository
+        - For Windows users: Google USB driver, if you have a Nexus phone.
 -  Create a 'local.properties' file to define your SDK and NDK locations, e.g.:
 ``sdk.dir=/Users/johndoe/Downloads/android-sdk-macosx``
 ``ndk.dir=/Users/johndoe/Downloads/android-ndk-r9d``
 -  Change the 'buildToolsVersion' in build.gradle to match your latest version.
-You will find this inside your sdk's ``build-tools`` directory.
+You will find this inside your sdk's ``build-tools`` directory or check the SDK
+manager entry.
 -  Run:
 ``
  ./gradlew assembleDebug
