@@ -8,8 +8,7 @@ import java.net.SocketAddress;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
-import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.Server;
+import org.simpleframework.http.core.ContainerSocketProcessor;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 
@@ -39,8 +38,8 @@ public class AudioHttpServer implements Container {
 
     public void start() {
         try {
-            Server server = new ContainerServer(this);
-            connection = new SocketConnection(server);
+            ContainerSocketProcessor processor = new ContainerSocketProcessor(this, 1);
+            connection = new SocketConnection(processor);
             SocketAddress address = new InetSocketAddress(PORT);
             connection.connect(address);
 
