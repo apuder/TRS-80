@@ -118,19 +118,19 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
                 if (width > height) {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 } else {
-                    setRequestedOrientation(9/* reversePortait */);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
                 }
                 break;
             case Surface.ROTATION_180:
                 if (height > width) {
-                    setRequestedOrientation(9/* reversePortait */);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
                 } else {
-                    setRequestedOrientation(8/* reverseLandscape */);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
                 }
                 break;
             case Surface.ROTATION_270:
                 if (width > height) {
-                    setRequestedOrientation(8/* reverseLandscape */);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
                 } else {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 }
