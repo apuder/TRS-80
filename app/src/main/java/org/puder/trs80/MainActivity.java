@@ -109,6 +109,7 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     protected void onPause() {
+        HintDialogUtil.dismissHint();
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -187,8 +188,14 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onConfigurationSelected(int position) {
-        runEmulator(Configuration.getConfiguration(position));
+    public void onConfigurationSelected(final int position) {
+        HintDialogUtil.showHint(this, R.string.hint_configuration_usage, new Runnable() {
+
+            @Override
+            public void run() {
+                runEmulator(Configuration.getConfiguration(position));
+            }
+        });
     }
 
     @Override

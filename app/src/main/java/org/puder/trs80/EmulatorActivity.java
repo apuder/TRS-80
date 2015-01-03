@@ -16,18 +16,9 @@
 
 package org.puder.trs80;
 
-import org.acra.ACRA;
-import org.puder.trs80.cast.CastMessageSender;
-import org.puder.trs80.cast.RemoteCastScreen;
-import org.puder.trs80.keyboard.KeyboardManager;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -57,6 +48,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.acra.ACRA;
+import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.keyboard.KeyboardManager;
+
 public class EmulatorActivity extends ActionBarActivity implements SensorEventListener,
         OnKeyListener {
 
@@ -80,7 +76,6 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private int                rotation;
     private OrientationChanged orientationManager;
     private Handler            handler               = new Handler();
-    private AlertDialog        dialog                = null;
 
     class OrientationChanged extends OrientationEventListener {
 
@@ -202,10 +197,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onPause() {
         super.onPause();
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
+        HintDialogUtil.dismissHint();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -441,48 +433,21 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
 
     private void showKeyboardHint(int keyboardType) {
         int messageId = -1;
-        String key = null;
         switch (keyboardType) {
         case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
             messageId = R.string.hint_keyboard_joystick;
-            key = "conf_hint_keyb_joystick_shown";
             break;
         case Configuration.KEYBOARD_TILT:
             messageId = R.string.hint_keyboard_tilt;
-            key = "conf_hint_keyb_tilt_shown";
             break;
         case Configuration.KEYBOARD_EXTERNAL:
             messageId = R.string.hint_keyboard_external;
-            key = "conf_hint_keyb_external_shown";
             break;
         }
         if (messageId == -1) {
             return;
         }
-        SharedPreferences sharedPrefs = this.getSharedPreferences(
-                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        if (!sharedPrefs.getBoolean(key, true)) {
-            return;
-        }
-        Editor editor = sharedPrefs.edit();
-        editor.putBoolean(key, false);
-        editor.commit();
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.hint_title);
-        builder.setMessage(messageId);
-        builder.setPositiveButton(R.string.hint_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
-            }
-
-        });
-
-        dialog = builder.create();
-        dialog.show();
+        HintDialogUtil.showHint(this, messageId);
     }
 
     @Override
