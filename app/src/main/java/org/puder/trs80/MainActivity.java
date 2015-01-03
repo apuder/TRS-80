@@ -16,11 +16,6 @@
 
 package org.puder.trs80;
 
-import java.io.File;
-
-import org.puder.trs80.cast.CastMessageSender;
-import org.puder.trs80.cast.RemoteCastScreen;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -32,46 +27,51 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity implements OnItemClickListener,
-        InitialSetupDialogFragment.DownloadCompletionListener {
+import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.cast.RemoteCastScreen;
 
-    private static final int             REQUEST_CODE_EDIT_CONFIG   = 1;
-    private static final int             REQUEST_CODE_RUN_EMULATOR  = 2;
-    private static final int             REQUEST_CODE_EDIT_SETTINGS = 3;
+import java.io.File;
+
+public class MainActivity extends ActionBarActivity implements
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener {
+
+    private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
+    private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
+    private static final int     REQUEST_CODE_EDIT_SETTINGS = 3;
 
     // Action Menu
-    private static final int             MENU_OPTION_DOWNLOAD       = 0;
-    private static final int             MENU_OPTION_ADD            = 1;
-    private static final int             MENU_OPTION_HELP           = 2;
-    private static final int             MENU_OPTION_SETTINGS       = 3;
+    private static final int     MENU_OPTION_DOWNLOAD       = 0;
+    private static final int     MENU_OPTION_ADD            = 1;
+    private static final int     MENU_OPTION_HELP           = 2;
+    private static final int     MENU_OPTION_SETTINGS       = 3;
 
     // Context Menu
-    private static final int             MENU_OPTION_START          = 0;
-    private static final int             MENU_OPTION_RESUME         = 1;
-    private static final int             MENU_OPTION_STOP           = 2;
-    private static final int             MENU_OPTION_EDIT           = 3;
-    private static final int             MENU_OPTION_DELETE         = 4;
-    private static final int             MENU_OPTION_UP             = 5;
-    private static final int             MENU_OPTION_DOWN           = 6;
+    private static final int     MENU_OPTION_START          = 0;
+    private static final int     MENU_OPTION_RESUME         = 1;
+    private static final int     MENU_OPTION_STOP           = 2;
+    private static final int     MENU_OPTION_EDIT           = 3;
+    private static final int     MENU_OPTION_DELETE         = 4;
+    private static final int     MENU_OPTION_UP             = 5;
+    private static final int     MENU_OPTION_DOWN           = 6;
 
-    private ConfigurationBackup          backup;
-    private ListView                     configurationListView;
-    private ConfigurationListViewAdapter configurationListViewAdapter;
-    private SharedPreferences            sharedPrefs;
-    private MenuItem                     downloadMenuItem           = null;
-    private AlertDialog                  dialog                     = null;
+    private ConfigurationBackup  backup;
+    private RecyclerView         configurationListView;
+    private RecyclerView.Adapter configurationListViewAdapter;
+    private int                  configurationCurrentContextMenu;
+    private SharedPreferences    sharedPrefs;
+    private MenuItem             downloadMenuItem           = null;
+    private AlertDialog          dialog                     = null;
 
-    private CastMessageSender            castMessageSender;
+    private CastMessageSender    castMessageSender;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,11 +81,11 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
         this.setContentView(R.layout.main_activity);
 
         castMessageSender = CastMessageSender.get();
-        configurationListViewAdapter = new ConfigurationListViewAdapter(this,
-                Configuration.getConfigurations());
-        configurationListView = (ListView) this.findViewById(R.id.list_configurations);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(this);
+        configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
+        configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
-        configurationListView.setOnItemClickListener(this);
+        // configurationListView.addOnItemTouchListener(this);
     }
 
     @Override
@@ -168,11 +168,6 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        runEmulator(Configuration.getConfiguration(position));
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MENU_OPTION_DOWNLOAD:
@@ -192,10 +187,14 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Configuration conf = Configuration.getConfiguration((int) info.id);
+    public void onConfigurationSelected(int position) {
+        runEmulator(Configuration.getConfiguration(position));
+    }
+
+    @Override
+    public void onConfigurationContextMenuClicked(ContextMenu menu, int position) {
+        this.configurationCurrentContextMenu = position;
+        Configuration conf = Configuration.getConfiguration(position);
         menu.setHeaderTitle(conf.getName());
         if (EmulatorState.hasSavedState(conf.getId())) {
             menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
@@ -217,10 +216,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 
     @Override
     public boolean onContextItemSelected(android.view.MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
-                .getMenuInfo();
-
-        Configuration conf = Configuration.getConfiguration(info.position);
+        Configuration conf = Configuration.getConfiguration(this.configurationCurrentContextMenu);
         int confID = conf.getId();
         switch (item.getItemId()) {
         case MENU_OPTION_START:

@@ -16,56 +16,76 @@
 
 package org.puder.trs80;
 
-import java.util.List;
-
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
+public class ConfigurationListViewAdapter extends
+        RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> {
 
-    class Holder {
+    private ConfigurationMenuListener listener;
+
+
+    class Holder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener,
+            View.OnClickListener {
+        int       position;
         TextView  name;
         TextView  model;
         TextView  disks;
         TextView  sound;
         TextView  keyboards;
         ImageView screenshot;
-    }
 
-    Context context;
 
-    public ConfigurationListViewAdapter(Context context, List<Configuration> items) {
-        super(context, 0, items);
-        this.context = context;
-    }
-
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Holder holder = null;
-        Configuration conf = getItem(position);
-        Context context = TRS80Application.getAppContext();
-
-        LayoutInflater mInflater = (LayoutInflater) context
-                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.configuration_item, null);
-            holder = new Holder();
-            holder.name = (TextView) convertView.findViewById(R.id.configuration_name);
-            holder.model = (TextView) convertView.findViewById(R.id.configuration_model);
-            holder.disks = (TextView) convertView.findViewById(R.id.configuration_disks);
-            holder.sound = (TextView) convertView.findViewById(R.id.configuration_sound);
-            holder.keyboards = (TextView) convertView.findViewById(R.id.configuration_keyboards);
-            holder.screenshot = (ImageView) convertView.findViewById(R.id.configuration_screenshot);
-            convertView.setTag(holder);
-        } else {
-            holder = (Holder) convertView.getTag();
+        public Holder(View itemView) {
+            super(itemView);
+            name = (TextView) itemView.findViewById(R.id.configuration_name);
+            model = (TextView) itemView.findViewById(R.id.configuration_model);
+            disks = (TextView) itemView.findViewById(R.id.configuration_disks);
+            sound = (TextView) itemView.findViewById(R.id.configuration_sound);
+            keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
+            screenshot = (ImageView) itemView.findViewById(R.id.configuration_screenshot);
+            itemView.setOnClickListener(this);
+            itemView.setOnCreateContextMenuListener(this);
         }
+
+        @Override
+        public void onClick(View v) {
+            listener.onConfigurationSelected(position);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v,
+                ContextMenu.ContextMenuInfo menuInfo) {
+            listener.onConfigurationContextMenuClicked(menu, position);
+        }
+    }
+
+
+    public ConfigurationListViewAdapter(ConfigurationMenuListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public Holder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.configuration_item,
+                viewGroup, false);
+        Holder vh = new Holder(v);
+        return vh;
+    }
+
+    @Override
+    public void onBindViewHolder(Holder holder, int position) {
+        Configuration conf = Configuration.getConfiguration(position);
+
+        // Position
+        holder.position = position;
 
         // Name
         holder.name.setText(conf.getName());
@@ -97,6 +117,7 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
         }
         holder.disks.setText(Integer.toString(count));
 
+        Context context = TRS80Application.getAppContext();
         // Sound
         holder.sound.setText(conf.muteSound() ? context.getString(R.string.sound_disabled)
                 : context.getString(R.string.sound_enabled));
@@ -115,7 +136,11 @@ public class ConfigurationListViewAdapter extends ArrayAdapter<Configuration> {
         } else {
             holder.screenshot.setVisibility(View.INVISIBLE);
         }
-        return convertView;
+    }
+
+    @Override
+    public int getItemCount() {
+        return Configuration.getConfigurations().size();
     }
 
     private String getKeyboardLabel(int type) {
