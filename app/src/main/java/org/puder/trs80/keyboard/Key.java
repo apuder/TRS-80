@@ -16,11 +16,6 @@
 
 package org.puder.trs80.keyboard;
 
-import org.puder.trs80.Hardware;
-import org.puder.trs80.R;
-import org.puder.trs80.TRS80Application;
-import org.puder.trs80.TypefaceCache;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -29,11 +24,15 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
+
+import org.puder.trs80.Hardware;
+import org.puder.trs80.R;
+import org.puder.trs80.TRS80Application;
+import org.puder.trs80.TypefaceCache;
 
 public class Key extends View {
 
@@ -259,7 +258,7 @@ public class Key extends View {
         paint.setStrokeWidth(3);
         canvas.drawRoundRect(rect, 10, 10, paint);
 
-        paint.setColor(Color.WHITE);
+        paint.setColor(getResources().getColor(R.color.key_color));
         paint.setAlpha(110);
         paint.setStyle(Style.FILL);
         paint.setStrokeWidth(1);
