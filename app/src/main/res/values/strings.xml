@@ -32,8 +32,6 @@
     <string name="menu_stop">Stop</string>
     <string name="menu_edit">Edit</string>
     <string name="menu_delete">Delete</string>
-    <string name="menu_up">Move up</string>
-    <string name="menu_down">Move down</string>
     <string name="sound_enabled">enabled</string>
     <string name="sound_disabled">disabled</string>
     <string name="keyboard_abbrev_original">original</string>
@@ -132,9 +130,9 @@
                         to download the ROM images?</string>
 
     <string name="hint_title">Hint</string>
-    <string name="hint_configuration_usage">Single tapping resumes the emulator.
-                        Long-pressing a configuration shows a context menu. Drag a configuration to
-                        re-order.</string>
+    <string name="hint_configuration_usage">Single tapping a configuration resumes the emulator.
+                        Long-pressing a configuration shows a context menu. Drag the screenshot
+                        to re-order a configuration.</string>
     <string name="hint_keyboard_tilt">Tilt the device to trigger cursor keys. Press anywhere
                         on the screen to fire (space bar). Use icon in top-right corner to
                         unlock orientation-lock.</string>

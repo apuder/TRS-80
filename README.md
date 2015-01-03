@@ -108,6 +108,7 @@ The following resources have been used for this project:
 
 * [sdltrs][sdltrs]
 * [xtrs][xtrs]
+* [DragSortRecycler][DragSortRecycler]
 * [Retro Fonts][Retro Fonts]
 * [Font Squirrel][Font Squirrel]
 * [Icons 1][Icons 1]
@@ -118,6 +119,7 @@ The following resources have been used for this project:
 [TRS-80 Emulator for Android]:https://play.google.com/store/apps/details?id=org.puder.trs80
 [sdltrs]:http://sdltrs.sourceforge.net/
 [xtrs]:http://www.tim-mann.org/xtrs.html
+[DragSortRecycler]:https://github.com/emileb/DragSortRecycler
 [Retro Fonts]:http://www.kreativekorp.com/software/fonts/index.shtml#retro
 [Font Squirrel]:http://www.fontsquirrel.com/fonts/DejaVu-Sans-Mono
 [Icons 1]:http://www.iconarchive.com/show/oxygen-icons-by-oxygen-icons.org/Mimetypes-inode-directory-icon.html

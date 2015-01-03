@@ -35,6 +35,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.emtronics.dragsortrecycler.DragSortRecycler;
+
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 
@@ -59,8 +61,6 @@ public class MainActivity extends ActionBarActivity implements
     private static final int     MENU_OPTION_STOP           = 2;
     private static final int     MENU_OPTION_EDIT           = 3;
     private static final int     MENU_OPTION_DELETE         = 4;
-    private static final int     MENU_OPTION_UP             = 5;
-    private static final int     MENU_OPTION_DOWN           = 6;
 
     private ConfigurationBackup  backup;
     private RecyclerView         configurationListView;
@@ -85,7 +85,28 @@ public class MainActivity extends ActionBarActivity implements
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
-        // configurationListView.addOnItemTouchListener(this);
+        configurationListView.setItemAnimator(null);
+
+        DragSortRecycler dragSortRecycler = new DragSortRecycler();
+        dragSortRecycler.setViewHandleId(R.id.configuration_screenshot);//card_view);
+        dragSortRecycler.setFloatingAlpha(0.4f);
+        dragSortRecycler.setFloatingBgColor(0x800000FF);
+        dragSortRecycler.setAutoScrollSpeed(0.3f);
+        dragSortRecycler.setAutoScrollWindow(0.1f);
+        dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
+            @Override
+            public void onItemMoved(int from, int to) {
+                if (from == to) {
+                    return;
+                }
+                Configuration.move(from, to);
+                configurationListViewAdapter.notifyDataSetChanged();
+            }
+        });
+
+        configurationListView.addItemDecoration(dragSortRecycler);
+        configurationListView.addOnItemTouchListener(dragSortRecycler);
+        configurationListView.setOnScrollListener(dragSortRecycler.getScrollListener());
     }
 
     @Override
@@ -125,7 +146,7 @@ public class MainActivity extends ActionBarActivity implements
     public void updateView() {
         View withoutConfigurationsView = this.findViewById(R.id.without_configurations);
         View withConfigurationsView = this.findViewById(R.id.with_configurations);
-        if (Configuration.getConfigurations().size() == 0) {
+        if (Configuration.getCount() == 0) {
             withoutConfigurationsView.setVisibility(View.VISIBLE);
             withConfigurationsView.setVisibility(View.GONE);
             return;
@@ -211,14 +232,6 @@ public class MainActivity extends ActionBarActivity implements
         }
         menu.add(Menu.NONE, MENU_OPTION_EDIT, Menu.NONE, this.getString(R.string.menu_edit));
         menu.add(Menu.NONE, MENU_OPTION_DELETE, Menu.NONE, this.getString(R.string.menu_delete));
-        if (Configuration.getConfigurations().size() > 1) {
-            if (!conf.isFirst()) {
-                menu.add(Menu.NONE, MENU_OPTION_UP, Menu.NONE, this.getString(R.string.menu_up));
-            }
-            if (!conf.isLast()) {
-                menu.add(Menu.NONE, MENU_OPTION_DOWN, Menu.NONE, this.getString(R.string.menu_down));
-            }
-        }
     }
 
     @Override
@@ -241,14 +254,6 @@ public class MainActivity extends ActionBarActivity implements
             break;
         case MENU_OPTION_DELETE:
             deleteConfiguration(conf);
-            break;
-        case MENU_OPTION_UP:
-            conf.moveUp();
-            updateView();
-            break;
-        case MENU_OPTION_DOWN:
-            conf.moveDown();
-            updateView();
             break;
         default:
             return false;

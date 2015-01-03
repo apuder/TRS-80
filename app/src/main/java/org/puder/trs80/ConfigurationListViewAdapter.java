@@ -18,6 +18,8 @@ package org.puder.trs80;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -132,15 +134,14 @@ public class ConfigurationListViewAdapter extends
         Bitmap screenshot = EmulatorState.loadScreenshot(conf.getId());
         if (screenshot != null) {
             holder.screenshot.setImageBitmap(screenshot);
-            holder.screenshot.setVisibility(View.VISIBLE);
         } else {
-            holder.screenshot.setVisibility(View.INVISIBLE);
+            holder.screenshot.setImageDrawable(new ColorDrawable(Color.BLACK));
         }
     }
 
     @Override
     public int getItemCount() {
-        return Configuration.getConfigurations().size();
+        return Configuration.getCount();
     }
 
     private String getKeyboardLabel(int type) {

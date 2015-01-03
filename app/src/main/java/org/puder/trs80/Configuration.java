@@ -16,14 +16,14 @@
 
 package org.puder.trs80;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Configuration {
 
@@ -54,6 +54,7 @@ public class Configuration {
     protected SharedPreferences        sharedPrefs;
     protected int                      id;
 
+
     private static void saveConfigurationIDs() {
         String ids = "";
         for (Configuration conf : configurations) {
@@ -67,8 +68,8 @@ public class Configuration {
         e.commit();
     }
 
-    public static List<Configuration> getConfigurations() {
-        return configurations;
+    public static int getCount() {
+        return configurations.size();
     }
 
     public static Configuration getConfiguration(int id) {
@@ -203,33 +204,10 @@ public class Configuration {
         return sharedPrefs.getBoolean(EditConfigurationActivity.CONF_MUTE_SOUND, false);
     }
 
-    public boolean isFirst() {
-        return configurations.get(0).getId() == getId();
-    }
-
-    public boolean isLast() {
-        return configurations.get(configurations.size() - 1).getId() == getId();
-    }
-
-    public void moveUp() {
-        if (isFirst()) {
-            return;
-        }
-        int self = configurations.indexOf(this);
-        Configuration tmp = configurations.get(self - 1);
-        configurations.set(self - 1, this);
-        configurations.set(self, tmp);
-        saveConfigurationIDs();
-    }
-
-    public void moveDown() {
-        if (isLast()) {
-            return;
-        }
-        int self = configurations.indexOf(this);
-        Configuration tmp = configurations.get(self + 1);
-        configurations.set(self + 1, this);
-        configurations.set(self, tmp);
+    static public void move(int from, int to) {
+        Configuration conf = configurations.get(from);
+        configurations.remove(from);
+        configurations.add(to, conf);
         saveConfigurationIDs();
     }
 }

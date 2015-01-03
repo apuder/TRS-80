@@ -17,6 +17,7 @@
 package org.puder.trs80;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 public class ScreenshotView extends ImageView {
 
     final private static float ASPECT_RATIO = 2.0f / 3.0f;
+
 
     public ScreenshotView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -34,11 +36,11 @@ public class ScreenshotView extends ImageView {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height;
         Drawable d = getDrawable();
-        if (d != null) {
+        if (d instanceof ColorDrawable) {
+            height = (int) Math.ceil((float) width * ASPECT_RATIO);
+        } else {
             height = (int) Math.ceil((float) width * (float) d.getIntrinsicHeight()
                     / (float) d.getIntrinsicWidth());
-        } else {
-            height = (int) (width * ASPECT_RATIO);
         }
         setMeasuredDimension(width, height);
     }
