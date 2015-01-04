@@ -32,6 +32,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -87,8 +88,28 @@ public class MainActivity extends ActionBarActivity implements
         configurationListView.setAdapter(configurationListViewAdapter);
         configurationListView.setItemAnimator(null);
 
+        configurationListView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+
+            private boolean firstTime = true;
+
+
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                if (firstTime) {
+                    HintDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
+                }
+                firstTime = false;
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+            }
+        });
+
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
-        dragSortRecycler.setViewHandleId(R.id.configuration_screenshot);//card_view);
+        dragSortRecycler.setViewHandleId(R.id.configuration_screenshot);
         dragSortRecycler.setFloatingAlpha(0.4f);
         dragSortRecycler.setFloatingBgColor(0x800000FF);
         dragSortRecycler.setAutoScrollSpeed(0.3f);
@@ -155,7 +176,6 @@ public class MainActivity extends ActionBarActivity implements
         withoutConfigurationsView.setVisibility(View.GONE);
         withConfigurationsView.setVisibility(View.VISIBLE);
 
-        registerForContextMenu(configurationListView);
         configurationListViewAdapter.notifyDataSetChanged();
     }
 
@@ -210,13 +230,7 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onConfigurationSelected(final int position) {
-        HintDialogUtil.showHint(this, R.string.hint_configuration_usage, new Runnable() {
-
-            @Override
-            public void run() {
-                runEmulator(Configuration.getConfiguration(position));
-            }
-        });
+        runEmulator(Configuration.getConfiguration(position));
     }
 
     @Override
