@@ -28,8 +28,8 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -44,7 +44,8 @@ import org.puder.trs80.cast.RemoteCastScreen;
 import java.io.File;
 
 public class MainActivity extends ActionBarActivity implements
-        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener {
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
+        PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
@@ -70,6 +71,7 @@ public class MainActivity extends ActionBarActivity implements
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
     private AlertDialog          dialog                     = null;
+    private PopupMenu            popup                      = null;
 
     private CastMessageSender    castMessageSender;
 
@@ -109,7 +111,7 @@ public class MainActivity extends ActionBarActivity implements
         });
 
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
-        dragSortRecycler.setViewHandleId(R.id.configuration_screenshot);
+        dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
         dragSortRecycler.setFloatingAlpha(0.4f);
         dragSortRecycler.setFloatingBgColor(0x800000FF);
         dragSortRecycler.setAutoScrollSpeed(0.3f);
@@ -155,6 +157,10 @@ public class MainActivity extends ActionBarActivity implements
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
+        }
+        if (popup != null) {
+            popup.dismiss();
+            popup = null;
         }
         if (isFinishing()) {
             castMessageSender.stop();
@@ -234,10 +240,13 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onConfigurationContextMenuClicked(ContextMenu menu, int position) {
+    public void onConfigurationMenuClicked(View anchor, int position) {
         this.configurationCurrentContextMenu = position;
         Configuration conf = Configuration.getConfiguration(position);
-        menu.setHeaderTitle(conf.getName());
+        popup = new PopupMenu(this, anchor);
+        popup.setOnMenuItemClickListener(this);
+        popup.setOnDismissListener(this);
+        Menu menu = popup.getMenu();
         if (EmulatorState.hasSavedState(conf.getId())) {
             menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
             menu.add(Menu.NONE, MENU_OPTION_STOP, Menu.NONE, this.getString(R.string.menu_stop));
@@ -246,33 +255,39 @@ public class MainActivity extends ActionBarActivity implements
         }
         menu.add(Menu.NONE, MENU_OPTION_EDIT, Menu.NONE, this.getString(R.string.menu_edit));
         menu.add(Menu.NONE, MENU_OPTION_DELETE, Menu.NONE, this.getString(R.string.menu_delete));
+        popup.show();
     }
 
     @Override
-    public boolean onContextItemSelected(android.view.MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         Configuration conf = Configuration.getConfiguration(this.configurationCurrentContextMenu);
         int confID = conf.getId();
         switch (item.getItemId()) {
         case MENU_OPTION_START:
             EmulatorState.deleteSavedState(confID);
             runEmulator(conf);
-            break;
+            return true;
         case MENU_OPTION_RESUME:
             runEmulator(conf);
-            break;
+            return true;
         case MENU_OPTION_STOP:
             stopEmulator(conf);
-            break;
+            return true;
         case MENU_OPTION_EDIT:
             editConfiguration(conf, false);
-            break;
+            return true;
         case MENU_OPTION_DELETE:
             deleteConfiguration(conf);
-            break;
-        default:
-            return false;
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    @Override
+    public void onDismiss(PopupMenu popupMenu) {
+        if (popup == popupMenu) {
+            popup = null;
+        }
     }
 
     @Override

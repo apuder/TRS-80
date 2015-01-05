@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +33,7 @@ public class ConfigurationListViewAdapter extends
     private ConfigurationMenuListener listener;
 
 
-    class Holder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener,
-            View.OnClickListener {
+    class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
         int       position;
         TextView  name;
         TextView  model;
@@ -43,6 +41,7 @@ public class ConfigurationListViewAdapter extends
         TextView  sound;
         TextView  keyboards;
         ImageView screenshot;
+        View      menu;
 
 
         public Holder(View itemView) {
@@ -53,19 +52,21 @@ public class ConfigurationListViewAdapter extends
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
             keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
             screenshot = (ImageView) itemView.findViewById(R.id.configuration_screenshot);
+            menu = itemView.findViewById(R.id.configuration_menu);
+            menu.setOnClickListener(this);
             itemView.setOnClickListener(this);
-            itemView.setOnCreateContextMenuListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            listener.onConfigurationSelected(position);
-        }
-
-        @Override
-        public void onCreateContextMenu(ContextMenu menu, View v,
-                ContextMenu.ContextMenuInfo menuInfo) {
-            listener.onConfigurationContextMenuClicked(menu, position);
+            switch (v.getId()) {
+            case R.id.configuration_menu:
+                listener.onConfigurationMenuClicked(menu, position);
+                break;
+            default:
+                listener.onConfigurationSelected(position);
+                break;
+            }
         }
     }
 

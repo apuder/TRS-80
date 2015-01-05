@@ -16,11 +16,11 @@
 
 package org.puder.trs80;
 
-import android.view.ContextMenu;
+import android.view.View;
 
 public interface ConfigurationMenuListener {
 
     void onConfigurationSelected(int position);
 
-    void onConfigurationContextMenuClicked(ContextMenu menu, int position);
+    void onConfigurationMenuClicked(View anchor, int position);
 }

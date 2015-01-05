@@ -99,6 +99,21 @@
             </TableRow>
         </TableLayout>
 
+        <ImageView
+            android:id="@+id/configuration_menu"
+            android:src="@drawable/menu_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"/>
+
+        <ImageView
+            android:id="@+id/configuration_reorder"
+            android:src="@drawable/reorder_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/padding_small"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/configuration_menu"/>
     </RelativeLayout>
 
     <RelativeLayout
