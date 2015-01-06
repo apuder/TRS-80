@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
         dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
         dragSortRecycler.setFloatingAlpha(0.4f);
-        dragSortRecycler.setFloatingBgColor(0x800000FF);
+        dragSortRecycler.setFloatingBgColor(0x80FFFFFF);
         dragSortRecycler.setAutoScrollSpeed(0.3f);
         dragSortRecycler.setAutoScrollWindow(0.1f);
         dragSortRecycler.addExcludedDraggingPosition(0);

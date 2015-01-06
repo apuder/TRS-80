@@ -132,7 +132,7 @@
 
     <string name="hint_title">Hint</string>
     <string name="hint_configuration_usage">Tapping a configuration resumes the emulator.
-                        Use the menu button in the lower left of the configuration to show a
+                        Use the menu button in the bottom corner of the configuration to show a
                         context menu. Drag the re-arrange icon to re-order the
                         configurations.</string>
     <string name="hint_keyboard_tilt">Tilt the device to trigger cursor keys. Press anywhere
