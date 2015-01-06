@@ -18,13 +18,10 @@ package org.puder.trs80;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ConfigurationListViewAdapter extends
@@ -34,14 +31,15 @@ public class ConfigurationListViewAdapter extends
 
 
     class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        int       position;
-        TextView  name;
-        TextView  model;
-        TextView  disks;
-        TextView  sound;
-        TextView  keyboards;
-        ImageView screenshot;
-        View      menu;
+        public int            position;
+        public TextView       name;
+        public TextView       model;
+        public TextView       disks;
+        public TextView       sound;
+        public TextView       keyboards;
+        public ScreenshotView screenshot;
+
+        private View          menu;
 
 
         public Holder(View itemView) {
@@ -51,7 +49,7 @@ public class ConfigurationListViewAdapter extends
             disks = (TextView) itemView.findViewById(R.id.configuration_disks);
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
             keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
-            screenshot = (ImageView) itemView.findViewById(R.id.configuration_screenshot);
+            screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
             menu = itemView.findViewById(R.id.configuration_menu);
             menu.setOnClickListener(this);
             itemView.setOnClickListener(this);
@@ -133,11 +131,7 @@ public class ConfigurationListViewAdapter extends
 
         // Screenshot
         Bitmap screenshot = EmulatorState.loadScreenshot(conf.getId());
-        if (screenshot != null) {
-            holder.screenshot.setImageBitmap(screenshot);
-        } else {
-            holder.screenshot.setImageDrawable(new ColorDrawable(Color.BLACK));
-        }
+        holder.screenshot.setScreenshotBitmap(screenshot);
     }
 
     @Override

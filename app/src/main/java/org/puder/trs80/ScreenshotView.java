@@ -17,14 +17,20 @@
 package org.puder.trs80;
 
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 public class ScreenshotView extends ImageView {
 
-    final private static float ASPECT_RATIO = 2.0f / 3.0f;
+    final private static float ASPECT_RATIO        = 2.0f / 3.0f;
+
+    private boolean            hasScreenshot       = false;
+    private Bitmap             startEmulatorBitmap = null;
 
 
     public ScreenshotView(Context context, AttributeSet attrs) {
@@ -35,14 +41,33 @@ public class ScreenshotView extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height;
-        Drawable d = getDrawable();
-        if (d instanceof ColorDrawable) {
-            height = (int) Math.ceil((float) width * ASPECT_RATIO);
-        } else {
+        if (hasScreenshot) {
+            Drawable d = getDrawable();
             height = (int) Math.ceil((float) width * (float) d.getIntrinsicHeight()
                     / (float) d.getIntrinsicWidth());
+        } else {
+            height = (int) Math.ceil((float) width * ASPECT_RATIO);
+            if (width != 0
+                    && (startEmulatorBitmap == null || startEmulatorBitmap.getWidth() != width)) {
+                Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.start_emulator_icon);
+                startEmulatorBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                Canvas c = new Canvas(startEmulatorBitmap);
+                c.drawColor(Color.BLACK);
+                c.drawBitmap(icon, (int) ((width - icon.getWidth()) / 2.0),
+                        (int) ((height - icon.getHeight()) / 2.0), null);
+            }
+            if (startEmulatorBitmap != null) {
+                setImageBitmap(startEmulatorBitmap);
+            }
         }
         setMeasuredDimension(width, height);
     }
 
+    public void setScreenshotBitmap(Bitmap img) {
+        if (img != null) {
+            setImageBitmap(img);
+            hasScreenshot = true;
+        }
+    }
 }
