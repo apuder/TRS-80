@@ -116,13 +116,14 @@ public class MainActivity extends ActionBarActivity implements
         dragSortRecycler.setFloatingBgColor(0x800000FF);
         dragSortRecycler.setAutoScrollSpeed(0.3f);
         dragSortRecycler.setAutoScrollWindow(0.1f);
+        dragSortRecycler.addExcludedDraggingPosition(0);
         dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
             @Override
             public void onItemMoved(int from, int to) {
                 if (from == to) {
                     return;
                 }
-                Configuration.move(from, to);
+                Configuration.move(from - 1, to - 1);
                 configurationListViewAdapter.notifyDataSetChanged();
             }
         });

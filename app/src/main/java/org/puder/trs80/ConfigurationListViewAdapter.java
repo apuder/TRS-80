@@ -18,6 +18,7 @@ package org.puder.trs80;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,9 @@ public class ConfigurationListViewAdapter extends
 
         public Holder(View itemView) {
             super(itemView);
+            if (!(itemView instanceof CardView)) {
+                return;
+            }
             name = (TextView) itemView.findViewById(R.id.configuration_name);
             model = (TextView) itemView.findViewById(R.id.configuration_model);
             disks = (TextView) itemView.findViewById(R.id.configuration_disks);
@@ -75,7 +79,7 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public Holder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.configuration_item,
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(viewType,
                 viewGroup, false);
         Holder vh = new Holder(v);
         return vh;
@@ -83,10 +87,13 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        Configuration conf = Configuration.getConfiguration(position);
+        if (position == 0) {
+            return;
+        }
+        Configuration conf = Configuration.getConfiguration(position - 1);
 
         // Position
-        holder.position = position;
+        holder.position = position - 1;
 
         // Name
         holder.name.setText(conf.getName());
@@ -135,8 +142,13 @@ public class ConfigurationListViewAdapter extends
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return position == 0 ? R.layout.configuration_header : R.layout.configuration_item;
+    }
+
+    @Override
     public int getItemCount() {
-        return Configuration.getCount();
+        return Configuration.getCount() + 1 /* for header */;
     }
 
     private String getKeyboardLabel(int type) {

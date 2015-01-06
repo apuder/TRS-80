@@ -22,7 +22,6 @@
         android:visibility="gone"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_marginTop="@dimen/configuration_list_padding_top"
         android:layout_marginRight="@dimen/configuration_list_padding_side"
         android:layout_marginLeft="@dimen/configuration_list_padding_side">
 

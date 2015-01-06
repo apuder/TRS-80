@@ -1,9 +1,8 @@
 <resources>
 
-    <dimen name="padding_small">8dp</dimen>
-    <dimen name="padding_medium">8dp</dimen>
-    <dimen name="padding_large">16dp</dimen>
-    <dimen name="configuration_list_padding_top">15dp</dimen>
+    <dimen name="padding_small">10dp</dimen>
+    <dimen name="padding_medium">15dp</dimen>
+    <dimen name="padding_large">20dp</dimen>
     <dimen name="configuration_list_padding_side">30dp</dimen>
 
 </resources>
