@@ -28,11 +28,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.support.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
@@ -64,6 +67,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
     private int viewHandleId = -1;
 
+    private List<Integer> excludedPositions = new ArrayList<Integer>();
 
     OnItemMovedListener moveInterface;
 
@@ -351,8 +355,10 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             if ((e.getAction() == MotionEvent.ACTION_UP) && selectedDragItemPos != -1)
             {
                 int newPos = getNewPostion(rv);
-                if (moveInterface != null)
-                    moveInterface.onItemMoved(selectedDragItemPos, newPos);
+                if (moveInterface != null) {
+                    if (canDragOver(selectedDragItemPos) && canDragOver(newPos))
+                        moveInterface.onItemMoved(selectedDragItemPos, newPos);
+                }
             }
 
             setIsDragging(false);
@@ -445,9 +451,13 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
      * @return True if we can drag the item over this position, False if not.
      */
     protected boolean canDragOver(int position) {
-        return true;
+        return !excludedPositions.contains(position);
     }
 
+
+    public void addExcludedDraggingPosition(int position) {
+        excludedPositions.add(position);
+    }
 
     private BitmapDrawable createFloatingBitmap(View v)
     {
