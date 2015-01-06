@@ -15,10 +15,11 @@
     android:orientation="horizontal"
     android:padding="@dimen/configuration_card_padding">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="@integer/configuration_details_weight" >
+        android:layout_weight="@integer/configuration_details_weight"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/configuration_name"
@@ -27,10 +28,9 @@
             android:textAppearance="@android:style/TextAppearance.Large" />
 
         <TableLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:padding="@dimen/configuration_table_padding"
-            android:layout_below="@+id/configuration_name" >
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/configuration_table_padding">
 
             <TableRow
                 android:layout_width="wrap_content"
@@ -100,23 +100,29 @@
             </TableRow>
         </TableLayout>
 
-        <ImageView
-            android:id="@+id/configuration_menu"
-            android:src="@drawable/menu_icon"
+        <RelativeLayout
             android:layout_marginTop="@dimen/configuration_padding_icon_top"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"/>
+            android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/configuration_reorder"
-            android:src="@drawable/reorder_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/padding_small"
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@+id/configuration_menu"/>
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/configuration_menu"
+                android:src="@drawable/menu_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"/>
+
+            <ImageView
+                android:id="@+id/configuration_reorder"
+                android:src="@drawable/reorder_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/padding_small"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/configuration_menu"/>
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="0dp"
