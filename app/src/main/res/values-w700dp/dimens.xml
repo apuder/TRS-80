@@ -3,6 +3,7 @@
     <dimen name="configuration_list_padding_side">70dp</dimen>
     <dimen name="configuration_screenshot_border">10dp</dimen>
     <dimen name="configuration_card_padding">15dp</dimen>
+    <dimen name="configuration_padding_button">0dp</dimen>
     <integer name="configuration_details_weight">3</integer>
     <integer name="configuration_screenshot_weight">3</integer>
 
