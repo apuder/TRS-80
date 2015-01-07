@@ -27,10 +27,10 @@ import android.widget.ImageView;
 
 public class ScreenshotView extends ImageView {
 
-    final private static float ASPECT_RATIO        = 2.0f / 3.0f;
+    final private static float ASPECT_RATIO        = 0.75f;
 
     private boolean            hasScreenshot       = false;
-    private Bitmap             startEmulatorBitmap = null;
+    private static Bitmap      startEmulatorBitmap = null;
 
 
     public ScreenshotView(Context context, AttributeSet attrs) {
