@@ -67,7 +67,7 @@ public class ScreenshotView extends ImageView {
     public void setScreenshotBitmap(Bitmap img) {
         if (img != null) {
             setImageBitmap(img);
-            hasScreenshot = true;
         }
+        hasScreenshot = img != null;
     }
 }
