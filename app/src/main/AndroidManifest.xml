@@ -33,7 +33,8 @@
         </activity>
         <activity android:name=".EditConfigurationActivity" />
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".EmulatorActivity" />
+        <activity android:name=".EmulatorActivity"
+            android:theme="@style/AppThemeDark"/>
         <activity android:name=".browser.FileBrowserActivity" />
         <activity
             android:name="org.acra.CrashReportDialog"
