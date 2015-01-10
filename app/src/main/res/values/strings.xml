@@ -146,8 +146,10 @@
     <string name="help_title_configurations">Help: Configurations</string>
     <string name="help_configurations">Tap on the \'+\' icon to create a new configuration.
                         A configuration defines the TRS-80 model and the disk images used for
-                        the emulation. Click on a configuration to run the emulator. Long-press
-                        on a configuration for further options.
+                        the emulation. Tap on a configuration to run the emulator. Use the menu
+                        button (three vertical dots) in the bottom corner of a configuration
+                        to show a context menu. Drag the re-arrange icon (three vertical lines)
+                        to re-order the configurations.
                         Note that currently only Model I and Model III emulation is supported.</string>
     <string name="help_title_edit_configuration">Help: Edit Configuration</string>
     <string name="help_edit_configuration">A configuration defines the parameters used by the

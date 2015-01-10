@@ -69,5 +69,6 @@ public class ScreenshotView extends ImageView {
             setImageBitmap(img);
         }
         hasScreenshot = img != null;
+        requestLayout();
     }
 }
