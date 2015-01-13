@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alert_dialog_cancel">Abbrechen</string>
+    <string name="alert_dialog_confirm_delete">Sind Sie sicher, dass Sie die Konfiguration \'%1$s\' löschen möchten?</string>
+    <string name="alert_dialog_confirm_eject">Sind Sie sicher, dass Sie die derzeit gemountete Datei auswerfen möchten?</string>
+    <string name="alert_dialog_confirm_stop_emu">Sind Sie sicher, dass Sie die Emulation für die Konfiguration \'%1$s\' stoppen möchten?</string>
+    <string name="alert_dialog_inform_crash">Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.</string>
+    <string name="alert_dialog_ok">OK</string>
+    <string name="conf_header">Konfigurationen</string>
+    <string name="conf_item_disks">Laufwerke</string>
+    <string name="conf_item_hardware">Hardware</string>
+    <string name="conf_item_keyboards">Tastaturen</string>
+    <string name="conf_item_sound">Ton</string>
+    <string name="config_name_model1">Model I - keine Laufwerke</string>
+    <string name="config_name_model3">Model III - keine Laufwerke</string>
+    <string name="crash_dialog_comment_prompt">Welche TRS-80 Anwendungen haben sie versucht auszuführen?</string>
+    <string name="crash_dialog_ok_toast">Vielen Dank!</string>
+    <string name="crash_dialog_text">Der Emulator ist abgestürzt, weshalb die TRS-80 App beendet werden musste. Bitte helfen Sie indem Sie uns sie Absturzdaten schicken. Sie müssen dazu nur auf \'OK\' tippen.</string>
+    <string name="crash_dialog_title">TRS-80 ist abgestürzt!</string>
+    <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
+    <string name="downloading">Herunterladen&#8230;</string>
+    <string name="hint_configuration_usage">Tippen Sie auf eine Konfiguration um diese fortzusetzen.
+                        Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren Optionen zu
+                        zeigen.</string>
+    <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLE </string>
+    <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
+                        zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
+    <string name="hint_keyboard_tilt">Kippen Sie das Gerät, um Cursor-Tasten zu betätigen. Tippen
+                        Sie auf den Bildschirm um zu feuern (Leertaste). Tippen auf der Symbol in der
+                        oberen rechten Ecke um die Orientierungssperre zu deaktivieren.</string>
+    <string name="initial_setup">Aus Gründen des Urheberrechts enthält dieser Emulator keine ROMs.
+                                 Allerdings haben Sie die Option die benötigten ROM Dateien von
+                                 bekannten Webseiten herunterzuladen. Möchten Sie dies nun tun?</string>
+    <string name="keyboard_original_layout">Original Layout</string>
+    <string name="keyboard_compact_layout">Kompaktes Layout</string>
+    <string name="keyboard_joystick_control">Joystick-Steuerung</string>
+    <string name="keyboard_tilt_interface">Kipp-Steuerung</string>
+
+    <string name="keyboard_tilt">Neigefunktion</string>
+    <string name="menu_add">Hinzufügen</string>
+    <string name="menu_cancel">Abbrechen</string>
+    <string name="menu_delete">Löschen</string>
+    <string name="menu_done">Fertig</string>
+    <string name="menu_download">Herunterladen</string>
+    <string name="menu_edit">Bearbeiten</string>
+    <string name="menu_eject">Auswerfen</string>
+    <string name="menu_help">Hilfe</string>
+    <string name="menu_pause">Pause</string>
+    <string name="menu_reset">Zurücksetzen</string>
+    <string name="menu_resume">Fortsetzen</string>
+    <string name="menu_rewind">Zurückspulen</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_sound_off">Ton aus</string>
+    <string name="menu_sound_on">Ton an</string>
+    <string name="menu_start">Start</string>
+    <string name="menu_stop">Stopp</string>
+    <string name="path">Pfad</string>
+    <string name="no_configurations">Tippen Sie auf \'+\' um eine neue Konfiguration zu erstellen.</string>
+    <string name="pref_cassette_title">Kasette</string>
+    <string name="pref_character_color_summary">Diese Farbe wird für die Ausgabeschrift verwendet</string>
+    <string name="pref_character_color_title">Schriftfarbe</string>
+    <string name="pref_disk1_summary">Datei für Laufwerk 1</string>
+    <string name="pref_disk1_title">Laufwerk 1</string>
+    <string name="pref_disk2_summary">Datei für Laufwerk 2</string>
+    <string name="pref_disk2_title">Laufwerk 2</string>
+    <string name="pref_disk3_summary">Datei für Laufwerk 3</string>
+    <string name="pref_disk3_title">Laufwerk 3</string>
+    <string name="pref_disk4_summary">Datei für Laufwerk 4</string>
+    <string name="pref_disk4_title">Laufwerk 4</string>
+    <string name="green">Grün</string>
+    <string name="pref_cassette_summary">Standard-Kassettenlaufwerk</string>
+    <string name="pref_keyboard_landscape_title">Tastatur-Typ</string>
+    <string name="pref_keyboard_landscape_summary">Die Tastatur für das Querformat</string>
+    <string name="pref_keyboard_portrait_title">Tastatur-Typ</string>
+    <string name="pref_keyboard_portrait_summary">Die Tastatur für das Hochformat</string>
+    <string name="pref_landscape_title">Querformat</string>
+    <string name="pref_portrait_title">Hochformat</string>
+    <string name="pref_name_title">Name</string>
+    <string name="pref_name_summary">Name der Konfiguration</string>
+    <string name="pref_mute_sound_title">Stummschaltung</string>
+    <string name="pref_mute_sound_summary_on">Alle Spiele-Töne werden stumm geschaltet</string>
+    <string name="pref_mute_sound_summary_off">Spiele-Töne abspielen</string>
+    <string name="pref_rom_model1_summary">ROM für Model I</string>
+    <string name="pref_rom_model1_title">Model I</string>
+    <string name="pref_rom_model3_summary">ROM für Model III</string>
+    <string name="pref_rom_model3_title">Model III</string>
+    <string name="pref_rom_model4_summary">ROM für Model 4</string>
+    <string name="pref_rom_model4_title">Model 4</string>
+    <string name="pref_rom_model4p_summary">ROM für Model 4P</string>
+    <string name="pref_rom_model4p_title">Model 4P</string>
+    <string name="pref_roms">ROMs</string>
+    <string name="pref_title">Allgemein</string>
+    <string name="pref_trs_model_summary">Das zu emulierende TRS-80 Model</string>
+    <string name="pref_trs_model_title">TRS-80 Model</string>
+    <string name="rewinding_cassette">Kasette wird zurückgespult&#8230;</string>
+    <string name="roms_downlaod_success_msg">Alle ROMs wurden erfolgreich heruntergeladen</string>
+    <string name="roms_download_failure_msg">Nicht alle ROMs konnten heruntergeladen werden!</string>
+    <string name="sound_disabled">deaktiviert</string>
+    <string name="sound_enabled">aktiviert</string>
+    <string name="start_casting">GoogleCast starten</string>
+    <string name="title_initial_setup">Initialisierung</string>
+    <string name="white">Weiß</string>
+    <string name="hint_ok">Alles klar!</string>
+    <string name="hint_title">Hinweis</string>
+    <string name="keyboard_abbrev_compact">kompakt</string>
+    <string name="keyboard_abbrev_joystick">joystick</string>
+    <string name="keyboard_abbrev_original">original</string>
+    <string name="keyboard_abbrev_tilt">kippen</string>
+    <string name="keyboard_compact">Kompaktes Layout</string>
+    <string name="keyboard_joystick">Joystick Steuerung</string>
+    <string name="keyboard_original">Original Layout</string>
+    <string name="help_title_configurations">Hilfe: Konfigurationen</string>
+    <string name="help_title_edit_configuration">Hilfe: Konfigurationen editieren</string>
+    <string name="help_title_settings">Hilfe: Einstellungen</string>
+    <string name="error_model_not_supported">Derzeit werden nur Model I und Model II unterstützt.</string>
+    <string name="error_init">Fehler während der Emulator-Initialisierung. (Error Code: %1$d).
+        Bitte senden Sie den Fehler Code und ihr Android Geräte-Typ an mobile@puder.org.</string>
+    <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
+    <string name="help_configurations">Tippen Sie das \'+\' Symbol um eine neue Konfiguration zu erzeugen.
+        \n\nEine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
+        \n\nTippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Menu-Button (drei
+        vertikale Punkte) gelangen Sie in ein Kontext-Menü.
+        \n\nBitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.</string>
+    <string name="help_edit_configuration">Eine Konfiguration definiert die Parameter die für die
+        Emulation verwendet werden. Wählen Sie ein zu emulierendes TRS-80 Model aus.
+        Bitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.
+        \n\nWenn keine Laufwerke definiert wurden, startet der TRS-80 ROM mit dem BASIC interpreter.
+        \n\nLaufwerks-Images müssen auf die SD-Karte kopiert werden. Die TRS-80 App enthält aus
+        Urheberrechtsgründen keine Images. Sie können aber selbst im Internet nach
+        \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk images</a>\' suchen.
+        \n\nStandarmäßig wird eine leere Kassette für jede neue Konfiguration erstellt. Es kann aber auch
+        ein eigenes Kassetten-Image per Dateipfad gesetzt werden.
+        \n\nEs können verschiedene Tastaturlayouts für das Hoch- und Querformat ausgewählt werden.
+        Das Standard-Layout orientiert sich an dem Layout des original TRS-80. Das kompakte Layout
+        ist besser für kleinere Bildschirme geeignet. Das Spiele-Layout hat Joystick-Kontrolle.
+        Das Kipp-Interface nutzt den Beschleunigungs-Sensor um dami die Pfeiltasten zu steuern.
+        Tippen Sie auf den Bildschirm um die Leertaste zu betätigen. (z.B. zum \'feuern\').
+
+    </string>
+    <string name="help_settings">Dieser Emulator benötigt original ROM Images der verschiedenen
+                        TRS-80 Modelle. ROM images für den TRS-80 müssen auf die SD-Karte kopiert werden,
+                        before die App gestartet wird.
+                        \n\nAus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
+                        sein. Allerdings können Sie diese ohne Probleme im Internet finden (zum Beispiel
+                        <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).</string>
+</resources>

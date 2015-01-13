@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">TRS-80</string>
-    <string name="chromecast_app_id">E0F0F42C</string>
+    <string name="app_name" translatable="false">TRS-80</string>
+    <string name="chromecast_app_id" translatable="false">E0F0F42C</string>
     <string name="start_casting">Start Casting</string>
 
     <string name="crash_toast_text">TRS-80 has crashed!</string>
@@ -12,7 +12,7 @@
     <string name="crash_dialog_comment_prompt">Which TRS-80 application did you try to run?</string>
     <string name="crash_dialog_ok_toast">Thank you!</string>
 
-    <string name="trs80_dir">TRS-80</string>
+    <string name="trs80_dir" translatable="false">TRS-80</string>
 
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
@@ -45,11 +45,11 @@
     <string name="conf_item_keyboards">Keyboards:</string>
 
     <!-- InitialSetupDialogFragment -->
-    <string name="model1_rom_url">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
-    <string name="model1_rom_file_in_zip">trs80model1.rom</string>
-    <string name="model1_rom_filename">model1.rom</string>
-    <string name="model3_rom_url">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
-    <string name="model3_rom_filename">model3.rom</string>
+    <string name="model1_rom_url" translatable="false">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
+    <string name="model1_rom_file_in_zip" translatable="false">trs80model1.rom</string>
+    <string name="model1_rom_filename" translatable="false">model1.rom</string>
+    <string name="model3_rom_url" translatable="false">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
+    <string name="model3_rom_filename" translatable="false">model3.rom</string>
     <string name="downloading">Downloading&#8230;</string>
     <string name="roms_downlaod_success_msg">All ROMs successfully downloaded</string>
     <string name="roms_download_failure_msg">Not all ROMs could be downloaded!</string>
@@ -176,5 +176,8 @@
                         For copyright reasons this app does not bundle ROM images. You can find
                         them on the Internet (for example
                         <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">here</a>).</string>
-
+    <string name="keyboard_original_layout">Original layout</string>
+    <string name="keyboard_compact_layout">Compact layout</string>
+    <string name="keyboard_joystick_control">Joystick control</string>
+    <string name="keyboard_tilt_interface">Tilt interface</string>
 </resources>
