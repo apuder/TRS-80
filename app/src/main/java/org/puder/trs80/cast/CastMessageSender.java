@@ -17,6 +17,8 @@
 package org.puder.trs80.cast;
 
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.BroadcastReceiver.PendingResult;
 import android.content.Context;
@@ -49,6 +51,7 @@ public class CastMessageSender {
     private MediaRouter                   mediaRouter;
     private final MediaRouterCallbackImpl mediaRouterCallback = new MediaRouterCallbackImpl();
     private CastDevice                    selectedDevice;
+    private Lock                          apiClientLock = new ReentrantLock();
     private GoogleApiClient               apiClient;
     private boolean                       waitingForReconnect;
     private boolean                       applicationStarted;
@@ -102,10 +105,19 @@ public class CastMessageSender {
             Log.w(TAG, "Sender not ready to send, message discarded.");
             return;
         }
-        com.google.android.gms.common.api.PendingResult<Status> result = Cast.CastApi.sendMessage(
+
+        try {
+            apiClientLock.lock();
+            if (apiClient == null) {
+                return;
+            }
+            com.google.android.gms.common.api.PendingResult<Status> result = Cast.CastApi.sendMessage(
                 apiClient, activeChannel.getNamespace(), message);
-        if (wait) {
-            result.await();
+            if (wait) {
+                result.await();
+            }
+        }finally {
+          apiClientLock.unlock();
         }
     }
 
@@ -133,18 +145,10 @@ public class CastMessageSender {
     private class CastClientListener extends Cast.Listener {
         @Override
         public void onApplicationStatusChanged() {
-//            if (apiClient != null) {
-//                Log.d(TAG,
-//                        "onApplicationStatusChanged: "
-//                                + Cast.CastApi.getApplicationStatus(apiClient));
-//            }
         }
 
         @Override
         public void onVolumeChanged() {
-//            if (apiClient != null) {
-//                Log.d(TAG, "onVolumeChanged: " + Cast.CastApi.getVolume(apiClient));
-//            }
         }
 
         @Override
@@ -168,13 +172,18 @@ public class CastMessageSender {
             Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(selectedDevice,
                     castClientListener);
 
-            apiClient = new GoogleApiClient.Builder(appContext)
+            try {
+                apiClientLock.lock();
+                apiClient = new GoogleApiClient.Builder(appContext)
                     .addApi(Cast.API, apiOptionsBuilder.build())
                     .addConnectionCallbacks(connectionCallbacks)
                     .addOnConnectionFailedListener(connectionFailedListener).build();
 
-            apiClient.connect();
-            Log.d(TAG, "API Client connect() called.");
+                apiClient.connect();
+                Log.d(TAG, "API Client connect() called.");
+            }finally {
+                apiClientLock.unlock();
+            }
         }
 
         @Override
@@ -206,6 +215,11 @@ public class CastMessageSender {
 
             activeChannel = new TRS80Channel();
             try {
+                apiClientLock.lock();
+                if (apiClient == null) {
+                    throw new IOException("Cannot set up callbacks. No apiClient.");
+                }
+
                 Cast.CastApi.setMessageReceivedCallbacks(apiClient, activeChannel.getNamespace(),
                         activeChannel);
                 readyToSend = true;
@@ -214,6 +228,8 @@ public class CastMessageSender {
                 String message = "Exception while creating channel" + e.getMessage();
                 Toast.makeText(appContext, message, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Exception while creating channel", e);
+            } finally {
+                apiClientLock.unlock();
             }
         }
     }
@@ -241,11 +257,18 @@ public class CastMessageSender {
                 // reconnectChannels();
             } else {
                 try {
+                    apiClientLock.lock();
+                    if (apiClient == null) {
+                        throw new IOException("Cannot launch application, apiClient is null.");
+                    }
+
                     Cast.CastApi.launchApplication(apiClient, chromecastAppId, false)
                             .setResultCallback(resultCallback);
 
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to launch application", e);
+                } finally {
+                    apiClientLock.unlock();
                 }
             }
         }
@@ -287,29 +310,34 @@ public class CastMessageSender {
      * Tears down the whole connection stack as cleanly as possible.
      */
     private void teardown() {
-        readyToSend = false;
-        Log.d(TAG, "teardown");
-        if (apiClient != null) {
-            if (applicationStarted) {
-                if (apiClient.isConnected()) {
-                    try {
-                        Cast.CastApi.stopApplication(apiClient, sessionId);
-                        if (activeChannel != null) {
-                            Cast.CastApi.removeMessageReceivedCallbacks(apiClient,
+        try {
+            apiClientLock.lock();
+            readyToSend = false;
+            Log.d(TAG, "teardown");
+            if (apiClient != null) {
+                if (applicationStarted) {
+                    if (apiClient.isConnected()) {
+                        try {
+                            Cast.CastApi.stopApplication(apiClient, sessionId);
+                            if (activeChannel != null) {
+                                Cast.CastApi.removeMessageReceivedCallbacks(apiClient,
                                     activeChannel.getNamespace());
-                            activeChannel = null;
+                                activeChannel = null;
+                            }
+                        } catch (IOException e) {
+                            Log.e(TAG, "Exception while removing channel", e);
                         }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Exception while removing channel", e);
+                        apiClient.disconnect();
                     }
-                    apiClient.disconnect();
+                    applicationStarted = false;
                 }
-                applicationStarted = false;
+                apiClient = null;
             }
-            apiClient = null;
+            selectedDevice = null;
+            waitingForReconnect = false;
+            sessionId = null;
+        } finally {
+            apiClientLock.unlock();
         }
-        selectedDevice = null;
-        waitingForReconnect = false;
-        sessionId = null;
     }
 }
