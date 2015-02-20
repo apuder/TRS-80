@@ -45,16 +45,9 @@
     <string name="conf_item_keyboards">Keyboards:</string>
 
     <!-- InitialSetupDialogFragment -->
-    <string name="model1_rom_url" translatable="false">http://www.classic-computers.org.nz/system-80/s80-roms.zip</string>
-    <string name="model1_rom_file_in_zip" translatable="false">trs80model1.rom</string>
-    <string name="model1_rom_filename" translatable="false">model1.rom</string>
-    <string name="model3_rom_url" translatable="false">http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom</string>
-    <string name="model3_rom_filename" translatable="false">model3.rom</string>
-    <string name="downloading">Downloading&#8230;</string>
+    <string name="downloading">Downloading (%1$d/%2$d)&#8230;</string>
     <string name="roms_downlaod_success_msg">All ROMs successfully downloaded</string>
     <string name="roms_download_failure_msg">Not all ROMs could be downloaded!</string>
-    <string name="config_name_model1">Model I - no disks</string>
-    <string name="config_name_model3">Model III - no disks</string>
 
     <!-- EditConfigurationActivity -->
     <string name="pref_title">General</string>

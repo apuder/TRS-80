@@ -11,14 +11,12 @@
     <string name="conf_item_hardware">Hardware</string>
     <string name="conf_item_keyboards">Tastaturen</string>
     <string name="conf_item_sound">Ton</string>
-    <string name="config_name_model1">Model I - keine Laufwerke</string>
-    <string name="config_name_model3">Model III - keine Laufwerke</string>
     <string name="crash_dialog_comment_prompt">Welche TRS-80 Anwendungen haben sie versucht auszuführen?</string>
     <string name="crash_dialog_ok_toast">Vielen Dank!</string>
     <string name="crash_dialog_text">Der Emulator ist abgestürzt, weshalb die TRS-80 App beendet werden musste. Bitte helfen Sie indem Sie uns sie Absturzdaten schicken. Sie müssen dazu nur auf \'OK\' tippen.</string>
     <string name="crash_dialog_title">TRS-80 ist abgestürzt!</string>
     <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
-    <string name="downloading">Herunterladen&#8230;</string>
+    <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
     <string name="hint_configuration_usage">Tippen Sie auf eine Konfiguration um diese fortzusetzen.
                         Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren Optionen zu
                         zeigen.</string>

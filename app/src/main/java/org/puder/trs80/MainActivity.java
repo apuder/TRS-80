@@ -97,11 +97,12 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                boolean intercept = firstTime;
                 if (firstTime) {
                     HintDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
                 }
                 firstTime = false;
-                return false;
+                return intercept;
             }
 
             @Override
@@ -141,13 +142,16 @@ public class MainActivity extends ActionBarActivity implements
         // TODO: Enable once fully supported.
         // AudioHttpServer.get().start();
 
-        if (!sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)) {
-            return;
-        }
+        boolean firstTime = sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true);
+        boolean ranNewAssistant = sharedPrefs.getBoolean(SettingsActivity.CONF_RAN_NEW_ASSISTANT,
+                false);
+
         Editor editor = sharedPrefs.edit();
         editor.putBoolean(SettingsActivity.CONF_FIRST_TIME, false);
+        editor.putBoolean(SettingsActivity.CONF_RAN_NEW_ASSISTANT, true);
         editor.commit();
-        if (!ROMs.hasROMs()) {
+
+        if (!ranNewAssistant || (!ROMs.hasROMs() && firstTime)) {
             downloadROMs();
         }
     }
@@ -511,13 +515,30 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     private void downloadROMs() {
-        InitialSetupDialogFragment dialog = new InitialSetupDialogFragment();
-        dialog.show(getSupportFragmentManager(), "dialog");
+        new AlertDialog.Builder(this)
+                .setIcon(R.drawable.warning_icon)
+                .setTitle(R.string.title_initial_setup)
+                .setMessage(R.string.initial_setup)
+                .setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                        InitialSetupDialogFragment prog = new InitialSetupDialogFragment();
+                        prog.show(getSupportFragmentManager(), "dialog");
+                    }
+                })
+                .setNegativeButton(R.string.alert_dialog_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
     }
 
     @Override
     public void onDownloadCompleted() {
-        downloadMenuItem.setVisible(false);
+        if (downloadMenuItem != null) {
+            downloadMenuItem.setVisible(false);
+        }
         updateView();
     }
 }

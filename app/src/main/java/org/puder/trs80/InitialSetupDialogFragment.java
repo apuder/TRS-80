@@ -16,6 +16,20 @@
 
 package org.puder.trs80;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.DialogFragment;
+import android.widget.Toast;
+
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,29 +42,64 @@ import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.IOUtils;
-
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.support.v4.app.DialogFragment;
-import android.widget.Toast;
-
 public class InitialSetupDialogFragment extends DialogFragment {
 
     public interface DownloadCompletionListener {
         public void onDownloadCompleted();
     }
 
-    DownloadCompletionListener listener;
+
+    static private class Download {
+        public boolean isROM;
+        public int     model;
+        public String  configurationName;
+        public String  url;
+        public String  fileInZip;
+        public String  destinationPath;
+
+
+        public Download(boolean isROM, int model, String configurationName, String url,
+                String fileInZip, String destinationPath) {
+            this.isROM = isROM;
+            this.model = model;
+            this.configurationName = configurationName;
+            this.url = url;
+            this.fileInZip = fileInZip;
+            this.destinationPath = destinationPath;
+        }
+    }
+
+
+    static private Download            downloads[] = {
+            new Download(true, Hardware.MODEL1, null,
+                    "http://www.classic-computers.org.nz/system-80/s80-roms.zip",
+                    "trs80model1.rom", "model1.rom"),
+            new Download(
+                    true,
+                    Hardware.MODEL3,
+                    null,
+                    "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
+                    null, "model3.rom"),
+            new Download(false, Hardware.MODEL1, "Model I - LDOS",
+                    "http://www.tim-mann.org/trs80/ld1-531.zip", "ld1-531.dsk", "ldos-model1.dsk"),
+            new Download(
+                    false,
+                    Hardware.MODEL1,
+                    "Model I - NEWDOS/80",
+                    "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.5%20(1986)(Apparat%20Inc)%5bDSK%5d.zip",
+                    "ND80-HD1.DSK", "newdos80-model1.dsk"),
+            new Download(false, Hardware.MODEL3, "Model III - LDOS",
+                    "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk", "ldos-model3.dsk"),
+            new Download(
+                    false,
+                    Hardware.MODEL3,
+                    "Model III - NEWDOS/80",
+                    "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%20III/NEWDOS-80%20v2.0%20(19xx)(Apparat%20Inc)%5bDSK%5d.zip",
+                    "NEWDOS80.DSK", "newdos80-model3.dsk"), };
+
+    private DownloadCompletionListener listener;
+    private ProgressDialog             progressDialog;
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -65,28 +114,16 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
-                .setIcon(R.drawable.warning_icon)
-                .setTitle(R.string.title_initial_setup)
-                .setMessage(R.string.initial_setup)
-                .setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        doInitialSetup();
-                    }
-                })
-                .setNegativeButton(R.string.alert_dialog_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                            }
-                        }).create();
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage(getString(R.string.downloading, 0, downloads.length));
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        return progressDialog;
     }
 
-    private void doInitialSetup() {
-        final String model1_rom_url = this.getString(R.string.model1_rom_url);
-        final String model1_rom_file_in_zip = this.getString(R.string.model1_rom_file_in_zip);
-        final String model3_rom_url = this.getString(R.string.model3_rom_url);
-        final String model1_rom_filename = this.getString(R.string.model1_rom_filename);
-        final String model3_rom_filename = this.getString(R.string.model3_rom_filename);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         File sdcard = Environment.getExternalStorageDirectory();
         final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir)
@@ -96,151 +133,124 @@ public class InitialSetupDialogFragment extends DialogFragment {
             dir.mkdirs();
         }
 
-        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage(this.getString(R.string.downloading));
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.show();
+        new AsyncTask<Void, Integer, Void>() {
 
-        final Handler handler = new Handler();
-
-        new Thread(new Runnable() {
             @Override
-            public void run() {
-                boolean ok;
-
-                if (!ROMs.hasModel1ROM()) {
-                    // Download Model 1 ROM
-                    try {
-                        ok = download(model1_rom_url, Hardware.MODEL1, true,
-                                model1_rom_file_in_zip, dirName + model1_rom_filename);
-                    } catch (IOException e) {
-                        ok = false;
+            protected Void doInBackground(Void... params) {
+                SharedPreferences sharedPrefs = TRS80Application.getAppContext()
+                        .getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
+                                Context.MODE_PRIVATE);
+                Editor editor = sharedPrefs.edit();
+                for (int i = 0; i < downloads.length; i++) {
+                    publishProgress(i + 1);
+                    Download download = downloads[i];
+                    String url = download.url;
+                    boolean isZipped = download.fileInZip != null;
+                    String fileInZip = download.fileInZip;
+                    String destFilePath = dirName + download.destinationPath;
+                    boolean ok = download(url, isZipped, fileInZip, destFilePath);
+                    if (!ok) {
+                        continue;
                     }
-                    if (ok) {
-                        createModel1Configuration();
-                    }
-                }
-
-                if (!ROMs.hasModel3ROM()) {
-                    // Download Model 3 ROM
-                    try {
-                        ok = download(model3_rom_url, Hardware.MODEL3, false, "", dirName
-                                + model3_rom_filename);
-                    } catch (IOException e) {
-                        ok = false;
-                    }
-                    if (ok) {
-                        createModel3Configuration();
-                    }
-                }
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            progressDialog.dismiss();
-                            if (ROMs.hasROMs()) {
-                                Toast.makeText(TRS80Application.getAppContext(),
-                                        R.string.roms_downlaod_success_msg, Toast.LENGTH_LONG)
-                                        .show();
-                                listener.onDownloadCompleted();
-                            } else {
-                                Toast.makeText(TRS80Application.getAppContext(),
-                                        R.string.roms_download_failure_msg, Toast.LENGTH_LONG)
-                                        .show();
-                            }
-                        } catch (IllegalArgumentException ex) {
-                            /*
-                             * If the Activity has gone away before
-                             * progressDialog.dismiss() is called, we will get
-                             * this exception. Simply ignore it.
-                             */
+                    if (download.isROM) {
+                        String key = null;
+                        switch (download.model) {
+                        case Hardware.MODEL1:
+                            key = SettingsActivity.CONF_ROM_MODEL1;
+                            break;
+                        case Hardware.MODEL3:
+                            key = SettingsActivity.CONF_ROM_MODEL3;
+                            break;
+                        case Hardware.MODEL4:
+                            key = SettingsActivity.CONF_ROM_MODEL4;
+                            break;
+                        case Hardware.MODEL4P:
+                            key = SettingsActivity.CONF_ROM_MODEL4P;
+                            break;
                         }
+                        editor.putString(key, destFilePath);
+                    } else {
+                        ConfigurationBackup newConfig = new ConfigurationBackup(
+                                Configuration.newConfiguration());
+                        newConfig.setName(download.configurationName);
+                        newConfig.setModel(download.model);
+                        newConfig.setDiskPath(0, destFilePath);
+                        newConfig.save();
                     }
-                });
+                }
+                editor.commit();
+                return null;
             }
-        }).start();
+
+            @Override
+            protected void onProgressUpdate(Integer... progress) {
+                progressDialog.setMessage(getString(R.string.downloading, progress[0],
+                        downloads.length));
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                dismiss();
+                if (ROMs.hasROMs()) {
+                    Toast.makeText(TRS80Application.getAppContext(),
+                            R.string.roms_downlaod_success_msg, Toast.LENGTH_LONG).show();
+                    listener.onDownloadCompleted();
+                } else {
+                    Toast.makeText(TRS80Application.getAppContext(),
+                            R.string.roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute();
     }
 
-    private boolean download(String URL, int model, boolean isZipped, String fileInZip,
-            String destFilePath) throws IOException {
+    private boolean download(String URL, boolean isZipped, String fileInZip, String destFilePath) {
         boolean ok = false;
 
-        URL url = new URL(URL);
-        URLConnection urlConnection = url.openConnection();
-        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+        try {
+            URL url = new URL(URL);
+            URLConnection urlConnection = url.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
-        if (isZipped) {
-            ZipInputStream zis = new ZipInputStream(in);
-            try {
-                ZipEntry ze;
-                while ((ze = zis.getNextEntry()) != null) {
-                    if (ze.getName().equals(fileInZip)) {
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[1024];
-                        int count;
-                        while ((count = zis.read(buffer)) != -1) {
-                            baos.write(buffer, 0, count);
+            if (isZipped) {
+                ZipInputStream zis = new ZipInputStream(in);
+                try {
+                    ZipEntry ze;
+                    while ((ze = zis.getNextEntry()) != null) {
+                        if (ze.getName().equals(fileInZip)) {
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            byte[] buffer = new byte[1024];
+                            int count;
+                            while ((count = zis.read(buffer)) != -1) {
+                                baos.write(buffer, 0, count);
+                            }
+                            byte[] bytes = baos.toByteArray();
+
+                            File destFile = new File(destFilePath);
+                            OutputStream out = new FileOutputStream(destFile);
+                            out.write(bytes);
+                            out.close();
+
+                            ok = true;
+                            break;
                         }
-                        byte[] bytes = baos.toByteArray();
-
-                        File destFile = new File(destFilePath);
-                        OutputStream out = new FileOutputStream(destFile);
-                        out.write(bytes);
-                        out.close();
-
-                        ok = true;
-                        break;
                     }
+                } finally {
+                    zis.close();
                 }
-            } finally {
-                zis.close();
-            }
-        } else {
-            File destFile = new File(destFilePath);
-            OutputStream out = new FileOutputStream(destFile);
-            IOUtils.copy(in, out);
-            out.close();
+            } else {
+                File destFile = new File(destFilePath);
+                OutputStream out = new FileOutputStream(destFile);
+                IOUtils.copy(in, out);
+                out.close();
 
-            ok = true;
-        }
-
-        in.close();
-
-        if (ok) {
-            // Perhaps this belongs in caller?
-            String pref = null;
-            switch (model) {
-            case Hardware.MODEL1:
-                pref = SettingsActivity.CONF_ROM_MODEL1;
-                break;
-            case Hardware.MODEL3:
-                pref = SettingsActivity.CONF_ROM_MODEL3;
-                break;
+                ok = true;
             }
 
-            SharedPreferences sharedPrefs = TRS80Application.getAppContext().getSharedPreferences(
-                    SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            Editor editor = sharedPrefs.edit();
-            editor.putString(pref, destFilePath);
-            editor.commit();
+            in.close();
+        } catch (IOException e) {
+            ok = false;
         }
 
         return ok;
-    }
-
-    private void createModel1Configuration() {
-        ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName(TRS80Application.getAppContext().getString(R.string.config_name_model1));
-        firstConfig.setModel(Hardware.MODEL1);
-        firstConfig.save();
-    }
-
-    private void createModel3Configuration() {
-        ConfigurationBackup firstConfig = new ConfigurationBackup(Configuration.newConfiguration());
-        firstConfig.setName(TRS80Application.getAppContext().getString(R.string.config_name_model3));
-        firstConfig.setModel(Hardware.MODEL3);
-        firstConfig.save();
     }
 }

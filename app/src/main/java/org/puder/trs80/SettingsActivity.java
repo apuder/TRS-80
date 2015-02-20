@@ -30,19 +30,20 @@ import android.view.View;
 
 public class SettingsActivity extends ActionBarActivity {
 
-    public static final String SHARED_PREF_NAME = "Settings";
+    public static final String SHARED_PREF_NAME       = "Settings";
 
     // Action Menu
-    private static final int   MENU_OPTION_DONE = 0;
-    private static final int   MENU_OPTION_HELP = 1;
+    private static final int   MENU_OPTION_DONE       = 0;
+    private static final int   MENU_OPTION_HELP       = 1;
 
-    public static final String CONF_FIRST_TIME  = "conf_first_time";
-    public static final String CONF_ROM_MODEL1  = "conf_rom_model1";
-    public static final String CONF_ROM_MODEL3  = "conf_rom_model3";
-    public static final String CONF_ROM_MODEL4  = "conf_rom_model4";
-    public static final String CONF_ROM_MODEL4P = "conf_rom_model4p";
+    public static final String CONF_FIRST_TIME        = "conf_first_time";
+    public static final String CONF_RAN_NEW_ASSISTANT = "conf_ran_new_assistant";
+    public static final String CONF_ROM_MODEL1        = "conf_rom_model1";
+    public static final String CONF_ROM_MODEL3        = "conf_rom_model3";
+    public static final String CONF_ROM_MODEL4        = "conf_rom_model4";
+    public static final String CONF_ROM_MODEL4P       = "conf_rom_model4p";
 
-    private AlertDialog        dialog           = null;
+    private AlertDialog        dialog                 = null;
 
     public static String getSetting(String key) {
         SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(

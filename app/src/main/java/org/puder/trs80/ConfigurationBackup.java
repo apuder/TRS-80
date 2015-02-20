@@ -31,6 +31,7 @@ public class ConfigurationBackup extends Configuration {
 
     private Editor   editor;
 
+
     protected ConfigurationBackup(Configuration other) {
         super(other.id);
         this.backupName = other.getName();
@@ -52,6 +53,10 @@ public class ConfigurationBackup extends Configuration {
 
     public void setModel(int model) {
         this.backupModel = model;
+    }
+
+    public void setDiskPath(int disk, String path) {
+        this.backupDisk[disk] = path;
     }
 
     public void save() {
