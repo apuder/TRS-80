@@ -11,8 +11,7 @@
     <dimen name="configuration_table_padding_vertical">0dp</dimen>
     <dimen name="configuration_table_padding_horizontal">5dp</dimen>
     <dimen name="configuration_screenshot_border">7dp</dimen>
-    <dimen name="configuration_padding_button">5dp</dimen>
-    <dimen name="configuration_padding_button_top">10dp</dimen>
+    <dimen name="configuration_button_margin_top">10dp</dimen>
     <integer name="configuration_details_weight">3</integer>
     <integer name="configuration_screenshot_weight">2</integer>
 

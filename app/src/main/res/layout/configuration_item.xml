@@ -109,7 +109,8 @@
         android:src="@drawable/menu_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/configuration_padding_button"
+        android:padding="@dimen/configuration_button_padding"
+        android:layout_margin="@dimen/configuration_button_margin"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
 
@@ -118,8 +119,8 @@
         android:src="@drawable/reorder_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/configuration_padding_button"
-        android:paddingLeft="@dimen/padding_small"
+        android:padding="@dimen/configuration_button_padding"
+        android:layout_margin="@dimen/configuration_button_margin"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/configuration_menu"/>
 

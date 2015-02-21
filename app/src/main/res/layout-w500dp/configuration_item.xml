@@ -101,7 +101,7 @@
         </TableLayout>
 
         <RelativeLayout
-            android:layout_marginTop="@dimen/configuration_padding_button_top"
+            android:layout_marginTop="@dimen/configuration_button_margin_top"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
@@ -110,7 +110,8 @@
                 android:src="@drawable/menu_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/configuration_padding_button"
+                android:padding="@dimen/configuration_button_padding"
+                android:layout_margin="@dimen/configuration_button_margin"
                 android:layout_alignParentBottom="true"/>
 
             <ImageView
@@ -118,8 +119,8 @@
                 android:src="@drawable/reorder_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/configuration_padding_button"
-                android:paddingLeft="@dimen/padding_small"
+                android:padding="@dimen/configuration_button_padding"
+                android:layout_margin="@dimen/configuration_button_margin"
                 android:layout_alignParentBottom="true"
                 android:layout_toRightOf="@+id/configuration_menu"/>
         </RelativeLayout>
