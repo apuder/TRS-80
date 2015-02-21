@@ -46,6 +46,7 @@ public class EditConfigurationActivity extends ActionBarActivity {
 
     private AlertDialog        dialog                  = null;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +57,8 @@ public class EditConfigurationActivity extends ActionBarActivity {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -116,13 +117,19 @@ public class EditConfigurationActivity extends ActionBarActivity {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
             }
 
         });
 
         dialog = builder.create();
         dialog.show();
+    }
+
+    private void dismissAlertDialog(DialogInterface d) {
+        d.dismiss();
+        if (d == dialog) {
+            dialog = null;
+        }
     }
 }

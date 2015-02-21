@@ -45,6 +45,7 @@ public class SettingsActivity extends ActionBarActivity {
 
     private AlertDialog        dialog                 = null;
 
+
     public static String getSetting(String key) {
         SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
                 SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -61,8 +62,8 @@ public class SettingsActivity extends ActionBarActivity {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -115,13 +116,19 @@ public class SettingsActivity extends ActionBarActivity {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
             }
 
         });
 
         dialog = builder.create();
         dialog.show();
+    }
+
+    private void dismissAlertDialog(DialogInterface d) {
+        d.dismiss();
+        if (d == dialog) {
+            dialog = null;
+        }
     }
 }

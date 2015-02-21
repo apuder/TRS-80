@@ -77,6 +77,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private OrientationChanged orientationManager;
     private Handler            handler               = new Handler();
 
+
     class OrientationChanged extends OrientationEventListener {
 
         public OrientationChanged(Context context) {
@@ -140,6 +141,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
         }
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,7 +199,6 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     @Override
     public void onPause() {
         super.onPause();
-        HintDialogUtil.dismissHint();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -207,6 +208,12 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
             stopAccelerometer();
         }
         stopCPUThread();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        HintDialogUtil.dismissHint();
     }
 
     @Override
@@ -511,6 +518,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+
     /**
      * negateX, negateY, xSrc, ySrc
      */
@@ -526,6 +534,7 @@ public class EmulatorActivity extends ActionBarActivity implements SensorEventLi
     private boolean      rightKeyPressed                 = false;
     private boolean      upKeyPressed                    = false;
     private boolean      downKeyPressed                  = false;
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {

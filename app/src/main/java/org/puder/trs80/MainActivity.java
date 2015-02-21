@@ -158,7 +158,20 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     protected void onPause() {
+        if (isFinishing()) {
+            castMessageSender.stop();
+            // TODO: Enable once fully supported.
+            // AudioHttpServer.get().stop();
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
         HintDialogUtil.dismissHint();
+
         if (dialog != null) {
             dialog.dismiss();
             dialog = null;
@@ -167,12 +180,6 @@ public class MainActivity extends ActionBarActivity implements
             popup.dismiss();
             popup = null;
         }
-        if (isFinishing()) {
-            castMessageSender.stop();
-            // TODO: Enable once fully supported.
-            // AudioHttpServer.get().stop();
-        }
-        super.onPause();
     }
 
     public void updateView() {
@@ -353,8 +360,7 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
                 conf.delete();
                 updateView();
             }
@@ -365,8 +371,7 @@ public class MainActivity extends ActionBarActivity implements
 
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        dialog.dismiss();
-                        dialog = null;
+                        dismissAlertDialog(d);
                     }
 
                 });
@@ -385,8 +390,7 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
                 EmulatorState.deleteSavedState(conf.getId());
                 updateView();
             }
@@ -397,8 +401,7 @@ public class MainActivity extends ActionBarActivity implements
 
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        dialog.dismiss();
-                        dialog = null;
+                        dismissAlertDialog(d);
                     }
 
                 });
@@ -466,8 +469,7 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
             }
 
         });
@@ -487,8 +489,7 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
             }
 
         });
@@ -504,8 +505,7 @@ public class MainActivity extends ActionBarActivity implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
             }
 
         });
@@ -515,23 +515,22 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     private void downloadROMs() {
-        new AlertDialog.Builder(this)
-                .setIcon(R.drawable.warning_icon)
-                .setTitle(R.string.title_initial_setup)
-                .setMessage(R.string.initial_setup)
-                .setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                        InitialSetupDialogFragment prog = new InitialSetupDialogFragment();
-                        prog.show(getSupportFragmentManager(), "dialog");
-                    }
-                })
-                .setNegativeButton(R.string.alert_dialog_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
+                R.string.title_initial_setup, R.drawable.warning_icon, R.string.initial_setup);
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int whichButton) {
+                dismissAlertDialog(d);
+                InitialSetupDialogFragment prog = new InitialSetupDialogFragment();
+                prog.show(getSupportFragmentManager(), "dialog");
+            }
+        }).setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int whichButton) {
+                dismissAlertDialog(d);
+            }
+        });
+
+        dialog = builder.create();
+        dialog.show();
     }
 
     @Override
@@ -540,5 +539,12 @@ public class MainActivity extends ActionBarActivity implements
             downloadMenuItem.setVisible(false);
         }
         updateView();
+    }
+
+    private void dismissAlertDialog(DialogInterface d) {
+        d.dismiss();
+        if (d == dialog) {
+            dialog = null;
+        }
     }
 }

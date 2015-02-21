@@ -63,8 +63,7 @@ public class HintDialogUtil {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                dismissAlertDialog(d);
                 if (runnable != null) {
                     runnable.run();
                     runnable = null;
@@ -75,5 +74,12 @@ public class HintDialogUtil {
 
         dialog = builder.create();
         dialog.show();
+    }
+
+    static private void dismissAlertDialog(DialogInterface d) {
+        d.dismiss();
+        if (d == dialog) {
+            dialog = null;
+        }
     }
 }
