@@ -11,7 +11,7 @@
     <string name="conf_item_hardware">Hardware</string>
     <string name="conf_item_keyboards">Tastaturen</string>
     <string name="conf_item_sound">Ton</string>
-    <string name="crash_dialog_comment_prompt">Welche TRS-80 Anwendungen haben sie versucht auszuführen?</string>
+    <string name="crash_dialog_comment_prompt">Welche TRS-80 Anwendungen haben Sie versucht auszuführen?</string>
     <string name="crash_dialog_ok_toast">Vielen Dank!</string>
     <string name="crash_dialog_text">Der Emulator ist abgestürzt, weshalb die TRS-80 App beendet werden musste. Bitte helfen Sie indem Sie uns sie Absturzdaten schicken. Sie müssen dazu nur auf \'OK\' tippen.</string>
     <string name="crash_dialog_title">TRS-80 ist abgestürzt!</string>
@@ -19,7 +19,8 @@
     <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
     <string name="hint_configuration_usage">Tippen Sie auf eine Konfiguration um diese fortzusetzen.
                         Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren Optionen zu
-                        zeigen.</string>
+                        zeigen. Ziehen Sie den Sortier-Knopf um die Reihenfolge der Konfigurationen
+                        zu ändern.</string>
     <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLE </string>
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
                         zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
@@ -90,7 +91,7 @@
     <string name="pref_title">Allgemein</string>
     <string name="pref_trs_model_summary">Das zu emulierende TRS-80 Model</string>
     <string name="pref_trs_model_title">TRS-80 Model</string>
-    <string name="rewinding_cassette">Kasette wird zurückgespult&#8230;</string>
+    <string name="rewinding_cassette">Kassette wird zurückgespult&#8230;</string>
     <string name="roms_downlaod_success_msg">Alle ROMs wurden erfolgreich heruntergeladen</string>
     <string name="roms_download_failure_msg">Nicht alle ROMs konnten heruntergeladen werden!</string>
     <string name="sound_disabled">deaktiviert</string>
@@ -129,7 +130,7 @@
         \n\nStandarmäßig wird eine leere Kassette für jede neue Konfiguration erstellt. Es kann aber auch
         ein eigenes Kassetten-Image per Dateipfad gesetzt werden.
         \n\nEs können verschiedene Tastaturlayouts für das Hoch- und Querformat ausgewählt werden.
-        Das Standard-Layout orientiert sich an dem Layout des original TRS-80. Das kompakte Layout
+        Das Standard-Layout orientiert sich an dem Tastatur-Layout des original TRS-80. Das kompakte Layout
         ist besser für kleinere Bildschirme geeignet. Das Spiele-Layout hat Joystick-Kontrolle.
         Das Kipp-Interface nutzt den Beschleunigungs-Sensor um dami die Pfeiltasten zu steuern.
         Tippen Sie auf den Bildschirm um die Leertaste zu betätigen. (z.B. zum \'feuern\').
@@ -137,7 +138,7 @@
     </string>
     <string name="help_settings">Dieser Emulator benötigt original ROM Images der verschiedenen
                         TRS-80 Modelle. ROM images für den TRS-80 müssen auf die SD-Karte kopiert werden,
-                        before die App gestartet wird.
+                        bevor die App gestartet wird.
                         \n\nAus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
                         sein. Allerdings können Sie diese ohne Probleme im Internet finden (zum Beispiel
                         <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).</string>
