@@ -70,7 +70,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
     }
 
 
-    static private Download            downloads[] = {
+    static private Download            downloads[]     = {
             new Download(true, Hardware.MODEL1, null,
                     "http://www.classic-computers.org.nz/system-80/s80-roms.zip",
                     "trs80model1.rom", "model1.rom"),
@@ -98,7 +98,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     "NEWDOS80.DSK", "newdos80-model3.dsk"), };
 
     private DownloadCompletionListener listener;
-    private ProgressDialog             progressDialog;
+    private int                        downloadCounter = 0;
 
 
     @Override
@@ -114,16 +114,31 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage(getString(R.string.downloading, 0, downloads.length));
+        ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog
+                .setMessage(getString(R.string.downloading, downloadCounter, downloads.length));
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         return progressDialog;
     }
 
     @Override
+    public void onDestroyView() {
+        /*
+         * https://code.google.com/p/android/issues/detail?id=17423
+         */
+        if (getDialog() != null && getRetainInstance()) {
+            getDialog().setDismissMessage(null);
+        }
+        super.onDestroyView();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setCancelable(false);
+        setRetainInstance(true);
 
         File sdcard = Environment.getExternalStorageDirectory();
         final String dirName = sdcard.getAbsolutePath() + "/" + this.getString(R.string.trs80_dir)
@@ -142,7 +157,8 @@ public class InitialSetupDialogFragment extends DialogFragment {
                                 Context.MODE_PRIVATE);
                 Editor editor = sharedPrefs.edit();
                 for (int i = 0; i < downloads.length; i++) {
-                    publishProgress(i + 1);
+                    downloadCounter = i + 1;
+                    publishProgress(downloadCounter);
                     Download download = downloads[i];
                     String url = download.url;
                     boolean isZipped = download.fileInZip != null;
@@ -184,20 +200,20 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
             @Override
             protected void onProgressUpdate(Integer... progress) {
-                progressDialog.setMessage(getString(R.string.downloading, progress[0],
-                        downloads.length));
+                ((ProgressDialog) getDialog()).setMessage(getString(R.string.downloading,
+                        progress[0], downloads.length));
             }
 
             @Override
             protected void onPostExecute(Void result) {
-                dismiss();
+                dismissAllowingStateLoss();
                 if (ROMs.hasROMs()) {
-                    Toast.makeText(TRS80Application.getAppContext(),
-                            R.string.roms_downlaod_success_msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), R.string.roms_downlaod_success_msg,
+                            Toast.LENGTH_LONG).show();
                     listener.onDownloadCompleted();
                 } else {
-                    Toast.makeText(TRS80Application.getAppContext(),
-                            R.string.roms_download_failure_msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), R.string.roms_download_failure_msg,
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }.execute();
