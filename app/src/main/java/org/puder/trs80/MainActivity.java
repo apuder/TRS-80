@@ -25,7 +25,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -43,7 +42,7 @@ import org.puder.trs80.cast.RemoteCastScreen;
 
 import java.io.File;
 
-public class MainActivity extends ActionBarActivity implements
+public class MainActivity extends ActionBarActivityFixLG implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
         PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
 

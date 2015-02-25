@@ -29,7 +29,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -53,7 +52,7 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-public class EmulatorActivity extends ActionBarActivity implements SensorEventListener,
+public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEventListener,
         OnKeyListener {
 
     // Action Menu
