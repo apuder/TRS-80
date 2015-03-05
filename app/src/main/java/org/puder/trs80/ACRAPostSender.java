@@ -1,17 +1,10 @@
 package org.puder.trs80;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import android.content.Context;
+import android.util.Log;
 
-import org.acra.collector.CrashReportData;
 import org.acra.ReportField;
+import org.acra.collector.CrashReportData;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.apache.http.NameValuePair;
@@ -21,7 +14,15 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import android.util.Log;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ACRAPostSender implements ReportSender {
     private final static String BASE_URL      = "http://trs80.sourceforge.net/acra.php?email=mobile@puder.org";
@@ -36,7 +37,7 @@ public class ACRAPostSender implements ReportSender {
     }
 
     @Override
-    public void send(CrashReportData report) throws ReportSenderException {
+    public void send(Context context, CrashReportData report) throws ReportSenderException {
 
         String url = getUrl();
         Log.e("xenim", url);

@@ -16,7 +16,9 @@
 
 package org.puder.trs80;
 
-import java.util.HashMap;
+import android.app.Application;
+import android.content.Context;
+import android.graphics.Bitmap;
 
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
@@ -24,11 +26,9 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-import android.app.Application;
-import android.content.Context;
-import android.graphics.Bitmap;
+import java.util.HashMap;
 
-@ReportsCrashes(formKey = "", formUri = "")
+@ReportsCrashes(formUri = "")
 public class TRS80Application extends Application {
 
     private static Context         context;

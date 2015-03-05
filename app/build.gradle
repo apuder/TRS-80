@@ -53,5 +53,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:+'
     compile 'org.apache.commons:commons-io:1.3.+'
     compile 'org.simpleframework:simple-http:6.+'
-    compile 'ch.acra:acra:4.5.+'
+    compile 'ch.acra:acra:4.6.+'
 }
