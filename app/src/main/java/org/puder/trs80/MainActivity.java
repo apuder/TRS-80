@@ -444,8 +444,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
             break;
         case Hardware.MODEL4:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
-            // TODO Change this to correct model when implemented
-            hardware = null;
+            hardware = new Model4(conf, romFile);
             break;
         case Hardware.MODEL4P:
             romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);

@@ -29,7 +29,7 @@ public class ROMs {
     }
 
     static public boolean hasROMs() {
-        return hasModel1ROM() && hasModel3ROM();
+        return hasModel1ROM() && hasModel3ROM() && hasModel4ROM() && hasModel4PROM();
     }
 
     static public boolean hasModel1ROM() {
@@ -38,6 +38,14 @@ public class ROMs {
 
     static public boolean hasModel3ROM() {
         return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null) != null;
+    }
+
+    static public boolean hasModel4ROM() {
+        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4, null) != null;
+    }
+
+    static public boolean hasModel4PROM() {
+        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4P, null) != null;
     }
 
 }

@@ -80,6 +80,18 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     null,
                     "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
                     null, "model3.rom"),
+            new Download(
+                    true,
+                    Hardware.MODEL4,
+                    null,
+                    "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model4.rom",
+                    null, "model4.rom"),
+            new Download(
+                    true,
+                    Hardware.MODEL4P,
+                    null,
+                    "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model4p.rom",
+                    null, "model4p.rom"),
             /*
             new Download(false, Hardware.MODEL1, "Model I - LDOS",
                     "http://www.tim-mann.org/trs80/ld1-531.zip", "ld1-531.dsk", "ldos-model1.dsk"),
@@ -99,7 +111,13 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     Hardware.MODEL3,
                     "Model III - NEWDOS/80",
                     "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%20III/NEWDOS-80%20v2.0%20(19xx)(Apparat%20Inc)%5bDSK%5d.zip",
-                    "NEWDOS80.DSK", "newdos80-model3.dsk"), };
+                    "NEWDOS80.DSK", "newdos80-model3.dsk"),
+            new Download(
+                    false,
+                    Hardware.MODEL4,
+                    "Model 4 - LDOS",
+                    "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%204/L/LDOS%20v6.3.1-1A%20(1990)(Misosys%20Inc)%5bDSK%5d%5bMaster%5d.zip",
+                    "l631l1am.dsk", "ldos-model4.dsk"), };
 
     private DownloadCompletionListener listener;
     private int                        downloadCounter = 0;
@@ -164,6 +182,11 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     downloadCounter = i + 1;
                     publishProgress(downloadCounter);
                     Download download = downloads[i];
+
+                    if (!download.isROM && hasConfiguration(download.configurationName)) {
+                        continue;
+                    }
+
                     String url = download.url;
                     boolean isZipped = download.fileInZip != null;
                     String fileInZip = download.fileInZip;
@@ -221,6 +244,16 @@ public class InitialSetupDialogFragment extends DialogFragment {
                 }
             }
         }.execute();
+    }
+
+    private boolean hasConfiguration(String name) {
+        for (int i = 0; i < Configuration.getCount(); i++) {
+            Configuration conf = Configuration.getConfiguration(i);
+            if (name.equals(conf.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean download(String URL, boolean isZipped, String fileInZip, String destFilePath) {
