@@ -303,25 +303,14 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     }
 
     private void startRenderThread() {
-        renderThread = new RenderThread();
+        renderThread = new SDLRenderThread();
         renderThread.setRunning(true);
-        renderThread.setPriority(Thread.MAX_PRIORITY);
-        renderThread.start();
         XTRS.setRenderer(renderThread);
     }
 
     private void stopRenderThread() {
-        boolean retry = true;
         XTRS.setRenderer(null);
         renderThread.setRunning(false);
-        renderThread.interrupt();
-        while (retry) {
-            try {
-                renderThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-            }
-        }
         renderThread = null;
     }
 

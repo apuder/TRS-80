@@ -17,6 +17,7 @@
 package org.puder.trs80;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -59,6 +60,9 @@ abstract public class Hardware {
     final public static int MODEL3        = 3;
     final public static int MODEL4        = 4;
     final public static int MODEL4P       = 5;
+    
+    public static int SDL_SURFACE_WIDTH = 516;
+    public static int SDL_SURFACE_HEIGHT = 388;
 
     private int             trsScreenWidth;
     private int             trsScreenHeight;
@@ -82,6 +86,7 @@ abstract public class Hardware {
     @SuppressWarnings("unused")
     private String          xtrsRomFile;
     private byte[]          xtrsScreenBuffer;
+    public ByteBuffer       xtrsSDLSurface;
     @SuppressWarnings("unused")
     private int             xtrsEntryAddr;
     @SuppressWarnings("unused")
@@ -113,6 +118,8 @@ abstract public class Hardware {
 
         setScreenBuffer(0x3fff - 0x3c00 + 1);
         setEntryAddress(0);
+        
+        xtrsSDLSurface = ByteBuffer.allocateDirect(SDL_SURFACE_WIDTH * SDL_SURFACE_HEIGHT * 2);
     }
 
     abstract protected ScreenConfiguration getScreenConfiguration();

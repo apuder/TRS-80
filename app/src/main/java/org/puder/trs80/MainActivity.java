@@ -29,6 +29,7 @@ import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -46,6 +47,9 @@ public class MainActivity extends ActionBarActivityFixLG implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
         PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
 
+    static {
+        System.loadLibrary("xtrs");
+    }
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
     private static final int     REQUEST_CODE_EDIT_SETTINGS = 3;

@@ -38,6 +38,8 @@ static jbyteArray screenArray = NULL;
 static jbyte* screenBuffer;
 static jboolean screenBufferIsCopy;
 
+static jbyte* screenBufferSDL;
+
 static jmp_buf ex_buf;
 
 unsigned char trs_screen[2048];
@@ -162,6 +164,19 @@ void trigger_screen_update() {
     screenUpdateRequired = 0;
 }
 
+void trigger_sdl_screen_update(void* pixels, int nbytes) {
+    screenUpdateRequired = 1;
+    JNIEnv *env = getEnv();
+    jboolean isReady = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
+            rendererIsReadyMethodId);
+    if (!isReady) {
+        return;
+    }
+    memcpy(screenBufferSDL, pixels, nbytes);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
+    screenUpdateRequired = 0;
+}
+
 int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
@@ -205,6 +220,7 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jfieldID xtrsModelID = (*env)->GetFieldID(env, hardwareClass, "xtrsModel", "I");
     jfieldID xtrsRomFileID = (*env)->GetFieldID(env, hardwareClass, "xtrsRomFile", "Ljava/lang/String;");
     jfieldID xtrsScreenBufferID = (*env)->GetFieldID(env, hardwareClass, "xtrsScreenBuffer", "[B");
+    jfieldID xtrsSDLSurfaceID = (*env)->GetFieldID(env, hardwareClass, "xtrsSDLSurface", "Ljava/nio/ByteBuffer;");
     jfieldID xtrsEntryAddrID = (*env)->GetFieldID(env, hardwareClass, "xtrsEntryAddr", "I");
     jfieldID xtrsCassetteID = (*env)->GetFieldID(env, hardwareClass, "xtrsCassette", "Ljava/lang/String;");
     jfieldID xtrsDisk0ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk0", "Ljava/lang/String;");
@@ -214,12 +230,15 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     jint xtrsModel = (*env)->GetIntField(env, hardware, xtrsModelID);
     jstring xtrsRomFile = (*env)->GetObjectField(env, hardware, xtrsRomFileID);
     jbyteArray xtrsScreenBuffer = (*env)->GetObjectField(env, hardware, xtrsScreenBufferID);
+    jobject xtrsSDLSurface = (*env)->GetObjectField(env, hardware, xtrsSDLSurfaceID);
     jint xtrsEntryAddr = (*env)->GetIntField(env, hardware, xtrsEntryAddrID);
     jstring xtrsCassette = (*env)->GetObjectField(env, hardware, xtrsCassetteID);
     jstring xtrsDisk0 = (*env)->GetObjectField(env, hardware, xtrsDisk0ID);
     jstring xtrsDisk1 = (*env)->GetObjectField(env, hardware, xtrsDisk1ID);
     jstring xtrsDisk2 = (*env)->GetObjectField(env, hardware, xtrsDisk2ID);
     jstring xtrsDisk3 = (*env)->GetObjectField(env, hardware, xtrsDisk3ID);
+
+    screenBufferSDL = (jbyte*)(*env)->GetDirectBufferAddress(env, xtrsSDLSurface);
 
     if (screenArray != NULL) {
         (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_ABORT);
@@ -256,7 +275,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
         while (isRunning) {
             z80_run(0);
             if (screenUpdateRequired) {
-                trigger_screen_update();
+                //trigger_screen_update();
             }
         }
     } else {

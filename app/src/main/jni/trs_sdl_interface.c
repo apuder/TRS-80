@@ -1163,7 +1163,6 @@ void trs_screen_init()
     top_margin = border_width;
   }
 
-#ifndef ANDROID
   if (fullscreen) {
      screen = SDL_SetVideoMode(OrigWidth, OrigHeight, 0, 
                                SDL_ANYFORMAT | SDL_FULLSCREEN);
@@ -1215,7 +1214,6 @@ void trs_screen_init()
 
   trs_disk_led(-1,0);
   trs_hard_led(-1,0);
-#endif
 }
 
 Uint32 last_key[256];
@@ -2085,10 +2083,8 @@ void trs_screen_expanded(int flag)
   int bit = flag ? EXPANDED : 0;
   if ((currentmode ^ bit) & EXPANDED) {
     currentmode ^= EXPANDED;
-#ifndef ANDROID
 	SDL_FillRect(screen,NULL,background);
     trs_screen_refresh();
-#endif
   }
   set_expanded_screen_mode(flag);
 }
@@ -2531,10 +2527,11 @@ void trs_hard_led(int drive, int on_off)
 
 void trs_screen_write_char(int position, int char_index)
 {
-#ifdef ANDROID
+#if 0
+   // ANDROID
   trs_screen[position] = char_index;
   trigger_screen_update();
-#else
+#endif
   int row,col,destx,desty;
   int plane;
   SDL_Rect srcRect, destRect;
@@ -2685,7 +2682,6 @@ void trs_screen_write_char(int position, int char_index)
   if (hrg_enable) {
     hrg_update_char(position);
   }
-#endif
 }
 
 #ifdef ANDROID
@@ -2782,7 +2778,8 @@ void trs_screen_scroll()
   for (i = row_chars; i < screen_chars; i++)
     trs_screen[i-row_chars] = trs_screen[i];
 
-#ifdef ANDROID
+#if 0
+  // ANDROID
   trigger_screen_update();
 #else
   if (grafyx_enable) {

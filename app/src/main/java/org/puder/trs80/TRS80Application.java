@@ -45,9 +45,9 @@ public class TRS80Application extends Application {
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
-        ACRA.init(this);
-        HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+//        ACRA.init(this);
+//        HashMap<String, String> ACRAData = new HashMap<String, String>();
+//        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
     }
 
     public static Context getAppContext() {

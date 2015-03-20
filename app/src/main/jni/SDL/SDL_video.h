@@ -119,6 +119,11 @@ typedef struct SDL_Surface {
 
 	/** Reference count -- used when freeing surface */
 	int refcount;				/**< Read-mostly */
+
+#ifdef ANDROID
+    int provided_pixels;
+#endif
+
 } SDL_Surface;
 
 /** @name SDL_Surface Flags
