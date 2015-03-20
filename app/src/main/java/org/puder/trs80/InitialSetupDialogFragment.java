@@ -80,16 +80,20 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     null,
                     "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
                     null, "model3.rom"),
+            /*
             new Download(false, Hardware.MODEL1, "Model I - LDOS",
                     "http://www.tim-mann.org/trs80/ld1-531.zip", "ld1-531.dsk", "ldos-model1.dsk"),
+                    */
             new Download(
                     false,
                     Hardware.MODEL1,
                     "Model I - NEWDOS/80",
                     "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.5%20(1986)(Apparat%20Inc)%5bDSK%5d.zip",
                     "ND80-HD1.DSK", "newdos80-model1.dsk"),
+            /*
             new Download(false, Hardware.MODEL3, "Model III - LDOS",
                     "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk", "ldos-model3.dsk"),
+                    */
             new Download(
                     false,
                     Hardware.MODEL3,
