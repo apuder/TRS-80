@@ -20,17 +20,29 @@ import android.content.SharedPreferences.Editor;
 
 public class ConfigurationBackup extends Configuration {
 
-    private String   backupName;
-    private int      backupModel;
-    private String   backupCassette;
-    private String[] backupDisk = new String[4];
-    private boolean  backupMuteSound;
-    private int      backupCharacterColor;
-    private int      backupKeyboardLayoutPortrait;
-    private int      backupKeyboardLayoutLandscape;
+    private static ConfigurationBackup backup     = null;
 
-    private Editor   editor;
+    private String                     backupName;
+    private int                        backupModel;
+    private String                     backupCassette;
+    private String[]                   backupDisk = new String[4];
+    private boolean                    backupMuteSound;
+    private int                        backupCharacterColor;
+    private int                        backupKeyboardLayoutPortrait;
+    private int                        backupKeyboardLayoutLandscape;
 
+    private Editor                     editor;
+
+
+    protected static void createBackup(Configuration conf) {
+        backup = new ConfigurationBackup(conf);
+    }
+
+    public static ConfigurationBackup retrieveBackup() {
+        ConfigurationBackup conf = backup;
+        backup = null;
+        return conf;
+    }
 
     protected ConfigurationBackup(Configuration other) {
         super(other.id);

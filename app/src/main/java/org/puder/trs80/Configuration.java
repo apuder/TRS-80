@@ -116,8 +116,8 @@ public class Configuration {
                 Context.MODE_PRIVATE);
     }
 
-    public ConfigurationBackup backup() {
-        return new ConfigurationBackup(this);
+    public void backup() {
+        ConfigurationBackup.createBackup(this);
     }
 
     public int getId() {

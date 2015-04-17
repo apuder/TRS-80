@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -63,7 +64,6 @@ public class MainActivity extends ActionBarActivityFixLG implements
     private static final int     MENU_OPTION_EDIT           = 3;
     private static final int     MENU_OPTION_DELETE         = 4;
 
-    private ConfigurationBackup  backup;
     private RecyclerView         configurationListView;
     private RecyclerView.Adapter configurationListViewAdapter;
     private int                  configurationCurrentContextMenu;
@@ -77,6 +77,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
@@ -307,6 +308,10 @@ public class MainActivity extends ActionBarActivityFixLG implements
             if (resultCode == Activity.RESULT_OK || data == null) {
                 return;
             }
+            ConfigurationBackup backup = ConfigurationBackup.retrieveBackup();
+            if (backup == null) {
+                return;
+            }
             boolean isNew = data.getBooleanExtra("IS_NEW", false);
             if (isNew) {
                 backup.delete();
@@ -342,7 +347,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     private void editConfiguration(Configuration conf, boolean isNew) {
-        backup = conf.backup();
+        conf.backup();
         Intent i = new Intent(this, EditConfigurationActivity.class);
         i.putExtra("CONFIG_ID", conf.getId());
         i.putExtra("IS_NEW", isNew);
