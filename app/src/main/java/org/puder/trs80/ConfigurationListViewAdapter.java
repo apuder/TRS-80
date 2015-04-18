@@ -18,6 +18,7 @@ package org.puder.trs80;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -79,14 +80,13 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public Holder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(viewType,
-                viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(viewType, viewGroup, false);
         Holder vh = new Holder(v);
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(Holder holder, int position) {
+    public void onBindViewHolder(final Holder holder, int position) {
         if (position == 0) {
             return;
         }
@@ -137,8 +137,19 @@ public class ConfigurationListViewAdapter extends
         holder.keyboards.setText(keyboards);
 
         // Screenshot
-        Bitmap screenshot = EmulatorState.loadScreenshot(conf.getId());
-        holder.screenshot.setScreenshotBitmap(screenshot);
+        holder.screenshot.setScreenshotBitmap(null);
+        new AsyncTask<Integer, Void, Bitmap>() {
+
+            @Override
+            protected Bitmap doInBackground(Integer... params) {
+                return EmulatorState.loadScreenshot(params[0]);
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap result) {
+                holder.screenshot.setScreenshotBitmap(result);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, conf.getId());
     }
 
     @Override

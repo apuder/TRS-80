@@ -23,18 +23,35 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
-public class ScreenshotView extends ImageView {
+public class ScreenshotView extends FrameLayout {
 
     final private static float ASPECT_RATIO        = 0.75f;
 
     private boolean            hasScreenshot       = false;
+    private ImageView          screenshot;
+    private ProgressBar        spinner;
     private static Bitmap      startEmulatorBitmap = null;
 
 
     public ScreenshotView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        screenshot = new ImageView(context);
+        screenshot.setVisibility(View.GONE);
+        addView(screenshot);
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        params.gravity = Gravity.CENTER;
+        spinner = new ProgressBar(context);
+        spinner.setLayoutParams(params);
+        addView(spinner);
     }
 
     @Override
@@ -42,7 +59,7 @@ public class ScreenshotView extends ImageView {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height;
         if (hasScreenshot) {
-            Drawable d = getDrawable();
+            Drawable d = screenshot.getDrawable();
             height = (int) Math.ceil((float) width * (float) d.getIntrinsicHeight()
                     / (float) d.getIntrinsicWidth());
         } else {
@@ -58,17 +75,22 @@ public class ScreenshotView extends ImageView {
                         (int) ((height - icon.getHeight()) / 2.0), null);
             }
             if (startEmulatorBitmap != null) {
-                setImageBitmap(startEmulatorBitmap);
+                screenshot.setImageBitmap(startEmulatorBitmap);
             }
         }
         setMeasuredDimension(width, height);
+        int mode = hasScreenshot ? MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+        measureChildren(MeasureSpec.makeMeasureSpec(width, mode),
+                MeasureSpec.makeMeasureSpec(height, mode));
     }
 
     public void setScreenshotBitmap(Bitmap img) {
         if (img != null) {
-            setImageBitmap(img);
+            screenshot.setImageBitmap(img);
         }
         hasScreenshot = img != null;
+        screenshot.setVisibility(hasScreenshot ? VISIBLE : GONE);
+        spinner.setVisibility(hasScreenshot ? GONE : VISIBLE);
         requestLayout();
     }
 }
