@@ -23,12 +23,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 public class ScreenshotView extends FrameLayout {
 
@@ -36,22 +32,13 @@ public class ScreenshotView extends FrameLayout {
 
     private boolean            hasScreenshot       = false;
     private ImageView          screenshot;
-    private ProgressBar        spinner;
     private static Bitmap      startEmulatorBitmap = null;
 
 
     public ScreenshotView(Context context, AttributeSet attrs) {
         super(context, attrs);
         screenshot = new ImageView(context);
-        screenshot.setVisibility(View.GONE);
         addView(screenshot);
-
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        params.gravity = Gravity.CENTER;
-        spinner = new ProgressBar(context);
-        spinner.setLayoutParams(params);
-        addView(spinner);
     }
 
     @Override
@@ -79,7 +66,7 @@ public class ScreenshotView extends FrameLayout {
             }
         }
         setMeasuredDimension(width, height);
-        int mode = hasScreenshot ? MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+        int mode = MeasureSpec.EXACTLY;
         measureChildren(MeasureSpec.makeMeasureSpec(width, mode),
                 MeasureSpec.makeMeasureSpec(height, mode));
     }
@@ -89,8 +76,6 @@ public class ScreenshotView extends FrameLayout {
             screenshot.setImageBitmap(img);
         }
         hasScreenshot = img != null;
-        screenshot.setVisibility(hasScreenshot ? VISIBLE : GONE);
-        spinner.setVisibility(hasScreenshot ? GONE : VISIBLE);
         requestLayout();
     }
 }
