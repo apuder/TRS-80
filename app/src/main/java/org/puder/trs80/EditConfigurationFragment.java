@@ -16,8 +16,6 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.browser.FileBrowserActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +24,8 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
+
+import org.puder.trs80.browser.FileBrowserActivity;
 
 public class EditConfigurationFragment extends PreferenceFragment implements
         OnPreferenceChangeListener {
@@ -59,7 +59,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         getPreferenceManager().setSharedPreferencesName("CONFIG_" + configId);
         addPreferencesFromResource(R.xml.configuration);
         sharedPrefs = this.getPreferenceManager().getSharedPreferences();// this.getPreferences(MODE_PRIVATE);
-        name = (Preference) findPreference(EditConfigurationActivity.CONF_NAME);
+        name = findPreference(EditConfigurationActivity.CONF_NAME);
         name.setOnPreferenceChangeListener(this);
         Preference.OnPreferenceClickListener listener = new Preference.OnPreferenceClickListener() {
             @Override
@@ -77,41 +77,41 @@ public class EditConfigurationFragment extends PreferenceFragment implements
             }
         };
 
-        cassette = (Preference) findPreference(EditConfigurationActivity.CONF_CASSETTE);
+        cassette = findPreference(EditConfigurationActivity.CONF_CASSETTE);
         cassette.setOnPreferenceChangeListener(this);
         cassette.setOnPreferenceClickListener(listener);
         defaultCassetteSummary = cassette.getSummary();
 
-        disk1 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK1);
+        disk1 = findPreference(EditConfigurationActivity.CONF_DISK1);
         disk1.setOnPreferenceChangeListener(this);
         disk1.setOnPreferenceClickListener(listener);
         defaultDisk1Summary = disk1.getSummary();
 
-        disk2 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK2);
+        disk2 = findPreference(EditConfigurationActivity.CONF_DISK2);
         disk2.setOnPreferenceChangeListener(this);
         disk2.setOnPreferenceClickListener(listener);
         defaultDisk2Summary = disk2.getSummary();
 
-        disk3 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK3);
+        disk3 = findPreference(EditConfigurationActivity.CONF_DISK3);
         disk3.setOnPreferenceChangeListener(this);
         disk3.setOnPreferenceClickListener(listener);
         defaultDisk3Summary = disk3.getSummary();
 
-        disk4 = (Preference) findPreference(EditConfigurationActivity.CONF_DISK4);
+        disk4 = findPreference(EditConfigurationActivity.CONF_DISK4);
         disk4.setOnPreferenceChangeListener(this);
         disk4.setOnPreferenceClickListener(listener);
         defaultDisk4Summary = disk4.getSummary();
 
-        model = (Preference) findPreference(EditConfigurationActivity.CONF_MODEL);
+        model = findPreference(EditConfigurationActivity.CONF_MODEL);
         model.setOnPreferenceChangeListener(this);
 
-        characterColor = (Preference) findPreference(EditConfigurationActivity.CONF_CHARACTER_COLOR);
+        characterColor = findPreference(EditConfigurationActivity.CONF_CHARACTER_COLOR);
         characterColor.setOnPreferenceChangeListener(this);
 
-        keyboardPortrait = (Preference) findPreference(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT);
+        keyboardPortrait = findPreference(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT);
         keyboardPortrait.setOnPreferenceChangeListener(this);
 
-        keyboardLandscape = (Preference) findPreference(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE);
+        keyboardLandscape = findPreference(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE);
         keyboardLandscape.setOnPreferenceChangeListener(this);
 
         updateSummaries();
@@ -212,7 +212,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
                 key = "conf_disk" + requestCode;
             }
             editor.putString(key, newValue);
-            editor.commit();
+            editor.apply();
             updateSummaries();
         }
     }

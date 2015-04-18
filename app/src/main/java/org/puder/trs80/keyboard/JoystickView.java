@@ -16,8 +16,6 @@
 
 package org.puder.trs80.keyboard;
 
-import org.puder.trs80.TRS80Application;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -29,6 +27,8 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import org.puder.trs80.TRS80Application;
 
 /**
  * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
@@ -323,7 +323,6 @@ public class JoystickView extends View {
                 downKeyPressed = true;
                 pressKeyDown();
             }
-            return;
         }
     }
 

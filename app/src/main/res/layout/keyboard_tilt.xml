@@ -1,7 +1,5 @@
 <!-- http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13 -->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyboard"
     android:layout_width="match_parent"
     android:layout_height="match_parent">

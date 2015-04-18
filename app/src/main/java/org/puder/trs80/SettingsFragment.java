@@ -16,8 +16,6 @@
 
 package org.puder.trs80;
 
-import org.puder.trs80.browser.FileBrowserActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +24,8 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import org.puder.trs80.browser.FileBrowserActivity;
 
 public class SettingsFragment extends PreferenceFragment implements OnPreferenceChangeListener {
 
@@ -56,22 +56,22 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
                 return true;
             }
         };
-        romModel1 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL1);
+        romModel1 = findPreference(SettingsActivity.CONF_ROM_MODEL1);
         romModel1.setOnPreferenceChangeListener(this);
         romModel1.setOnPreferenceClickListener(listener);
         defaultRomModel1Summary = romModel1.getSummary();
 
-        romModel3 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL3);
+        romModel3 = findPreference(SettingsActivity.CONF_ROM_MODEL3);
         romModel3.setOnPreferenceChangeListener(this);
         romModel3.setOnPreferenceClickListener(listener);
         defaultRomModel3Summary = romModel3.getSummary();
 
-        romModel4 = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4);
+        romModel4 = findPreference(SettingsActivity.CONF_ROM_MODEL4);
         romModel4.setOnPreferenceChangeListener(this);
         romModel4.setOnPreferenceClickListener(listener);
         defaultRomModel4Summary = romModel4.getSummary();
 
-        romModel4p = (Preference) findPreference(SettingsActivity.CONF_ROM_MODEL4P);
+        romModel4p = findPreference(SettingsActivity.CONF_ROM_MODEL4P);
         romModel4p.setOnPreferenceChangeListener(this);
         romModel4p.setOnPreferenceClickListener(listener);
         defaultRomModel4PSummary = romModel4p.getSummary();
@@ -107,7 +107,7 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
             if (SettingsActivity.CONF_ROM_MODEL4P.hashCode() == requestCode) {
                 editor.putString(SettingsActivity.CONF_ROM_MODEL4P, path);
             }
-            editor.commit();
+            editor.apply();
             updateSummaries();
         }
     }

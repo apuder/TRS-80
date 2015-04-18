@@ -149,7 +149,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
         Editor editor = sharedPrefs.edit();
         editor.putBoolean(SettingsActivity.CONF_FIRST_TIME, false);
         editor.putBoolean(SettingsActivity.CONF_RAN_NEW_ASSISTANT, true);
-        editor.commit();
+        editor.apply();
 
         if (!ranNewAssistant || (!ROMs.hasROMs() && firstTime)) {
             downloadROMs();

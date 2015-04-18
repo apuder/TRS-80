@@ -1,5 +1,6 @@
 package org.puder.trs80;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -14,6 +15,7 @@ import java.lang.reflect.Field;
 /**
  * Fix for: https://code.google.com/p/android/issues/detail?id=78154
  */
+@SuppressLint("Registered")
 public class ActionBarActivityFixLG extends ActionBarActivity {
 
     @Override
@@ -57,7 +59,7 @@ public class ActionBarActivityFixLG extends ActionBarActivity {
                 menuKeyField.setAccessible(true);
                 menuKeyField.setBoolean(config, false);
             }
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (/*IllegalAccessException | NoSuchFieldException*/ Exception e) {
             // Log.w(TAG, "Failed to force overflow menu.");
         }
     }

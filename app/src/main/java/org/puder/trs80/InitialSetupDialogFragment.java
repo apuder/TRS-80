@@ -45,7 +45,7 @@ import java.util.zip.ZipInputStream;
 public class InitialSetupDialogFragment extends DialogFragment {
 
     public interface DownloadCompletionListener {
-        public void onDownloadCompleted();
+        void onDownloadCompleted();
     }
 
 
@@ -198,7 +198,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
                         newConfig.save();
                     }
                 }
-                editor.commit();
+                editor.apply();
                 return null;
             }
 

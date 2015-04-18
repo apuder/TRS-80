@@ -54,7 +54,7 @@ public class HintDialogUtil {
         runnable = action;
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putBoolean(key, false);
-        editor.commit();
+        editor.apply();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.hint_title);

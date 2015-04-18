@@ -66,7 +66,7 @@ public class XTRS {
     }
 
     public static boolean rendererIsReady() {
-        return (renderer == null) ? false : !renderer.isRendering();
+        return (renderer != null) && !renderer.isRendering();
     }
 
     public static void updateScreen() {

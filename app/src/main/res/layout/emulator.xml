@@ -5,7 +5,8 @@
     android:focusable="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EmulatorActivity">
+    tools:context=".EmulatorActivity"
+    tools:ignore="MergeRootFrame">
 
     <org.puder.trs80.Screen
         android:id="@+id/screen"

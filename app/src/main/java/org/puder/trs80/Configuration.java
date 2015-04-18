@@ -65,7 +65,7 @@ public class Configuration {
         }
         Editor e = globalPrefs.edit();
         e.putString("CONFIGURATIONS", ids);
-        e.commit();
+        e.apply();
     }
 
     public static int getCount() {
@@ -81,7 +81,7 @@ public class Configuration {
         nextId++;
         Editor e = globalPrefs.edit();
         e.putInt("NEXT_ID", nextId);
-        e.commit();
+        e.apply();
         Configuration newConfig = new Configuration(nextId);
         configurations.add(newConfig);
         saveConfigurationIDs();
@@ -104,7 +104,7 @@ public class Configuration {
         // Delete shared preferences
         Editor e = sharedPrefs.edit();
         e.clear();
-        e.commit();
+        e.apply();
 
         // Delete state
         EmulatorState.deleteSavedState(getId());

@@ -83,7 +83,7 @@ public class ConfigurationBackup extends Configuration {
         saveMuteSound();
         saveCharacterColor();
         saveKeyboardLayout();
-        editor.commit();
+        editor.apply();
     }
 
     private void saveName() {
