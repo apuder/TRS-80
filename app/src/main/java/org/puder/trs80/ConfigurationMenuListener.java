@@ -20,7 +20,7 @@ import android.view.View;
 
 public interface ConfigurationMenuListener {
 
-    void onConfigurationSelected(int position);
+    void onConfigurationSelected(Configuration configuration, int position);
 
-    void onConfigurationMenuClicked(View anchor, int position);
+    void onConfigurationMenuClicked(View anchor, Configuration configuration, int position);
 }

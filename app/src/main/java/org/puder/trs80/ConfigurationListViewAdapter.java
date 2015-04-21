@@ -34,6 +34,7 @@ public class ConfigurationListViewAdapter extends
 
     class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public int            position;
+        public Configuration  configuration;
         public TextView       name;
         public TextView       model;
         public TextView       disks;
@@ -64,10 +65,10 @@ public class ConfigurationListViewAdapter extends
         public void onClick(View v) {
             switch (v.getId()) {
             case R.id.configuration_menu:
-                listener.onConfigurationMenuClicked(menu, position);
+                listener.onConfigurationMenuClicked(menu, configuration, position);
                 break;
             default:
-                listener.onConfigurationSelected(position);
+                listener.onConfigurationSelected(configuration, position);
                 break;
             }
         }
@@ -89,10 +90,13 @@ public class ConfigurationListViewAdapter extends
         if (position == 0) {
             return;
         }
-        Configuration conf = Configuration.getConfiguration(position - 1);
+        Configuration conf = Configuration.getNthConfiguration(position - 1);
 
         // Position
-        holder.position = position - 1;
+        holder.position = position;
+
+        // Configuration
+        holder.configuration = conf;
 
         // Name
         holder.name.setText(conf.getName());

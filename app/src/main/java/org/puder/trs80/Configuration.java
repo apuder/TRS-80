@@ -72,8 +72,8 @@ public class Configuration {
         return configurations.size();
     }
 
-    public static Configuration getConfiguration(int id) {
-        return configurations.get(id);
+    public static Configuration getNthConfiguration(int n) {
+        return configurations.get(n);
     }
 
     public static Configuration newConfiguration() {

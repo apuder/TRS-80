@@ -66,7 +66,8 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     private RecyclerView         configurationListView;
     private RecyclerView.Adapter configurationListViewAdapter;
-    private int                  configurationCurrentContextMenu;
+    private Configuration        currentConfiguration;
+    private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
     private AlertDialog          dialog                     = null;
@@ -88,7 +89,6 @@ public class MainActivity extends ActionBarActivityFixLG implements
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
-        configurationListView.setItemAnimator(null);
 
         configurationListView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
 
@@ -137,7 +137,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
     @Override
     public void onResume() {
         super.onResume();
-        updateView();
+        updateView(-1, -1, -1);
         castMessageSender.start();
         // TODO: Enable once fully supported.
         // AudioHttpServer.get().start();
@@ -182,7 +182,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
         }
     }
 
-    public void updateView() {
+    private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
         View withoutConfigurationsView = this.findViewById(R.id.without_configurations);
         View withConfigurationsView = this.findViewById(R.id.with_configurations);
         if (Configuration.getCount() == 0) {
@@ -194,7 +194,16 @@ public class MainActivity extends ActionBarActivityFixLG implements
         withoutConfigurationsView.setVisibility(View.GONE);
         withConfigurationsView.setVisibility(View.VISIBLE);
 
-        configurationListViewAdapter.notifyDataSetChanged();
+        if (positionChanged != -1) {
+            configurationListViewAdapter.notifyItemChanged(positionChanged);
+        } else if (positionInserted != -1) {
+            configurationListViewAdapter.notifyItemInserted(positionInserted);
+            configurationListView.getLayoutManager().scrollToPosition(positionInserted);
+        } else if (positionDeleted != -1) {
+            configurationListViewAdapter.notifyItemRemoved(positionDeleted);
+        } else {
+            configurationListViewAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -247,19 +256,19 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     @Override
-    public void onConfigurationSelected(final int position) {
-        runEmulator(Configuration.getConfiguration(position));
+    public void onConfigurationSelected(Configuration configuration, int position) {
+        runEmulator(configuration);
     }
 
     @Override
-    public void onConfigurationMenuClicked(View anchor, int position) {
-        this.configurationCurrentContextMenu = position;
-        Configuration conf = Configuration.getConfiguration(position);
+    public void onConfigurationMenuClicked(View anchor, Configuration configuration, int position) {
+        currentConfiguration = configuration;
+        currentConfigurationPosition = position;
         popup = new PopupMenu(this, anchor);
         popup.setOnMenuItemClickListener(this);
         popup.setOnDismissListener(this);
         Menu menu = popup.getMenu();
-        if (EmulatorState.hasSavedState(conf.getId())) {
+        if (EmulatorState.hasSavedState(configuration.getId())) {
             menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
             menu.add(Menu.NONE, MENU_OPTION_STOP, Menu.NONE, this.getString(R.string.menu_stop));
         } else {
@@ -272,24 +281,22 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        Configuration conf = Configuration.getConfiguration(this.configurationCurrentContextMenu);
-        int confID = conf.getId();
         switch (item.getItemId()) {
         case MENU_OPTION_START:
-            EmulatorState.deleteSavedState(confID);
-            runEmulator(conf);
+            EmulatorState.deleteSavedState(currentConfiguration.getId());
+            runEmulator(currentConfiguration);
             return true;
         case MENU_OPTION_RESUME:
-            runEmulator(conf);
+            runEmulator(currentConfiguration);
             return true;
         case MENU_OPTION_STOP:
-            stopEmulator(conf);
+            stopEmulator(currentConfiguration, currentConfigurationPosition);
             return true;
         case MENU_OPTION_EDIT:
-            editConfiguration(conf, false);
+            editConfiguration(currentConfiguration, false);
             return true;
         case MENU_OPTION_DELETE:
-            deleteConfiguration(conf);
+            deleteConfiguration(currentConfiguration, currentConfigurationPosition);
             return true;
         }
         return false;
@@ -305,20 +312,27 @@ public class MainActivity extends ActionBarActivityFixLG implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_EDIT_CONFIG) {
-            if (resultCode == Activity.RESULT_OK || data == null) {
+            if (data == null) {
+                return;
+            }
+            boolean isNew = data.getBooleanExtra("IS_NEW", false);
+            if (resultCode == Activity.RESULT_OK) {
+                if (isNew) {
+                    updateView(-1, currentConfigurationPosition, -1);
+                } else {
+                    updateView(currentConfigurationPosition, -1, -1);
+                }
                 return;
             }
             ConfigurationBackup backup = ConfigurationBackup.retrieveBackup();
             if (backup == null) {
                 return;
             }
-            boolean isNew = data.getBooleanExtra("IS_NEW", false);
             if (isNew) {
                 backup.delete();
             } else {
                 backup.save();
             }
-            updateView();
         }
 
         if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
@@ -342,8 +356,9 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     private void addConfiguration() {
-        Configuration newConfig = Configuration.newConfiguration();
-        editConfiguration(newConfig, true);
+        currentConfiguration = Configuration.newConfiguration();
+        currentConfigurationPosition = Configuration.getCount();
+        editConfiguration(currentConfiguration, true);
     }
 
     private void editConfiguration(Configuration conf, boolean isNew) {
@@ -354,7 +369,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
         startActivityForResult(i, REQUEST_CODE_EDIT_CONFIG);
     }
 
-    private void deleteConfiguration(final Configuration conf) {
+    private void deleteConfiguration(final Configuration conf, final int position) {
         String msg = this.getString(R.string.alert_dialog_confirm_delete, conf.getName());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.app_name);
@@ -366,7 +381,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
             public void onClick(DialogInterface d, int which) {
                 dismissAlertDialog(d);
                 conf.delete();
-                updateView();
+                updateView(-1, -1, position);
             }
 
         });
@@ -384,7 +399,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
         dialog.show();
     }
 
-    private void stopEmulator(final Configuration conf) {
+    private void stopEmulator(final Configuration conf, final int position) {
         String msg = this.getString(R.string.alert_dialog_confirm_stop_emu, conf.getName());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.app_name);
@@ -396,7 +411,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
             public void onClick(DialogInterface d, int which) {
                 dismissAlertDialog(d);
                 EmulatorState.deleteSavedState(conf.getId());
-                updateView();
+                updateView(position, -1, -1);
             }
 
         });
@@ -542,7 +557,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
         if (downloadMenuItem != null) {
             downloadMenuItem.setVisible(false);
         }
-        updateView();
+        updateView(-1, -1, -1);
     }
 
     private void dismissAlertDialog(DialogInterface d) {
