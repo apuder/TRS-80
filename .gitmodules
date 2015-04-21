@@ -1,0 +1,3 @@
+[submodule "ShowcaseView"]
+	path = ShowcaseView
+	url = git@github.com:apuder/ShowcaseView.git

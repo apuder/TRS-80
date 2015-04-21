@@ -14,9 +14,10 @@ need to install the Android SDK and NDK.
 
 Next clone the TRS-80 Emulator sources via git:
 
-``
-git clone git://git.code.sf.net/p/trs80/code TRS-80
-``
+``git clone git://git.code.sf.net/p/trs80/code TRS-80``
+``cd TRS-80``
+``git submodule init``
+``git submodule update``
 
 Next import the project into Android Studio via File -> Import Project...
 At this point you should be able to compile the sources. Note that running
