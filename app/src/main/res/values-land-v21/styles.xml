@@ -1,0 +1,10 @@
+<resources>
+
+    <!--
+        This style is a fix for ShowcaseView and Android 5:
+        https://github.com/amlcurran/ShowcaseView/pull/272
+    -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light">
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+    </style>
+</resources>
