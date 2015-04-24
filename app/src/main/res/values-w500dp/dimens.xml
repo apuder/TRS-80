@@ -14,5 +14,6 @@
     <dimen name="configuration_button_margin_top">10dp</dimen>
     <integer name="configuration_details_weight">3</integer>
     <integer name="configuration_screenshot_weight">2</integer>
+    <bool name="align_showcase_button_left">false</bool>
 
 </resources>

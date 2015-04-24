@@ -31,8 +31,8 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.emtronics.dragsortrecycler.DragSortRecycler;
@@ -89,27 +89,6 @@ public class MainActivity extends ActionBarActivityFixLG implements
         configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
 
-        configurationListView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-
-            private boolean firstTime = true;
-
-
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                boolean intercept = firstTime;
-                if (firstTime) {
-                    HintDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
-                }
-                firstTime = false;
-                return intercept;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-            }
-        });
-
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
         dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
         dragSortRecycler.setFloatingAlpha(0.4f);
@@ -131,6 +110,46 @@ public class MainActivity extends ActionBarActivityFixLG implements
         configurationListView.addItemDecoration(dragSortRecycler);
         configurationListView.addOnItemTouchListener(dragSortRecycler);
         configurationListView.setOnScrollListener(dragSortRecycler.getScrollListener());
+
+        showCase();
+    }
+
+    private void showCase() {
+        final View root = findViewById(R.id.main);
+        root.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+
+                    private ViewTreeObserver.OnGlobalLayoutListener layoutListener = this;
+
+                    @Override
+                    public void onGlobalLayout() {
+                        HintUtil.showCase(MainActivity.this, HintUtil.SHOWCASE_CONFIG_MENU,
+                                new HintUtil.ShowcaseListener() {
+                                    @Override
+                                    public void showcaseShown(int scv) {
+                                        switch (scv) {
+                                        case HintUtil.SHOWCASE_CONFIG_MENU:
+                                            HintUtil.showCase(MainActivity.this,
+                                                    HintUtil.SHOWCASE_CONFIG_REORDER, this);
+                                            break;
+                                        case HintUtil.SHOWCASE_CONFIG_REORDER:
+                                            HintUtil.showCase(MainActivity.this,
+                                                    HintUtil.SHOWCASE_CONFIG_START, this);
+                                            break;
+                                        }
+                                    }
+
+                                    @Override
+                                    public void showcaseWillBeShown() {
+                                        if (layoutListener != null) {
+                                            root.getViewTreeObserver()
+                                                    .removeGlobalOnLayoutListener(layoutListener);
+                                            layoutListener = null;
+                                        }
+                                    }
+                                });
+                    }
+                });
     }
 
     @Override
@@ -168,8 +187,6 @@ public class MainActivity extends ActionBarActivityFixLG implements
     @Override
     protected void onStop() {
         super.onStop();
-
-        HintDialogUtil.dismissHint();
 
         if (dialog != null) {
             dialog.dismiss();

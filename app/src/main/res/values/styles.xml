@@ -19,4 +19,19 @@
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
     </style>
+
+    <style name="ShowcaseTheme" parent="ShowcaseView.Light">
+        <item name="sv_backgroundColor">#cc3d4353</item>
+        <item name="sv_showcaseColor">#25467A</item>
+        <item name="sv_titleTextAppearance">@style/ShowcaseTitle</item>
+        <item name="sv_detailTextAppearance">@style/ShowcaseDetail</item>
+    </style>
+
+    <style name="ShowcaseTitle" parent="TextAppearance.ShowcaseView.Title">
+        <item name="android:textColor">#dddddd</item>
+    </style>
+
+    <style name="ShowcaseDetail" parent="TextAppearance.ShowcaseView.Detail">
+        <item name="android:textColor">#ffffff</item>
+    </style>
 </resources>

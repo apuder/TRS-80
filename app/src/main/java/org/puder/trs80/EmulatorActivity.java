@@ -212,7 +212,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     @Override
     public void onStop() {
         super.onStop();
-        HintDialogUtil.dismissHint();
+        HintUtil.dismissHint();
     }
 
     @Override
@@ -453,7 +453,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
         if (messageId == -1) {
             return;
         }
-        HintDialogUtil.showHint(this, messageId);
+        HintUtil.showHint(this, messageId);
     }
 
     @Override

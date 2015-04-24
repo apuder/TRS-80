@@ -124,10 +124,6 @@
                         to download the ROM images?</string>
 
     <string name="hint_title">Hint</string>
-    <string name="hint_configuration_usage">Tapping a configuration resumes the emulator.
-                        Use the menu button in the bottom corner of the configuration to show a
-                        context menu. Drag the re-arrange icon to re-order the
-                        configurations.</string>
     <string name="hint_keyboard_tilt">Tilt the device to trigger cursor keys. Press anywhere
                         on the screen to fire (space bar). Use icon in top-right corner to
                         unlock orientation-lock.</string>
@@ -173,4 +169,10 @@
     <string name="keyboard_compact_layout">Compact layout</string>
     <string name="keyboard_joystick_control">Joystick control</string>
     <string name="keyboard_tilt_interface">Tilt interface</string>
+    <string name="scv_config_menu_title">Menu</string>
+    <string name="scv_config_menu_descr">Tap menu icon for more options</string>
+    <string name="scv_config_reorder_title">Rearrange</string>
+    <string name="scv_config_reorder_descr">Drag rearrange icon to reorder configurations</string>
+    <string name="scv_config_card_view_title">Start</string>
+    <string name="scv_config_card_view_descr">Tap anywhere else to start or resume emulator</string>
 </resources>

@@ -17,10 +17,6 @@
     <string name="crash_dialog_title">TRS-80 ist abgestürzt!</string>
     <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
     <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
-    <string name="hint_configuration_usage">Tippen Sie auf eine Konfiguration um diese fortzusetzen.
-                        Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren Optionen zu
-                        zeigen. Ziehen Sie den Sortier-Knopf um die Reihenfolge der Konfigurationen
-                        zu ändern.</string>
     <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLE </string>
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
                         zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
@@ -142,4 +138,13 @@
                         \n\nAus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
                         sein. Allerdings können Sie diese ohne Probleme im Internet finden (zum Beispiel
                         <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).</string>
+    <string name="scv_config_menu_title">Menü</string>
+    <string name="scv_config_menu_descr">Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren
+        Optionen zu zeigen</string>
+    <string name="scv_config_reorder_title">Sortieren</string>
+    <string name="scv_config_reorder_descr">Ziehen Sie den Sortier-Knopf um die Reihenfolge der
+        Konfigurationen zu ändern</string>
+    <string name="scv_config_card_view_title">Starten</string>
+    <string name="scv_config_card_view_descr">Tippen Sie auf die Konfiguration um den Emulator zu
+        starten oder fortzusetzen</string>
 </resources>
