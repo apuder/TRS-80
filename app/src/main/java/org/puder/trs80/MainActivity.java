@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -78,7 +77,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        StrictMode.enableDefaults();
+        //StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
