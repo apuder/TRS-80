@@ -18,17 +18,28 @@ package org.puder.trs80;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
-import android.text.SpannableString;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AlertDialogUtil {
 
-    public static Builder createAlertDialog(Context context, int titleId, int iconId,
+    static private Map<Context, Dialog> dialogs = new HashMap<>();
+
+
+    public static Builder createAlertDialog(final Context context, int titleId, int iconId,
             CharSequence message) {
+        dismissDialog(context);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(titleId);
         if (iconId != -1) {
@@ -38,14 +49,63 @@ public class AlertDialogUtil {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.alert_dialog, null, false);
         TextView t = (TextView) view.findViewById(R.id.alert_text);
-        SpannableString s = new SpannableString(message);
-        t.setText(s);
+        final int size = (int) (t.getTextSize() * 1.2f);
+        t.setText(Html.fromHtml(message.toString(), new Html.ImageGetter() {
+            @Override
+            public Drawable getDrawable(String source) {
+                source = source.replace("/", "");
+                int id = context.getResources()
+                        .getIdentifier(source, "drawable", "org.puder.trs80");
+                Drawable d = context.getResources().getDrawable(id);
+                d.setBounds(0, 0, size, size);
+                return d;
+            }
+        }, null));
         t.setMovementMethod(LinkMovementMethod.getInstance());
         builder.setView(view);
         return builder;
     }
 
+    public static void showDialog(Context context, Builder builder) {
+        dismissDialog(context);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialogs.put(context, dialog);
+    }
+
     public static Builder createAlertDialog(Context context, int titleId, int iconId, int messageId) {
         return createAlertDialog(context, titleId, iconId, context.getText(messageId));
+    }
+
+    static public void dismissDialog(Context context) {
+        if (dialogs.containsKey(context)) {
+            dialogs.get(context).dismiss();
+            dialogs.remove(context);
+        }
+    }
+
+    static public boolean showHint(final Context context, int hintId) {
+        String key = "conf_new_hint_id" + hintId;
+        SharedPreferences sharedPrefs = context.getSharedPreferences(
+                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        if (!sharedPrefs.getBoolean(key, true)) {
+            return false;
+        }
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(key, false);
+        editor.apply();
+
+        AlertDialog.Builder builder = createAlertDialog(context, R.string.hint_title, -1, hintId);
+        builder.setPositiveButton(R.string.hint_ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                dismissDialog(context);
+            }
+
+        });
+
+        showDialog(context, builder);
+        return true;
     }
 }

@@ -4,7 +4,7 @@
     <string name="alert_dialog_confirm_delete">Sind Sie sicher, dass Sie die Konfiguration \'%1$s\' löschen möchten?</string>
     <string name="alert_dialog_confirm_eject">Sind Sie sicher, dass Sie die derzeit gemountete Datei auswerfen möchten?</string>
     <string name="alert_dialog_confirm_stop_emu">Sind Sie sicher, dass Sie die Emulation für die Konfiguration \'%1$s\' stoppen möchten?</string>
-    <string name="alert_dialog_inform_crash">Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.</string>
+    <string name="alert_dialog_inform_crash"><![CDATA[Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.]]></string>
     <string name="alert_dialog_ok">OK</string>
     <string name="conf_header">Konfigurationen</string>
     <string name="conf_item_disks">Laufwerke</string>
@@ -17,11 +17,18 @@
     <string name="crash_dialog_title">TRS-80 ist abgestürzt!</string>
     <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
     <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
-    <string name="hint_configuration_usage">Tippen Sie auf eine Konfiguration um diese fortzusetzen.
-                        Tippen Sie auf den Menü-Knopf um ein Kontext-Menü mit weiteren Optionen zu
-                        zeigen. Ziehen Sie den Sortier-Knopf um die Reihenfolge der Konfigurationen
-                        zu ändern.</string>
-    <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLE </string>
+    <string name="hint_configuration_usage"><![CDATA[Tippen Sie auf eine Konfiguration um diese fortzusetzen.
+                        Tippen Sie auf den Menü-Knopf (<img src="menu_icon"/>) um ein Kontext-Menü mit weiteren Optionen zu
+                        zeigen. Ziehen Sie den Sortier-Knopf (<img src="reorder_icon"/>) um die Reihenfolge der Konfigurationen
+                        zu ändern.]]></string>
+    <string name="hint_emulator"><![CDATA[Benutzen Sie die virtuelle Tastatur oder externe Tastatur
+                        um TRS Kommandos einzugeben. Das Hilfe-Menü bietet weitere Informationen.<p>
+                        Die folgenden Aktionen sind verfügbar:<br/>
+                        &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
+                        &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
+                        &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten]]></string>
+    <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLEAR.</string>
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
                         zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
     <string name="hint_keyboard_tilt">Kippen Sie das Gerät, um Cursor-Tasten zu betätigen. Tippen
@@ -68,9 +75,10 @@
     <string name="pref_disk4_title">Laufwerk 4</string>
     <string name="green">Grün</string>
     <string name="pref_cassette_summary">Standard-Kassettenlaufwerk</string>
-    <string name="pref_keyboard_landscape_title">Tastatur-Typ</string>
+    <string name="pref_keyboard">Tastatur</string>
+    <string name="pref_keyboard_landscape_title">Querformat Tastatur</string>
     <string name="pref_keyboard_landscape_summary">Die Tastatur für das Querformat</string>
-    <string name="pref_keyboard_portrait_title">Tastatur-Typ</string>
+    <string name="pref_keyboard_portrait_title">Hochformat Tastatur</string>
     <string name="pref_keyboard_portrait_summary">Die Tastatur für das Hochformat</string>
     <string name="pref_landscape_title">Querformat</string>
     <string name="pref_portrait_title">Hochformat</string>
@@ -79,6 +87,8 @@
     <string name="pref_mute_sound_title">Stummschaltung</string>
     <string name="pref_mute_sound_summary_on">Alle Spiele-Töne werden stumm geschaltet</string>
     <string name="pref_mute_sound_summary_off">Spiele-Töne abspielen</string>
+    <string name="pref_storage">Speichermedien</string>
+    <string name="pref_misc">Sonstiges</string>
     <string name="pref_rom_model1_summary">ROM für Model I</string>
     <string name="pref_rom_model1_title">Model I</string>
     <string name="pref_rom_model3_summary">ROM für Model III</string>
@@ -113,33 +123,52 @@
     <string name="help_title_settings">Hilfe: Einstellungen</string>
     <string name="error_model_not_supported">Derzeit werden nur Model I und Model II unterstützt.</string>
     <string name="error_init">Fehler während der Emulator-Initialisierung. (Error Code: %1$d).
-        Bitte senden Sie den Fehler Code und ihr Android Geräte-Typ an mobile@puder.org.</string>
+        Bitte senden Sie den Fehler Code und Ihr Android Geräte-Typ an mobile@puder.org.</string>
     <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
-    <string name="help_configurations">Tippen Sie das \'+\' Symbol um eine neue Konfiguration zu erzeugen.
-        \n\nEine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
-        \n\nTippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Menu-Button (drei
-        vertikale Punkte) gelangen Sie in ein Kontext-Menü.
-        \n\nBitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.</string>
-    <string name="help_edit_configuration">Eine Konfiguration definiert die Parameter die für die
+    <string name="help_configurations"><![CDATA[Tippen Sie den Hinzufügen-Button (<img src="add_icon"/>) um eine neue Konfiguration zu erzeugen.
+        Eine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
+        Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Menu-Button (<img src="menu_icon"/>)
+        gelangen Sie in ein Kontext-Menü. Ziehen Sie den Sortier-Button (<img src="reorder_icon"/>) um
+        die Reihenfolge der Konfigurationen zu ändern.
+        Bitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.]]></string>
+    <string name="help_edit_configuration"><![CDATA[Eine Konfiguration definiert die Parameter die für die
         Emulation verwendet werden. Wählen Sie ein zu emulierendes TRS-80 Model aus.
         Bitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.
-        \n\nWenn keine Laufwerke definiert wurden, startet der TRS-80 ROM mit dem BASIC interpreter.
-        \n\nLaufwerks-Images müssen auf die SD-Karte kopiert werden. Die TRS-80 App enthält aus
+        Wenn keine Laufwerke definiert wurden, startet der TRS-80 ROM mit dem BASIC interpreter.
+        Laufwerks-Images müssen auf die SD-Karte kopiert werden. Die TRS-80 App enthält aus
         Urheberrechtsgründen keine Images. Sie können aber selbst im Internet nach
-        \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk images</a>\' suchen.
-        \n\nStandarmäßig wird eine leere Kassette für jede neue Konfiguration erstellt. Es kann aber auch
+        \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk images</a>\' suchen.<p>
+        Standarmäßig wird eine leere Kassette für jede neue Konfiguration erstellt. Es kann aber auch
         ein eigenes Kassetten-Image per Dateipfad gesetzt werden.
-        \n\nEs können verschiedene Tastaturlayouts für das Hoch- und Querformat ausgewählt werden.
+        Es können verschiedene Tastaturlayouts für das Hoch- und Querformat ausgewählt werden.
         Das Standard-Layout orientiert sich an dem Tastatur-Layout des original TRS-80. Das kompakte Layout
         ist besser für kleinere Bildschirme geeignet. Das Spiele-Layout hat Joystick-Kontrolle.
         Das Kipp-Interface nutzt den Beschleunigungs-Sensor um dami die Pfeiltasten zu steuern.
-        Tippen Sie auf den Bildschirm um die Leertaste zu betätigen. (z.B. zum \'feuern\').
-
+        Tippen Sie auf den Bildschirm um die Leertaste zu betätigen. (z.B. zum \'feuern\').]]>
     </string>
-    <string name="help_settings">Dieser Emulator benötigt original ROM Images der verschiedenen
+    <string name="help_settings"><![CDATA[Dieser Emulator benötigt original ROM Images der verschiedenen
                         TRS-80 Modelle. ROM images für den TRS-80 müssen auf die SD-Karte kopiert werden,
                         bevor die App gestartet wird.
-                        \n\nAus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
+                        Aus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
                         sein. Allerdings können Sie diese ohne Probleme im Internet finden (zum Beispiel
-                        <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).</string>
+                        <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).]]></string>
+    <string name="help_title_emulator">Hilfe: Emulator</string>
+    <string name="help_emulator"><![CDATA[Pausieren des Emulator speichert dessen aktuellen Zustand. Die
+                        TRS-BASIC CLOAD/CSAVE Kommandos lesen und schreiben auf die Kassette. Die Kassette
+                        muss vor einem CLOAD Kommando zurückgespult werden. Nachdem der Emulator angehalten
+                        wird, können verschiedene Floppy- und Kassetten-Dateien, sowie verschiedene Tastaturen
+                        für Hoch- und Querformat individuell für jede Konfiguration definiert werden. Es wird
+                        empfohlen, eine externe Tastatur zu benutzen.<p>
+                        Die folgenden Aktionen sind über das Menü verfügbar:<br/>
+                        &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
+                        &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
+                        &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<p>
+                        Für die ersten Schritte, folgende Kommandos nach dem booten von NEWDOS/80, eingeben:<p>
+                        <tt>&nbsp;&nbsp;DIR</tt><br/>
+                        <tt>&nbsp;&nbsp;BASIC</tt><br/>
+                        <tt>&nbsp;&nbsp;10 PRINT &quot;HELLO WORLD!&quot;</tt><br/>
+                        <tt>&nbsp;&nbsp;RUN</tt><br/>
+                        <tt>&nbsp;&nbsp;LIST</tt><br/>
+                        <tt>&nbsp;&nbsp;CSAVE &quot;FIRST.BAS&quot;</tt>]]></string>
 </resources>

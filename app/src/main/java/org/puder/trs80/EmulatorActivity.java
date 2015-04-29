@@ -18,7 +18,9 @@ package org.puder.trs80;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -61,6 +63,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     private static final int   MENU_OPTION_RESET     = 2;
     private static final int   MENU_OPTION_SOUND_ON  = 3;
     private static final int   MENU_OPTION_SOUND_OFF = 4;
+    private static final int   MENU_OPTION_HELP      = 5;
 
     private Thread             cpuThread;
     private RenderThread       renderThread;
@@ -178,6 +181,8 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
         orientationManager.enable();
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        AlertDialogUtil.showHint(this, R.string.hint_emulator);
     }
 
     @Override
@@ -212,7 +217,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     @Override
     public void onStop() {
         super.onStop();
-        HintDialogUtil.dismissHint();
+        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -233,13 +238,13 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
                         this.getString(R.string.menu_pause)).setIcon(R.drawable.pause_icon),
                 MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE,
-                        this.getString(R.string.menu_rewind)).setIcon(R.drawable.rewind_icon),
-                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
-        MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE,
                         this.getString(R.string.menu_reset)).setIcon(R.drawable.reset_icon),
-                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE,
+                        this.getString(R.string.menu_rewind)).setIcon(R.drawable.rewind_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             setSoundMuted(true);
@@ -247,13 +252,18 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
             muteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_OFF, Menu.NONE,
                     this.getString(R.string.menu_sound_off));
             MenuItemCompat.setShowAsAction(muteMenuItem.setIcon(R.drawable.sound_off_icon),
-                    MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+                    MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
             unmuteMenuItem = menu.add(Menu.NONE, MENU_OPTION_SOUND_ON, Menu.NONE,
                     this.getString(R.string.menu_sound_on));
             MenuItemCompat.setShowAsAction(unmuteMenuItem.setIcon(R.drawable.sound_on_icon),
-                    MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+                    MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
             updateMuteSoundIcons();
         }
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                                this.getString(R.string.menu_help)).setIcon(
+                                R.drawable.help_icon_white), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         return true;
     }
 
@@ -277,6 +287,9 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
         case MENU_OPTION_SOUND_OFF:
             setSoundMuted(false);
             updateMuteSoundIcons();
+            return true;
+        case MENU_OPTION_HELP:
+            showHelp();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -453,7 +466,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
         if (messageId == -1) {
             return;
         }
-        HintDialogUtil.showHint(this, messageId);
+        AlertDialogUtil.showHint(this, messageId);
     }
 
     @Override
@@ -501,6 +514,21 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
             muteMenuItem.setVisible(false);
             unmuteMenuItem.setVisible(true);
         }
+    }
+
+    private void showHelp() {
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
+                R.string.help_title_emulator, -1, R.string.help_emulator);
+        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                AlertDialogUtil.dismissDialog(EmulatorActivity.this);
+            }
+
+        });
+
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     public void log(final String msg) {

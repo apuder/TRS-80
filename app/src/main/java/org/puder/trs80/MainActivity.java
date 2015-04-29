@@ -69,7 +69,6 @@ public class MainActivity extends ActionBarActivityFixLG implements
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
-    private AlertDialog          dialog                     = null;
     private PopupMenu            popup                      = null;
 
     private CastMessageSender    castMessageSender;
@@ -77,7 +76,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //StrictMode.enableDefaults();
+        // StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
@@ -98,7 +97,8 @@ public class MainActivity extends ActionBarActivityFixLG implements
             public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
                 boolean intercept = firstTime;
                 if (firstTime) {
-                    HintDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
+                    intercept = AlertDialogUtil.showHint(MainActivity.this,
+                            R.string.hint_configuration_usage);
                 }
                 firstTime = false;
                 return intercept;
@@ -169,12 +169,8 @@ public class MainActivity extends ActionBarActivityFixLG implements
     protected void onStop() {
         super.onStop();
 
-        HintDialogUtil.dismissHint();
+        AlertDialogUtil.dismissDialog(this);
 
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
         if (popup != null) {
             popup.dismiss();
             popup = null;
@@ -370,15 +366,13 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
     private void deleteConfiguration(final Configuration conf, final int position) {
         String msg = this.getString(R.string.alert_dialog_confirm_delete, conf.getName());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
-        builder.setMessage(msg);
-        builder.setIcon(R.drawable.warning_icon);
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
+                R.drawable.warning_icon, msg);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
                 conf.delete();
                 updateView(-1, -1, position);
             }
@@ -389,26 +383,23 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        dismissAlertDialog(d);
+                        AlertDialogUtil.dismissDialog(MainActivity.this);
                     }
 
                 });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void stopEmulator(final Configuration conf, final int position) {
         String msg = this.getString(R.string.alert_dialog_confirm_stop_emu, conf.getName());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
-        builder.setMessage(msg);
-        builder.setIcon(R.drawable.warning_icon);
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
+                R.drawable.warning_icon, msg);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
                 EmulatorState.deleteSavedState(conf.getId());
                 updateView(position, -1, -1);
             }
@@ -419,13 +410,12 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        dismissAlertDialog(d);
+                        AlertDialogUtil.dismissDialog(MainActivity.this);
                     }
 
                 });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void runEmulator(Configuration conf) {
@@ -487,13 +477,12 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
             }
 
         });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void showSettings() {
@@ -507,13 +496,12 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
             }
 
         });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void showHelp() {
@@ -523,13 +511,12 @@ public class MainActivity extends ActionBarActivityFixLG implements
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
             }
 
         });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void downloadROMs() {
@@ -537,18 +524,17 @@ public class MainActivity extends ActionBarActivityFixLG implements
                 R.string.title_initial_setup, R.drawable.warning_icon, R.string.initial_setup);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int whichButton) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
                 InitialSetupDialogFragment prog = new InitialSetupDialogFragment();
                 prog.show(getSupportFragmentManager(), "dialog");
             }
         }).setNegativeButton(R.string.alert_dialog_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int whichButton) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(MainActivity.this);
             }
         });
 
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     @Override
@@ -557,12 +543,5 @@ public class MainActivity extends ActionBarActivityFixLG implements
             downloadMenuItem.setVisible(false);
         }
         updateView(-1, -1, -1);
-    }
-
-    private void dismissAlertDialog(DialogInterface d) {
-        d.dismiss();
-        if (d == dialog) {
-            dialog = null;
-        }
     }
 }

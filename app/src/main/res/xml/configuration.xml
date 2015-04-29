@@ -12,7 +12,11 @@
             android:summary="@string/pref_trs_model_summary"
             android:key="conf_model"
             android:entryValues="@array/conf_trs_model_values" />
+    </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/pref_storage"
+        android:key="conf_storage">
         <Preference
             android:title="@string/pref_cassette_title"
             android:summary="@string/pref_cassette_summary"
@@ -33,6 +37,28 @@
             android:title="@string/pref_disk4_title"
             android:summary="@string/pref_disk4_summary"
             android:key="conf_disk4" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_keyboard"
+        android:key="conf_keyboard">
+        <ListPreference
+            android:entries="@array/conf_keyboard_type"
+            android:title="@string/pref_keyboard_portrait_title"
+            android:summary="@string/pref_keyboard_portrait_summary"
+            android:key="conf_keyboard_portrait"
+            android:entryValues="@array/conf_keyboard_type_values" />
+        <ListPreference
+            android:entries="@array/conf_keyboard_type"
+            android:title="@string/pref_keyboard_landscape_title"
+            android:summary="@string/pref_keyboard_landscape_summary"
+            android:key="conf_keyboard_landscape"
+            android:entryValues="@array/conf_keyboard_type_values" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_misc"
+        android:key="conf_misc">
         <ListPreference
             android:entries="@array/conf_character_color"
             android:title="@string/pref_character_color_title"
@@ -44,25 +70,5 @@
             android:summaryOn="@string/pref_mute_sound_summary_on"
             android:summaryOff="@string/pref_mute_sound_summary_off"
             android:key="conf_mute_sound" />
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/pref_portrait_title"
-        android:key="conf_portrait">
-        <ListPreference
-            android:entries="@array/conf_keyboard_type"
-            android:title="@string/pref_keyboard_portrait_title"
-            android:summary="@string/pref_keyboard_portrait_summary"
-            android:key="conf_keyboard_portrait"
-            android:entryValues="@array/conf_keyboard_type_values" />
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/pref_landscape_title"
-        android:key="conf_landscape">
-        <ListPreference
-            android:entries="@array/conf_keyboard_type"
-            android:title="@string/pref_keyboard_landscape_title"
-            android:summary="@string/pref_keyboard_landscape_summary"
-            android:key="conf_keyboard_landscape"
-            android:entryValues="@array/conf_keyboard_type_values" />
     </PreferenceCategory>
 </PreferenceScreen>

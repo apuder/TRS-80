@@ -42,8 +42,6 @@ public class SettingsActivity extends ActionBarActivityFixLG {
     public static final String CONF_ROM_MODEL4        = "conf_rom_model4";
     public static final String CONF_ROM_MODEL4P       = "conf_rom_model4p";
 
-    private AlertDialog        dialog                 = null;
-
 
     public static String getSetting(String key) {
         SharedPreferences prefs = TRS80Application.getAppContext().getSharedPreferences(
@@ -63,10 +61,7 @@ public class SettingsActivity extends ActionBarActivityFixLG {
     @Override
     public void onStop() {
         super.onStop();
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
+        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -115,19 +110,11 @@ public class SettingsActivity extends ActionBarActivityFixLG {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(SettingsActivity.this);
             }
 
         });
 
-        dialog = builder.create();
-        dialog.show();
-    }
-
-    private void dismissAlertDialog(DialogInterface d) {
-        d.dismiss();
-        if (d == dialog) {
-            dialog = null;
-        }
+        AlertDialogUtil.showDialog(this, builder);
     }
 }

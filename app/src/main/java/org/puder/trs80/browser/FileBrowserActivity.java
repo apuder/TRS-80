@@ -16,13 +16,6 @@
 
 package org.puder.trs80.browser;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.puder.trs80.R;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +31,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.puder.trs80.AlertDialogUtil;
+import org.puder.trs80.R;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class FileBrowserActivity extends ActionBarActivity implements OnItemClickListener {
 
     // Action Menu
@@ -49,7 +50,7 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
     private TextView               pathLabel;
     private String                 currentPath;
     private BrowserListViewAdapter fileListAdapter;
-    private AlertDialog            dialog             = null;
+
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -67,10 +68,7 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
     @Override
     public void onPause() {
         super.onPause();
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
+        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -122,16 +120,13 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
     }
 
     private void eject() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.app_name);
-        builder.setMessage(R.string.alert_dialog_confirm_eject);
-        builder.setIcon(R.drawable.warning_icon);
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
+                R.drawable.warning_icon, R.string.alert_dialog_confirm_eject);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dialog.dismiss();
-                dialog = null;
+                AlertDialogUtil.dismissDialog(FileBrowserActivity.this);
                 Intent i = getIntent();
                 i.putExtra("PATH", (String) null);
                 setResult(RESULT_OK, i);
@@ -144,14 +139,11 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
 
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        dialog.dismiss();
-                        dialog = null;
+                        AlertDialogUtil.dismissDialog(FileBrowserActivity.this);
                     }
 
                 });
-
-        dialog = builder.create();
-        dialog.show();
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void getFiles(String path) {

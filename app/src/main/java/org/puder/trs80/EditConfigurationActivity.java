@@ -44,8 +44,6 @@ public class EditConfigurationActivity extends ActionBarActivity {
     private static final int   MENU_OPTION_CANCEL      = 1;
     private static final int   MENU_OPTION_HELP        = 2;
 
-    private AlertDialog        dialog                  = null;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,10 +57,7 @@ public class EditConfigurationActivity extends ActionBarActivity {
     @Override
     public void onStop() {
         super.onStop();
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
+        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -117,19 +112,11 @@ public class EditConfigurationActivity extends ActionBarActivity {
 
             @Override
             public void onClick(DialogInterface d, int which) {
-                dismissAlertDialog(d);
+                AlertDialogUtil.dismissDialog(EditConfigurationActivity.this);
             }
 
         });
 
-        dialog = builder.create();
-        dialog.show();
-    }
-
-    private void dismissAlertDialog(DialogInterface d) {
-        d.dismiss();
-        if (d == dialog) {
-            dialog = null;
-        }
+        AlertDialogUtil.showDialog(this, builder);
     }
 }
