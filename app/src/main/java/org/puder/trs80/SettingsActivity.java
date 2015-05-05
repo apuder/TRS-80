@@ -17,9 +17,7 @@
 package org.puder.trs80;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -56,12 +54,6 @@ public class SettingsActivity extends ActionBarActivityFixLG {
         setContentView(new View(this));
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment()).commit();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -104,17 +96,6 @@ public class SettingsActivity extends ActionBarActivityFixLG {
     }
 
     private void doHelp() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
-                R.string.help_title_settings, -1, R.string.help_settings);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(SettingsActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
+        showDialog(R.string.help_title_settings, -1, R.string.help_settings);
     }
 }

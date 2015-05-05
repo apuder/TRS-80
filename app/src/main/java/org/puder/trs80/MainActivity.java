@@ -166,10 +166,8 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
-
-        AlertDialogUtil.dismissDialog(this);
 
         if (popup != null) {
             popup.dismiss();
@@ -471,18 +469,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     private void showError(int err) {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
-                -1, this.getString(R.string.error_init, err));
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(MainActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
+        showDialog(R.string.app_name, -1, this.getString(R.string.error_init, err));
     }
 
     private void showSettings() {
@@ -505,18 +492,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
     }
 
     private void showHelp() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
-                R.string.help_title_configurations, -1, R.string.help_configurations);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(MainActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
+        showDialog(R.string.help_title_configurations, -1, R.string.help_configurations);
     }
 
     private void downloadROMs() {

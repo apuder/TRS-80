@@ -6,7 +6,6 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
@@ -16,7 +15,7 @@ import java.lang.reflect.Field;
  * Fix for: https://code.google.com/p/android/issues/detail?id=78154
  */
 @SuppressLint("Registered")
-public class ActionBarActivityFixLG extends ActionBarActivity {
+public class ActionBarActivityFixLG extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

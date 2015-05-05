@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +31,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.puder.trs80.AlertDialogUtil;
+import org.puder.trs80.BaseActivity;
 import org.puder.trs80.R;
 
 import java.io.File;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class FileBrowserActivity extends ActionBarActivity implements OnItemClickListener {
+public class FileBrowserActivity extends BaseActivity implements OnItemClickListener {
 
     // Action Menu
     private static final int       MENU_OPTION_CANCEL = 0;
@@ -63,12 +63,6 @@ public class FileBrowserActivity extends ActionBarActivity implements OnItemClic
         listView.setAdapter(fileListAdapter);
         listView.setOnItemClickListener(this);
         getFiles(Environment.getExternalStorageDirectory().getPath());
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override

@@ -16,16 +16,13 @@
 
 package org.puder.trs80;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class EditConfigurationActivity extends ActionBarActivity {
+public class EditConfigurationActivity extends BaseActivity {
 
     public static final String CONF_NAME               = "conf_name";
     public static final String CONF_MODEL              = "conf_model";
@@ -52,12 +49,6 @@ public class EditConfigurationActivity extends ActionBarActivity {
         setContentView(new View(this));
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new EditConfigurationFragment()).commit();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        AlertDialogUtil.dismissDialog(this);
     }
 
     @Override
@@ -106,17 +97,6 @@ public class EditConfigurationActivity extends ActionBarActivity {
     }
 
     private void doHelp() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
-                R.string.help_title_edit_configuration, -1, R.string.help_edit_configuration);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(EditConfigurationActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
+        showDialog(R.string.help_title_edit_configuration, -1, R.string.help_edit_configuration);
     }
 }

@@ -18,9 +18,7 @@ package org.puder.trs80;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -215,12 +213,6 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        AlertDialogUtil.dismissDialog(this);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         if (TRS80Application.hasCrashed()) {
@@ -289,7 +281,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
             updateMuteSoundIcons();
             return true;
         case MENU_OPTION_HELP:
-            showHelp();
+            showDialog(R.string.help_title_emulator, -1, R.string.help_emulator);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -514,21 +506,6 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
             muteMenuItem.setVisible(false);
             unmuteMenuItem.setVisible(true);
         }
-    }
-
-    private void showHelp() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
-                R.string.help_title_emulator, -1, R.string.help_emulator);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(EmulatorActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
     }
 
     public void log(final String msg) {
