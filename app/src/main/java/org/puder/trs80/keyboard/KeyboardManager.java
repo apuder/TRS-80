@@ -16,9 +16,9 @@
 
 package org.puder.trs80.keyboard;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import android.content.res.XmlResourceParser;
+import android.os.Handler;
+import android.view.KeyEvent;
 
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
@@ -26,22 +26,31 @@ import org.puder.trs80.XTRS;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.XmlResourceParser;
-import android.os.Handler;
-import android.view.KeyEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KeyboardManager {
+
+    /**
+     * The delays in milli-seconds when to inject the matching key-up event
+     * after a key-down event. If this delay is too short, the emulated TRS
+     * might miss the key-up event. This can especially happen when using an
+     * external keyboard with key-repeat.
+     */
+    final static private int    KEY_UP_DELAY = 100;
 
     private List<Key>           shiftableKeys;
     private int                 pressedShiftKey;
 
     private static List<KeyMap> keyboardMapping;
 
-    private Handler             handler = new Handler();
+    private Handler             handler      = new Handler();
 
     static {
         keyboardMapping = parseKeyMap(R.xml.keymap_us);
     }
+
 
     static private List<KeyMap> parseKeyMap(int keyMapLayout) {
         XmlResourceParser parser = TRS80Application.getAppContext().getResources()
@@ -204,7 +213,7 @@ public class KeyboardManager {
             public void run() {
                 keyUp(key);
             }
-        }, 50);
+        }, KEY_UP_DELAY);
         return true;
     }
 
