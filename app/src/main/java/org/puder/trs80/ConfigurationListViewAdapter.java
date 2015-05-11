@@ -16,7 +16,6 @@
 
 package org.puder.trs80;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v7.widget.CardView;
@@ -38,6 +37,7 @@ public class ConfigurationListViewAdapter extends
         public TextView       name;
         public TextView       model;
         public TextView       disks;
+        public TextView       cassette;
         public TextView       sound;
         public TextView       keyboards;
         public ScreenshotView screenshot;
@@ -53,6 +53,7 @@ public class ConfigurationListViewAdapter extends
             name = (TextView) itemView.findViewById(R.id.configuration_name);
             model = (TextView) itemView.findViewById(R.id.configuration_model);
             disks = (TextView) itemView.findViewById(R.id.configuration_disks);
+            cassette = (TextView) itemView.findViewById(R.id.configuration_cassette);
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
             keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
             screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
@@ -128,10 +129,12 @@ public class ConfigurationListViewAdapter extends
         }
         holder.disks.setText(Integer.toString(count));
 
-        Context context = TRS80Application.getAppContext();
+        // Cassette
+        holder.cassette.setText(conf.getCassettePosition() > 0 ? R.string.cassette_not_rewound
+                : R.string.cassette_rewound);
+
         // Sound
-        holder.sound.setText(conf.muteSound() ? context.getString(R.string.sound_disabled)
-                : context.getString(R.string.sound_enabled));
+        holder.sound.setText(conf.muteSound() ? R.string.sound_disabled : R.string.sound_enabled);
 
         // Keyboards
         String keyboards = getKeyboardLabel(conf.getKeyboardLayoutPortrait());

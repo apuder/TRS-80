@@ -78,6 +78,23 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@android:style/TextAppearance.Small"
                 android:paddingRight="@dimen/configuration_table_padding_horizontal"
+                android:text="@string/conf_cassette"/>
+            <TextView
+                android:id="@+id/configuration_cassette"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@android:style/TextAppearance.Small" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/configuration_table_padding_vertical" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@android:style/TextAppearance.Small"
+                android:paddingRight="@dimen/configuration_table_padding_horizontal"
                 android:text="@string/conf_item_sound"/>
             <TextView
                 android:id="@+id/configuration_sound"

@@ -27,6 +27,8 @@ import java.util.List;
 
 public class Configuration {
 
+    private static final String        CASSETTE_POSITION        = "cassette_position";
+
     public static final int            KEYBOARD_LAYOUT_ORIGINAL = 0;
     public static final int            KEYBOARD_LAYOUT_COMPACT  = 1;
     public static final int            KEYBOARD_LAYOUT_JOYSTICK = 2;
@@ -163,6 +165,16 @@ public class Configuration {
 
     public String getCassettePath() {
         return sharedPrefs.getString(EditConfigurationActivity.CONF_CASSETTE, null);
+    }
+
+    public float getCassettePosition() {
+        return sharedPrefs.getFloat(CASSETTE_POSITION, 0);
+    }
+
+    public void setCassettePosition(float pos) {
+        Editor editor = sharedPrefs.edit();
+        editor.putFloat(CASSETTE_POSITION, pos);
+        editor.apply();
     }
 
     public String getDiskPath(int disk) {

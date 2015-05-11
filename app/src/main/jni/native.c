@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include "trs.h"
 #include "trs_disk.h"
+#include "trs_cassette.h"
 #include "trs_iodefs.h"
 #include "trs_uart.h"
 #include "trs_state_save.h"
@@ -285,6 +286,10 @@ void Java_org_puder_trs80_XTRS_setSoundMuted(JNIEnv* e, jclass clazz, jboolean m
 
 void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
     isRunning = run;
+}
+
+jfloat Java_org_puder_trs80_XTRS_getCassettePosition(JNIEnv* e, jclass clazz) {
+    return (jfloat) trs_get_cassette_position() / (jfloat) trs_get_cassette_length();
 }
 
 void set_expanded_screen_mode(int flag) {

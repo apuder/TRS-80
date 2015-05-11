@@ -7,10 +7,13 @@
     <string name="alert_dialog_inform_crash"><![CDATA[Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.]]></string>
     <string name="alert_dialog_ok">OK</string>
     <string name="conf_header">Konfigurationen</string>
-    <string name="conf_item_disks">Laufwerke</string>
-    <string name="conf_item_hardware">Hardware</string>
-    <string name="conf_item_keyboards">Tastaturen</string>
-    <string name="conf_item_sound">Ton</string>
+    <string name="conf_item_disks">Laufwerke:</string>
+    <string name="conf_item_hardware">Hardware:</string>
+    <string name="conf_item_keyboards">Tastaturen:</string>
+    <string name="conf_item_sound">Ton:</string>
+    <string name="conf_cassette">Kassette:</string>
+    <string name="cassette_rewound">zurückgespult</string>
+    <string name="cassette_not_rewound">nicht zurückgespult</string>
     <string name="crash_dialog_comment_prompt">Welche TRS-80 Anwendungen haben Sie versucht auszuführen?</string>
     <string name="crash_dialog_ok_toast">Vielen Dank!</string>
     <string name="crash_dialog_text">Der Emulator ist abgestürzt, weshalb die TRS-80 App beendet werden musste. Bitte helfen Sie indem Sie uns sie Absturzdaten schicken. Sie müssen dazu nur auf \'OK\' tippen.</string>

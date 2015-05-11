@@ -399,6 +399,7 @@ public class MainActivity extends ActionBarActivityFixLG implements
             public void onClick(DialogInterface d, int which) {
                 AlertDialogUtil.dismissDialog(MainActivity.this);
                 EmulatorState.deleteSavedState(conf.getId());
+                conf.setCassettePosition(0);
                 updateView(position, -1, -1);
             }
 

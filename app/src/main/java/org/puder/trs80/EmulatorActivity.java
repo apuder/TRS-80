@@ -485,6 +485,7 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
 
     private void pauseEmulator() {
         takeScreenshot();
+        TRS80Application.getCurrentConfiguration().setCassettePosition(XTRS.getCassettePosition());
         setResult(Activity.RESULT_OK, getIntent());
         finish();
     }

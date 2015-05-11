@@ -43,6 +43,9 @@
     <string name="conf_item_disks">Disks:</string>
     <string name="conf_item_sound">Sound:</string>
     <string name="conf_item_keyboards">Keyboards:</string>
+    <string name="conf_cassette">Cassette:</string>
+    <string name="cassette_rewound">rewound</string>
+    <string name="cassette_not_rewound">not rewound</string>
 
     <!-- InitialSetupDialogFragment -->
     <string name="downloading">Downloading (%1$d/%2$d)&#8230;</string>

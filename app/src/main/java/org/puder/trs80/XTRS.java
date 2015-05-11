@@ -35,6 +35,7 @@ public class XTRS {
 
     private static EmulatorActivity emulator    = null;
 
+
     public static native void setRunning(boolean run);
 
     public static native int init(Hardware hardware);
@@ -52,6 +53,8 @@ public class XTRS {
     public static native void setSoundMuted(boolean isMuted);
 
     public static native void run();
+
+    public static native float getCassettePosition();
 
     public static void setRenderer(RenderThread r) {
         renderer = r;
