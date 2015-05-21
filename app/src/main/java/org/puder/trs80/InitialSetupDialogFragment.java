@@ -88,8 +88,8 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     false,
                     Hardware.MODEL1,
                     "Model I - NEWDOS/80",
-                    "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.5%20(1986)(Apparat%20Inc)%5bDSK%5d.zip",
-                    "ND80-HD1.DSK", "newdos80-model1.dsk"),
+                    "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.0%20(19xx)(Apparat%20Inc)%5bDSK%5d%5bMaster%5d.zip",
+                    "ND80MST.DSK", "newdos80-model1.dsk"),
             /*
             new Download(false, Hardware.MODEL3, "Model III - LDOS",
                     "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk", "ldos-model3.dsk"),
