@@ -31,7 +31,8 @@
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten]]></string>
-    <string name="hint_keyboard_external">&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für CLEAR.</string>
+    <string name="hint_keyboard_external"><![CDATA[&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für
+                        CLEAR.]]></string>
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
                         zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
     <string name="hint_keyboard_tilt">Kippen Sie das Gerät, um Cursor-Tasten zu betätigen. Tippen
