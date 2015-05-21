@@ -1,0 +1,43 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tutorial"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:visibility="gone"
+    android:background="@color/tutorial_background">
+
+    <TextView
+        android:id="@+id/tutorial_command"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/tutorial_next"
+        android:layout_alignParentLeft="true"
+        android:textSize="30dp"
+        android:padding="@dimen/padding_large"/>
+
+    <TextView
+        android:id="@+id/tutorial_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tutorial_command"
+        android:layout_toLeftOf="@+id/tutorial_next"
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="@dimen/padding_large"/>
+
+    <ImageButton
+        android:id="@+id/tutorial_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/padding_medium"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/cancel_icon"/>
+
+    <Button
+        android:id="@+id/tutorial_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/padding_medium"
+        android:layout_below="@+id/tutorial_description"
+        android:layout_alignParentRight="true"/>
+</RelativeLayout>

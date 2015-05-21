@@ -61,7 +61,8 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     private static final int   MENU_OPTION_RESET     = 2;
     private static final int   MENU_OPTION_SOUND_ON  = 3;
     private static final int   MENU_OPTION_SOUND_OFF = 4;
-    private static final int   MENU_OPTION_HELP      = 5;
+    private static final int   MENU_OPTION_TUTORIAL  = 5;
+    private static final int   MENU_OPTION_HELP      = 6;
 
     private Thread             cpuThread;
     private RenderThread       renderThread;
@@ -180,7 +181,13 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        AlertDialogUtil.showHint(this, R.string.hint_emulator);
+        AlertDialogUtil.showHint(this, R.string.hint_emulator, R.string.menu_tutorial,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        showTutorial();
+                    }
+                });
     }
 
     @Override
@@ -251,6 +258,10 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
                     MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
             updateMuteSoundIcons();
         }
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_TUTORIAL, Menu.NONE,
+                        this.getString(R.string.menu_tutorial)),
+                MenuItemCompat.SHOW_AS_ACTION_NEVER);
         MenuItemCompat
                 .setShowAsAction(
                         menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
@@ -279,6 +290,9 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
         case MENU_OPTION_SOUND_OFF:
             setSoundMuted(false);
             updateMuteSoundIcons();
+            return true;
+        case MENU_OPTION_TUTORIAL:
+            showTutorial();
             return true;
         case MENU_OPTION_HELP:
             showDialog(R.string.help_title_emulator, -1, R.string.help_emulator);
@@ -464,6 +478,12 @@ public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEv
     @Override
     public void onBackPressed() {
         pauseEmulator();
+    }
+
+    private void showTutorial() {
+        View tutorialRoot = findViewById(R.id.tutorial);
+        View keyboardRoot = findViewById(R.id.keyboard_container);
+        new Tutorial(tutorialRoot, keyboardRoot).show();
     }
 
     private int getKeyboardType() {

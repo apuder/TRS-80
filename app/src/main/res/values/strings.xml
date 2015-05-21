@@ -108,6 +108,7 @@
     <string name="menu_reset">Reset</string>
     <string name="menu_sound_on">Sound On</string>
     <string name="menu_sound_off">Sound Off</string>
+    <string name="menu_tutorial">Tutorial</string>
     <string name="rewinding_cassette">Rewinding cassette&#8230;</string>
 
     <!-- FileBrowserActivity -->
@@ -137,7 +138,7 @@
     <string name="hint_emulator"><![CDATA[Use the virtual keyboard or an attached external
                         keyboard to type TRS commands. Consult the help menu for further
                         information.<p>
-                        The following action bar commands are available:<br/>
+                        The following action bar commands are available in portrait mode:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Pause emulator<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Reset emulator<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Rewind cassette<br/>
@@ -162,7 +163,7 @@
                         emulator. Select the TRS-80 model to emulate.
                         Note that currently only Model I and Model III emulation is supported.
                         If no disk images are defined,
-                        the TRS-80 ROM will launch the Basic interpreter. Disk images need to be
+                        the TRS-80 ROM will launch the BASIC interpreter. Disk images need to be
                         copied to the SD card. This app does not contain disk images for copyright
                         reasons. You can search the Internet for
                         \'<a href="https://www.google.com/search?q=trs-80+disk+images">TRS-80 disk
@@ -185,25 +186,39 @@
     <string name="help_title_emulator">Help: Emulator</string>
     <string name="help_emulator"><![CDATA[Pausing the emulator will store its current state. The
                         TRS-BASIC CLOAD/CSAVE commands will read and write to the cassette. The cassette
-                        needs to be manually rewound before using the CLOAD command. Different
+                        needs to be rewound before using the CLOAD command. Different
                         keyboard types for portrait and landscape mode as well as different disk and cassette
-                        images can be defined while emulator is paused from
+                        images can be mounted while emulator is paused from
                         the main configurations list view. Attach an external physical keyboard for better
                         usability.<p>
-                        The following action bar commands are available:<br/>
+                        The following action bar commands are available in portrait mode:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Pause emulator<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Reset emulator<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Rewind cassette<br/>
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<p>
-                        To get going, after booting NEWDOS/80, type:<p>
-                        <tt>&nbsp;&nbsp;DIR</tt><br/>
-                        <tt>&nbsp;&nbsp;BASIC</tt><br/>
-                        <tt>&nbsp;&nbsp;10 PRINT &quot;HELLO WORLD!&quot;</tt><br/>
-                        <tt>&nbsp;&nbsp;RUN</tt><br/>
-                        <tt>&nbsp;&nbsp;LIST</tt><br/>
-                        <tt>&nbsp;&nbsp;CSAVE &quot;FIRST.BAS&quot;</tt>]]></string>
+                        Start the tutorial to run some TRS-commands.]]></string>
     <string name="keyboard_original_layout">Original layout</string>
     <string name="keyboard_compact_layout">Compact layout</string>
     <string name="keyboard_joystick_control">Joystick control</string>
     <string name="keyboard_tilt_interface">Tilt interface</string>
+
+    <string name="tutorial_next">Next (%1$d/%2$d)</string>
+    <string name="tutorial_step_1_cmd" translatable="false">DIR</string>
+    <string name="tutorial_step_1">Display the directory of the floppy disks. Up to four floppy
+                         images can be mounted per emulator configuration.</string>
+    <string name="tutorial_step_2_cmd" translatable="false">BASIC</string>
+    <string name="tutorial_step_2">Enter the BASIC interpreter.</string>
+    <string name="tutorial_step_3_cmd" translatable="false">10 PRINT \"HELLO WORLD\"</string>
+    <string name="tutorial_step_3">Write the BASIC version of \"Hello World\".</string>
+    <string name="tutorial_step_4_cmd" translatable="false">RUN</string>
+    <string name="tutorial_step_4">Run the BASIC program.</string>
+    <string name="tutorial_step_5_cmd" translatable="false">CSAVE \"FIRST/BAS\"</string>
+    <string name="tutorial_step_5">Save the program to the cassette. The
+                          cassette needs to be rewound before loading via CLOAD.</string>
+    <string name="tutorial_step_6_cmd" translatable="false">SAVE \"FIRST/BAS\"</string>
+    <string name="tutorial_step_6">Save the program to the floppy disk as well.</string>
+    <string name="tutorial_step_7_cmd" translatable="false">CMD \"S\"</string>
+    <string name="tutorial_step_7">Exit the BASIC interpreter.</string>
+    <string name="tutorial_step_8_cmd" translatable="false">DIR</string>
+    <string name="tutorial_step_8">Display the directory again. Note the file FIRST/BAS.</string>
 </resources>

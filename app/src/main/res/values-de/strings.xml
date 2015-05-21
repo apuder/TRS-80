@@ -26,7 +26,7 @@
                         zu ändern.]]></string>
     <string name="hint_emulator"><![CDATA[Benutzen Sie die virtuelle Tastatur oder externe Tastatur
                         um TRS Kommandos einzugeben. Das Hilfe-Menü bietet weitere Informationen.<p>
-                        Die folgenden Aktionen sind verfügbar:<br/>
+                        Die folgenden Aktionen sind im Hochformat verfügbar:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
@@ -63,6 +63,7 @@
     <string name="menu_sound_on">Ton an</string>
     <string name="menu_start">Start</string>
     <string name="menu_stop">Stopp</string>
+    <string name="menu_tutorial">Tutorium</string>
     <string name="path">Pfad</string>
     <string name="no_configurations">Tippen Sie auf \'+\' um eine neue Konfiguration zu erstellen.</string>
     <string name="pref_cassette_title">Kasette</string>
@@ -162,16 +163,23 @@
                         wird, können verschiedene Floppy- und Kassetten-Dateien, sowie verschiedene Tastaturen
                         für Hoch- und Querformat individuell für jede Konfiguration definiert werden. Es wird
                         empfohlen, eine externe Tastatur zu benutzen.<p>
-                        Die folgenden Aktionen sind über das Menü verfügbar:<br/>
+                        Die folgenden Aktionen sind über das Menü im Hochformat verfügbar:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<p>
-                        Für die ersten Schritte, folgende Kommandos nach dem booten von NEWDOS/80, eingeben:<p>
-                        <tt>&nbsp;&nbsp;DIR</tt><br/>
-                        <tt>&nbsp;&nbsp;BASIC</tt><br/>
-                        <tt>&nbsp;&nbsp;10 PRINT &quot;HELLO WORLD!&quot;</tt><br/>
-                        <tt>&nbsp;&nbsp;RUN</tt><br/>
-                        <tt>&nbsp;&nbsp;LIST</tt><br/>
-                        <tt>&nbsp;&nbsp;CSAVE &quot;FIRST.BAS&quot;</tt>]]></string>
+                        Das Tutorium zeigt einige TRS-Kommandos.]]></string>
+
+    <string name="tutorial_next">Weiter (%1$d/%2$d)</string>
+    <string name="tutorial_step_1">Zeigt den Inhalt des Floppy-Verzeichnisses an. Bis zu vier
+                        Floppies können konfiguriert werden.</string>
+    <string name="tutorial_step_2">Startet den BASIC Interpreter.</string>
+    <string name="tutorial_step_3">Die BASIC Version von \"Hello World\".</string>
+    <string name="tutorial_step_4">Führt das BASIC Programm aus.</string>
+    <string name="tutorial_step_5">Das Programm wird auf der Kassette gespeichert. Die Kassette
+                        muss vor einem Laden mittels CLOAD zunächst zurückgespult werden.</string>
+    <string name="tutorial_step_6">Speichert das Programm auf die Floppy.</string>
+    <string name="tutorial_step_7">Beendet den BASIC Interpreter.</string>
+    <string name="tutorial_step_8">Zeigt den Inhalt des Floppy-Verzeichnisses mit der neuen Datei
+                        FIRST/BAS an.</string>
 </resources>

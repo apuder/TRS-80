@@ -28,7 +28,8 @@ public class BaseActivity extends AppCompatActivity {
         AlertDialogUtil.dismissDialog(this);
     }
 
-    protected void showDialog(int titleId, int iconId, String message) {
+    protected void showDialog(int titleId, int iconId, String message, String buttonText,
+            final Runnable buttonCallback) {
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, titleId, iconId,
                 message);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
@@ -40,7 +41,20 @@ public class BaseActivity extends AppCompatActivity {
 
         });
 
+        if (buttonCallback != null) {
+            builder.setNegativeButton(buttonText, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    AlertDialogUtil.dismissDialog(BaseActivity.this);
+                    buttonCallback.run();
+                }
+            });
+        }
         AlertDialogUtil.showDialog(this, builder);
+    }
+
+    protected void showDialog(int titleId, int iconId, String message) {
+        showDialog(titleId, iconId, message, null, null);
     }
 
     protected void showDialog(int titleId, int iconId, int messageId) {

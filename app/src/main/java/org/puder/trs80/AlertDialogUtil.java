@@ -84,7 +84,8 @@ public class AlertDialogUtil {
         }
     }
 
-    static public boolean showHint(final Context context, int hintId) {
+    static public boolean showHint(final Context context, int hintId, int buttonTitle,
+            final Runnable buttonCallback) {
         String key = "conf_new_hint_id" + hintId;
         SharedPreferences sharedPrefs = context.getSharedPreferences(
                 SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -105,7 +106,21 @@ public class AlertDialogUtil {
 
         });
 
+        if (buttonCallback != null) {
+            builder.setNegativeButton(context.getText(buttonTitle),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dismissDialog(context);
+                            buttonCallback.run();
+                        }
+                    });
+        }
         showDialog(context, builder);
         return true;
+    }
+
+    static public boolean showHint(Context context, int hintId) {
+        return showHint(context, hintId, 0, null);
     }
 }

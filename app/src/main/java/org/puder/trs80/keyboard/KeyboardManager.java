@@ -104,6 +104,45 @@ public class KeyboardManager {
         return keyboardMapping.get(id);
     }
 
+    public KeyMap getKeyMap(String name) {
+        for (KeyMap key : keyboardMapping) {
+            if (key.name.equals(name)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    public void injectKey(char ch) {
+        String keyName;
+        switch (ch) {
+        case ' ':
+            keyName = "key_SPACE";
+            break;
+        case '"':
+            keyName = "key_QUOT";
+            break;
+        case '/':
+            keyName = "key_SLASH";
+            break;
+        case '\n':
+            keyName = "key_ENTER";
+            break;
+        default:
+            keyName = "key_" + ch;
+            break;
+        }
+
+        final KeyMap key = getKeyMap(keyName);
+        keyDown(key.value);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                keyUp(key.value);
+            }
+        }, KEY_UP_DELAY);
+    }
+
     public void addShiftableKey(Key key) {
         shiftableKeys.add(key);
     }
