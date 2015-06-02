@@ -108,6 +108,11 @@ public class MainActivity extends ActionBarActivityFixLG implements
             public void onTouchEvent(RecyclerView rv, MotionEvent e) {
 
             }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean b) {
+                // Do nothing
+            }
         });
 
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
