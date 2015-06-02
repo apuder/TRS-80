@@ -24,5 +24,6 @@
 .idea/modules.xml
 .idea/scopes/scope_settings.xml
 .idea/vcs.xml
+.idea/runConfigurations.xml
 *.iml
 local.properties
