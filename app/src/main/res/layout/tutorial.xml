@@ -25,13 +25,13 @@
         android:layout_alignParentLeft="true"
         android:paddingLeft="@dimen/padding_large"/>
 
-    <ImageButton
+    <ImageView
         android:id="@+id/tutorial_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/padding_medium"
         android:layout_alignParentRight="true"
-        android:src="@drawable/cancel_icon"/>
+        android:src="@drawable/cancel_icon_white"/>
 
     <Button
         android:id="@+id/tutorial_next"

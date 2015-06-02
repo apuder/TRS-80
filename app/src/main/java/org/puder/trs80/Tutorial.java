@@ -18,12 +18,12 @@ package org.puder.trs80;
 
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class Tutorial implements View.OnClickListener, Runnable {
 
-    final private static int KEY_DELAY = 300;
+    final private static int KEY_DELAY = 180;
 
     private View             tutorialRoot;
     private View             keyboardRoot;
@@ -66,7 +66,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
         keyboardRoot.setVisibility(View.GONE);
         nextButton = (Button) tutorialRoot.findViewById(R.id.tutorial_next);
         nextButton.setOnClickListener(this);
-        ImageButton buttonCancel = (ImageButton) tutorialRoot.findViewById(R.id.tutorial_cancel);
+        ImageView buttonCancel = (ImageView) tutorialRoot.findViewById(R.id.tutorial_cancel);
         buttonCancel.setOnClickListener(this);
         command = (TextView) tutorialRoot.findViewById(R.id.tutorial_command);
         command.setTypeface(Fonts.getTypeface(Hardware.MODEL3));
