@@ -74,32 +74,58 @@ public class InitialSetupDialogFragment extends DialogFragment {
             new Download(true, Hardware.MODEL1, null,
                     "http://www.classic-computers.org.nz/system-80/s80-roms.zip",
                     "trs80model1.rom", "model1.rom"),
+            /*
+            // Defunct download
             new Download(
                     true,
                     Hardware.MODEL3,
                     null,
                     "http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
                     null, "model3.rom"),
+                    */
+            new Download(
+                    true,
+                    Hardware.MODEL3,
+                    null,
+                    "https://github.com/lkesteloot/trs80/raw/master/roms/model3.rom",
+                    null, "model3.rom"),
             /*
             new Download(false, Hardware.MODEL1, "Model I - LDOS",
                     "http://www.tim-mann.org/trs80/ld1-531.zip", "ld1-531.dsk", "ldos-model1.dsk"),
                     */
+            /*
             new Download(
                     false,
                     Hardware.MODEL1,
                     "Model I - NEWDOS/80",
                     "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.0%20(19xx)(Apparat%20Inc)%5bDSK%5d%5bMaster%5d.zip",
                     "ND80MST.DSK", "newdos80-model1.dsk"),
+                    */
+            new Download(
+                    false,
+                    Hardware.MODEL1,
+                    "Model I - NEWDOS/80",
+                    "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2m1.zip",
+                    "ND80MST.DSK", "newdos80-model1.dsk"),
             /*
             new Download(false, Hardware.MODEL3, "Model III - LDOS",
                     "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk", "ldos-model3.dsk"),
                     */
+            /*
             new Download(
                     false,
                     Hardware.MODEL3,
                     "Model III - NEWDOS/80",
                     "http://www.classiccmp.org/cpmarchives/trs80/Software/Model%20III/NEWDOS-80%20v2.0%20(19xx)(Apparat%20Inc)%5bDSK%5d.zip",
-                    "NEWDOS80.DSK", "newdos80-model3.dsk"), };
+                    "NEWDOS80.DSK", "newdos80-model3.dsk"),
+                     */
+            new Download(
+                    false,
+                    Hardware.MODEL3,
+                    "Model III - NEWDOS/80",
+                    "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2d.zip",
+                    "nd80ira.dsk", "newdos80-model3.dsk"),
+    };
 
     private DownloadCompletionListener listener;
     private int                        downloadCounter = 0;

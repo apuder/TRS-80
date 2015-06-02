@@ -182,8 +182,7 @@
                         various TRS-80 models. ROM images for the TRS-80 need to be copied
                         to the SD card before using this app.
                         For copyright reasons this app does not bundle ROM images. You can find
-                        them on the Internet (for example
-                        <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">here</a>).]]></string>
+                        them on the Internet.]]></string>
     <string name="help_title_emulator">Help: Emulator</string>
     <string name="help_emulator"><![CDATA[Pausing the emulator will store its current state. The
                         TRS-BASIC CLOAD/CSAVE commands will read and write to the cassette. The cassette

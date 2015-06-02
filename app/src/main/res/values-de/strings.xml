@@ -155,8 +155,7 @@
                         TRS-80 Modelle. ROM images für den TRS-80 müssen auf die SD-Karte kopiert werden,
                         bevor die App gestartet wird.
                         Aus Urheberrechtsgründen können diese Images nicht Bestandteil dieser App
-                        sein. Allerdings können Sie diese ohne Probleme im Internet finden (zum Beispiel
-                        <a href="http://www.classiccmp.org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/">hier</a>).]]></string>
+                        sein. Allerdings können Sie diese ohne Probleme im Internet finden.]]></string>
     <string name="help_title_emulator">Hilfe: Emulator</string>
     <string name="help_emulator"><![CDATA[Pausieren des Emulator speichert dessen aktuellen Zustand. Die
                         TRS-BASIC CLOAD/CSAVE Kommandos lesen und schreiben auf die Kassette. Die Kassette
