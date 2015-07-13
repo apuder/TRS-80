@@ -38,6 +38,7 @@ public class TRS80Application extends Application {
     private static Bitmap          screenshot;
     private static boolean         hasCrashed = false;
 
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -45,9 +46,12 @@ public class TRS80Application extends Application {
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
-        ACRA.init(this);
-        HashMap<String, String> ACRAData = new HashMap<String, String>();
-        ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+        boolean debug = getApplicationContext().getResources().getBoolean(R.bool.debug);
+        if (!debug) {
+            ACRA.init(this);
+            HashMap<String, String> ACRAData = new HashMap<>();
+            ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+        }
     }
 
     public static Context getAppContext() {
