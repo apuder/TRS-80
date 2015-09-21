@@ -42,7 +42,7 @@ import org.puder.trs80.cast.RemoteCastScreen;
 
 import java.io.File;
 
-public class MainActivity extends ActionBarActivityFixLG implements
+public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
         PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
 

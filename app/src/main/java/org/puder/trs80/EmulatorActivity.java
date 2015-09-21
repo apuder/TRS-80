@@ -52,7 +52,7 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-public class EmulatorActivity extends ActionBarActivityFixLG implements SensorEventListener,
+public class EmulatorActivity extends BaseActivity implements SensorEventListener,
         OnKeyListener {
 
     // Action Menu

@@ -25,7 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class SettingsActivity extends ActionBarActivityFixLG {
+public class SettingsActivity extends BaseActivity {
 
     public static final String SHARED_PREF_NAME       = "Settings";
 
