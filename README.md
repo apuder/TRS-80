@@ -15,7 +15,7 @@ need to install the Android SDK and NDK.
 Next clone the TRS-80 Emulator sources via git:
 
 ``
-git clone git://git.code.sf.net/p/trs80/code TRS-80
+git clone git@github.com:apuder/TRS-80.git
 ``
 
 Next import the project into Android Studio via File -> Import Project...
@@ -43,7 +43,7 @@ Compiling with Gradle
 ``sdk.dir=/Users/johndoe/Downloads/android-sdk-macosx``
 ``ndk.dir=/Users/johndoe/Downloads/android-ndk-r9d``
 -  Change the 'buildToolsVersion' in build.gradle to match your latest version.
-You will find this inside your sdk's ``build-tools`` directory or check the SDK
+You will find this inside your SDK's ``build-tools`` directory or check the SDK
 manager entry.
 -  Run:
 ``
