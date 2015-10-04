@@ -28,6 +28,7 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.Display;
@@ -45,7 +46,6 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.acra.ACRA;
 import org.puder.trs80.cast.CastMessageSender;
@@ -277,7 +277,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             pauseEmulator();
             return true;
         case MENU_OPTION_REWIND:
-            Toast.makeText(this, R.string.rewinding_cassette, Toast.LENGTH_SHORT).show();
+            View root = findViewById(R.id.emulator);
+            Snackbar.make(root, R.string.rewinding_cassette, Snackbar.LENGTH_SHORT).show();
             XTRS.rewindCassette();
             return true;
         case MENU_OPTION_RESET:

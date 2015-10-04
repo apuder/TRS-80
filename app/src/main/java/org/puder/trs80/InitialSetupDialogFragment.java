@@ -25,8 +25,9 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
-import android.widget.Toast;
+import android.view.View;
 
 import org.apache.commons.io.IOUtils;
 
@@ -237,13 +238,14 @@ public class InitialSetupDialogFragment extends DialogFragment {
             @Override
             protected void onPostExecute(Void result) {
                 dismissAllowingStateLoss();
+                View root = getActivity().findViewById(R.id.main);
                 if (ROMs.hasROMs()) {
-                    Toast.makeText(getActivity(), R.string.roms_downlaod_success_msg,
-                            Toast.LENGTH_LONG).show();
+                    Snackbar.make(root, R.string.roms_downlaod_success_msg,
+                            Snackbar.LENGTH_LONG).show();
                     listener.onDownloadCompleted();
                 } else {
-                    Toast.makeText(getActivity(), R.string.roms_download_failure_msg,
-                            Toast.LENGTH_LONG).show();
+                    Snackbar.make(root, R.string.roms_download_failure_msg,
+                            Snackbar.LENGTH_LONG).show();
                 }
             }
         }.execute();

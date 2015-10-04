@@ -19,4 +19,11 @@
 
     <style name="AppThemeDark" parent="Theme.AppCompat">
     </style>
+
+    <style name="floating_action_button">
+        <item name="android:layout_margin">16dp</item>
+        <item name="borderWidth">0dp</item>
+        <item name="elevation">4sp</item>
+    </style>
+
 </resources>

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,7 +34,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.emtronics.dragsortrecycler.DragSortRecycler;
 
@@ -52,9 +52,8 @@ public class MainActivity extends BaseActivity implements
 
     // Action Menu
     private static final int     MENU_OPTION_DOWNLOAD       = 0;
-    private static final int     MENU_OPTION_ADD            = 1;
-    private static final int     MENU_OPTION_HELP           = 2;
-    private static final int     MENU_OPTION_SETTINGS       = 3;
+    private static final int     MENU_OPTION_HELP           = 1;
+    private static final int     MENU_OPTION_SETTINGS       = 2;
 
     // Context Menu
     private static final int     MENU_OPTION_START          = 0;
@@ -220,9 +219,6 @@ public class MainActivity extends BaseActivity implements
         }
 
         MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE, this.getString(R.string.menu_add))
-                        .setIcon(R.drawable.add_icon), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
                         this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon),
                 MenuItemCompat.SHOW_AS_ACTION_NEVER);
@@ -240,9 +236,6 @@ public class MainActivity extends BaseActivity implements
         case MENU_OPTION_DOWNLOAD:
             downloadROMs();
             return true;
-        case MENU_OPTION_ADD:
-            addConfiguration();
-            return true;
         case MENU_OPTION_HELP:
             showHelp();
             return true;
@@ -251,6 +244,10 @@ public class MainActivity extends BaseActivity implements
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onFloatingActionButtonClicked(View view) {
+        addConfiguration();
     }
 
     @Override
@@ -451,13 +448,14 @@ public class MainActivity extends BaseActivity implements
             break;
         }
 
+        View root = findViewById(R.id.main);
         if (hardware == null) {
-            Toast.makeText(this, R.string.error_model_not_supported, Toast.LENGTH_LONG).show();
+            Snackbar.make(root, R.string.error_model_not_supported, Snackbar.LENGTH_LONG).show();
             return;
         }
 
         if (romFile == null || !new File(romFile).exists()) {
-            Toast.makeText(this, R.string.error_no_rom, Toast.LENGTH_LONG).show();
+            Snackbar.make(root, R.string.error_no_rom, Snackbar.LENGTH_LONG).show();
             return;
         }
 
