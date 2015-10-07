@@ -125,10 +125,8 @@
         Please report error code and your device model to mobile@puder.org.</string>
 
     <string name="title_initial_setup">Initial Setup</string>
-    <string name="initial_setup">For copyright reasons this emulator does not contain ROM
-                        images. However, you have the option to download the required ROM
-                        files from well-known locations from the Internet. Would you like
-                        to download the ROM images?</string>
+    <string name="initial_setup">Do you want to download the necessary TRS-80 ROM-images
+                        from well-known Internet locations?</string>
 
     <string name="hint_title">Hint</string>
     <string name="hint_configuration_usage"><![CDATA[Tapping a configuration resumes the emulator.
