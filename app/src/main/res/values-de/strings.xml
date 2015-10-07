@@ -106,7 +106,6 @@
     <string name="pref_trs_model_summary">Das zu emulierende TRS-80 Model</string>
     <string name="pref_trs_model_title">TRS-80 Model</string>
     <string name="rewinding_cassette">Kassette wird zurückgespult&#8230;</string>
-    <string name="roms_downlaod_success_msg">Alle ROMs wurden erfolgreich heruntergeladen</string>
     <string name="roms_download_failure_msg">Nicht alle ROMs konnten heruntergeladen werden!</string>
     <string name="sound_disabled">deaktiviert</string>
     <string name="sound_enabled">aktiviert</string>

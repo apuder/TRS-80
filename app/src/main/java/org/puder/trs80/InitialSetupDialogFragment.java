@@ -240,8 +240,6 @@ public class InitialSetupDialogFragment extends DialogFragment {
                 dismissAllowingStateLoss();
                 View root = getActivity().findViewById(R.id.main);
                 if (ROMs.hasROMs()) {
-                    Snackbar.make(root, R.string.roms_downlaod_success_msg,
-                            Snackbar.LENGTH_LONG).show();
                     listener.onDownloadCompleted();
                 } else {
                     Snackbar.make(root, R.string.roms_download_failure_msg,

@@ -32,7 +32,6 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.emtronics.dragsortrecycler.DragSortRecycler;
@@ -86,33 +85,6 @@ public class MainActivity extends BaseActivity implements
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
-
-        configurationListView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-
-            private boolean firstTime = true;
-
-
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                boolean intercept = firstTime;
-                if (firstTime) {
-                    intercept = AlertDialogUtil.showHint(MainActivity.this,
-                            R.string.hint_configuration_usage);
-                }
-                firstTime = false;
-                return intercept;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean b) {
-                // Do nothing
-            }
-        });
 
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
         dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
@@ -523,5 +495,6 @@ public class MainActivity extends BaseActivity implements
             downloadMenuItem.setVisible(false);
         }
         updateView(-1, -1, -1);
+        AlertDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
     }
 }
