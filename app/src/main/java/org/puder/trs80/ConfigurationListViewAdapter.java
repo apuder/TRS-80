@@ -88,7 +88,7 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
-        if (position == 0) {
+        if (position == 0 || position == Configuration.getCount() + 1) {
             return;
         }
         Configuration conf = Configuration.getNthConfiguration(position - 1);
@@ -160,12 +160,18 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ? R.layout.configuration_header : R.layout.configuration_item;
+        if (position == 0) {
+            return R.layout.configuration_header;
+        }
+        if (position == Configuration.getCount() + 1) {
+            return R.layout.configuration_footer;
+        }
+        return R.layout.configuration_item;
     }
 
     @Override
     public int getItemCount() {
-        return Configuration.getCount() + 1 /* for header */;
+        return Configuration.getCount() + 2 /* header  + footer */;
     }
 
     private String getKeyboardLabel(int type) {
