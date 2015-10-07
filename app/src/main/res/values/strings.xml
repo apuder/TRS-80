@@ -177,9 +177,10 @@
     <string name="help_title_settings">Help: Settings</string>
     <string name="help_settings"><![CDATA[The emulator requires the original ROM images of the
                         various TRS-80 models. ROM images for the TRS-80 need to be copied
-                        to the SD card before using this app.
-                        For copyright reasons this app does not bundle ROM images. You can find
-                        them on the Internet.]]></string>
+                        to the SD card before running the emulator.
+                        For copyright reasons this app does not bundle ROM images. However, the setup
+                        assistant helps with downloading and installing ROM images from
+                        the Internet.]]></string>
     <string name="help_title_emulator">Help: Emulator</string>
     <string name="help_emulator"><![CDATA[Pausing the emulator will store its current state. The
                         TRS-BASIC CLOAD/CSAVE commands will read and write to the cassette. The cassette
