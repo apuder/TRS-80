@@ -8,10 +8,15 @@ android {
         applicationId "org.puder.trs80"
         minSdkVersion 11
         targetSdkVersion 22
+
+        ndk {
+            moduleName "xtrs"
+        }
     }
 
     sourceSets.main {
-        jni.srcDirs = []
+        jni.srcDirs = [] //disable automatic ndk-build call
+        //jni.srcDirs = ['src/main/jni']
         jniLibs.srcDir 'src/main/libs'
     }
 
@@ -24,6 +29,28 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+
+    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+        def ndkDir = android.ndkDirectory
+        commandLine "$ndkDir/ndk-build",
+                '-C', file('src/main/jni').absolutePath,
+                '-j', Runtime.runtime.availableProcessors(),
+                'all',
+                'NDK_DEBUG=1'
+    }
+
+    task cleanNative(type: Exec, description: 'Clean JNI object files') {
+        def ndkDir = android.ndkDirectory
+        commandLine "$ndkDir/ndk-build",
+                '-C', file('src/main/jni').absolutePath,
+                'clean'
+    }
+
+    clean.dependsOn 'cleanNative'
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildNative
     }
 }
 
