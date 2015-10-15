@@ -1,36 +1,35 @@
 package org.puder.trs80;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import org.acra.ReportField;
 import org.acra.collector.CrashReportData;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class ACRAPostSender implements ReportSender {
+
     private final static String BASE_URL      = "http://trs80.sourceforge.net/acra.php?email=mobile@puder.org";
     private final static String SHARED_SECRET = "mobl_secret";
     private Map<String, String> custom_data   = null;
 
-    ACRAPostSender() {
-    }
 
     public ACRAPostSender(HashMap<String, String> custom_data) {
         this.custom_data = custom_data;
@@ -38,96 +37,87 @@ public class ACRAPostSender implements ReportSender {
 
     @Override
     public void send(Context context, CrashReportData report) throws ReportSenderException {
+        Map<String, String> parameters = new LinkedHashMap<>();
 
-        String url = getUrl();
-        Log.e("xenim", url);
+        if (custom_data != null) {
+            for (Map.Entry<String, String> entry : custom_data.entrySet()) {
+                parameters.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        parameters.put("DATE", new Date().toString());
+        parameters.put("REPORT_ID", report.get(ReportField.REPORT_ID));
+        parameters.put("APP_VERSION_CODE", report.get(ReportField.APP_VERSION_CODE));
+        parameters.put("APP_VERSION_NAME", report.get(ReportField.APP_VERSION_NAME));
+        parameters.put("PACKAGE_NAME", report.get(ReportField.PACKAGE_NAME));
+        parameters.put("FILE_PATH", report.get(ReportField.FILE_PATH));
+        parameters.put("PHONE_MODEL", report.get(ReportField.PHONE_MODEL));
+        parameters.put("ANDROID_VERSION", report.get(ReportField.ANDROID_VERSION));
+        parameters.put("BUILD", report.get(ReportField.BUILD));
+        parameters.put("BRAND", report.get(ReportField.BRAND));
+        parameters.put("PRODUCT", report.get(ReportField.PRODUCT));
+        parameters.put("TOTAL_MEM_SIZE", report.get(ReportField.TOTAL_MEM_SIZE));
+        parameters.put("AVAILABLE_MEM_SIZE", report.get(ReportField.AVAILABLE_MEM_SIZE));
+        parameters.put("CUSTOM_DATA", report.get(ReportField.CUSTOM_DATA));
+        parameters.put("STACK_TRACE", report.get(ReportField.STACK_TRACE));
+        parameters.put("INITIAL_CONFIGURATION", report.get(ReportField.INITIAL_CONFIGURATION));
+        parameters.put("CRASH_CONFIGURATION", report.get(ReportField.CRASH_CONFIGURATION));
+        parameters.put("DISPLAY", report.get(ReportField.DISPLAY));
+        parameters.put("USER_COMMENT", report.get(ReportField.USER_COMMENT));
+        parameters.put("USER_APP_START_DATE", report.get(ReportField.USER_APP_START_DATE));
+        parameters.put("USER_CRASH_DATE", report.get(ReportField.USER_CRASH_DATE));
+        parameters.put("DUMPSYS_MEMINFO", report.get(ReportField.DUMPSYS_MEMINFO));
+        parameters.put("DROPBOX", report.get(ReportField.DROPBOX));
+        parameters.put("LOGCAT", report.get(ReportField.LOGCAT));
+        parameters.put("EVENTSLOG", report.get(ReportField.EVENTSLOG));
+        parameters.put("RADIOLOG", report.get(ReportField.RADIOLOG));
+        parameters.put("IS_SILENT", report.get(ReportField.IS_SILENT));
+        parameters.put("DEVICE_ID", report.get(ReportField.DEVICE_ID));
+        parameters.put("INSTALLATION_ID", report.get(ReportField.INSTALLATION_ID));
+        parameters.put("USER_EMAIL", report.get(ReportField.USER_EMAIL));
+        parameters.put("DEVICE_FEATURES", report.get(ReportField.DEVICE_FEATURES));
+        parameters.put("ENVIRONMENT", report.get(ReportField.ENVIRONMENT));
+        parameters.put("SETTINGS_SYSTEM", report.get(ReportField.SETTINGS_SYSTEM));
+        parameters.put("SETTINGS_SECURE", report.get(ReportField.SETTINGS_SECURE));
+        parameters.put("SHARED_PREFERENCES", report.get(ReportField.SHARED_PREFERENCES));
+        parameters.put("APPLICATION_LOG", report.get(ReportField.APPLICATION_LOG));
+        parameters.put("MEDIA_CODEC_LIST", report.get(ReportField.MEDIA_CODEC_LIST));
+        parameters.put("THREAD_DETAILS", report.get(ReportField.THREAD_DETAILS));
 
         try {
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(url);
+            URL url = getUrl();
+            Log.e("xenim", url.toString());
 
-            List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
 
-            if (custom_data != null) {
-                for (Map.Entry<String, String> entry : custom_data.entrySet()) {
-                    parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-                }
+            Uri.Builder builder = new Uri.Builder();
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                builder.appendQueryParameter(entry.getKey(), entry.getValue());
             }
-            parameters.add(new BasicNameValuePair("DATE", new Date().toString()));
-            parameters.add(new BasicNameValuePair("REPORT_ID", report.get(ReportField.REPORT_ID)));
-            parameters.add(new BasicNameValuePair("APP_VERSION_CODE", report
-                    .get(ReportField.APP_VERSION_CODE)));
-            parameters.add(new BasicNameValuePair("APP_VERSION_NAME", report
-                    .get(ReportField.APP_VERSION_NAME)));
-            parameters.add(new BasicNameValuePair("PACKAGE_NAME", report
-                    .get(ReportField.PACKAGE_NAME)));
-            parameters.add(new BasicNameValuePair("FILE_PATH", report.get(ReportField.FILE_PATH)));
-            parameters.add(new BasicNameValuePair("PHONE_MODEL", report
-                    .get(ReportField.PHONE_MODEL)));
-            parameters.add(new BasicNameValuePair("ANDROID_VERSION", report
-                    .get(ReportField.ANDROID_VERSION)));
-            parameters.add(new BasicNameValuePair("BUILD", report.get(ReportField.BUILD)));
-            parameters.add(new BasicNameValuePair("BRAND", report.get(ReportField.BRAND)));
-            parameters.add(new BasicNameValuePair("PRODUCT", report.get(ReportField.PRODUCT)));
-            parameters.add(new BasicNameValuePair("TOTAL_MEM_SIZE", report
-                    .get(ReportField.TOTAL_MEM_SIZE)));
-            parameters.add(new BasicNameValuePair("AVAILABLE_MEM_SIZE", report
-                    .get(ReportField.AVAILABLE_MEM_SIZE)));
-            parameters.add(new BasicNameValuePair("CUSTOM_DATA", report
-                    .get(ReportField.CUSTOM_DATA)));
-            parameters.add(new BasicNameValuePair("STACK_TRACE", report
-                    .get(ReportField.STACK_TRACE)));
-            parameters.add(new BasicNameValuePair("INITIAL_CONFIGURATION", report
-                    .get(ReportField.INITIAL_CONFIGURATION)));
-            parameters.add(new BasicNameValuePair("CRASH_CONFIGURATION", report
-                    .get(ReportField.CRASH_CONFIGURATION)));
-            parameters.add(new BasicNameValuePair("DISPLAY", report.get(ReportField.DISPLAY)));
-            parameters.add(new BasicNameValuePair("USER_COMMENT", report
-                    .get(ReportField.USER_COMMENT)));
-            parameters.add(new BasicNameValuePair("USER_APP_START_DATE", report
-                    .get(ReportField.USER_APP_START_DATE)));
-            parameters.add(new BasicNameValuePair("USER_CRASH_DATE", report
-                    .get(ReportField.USER_CRASH_DATE)));
-            parameters.add(new BasicNameValuePair("DUMPSYS_MEMINFO", report
-                    .get(ReportField.DUMPSYS_MEMINFO)));
-            parameters.add(new BasicNameValuePair("DROPBOX", report.get(ReportField.DROPBOX)));
-            parameters.add(new BasicNameValuePair("LOGCAT", report.get(ReportField.LOGCAT)));
-            parameters.add(new BasicNameValuePair("EVENTSLOG", report.get(ReportField.EVENTSLOG)));
-            parameters.add(new BasicNameValuePair("RADIOLOG", report.get(ReportField.RADIOLOG)));
-            parameters.add(new BasicNameValuePair("IS_SILENT", report.get(ReportField.IS_SILENT)));
-            parameters.add(new BasicNameValuePair("DEVICE_ID", report.get(ReportField.DEVICE_ID)));
-            parameters.add(new BasicNameValuePair("INSTALLATION_ID", report
-                    .get(ReportField.INSTALLATION_ID)));
-            parameters
-                    .add(new BasicNameValuePair("USER_EMAIL", report.get(ReportField.USER_EMAIL)));
-            parameters.add(new BasicNameValuePair("DEVICE_FEATURES", report
-                    .get(ReportField.DEVICE_FEATURES)));
-            parameters.add(new BasicNameValuePair("ENVIRONMENT", report
-                    .get(ReportField.ENVIRONMENT)));
-            parameters.add(new BasicNameValuePair("SETTINGS_SYSTEM", report
-                    .get(ReportField.SETTINGS_SYSTEM)));
-            parameters.add(new BasicNameValuePair("SETTINGS_SECURE", report
-                    .get(ReportField.SETTINGS_SECURE)));
-            parameters.add(new BasicNameValuePair("SHARED_PREFERENCES", report
-                    .get(ReportField.SHARED_PREFERENCES)));
-            parameters.add(new BasicNameValuePair("APPLICATION_LOG", report
-                    .get(ReportField.APPLICATION_LOG)));
-            parameters.add(new BasicNameValuePair("MEDIA_CODEC_LIST", report
-                    .get(ReportField.MEDIA_CODEC_LIST)));
-            parameters.add(new BasicNameValuePair("THREAD_DETAILS", report
-                    .get(ReportField.THREAD_DETAILS)));
 
-            httpPost.setEntity(new UrlEncodedFormEntity(parameters, HTTP.UTF_8));
-            httpClient.execute(httpPost);
+            String query = builder.build().getEncodedQuery();
+            connection.setFixedLengthStreamingMode(query.length());
+
+            OutputStream out = connection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+
+            writer.write(query);
+            writer.flush();
+            writer.close();
+
+            out.close();
+
+            connection.connect();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private String getUrl() {
+    private URL getUrl() throws MalformedURLException {
         String token = getToken();
         String key = getKey(token);
-        return String.format("%s&token=%s&key=%s&", BASE_URL, token, key);
+        return new URL(String.format("%s&token=%s&key=%s&", BASE_URL, token, key));
     }
 
     private String getKey(String token) {
@@ -138,7 +128,7 @@ public class ACRAPostSender implements ReportSender {
         return md5(UUID.randomUUID().toString());
     }
 
-    public static String md5(String s) {
+    public String md5(String s) {
         MessageDigest m = null;
         try {
             m = MessageDigest.getInstance("MD5");
