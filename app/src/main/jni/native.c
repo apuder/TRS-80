@@ -68,6 +68,37 @@ static JNIEnv* getEnv() {
     return env;
 }
 
+extern int trs_paste_started();
+static int charCount = 0;
+static unsigned char *pasteString = NULL;
+static int pasteStringLength = 0;
+
+static void clear_paste_string()
+{
+    if (pasteString != NULL) {
+        free(pasteString);
+        pasteString = NULL;
+    }
+    charCount = pasteStringLength = 0;
+}
+
+int PasteManagerGetChar(unsigned short *character)
+{
+    if (charCount) {
+        *character = pasteString[pasteStringLength - charCount];
+        charCount--;
+        if (charCount) {
+            return (TRUE);
+        } else {
+            clear_paste_string();
+            return(FALSE);
+        }
+    }
+    else {
+        return(FALSE);
+    }
+}
+
 static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr, jstring xtrsCassette,
                       jstring xtrsDisk0, jstring xtrsDisk1, jstring xtrsDisk2, jstring xtrsDisk3) {
     int debug = FALSE;
@@ -96,6 +127,7 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_autodelay = 1;
     trs_emtsafe = 1;
     trs_show_led = 0;
+    timer_overclock = 0;
     grafyx_set_microlabs(0);
     trs_disk_doubler = TRSDISK_BOTH;
     trs_disk_truedam = 0;
@@ -145,6 +177,7 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
 
     trs_disk_init(1);
     z80_state.pc.word = entryAddr;
+    clear_paste_string();
 }
 
 void trigger_screen_update() {
@@ -251,7 +284,18 @@ void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, 
     add_key_event(event, sym, key);
 }
 
+void Java_org_puder_trs80_XTRS_paste(JNIEnv* env, jclass cls, jstring clipboard) {
+    clear_paste_string();
+    const char* cb = (*env)->GetStringUTFChars(env, clipboard, NULL);
+    charCount = pasteStringLength = (*env)->GetStringUTFLength(env, clipboard);
+    pasteString = (unsigned char*) malloc(pasteStringLength);
+    memcpy(pasteString, cb, pasteStringLength);
+    (*env)->ReleaseStringUTFChars(env, clipboard, cb);
+    trs_paste_started();
+}
+
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
+    clear_paste_string();
     if (!setjmp(ex_buf)) {
         screenUpdateRequired = 1;
         while (isRunning) {
@@ -267,6 +311,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 }
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
+    clear_paste_string();
     trs_timer_init();
     trs_reset(0);
 }

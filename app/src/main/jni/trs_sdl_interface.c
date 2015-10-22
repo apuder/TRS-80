@@ -1574,7 +1574,7 @@ char *trs_get_copy_data()
   return copy_data;
 }
 
-/* 
+/*
  * Get and process SDL event(s).
  *   If wait is true, process one event, blocking until one is available.
  *   If wait is false, process as many events as are available, returning
@@ -1608,8 +1608,7 @@ void trs_get_event(int wait)
 			}
 		}
 
-#ifndef ANDROID
-		if (paste_state == PASTE_GETNEXT) {
+      if (paste_state == PASTE_GETNEXT) {
 			if (!PasteManagerGetChar(&paste_key_uni)) 
 				paste_lastkey = TRUE;
 			else
@@ -1627,7 +1626,6 @@ void trs_get_event(int wait)
 			else
 				paste_state = PASTE_GETNEXT;
 		}
-#endif
     }
 		  
     if (wait) {

@@ -18,6 +18,8 @@ package org.puder.trs80;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
@@ -52,31 +54,33 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-public class EmulatorActivity extends BaseActivity implements SensorEventListener,
-        OnKeyListener {
+public class EmulatorActivity extends BaseActivity implements SensorEventListener, OnKeyListener {
 
     // Action Menu
-    private static final int   MENU_OPTION_PAUSE     = 0;
-    private static final int   MENU_OPTION_REWIND    = 1;
-    private static final int   MENU_OPTION_RESET     = 2;
-    private static final int   MENU_OPTION_SOUND_ON  = 3;
-    private static final int   MENU_OPTION_SOUND_OFF = 4;
-    private static final int   MENU_OPTION_TUTORIAL  = 5;
-    private static final int   MENU_OPTION_HELP      = 6;
+    private static final int MENU_OPTION_PAUSE     = 0;
+    private static final int MENU_OPTION_REWIND    = 1;
+    private static final int MENU_OPTION_RESET     = 2;
+    private static final int MENU_OPTION_PASTE     = 3;
+    private static final int MENU_OPTION_SOUND_ON  = 4;
+    private static final int MENU_OPTION_SOUND_OFF = 5;
+    private static final int MENU_OPTION_TUTORIAL  = 6;
+    private static final int MENU_OPTION_HELP      = 7;
 
     private Thread             cpuThread;
     private RenderThread       renderThread;
     private TextView           logView;
     private int                orientation;
-    private boolean            soundMuted            = false;
-    private MenuItem           muteMenuItem;
-    private MenuItem           unmuteMenuItem;
-    private SensorManager      sensorManager         = null;
+    private boolean            soundMuted     = false;
+    private MenuItem           pasteMenuItem  = null;
+    private MenuItem           muteMenuItem   = null;
+    private MenuItem           unmuteMenuItem = null;
+    private SensorManager      sensorManager  = null;
     private Sensor             sensorAccelerometer;
     private KeyboardManager    keyboardManager;
     private int                rotation;
     private OrientationChanged orientationManager;
-    private Handler            handler               = new Handler();
+    private ClipboardManager   clipboardManager;
+    private Handler            handler        = new Handler();
 
 
     class OrientationChanged extends OrientationEventListener {
@@ -159,6 +163,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             return;
         }
 
+        clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
         orientation = getResources().getConfiguration().orientation;
         if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
                 && !CastMessageSender.get().isReadyToSend()) {
@@ -196,6 +202,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         if (TRS80Application.hasCrashed()) {
             return;
         }
+
+        updateMenuIcons();
+
         RemoteCastScreen.get().startSession();
 
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
@@ -243,7 +252,11 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_REWIND, Menu.NONE,
                         this.getString(R.string.menu_rewind)).setIcon(R.drawable.rewind_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        pasteMenuItem = menu.add(Menu.NONE, MENU_OPTION_PASTE, Menu.NONE,
+                this.getString(R.string.menu_paste));
+        MenuItemCompat.setShowAsAction(pasteMenuItem.setIcon(R.drawable.paste_icon),
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         if (TRS80Application.getCurrentConfiguration().muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             setSoundMuted(true);
@@ -256,17 +269,16 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                     this.getString(R.string.menu_sound_on));
             MenuItemCompat.setShowAsAction(unmuteMenuItem.setIcon(R.drawable.sound_on_icon),
                     MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-            updateMuteSoundIcons();
         }
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_TUTORIAL, Menu.NONE,
                         this.getString(R.string.menu_tutorial)),
                 MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
-                                this.getString(R.string.menu_help)).setIcon(
-                                R.drawable.help_icon_white), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
+                        .setIcon(R.drawable.help_icon_white),
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        updateMenuIcons();
         return true;
     }
 
@@ -284,13 +296,16 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         case MENU_OPTION_RESET:
             XTRS.reset();
             return true;
+        case MENU_OPTION_PASTE:
+            paste();
+            return true;
         case MENU_OPTION_SOUND_ON:
             setSoundMuted(true);
-            updateMuteSoundIcons();
+            updateMenuIcons();
             return true;
         case MENU_OPTION_SOUND_OFF:
             setSoundMuted(false);
-            updateMuteSoundIcons();
+            updateMenuIcons();
             return true;
         case MENU_OPTION_TUTORIAL:
             showTutorial();
@@ -481,6 +496,18 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         pauseEmulator();
     }
 
+    private void paste() {
+        if (!clipboardManager.hasPrimaryClip()) {
+            return;
+        }
+        ClipData clip = clipboardManager.getPrimaryClip();
+        ClipData.Item item = clip.getItemAt(0);
+        CharSequence text = item.getText();
+        if (text != null) {
+            XTRS.paste(text.toString().replace('\n', '\015'));
+        }
+    }
+
     private void showTutorial() {
         View tutorialRoot = findViewById(R.id.tutorial);
         View keyboardRoot = findViewById(R.id.keyboard_container);
@@ -488,7 +515,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private int getKeyboardType() {
-        if (getResources().getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
+        if (getResources()
+                .getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
             return Configuration.KEYBOARD_EXTERNAL;
         }
 
@@ -520,13 +548,26 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         TRS80Application.setScreenshot(renderThread.takeScreenshot());
     }
 
-    private void updateMuteSoundIcons() {
-        if (soundMuted) {
-            muteMenuItem.setVisible(true);
-            unmuteMenuItem.setVisible(false);
-        } else {
-            muteMenuItem.setVisible(false);
-            unmuteMenuItem.setVisible(true);
+    private void updateMenuIcons() {
+        if (muteMenuItem != null && unmuteMenuItem != null) {
+            if (soundMuted) {
+                muteMenuItem.setVisible(true);
+                unmuteMenuItem.setVisible(false);
+            } else {
+                muteMenuItem.setVisible(false);
+                unmuteMenuItem.setVisible(true);
+            }
+        }
+
+        if (pasteMenuItem != null) {
+            boolean hasClip = false;
+            if (clipboardManager.hasPrimaryClip()) {
+                ClipData clip = clipboardManager.getPrimaryClip();
+                ClipData.Item item = clip.getItemAt(0);
+                CharSequence text = item.getText();
+                hasClip = (text != null) && !text.equals("");
+            }
+            pasteMenuItem.setEnabled(hasClip);
         }
     }
 
@@ -548,18 +589,18 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     /**
      * negateX, negateY, xSrc, ySrc
      */
-    final static int[][] axisSwap                        = { { 1, -1, 0, 1 }, // ROTATION_0
+    final static int[][] axisSwap = { { 1, -1, 0, 1 }, // ROTATION_0
             { -1, -1, 1, 0 }, // ROTATION_90
             { -1, 1, 0, 1 }, // ROTATION_180
-            { 1, 1, 1, 0 }                              };      // ROTATION_270
+            { 1, 1, 1, 0 } }; // ROTATION_270
 
-    final static float   ACCELEROMETER_PRESS_THRESHOLD   = 1.0f;
-    final static float   ACCELEROMETER_UNPRESS_THRESHOLD = 0.3f;
+    final static float ACCELEROMETER_PRESS_THRESHOLD   = 1.0f;
+    final static float ACCELEROMETER_UNPRESS_THRESHOLD = 0.3f;
 
-    private boolean      leftKeyPressed                  = false;
-    private boolean      rightKeyPressed                 = false;
-    private boolean      upKeyPressed                    = false;
-    private boolean      downKeyPressed                  = false;
+    private boolean leftKeyPressed  = false;
+    private boolean rightKeyPressed = false;
+    private boolean upKeyPressed    = false;
+    private boolean downKeyPressed  = false;
 
 
     @Override

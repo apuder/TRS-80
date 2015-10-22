@@ -29,11 +29,12 @@ public class XTRS {
         System.loadLibrary("xtrs");
     }
 
-    private static RenderThread     renderer    = null;
 
-    private static Thread           audioThread = null;
+    private static RenderThread renderer = null;
 
-    private static EmulatorActivity emulator    = null;
+    private static Thread audioThread = null;
+
+    private static EmulatorActivity emulator = null;
 
 
     public static native void setRunning(boolean run);
@@ -49,6 +50,8 @@ public class XTRS {
     public static native void rewindCassette();
 
     public static native void addKeyEvent(int event, int mod, int key);
+
+    public static native void paste(String clipboard);
 
     public static native void setSoundMuted(boolean isMuted);
 

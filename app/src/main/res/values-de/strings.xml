@@ -56,6 +56,7 @@
     <string name="menu_help">Hilfe</string>
     <string name="menu_pause">Pause</string>
     <string name="menu_reset">Zurücksetzen</string>
+    <string name="menu_paste">Einfügen</string>
     <string name="menu_resume">Fortsetzen</string>
     <string name="menu_rewind">Zurückspulen</string>
     <string name="menu_settings">Einstellungen</string>
@@ -166,6 +167,7 @@
                         &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
+                        &nbsp;&nbsp;<img src="paste_icon"/>: Ablage in die Tastatur einfügen<br/>
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<p>
                         Das Tutorium zeigt einige TRS-Kommandos.]]></string>
 
