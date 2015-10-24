@@ -38,6 +38,7 @@
     <string name="keyboard_abbrev_compact">compact</string>
     <string name="keyboard_abbrev_joystick">joystick</string>
     <string name="keyboard_abbrev_tilt">tilt</string>
+    <string name="keyboard_abbrev_game_controller">controller</string>
     <string name="conf_header">Configurations</string>
     <string name="conf_item_hardware">Hardware:</string>
     <string name="conf_item_disks">Disks:</string>
@@ -87,6 +88,7 @@
     <string name="keyboard_compact">Compact layout</string>
     <string name="keyboard_joystick">Joystick control</string>
     <string name="keyboard_tilt">Tilt interface</string>
+    <string name="keyboard_game_controller">Game controller</string>
 
     <!-- SettingActivity -->
     <string name="menu_done">Done</string>
@@ -197,10 +199,6 @@
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Rewind cassette<br/>
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<p>
                         Start the tutorial to run some TRS-commands.]]></string>
-    <string name="keyboard_original_layout">Original layout</string>
-    <string name="keyboard_compact_layout">Compact layout</string>
-    <string name="keyboard_joystick_control">Joystick control</string>
-    <string name="keyboard_tilt_interface">Tilt interface</string>
 
     <string name="tutorial_next">Next (%1$d/%2$d)</string>
     <string name="tutorial_step_1_cmd" translatable="false">DIR</string>

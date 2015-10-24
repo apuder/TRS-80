@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "org.puder.trs80"
-        minSdkVersion 11
+        minSdkVersion 12
         targetSdkVersion 22
 
         ndk {

@@ -45,7 +45,6 @@
     <string name="keyboard_joystick_control">Joystick-Steuerung</string>
     <string name="keyboard_tilt_interface">Kipp-Steuerung</string>
 
-    <string name="keyboard_tilt">Neigefunktion</string>
     <string name="menu_add">Hinzufügen</string>
     <string name="menu_cancel">Abbrechen</string>
     <string name="menu_delete">Löschen</string>
@@ -118,10 +117,13 @@
     <string name="keyboard_abbrev_compact">kompakt</string>
     <string name="keyboard_abbrev_joystick">joystick</string>
     <string name="keyboard_abbrev_original">original</string>
+    <string name="keyboard_abbrev_game_controller">Konsole</string>
     <string name="keyboard_abbrev_tilt">kippen</string>
     <string name="keyboard_compact">Kompaktes Layout</string>
     <string name="keyboard_joystick">Joystick Steuerung</string>
     <string name="keyboard_original">Original Layout</string>
+    <string name="keyboard_game_controller">Spielkonsole</string>
+    <string name="keyboard_tilt">Kipp-Steuerung</string>
     <string name="help_title_configurations">Hilfe: Konfigurationen</string>
     <string name="help_title_edit_configuration">Hilfe: Konfigurationen editieren</string>
     <string name="help_title_settings">Hilfe: Einstellungen</string>
@@ -147,7 +149,7 @@
         Es können verschiedene Tastaturlayouts für das Hoch- und Querformat ausgewählt werden.
         Das Standard-Layout orientiert sich an dem Tastatur-Layout des original TRS-80. Das kompakte Layout
         ist besser für kleinere Bildschirme geeignet. Das Spiele-Layout hat Joystick-Kontrolle.
-        Das Kipp-Interface nutzt den Beschleunigungs-Sensor um dami die Pfeiltasten zu steuern.
+        Das Kipp-Interface nutzt den Beschleunigungs-Sensor um damit die Pfeiltasten zu steuern.
         Tippen Sie auf den Bildschirm um die Leertaste zu betätigen. (z.B. zum \'feuern\').]]>
     </string>
     <string name="help_settings"><![CDATA[Dieser Emulator benötigt original ROM Images der verschiedenen

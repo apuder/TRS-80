@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
 import org.puder.trs80.XTRS;
+import org.puder.trs80.Configuration;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -38,19 +39,20 @@ public class KeyboardManager {
      * might miss the key-up event. This can especially happen when using an
      * external keyboard with key-repeat.
      */
-    final static private int    KEY_UP_DELAY = 100;
+    final static private int KEY_UP_DELAY = 100;
 
-    private List<Key>           shiftableKeys;
-    private int                 pressedShiftKey;
+    private Configuration configuration;
+    private List<Key>     shiftableKeys;
+    private int           pressedShiftKey;
 
     private static List<KeyMap> keyboardMapping;
 
-    private Handler             handler      = new Handler();
+    private Handler handler = new Handler();
+
 
     static {
         keyboardMapping = parseKeyMap(R.xml.keymap_us);
     }
-
 
     static private List<KeyMap> parseKeyMap(int keyMapLayout) {
         XmlResourceParser parser = TRS80Application.getAppContext().getResources()
@@ -95,7 +97,8 @@ public class KeyboardManager {
         return keyMap;
     }
 
-    public KeyboardManager() {
+    public KeyboardManager(Configuration configuration) {
+        this.configuration = configuration;
         shiftableKeys = new ArrayList<Key>();
         pressedShiftKey = Key.TK_NONE;
     }
@@ -257,7 +260,12 @@ public class KeyboardManager {
     }
 
     private int mapKeyEventToTRS(KeyEvent event) {
-        switch (event.getKeyCode()) {
+        int keyCode = event.getKeyCode();
+        int keyController = configuration.mapGameControllerButton(keyCode);
+        if (keyController != Key.TK_NONE) {
+            return keyController;
+        }
+        switch (keyCode) {
         case KeyEvent.KEYCODE_ENTER:
             return Key.TK_ENTER;
         case KeyEvent.KEYCODE_DEL:

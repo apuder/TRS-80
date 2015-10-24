@@ -38,10 +38,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -54,7 +54,8 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-public class EmulatorActivity extends BaseActivity implements SensorEventListener, OnKeyListener {
+public class EmulatorActivity extends BaseActivity
+        implements SensorEventListener, GameControllerListener {
 
     // Action Menu
     private static final int MENU_OPTION_PAUSE     = 0;
@@ -77,6 +78,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private SensorManager      sensorManager  = null;
     private Sensor             sensorAccelerometer;
     private KeyboardManager    keyboardManager;
+    private ViewGroup          keyboardContainer = null;
+    private GameController     gameController;
     private int                rotation;
     private OrientationChanged orientationManager;
     private ClipboardManager   clipboardManager;
@@ -176,8 +179,10 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         XTRS.setEmulatorActivity(this);
         Hardware hardware = TRS80Application.getHardware();
         hardware.computeFontDimensions(getWindow());
-        keyboardManager = new KeyboardManager();
+        keyboardManager = new KeyboardManager(TRS80Application.getCurrentConfiguration());
         TRS80Application.setKeyboardManager(keyboardManager);
+
+        gameController = new GameController(this);
 
         startRenderThread();
         initView();
@@ -206,7 +211,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         updateMenuIcons();
 
         RemoteCastScreen.get().startSession();
-
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             startAccelerometer();
         }
@@ -318,14 +322,59 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            return keyboardManager.keyDown(event);
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (gameController.dispatchKeyEvent(event)) {
+            return true;
         }
-        if (event.getAction() == KeyEvent.ACTION_UP) {
-            return keyboardManager.keyUp(event);
+        boolean consumed = false;
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            consumed = keyboardManager.keyDown(event);
         }
-        return false;
+        if (event.getAction() == KeyEvent.ACTION_UP && event.getRepeatCount() == 0) {
+            consumed = keyboardManager.keyUp(event);
+        }
+        return consumed || super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        return gameController.dispatchGenericMotionEvent(event);
+    }
+
+    @Override
+    public void onGameControllerAction(GameController.Action action) {
+        switch (action) {
+        case LEFT_DOWN:
+            keyboardManager.pressKeyLeft();
+            break;
+        case LEFT_UP:
+            keyboardManager.unpressKeyLeft();
+            break;
+        case TOP_DOWN:
+            keyboardManager.pressKeyUp();
+            break;
+        case TOP_UP:
+            keyboardManager.unpressKeyUp();
+            break;
+        case RIGHT_DOWN:
+            keyboardManager.pressKeyRight();
+            break;
+        case RIGHT_UP:
+            keyboardManager.unpressKeyRight();
+            break;
+        case BOTTOM_DOWN:
+            keyboardManager.pressKeyDown();
+            break;
+        case BOTTOM_UP:
+            keyboardManager.unpressKeyDown();
+            break;
+        case CENTER_DOWN:
+            keyboardManager.pressKeySpace();
+            break;
+        case CENTER_UP:
+            keyboardManager.unpressKeySpace();
+            break;
+        }
     }
 
     public void onScreenRotationClick(View view) {
@@ -405,7 +454,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         View top = this.findViewById(R.id.emulator);
         top.setFocusable(true);
         top.setFocusableInTouchMode(true);
-        top.setOnKeyListener(this);
         top.requestFocus();
         logView = (TextView) findViewById(R.id.log);
 
@@ -419,10 +467,11 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
         int keyboardType = getKeyboardType();
         showKeyboardHint(keyboardType);
-        if (keyboardType == Configuration.KEYBOARD_EXTERNAL) {
+        if (keyboardType == Configuration.KEYBOARD_GAME_CONTROLLER
+                || keyboardType == Configuration.KEYBOARD_EXTERNAL) {
             return;
         }
-        final ViewGroup root = (ViewGroup) findViewById(R.id.keyboard_container);
+        keyboardContainer = (ViewGroup) findViewById(R.id.keyboard_container);
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // if (android.os.Build.VERSION.SDK_INT >=
@@ -444,7 +493,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             layoutId = R.layout.keyboard_tilt;
             break;
         }
-        inflater.inflate(layoutId, root);
+        inflater.inflate(layoutId, keyboardContainer);
 
         /*
          * The following code is a hack to work around a problem with the
@@ -457,16 +506,16 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
          * GONE after the layout has been computed and just before it will be
          * rendered.
          */
-        ViewTreeObserver vto = root.getViewTreeObserver();
+        ViewTreeObserver vto = keyboardContainer.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
 
-                View kb2 = root.findViewById(R.id.keyboard_view_2);
+                View kb2 = keyboardContainer.findViewById(R.id.keyboard_view_2);
                 if (kb2 != null) {
                     kb2.setVisibility(View.GONE);
                 }
-                ViewTreeObserver obs = root.getViewTreeObserver();
+                ViewTreeObserver obs = keyboardContainer.getViewTreeObserver();
                 obs.removeGlobalOnLayoutListener(this);
             }
         });
@@ -530,6 +579,18 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             break;
         }
         return keyboardType;
+    }
+
+    private void showKeyboard() {
+        if (keyboardContainer != null) {
+            keyboardContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideKeyboard() {
+        if (keyboardContainer != null) {
+            keyboardContainer.setVisibility(View.GONE);
+        }
     }
 
     private void pauseEmulator() {

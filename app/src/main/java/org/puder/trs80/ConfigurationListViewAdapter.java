@@ -189,6 +189,9 @@ public class ConfigurationListViewAdapter extends
         case Configuration.KEYBOARD_TILT:
             id = R.string.keyboard_abbrev_tilt;
             break;
+        case Configuration.KEYBOARD_GAME_CONTROLLER:
+            id = R.string.keyboard_abbrev_game_controller;
+            break;
         default:
             return "-";
         }

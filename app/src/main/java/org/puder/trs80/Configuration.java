@@ -21,6 +21,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
+
+import org.puder.trs80.keyboard.Key;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +35,7 @@ public class Configuration {
     public static final int            KEYBOARD_LAYOUT_ORIGINAL = 0;
     public static final int            KEYBOARD_LAYOUT_COMPACT  = 1;
     public static final int            KEYBOARD_LAYOUT_JOYSTICK = 2;
-    public static final int            KEYBOARD_LAYOUT_GAMING_2 = 3;
+    public static final int            KEYBOARD_GAME_CONTROLLER = 3;
     public static final int            KEYBOARD_TILT            = 4;
     public static final int            KEYBOARD_EXTERNAL        = 5;
 
@@ -221,5 +224,23 @@ public class Configuration {
         configurations.remove(from);
         configurations.add(to, conf);
         saveConfigurationIDs();
+    }
+
+    public int mapGameControllerButton(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_L1:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_R1:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_X:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_Y:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_B:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_A:
+                return Key.TK_SPACE;
+        }
+        return Key.TK_NONE;
     }
 }

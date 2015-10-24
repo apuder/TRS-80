@@ -193,7 +193,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
             pref.setSummary(this.getString(R.string.keyboard_joystick));
         }
         if ("3".equals(val)) {
-            pref.setSummary("unused");
+            pref.setSummary(R.string.keyboard_game_controller);
         }
         if ("4".equals(val)) {
             pref.setSummary(this.getString(R.string.keyboard_tilt));

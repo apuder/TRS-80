@@ -16,15 +16,12 @@
 
 package org.puder.trs80;
 
-import java.io.File;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.os.Environment;
 import android.view.Window;
 
 /**
@@ -224,9 +221,6 @@ abstract public class Hardware {
             maxKeyBoxes = 15;
             break;
         case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
-            maxKeyBoxes = 8;
-            break;
-        case Configuration.KEYBOARD_LAYOUT_GAMING_2:
             maxKeyBoxes = 8;
             break;
         }

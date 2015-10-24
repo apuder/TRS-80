@@ -21,15 +21,17 @@
         <item>1</item>
     </string-array>
     <string-array name="conf_keyboard_type">
-        <item>@string/keyboard_original_layout</item>
-        <item>@string/keyboard_compact_layout</item>
-        <item>@string/keyboard_joystick_control</item>
-        <item>@string/keyboard_tilt_interface</item>
-        </string-array>
+        <item>@string/keyboard_original</item>
+        <item>@string/keyboard_compact</item>
+        <item>@string/keyboard_joystick</item>
+        <item>@string/keyboard_game_controller</item>
+        <item>@string/keyboard_tilt</item>
+    </string-array>
     <string-array name="conf_keyboard_type_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>4</item>
     </string-array>
 </resources>
