@@ -360,7 +360,7 @@ KeyTable ascii_key_table[] = {
 /* 0xc1 */    { TK_NULL, TK_Neutral },
 /* 0xc2 */    { TK_NULL, TK_Neutral },
 /* 0xc3 */    { TK_NULL, TK_Neutral },
-/* 0xc4 */    { TK_LeftBracket, TK_ForceShift },    /* Ä */
+/* 0xc4 */    { TK_LeftBracket, TK_ForceShift },    /* ï¿½ */
 /* 0xc5 */    { TK_NULL, TK_Neutral },
 /* 0xc6 */    { TK_NULL, TK_Neutral },
 /* 0xc7 */    { TK_NULL, TK_Neutral },
@@ -378,21 +378,21 @@ KeyTable ascii_key_table[] = {
 /* 0xd3 */    { TK_NULL, TK_Neutral },
 /* 0xd4 */    { TK_NULL, TK_Neutral },
 /* 0xd5 */    { TK_NULL, TK_Neutral },
-/* 0xd6 */    { TK_Backslash, TK_ForceShift },      /* Ö */
+/* 0xd6 */    { TK_Backslash, TK_ForceShift },      /* ï¿½ */
 /* 0xd7 */    { TK_NULL, TK_Neutral },
 /* 0xd8 */    { TK_NULL, TK_Neutral },
 /* 0xd9 */    { TK_NULL, TK_Neutral },
 /* 0xda */    { TK_NULL, TK_Neutral },
 /* 0xdb */    { TK_NULL, TK_Neutral },
-/* 0xdc */    { TK_RightBracket, TK_ForceShift },   /* Ü */
+/* 0xdc */    { TK_RightBracket, TK_ForceShift },   /* ï¿½ */
 /* 0xdd */    { TK_NULL, TK_Neutral },
 /* 0xde */    { TK_NULL, TK_Neutral },
-/* 0xdf */    { TK_Caret, TK_ForceNoShift },        /* ß */
+/* 0xdf */    { TK_Caret, TK_ForceNoShift },        /* ï¿½ */
 /* 0xe0 */    { TK_NULL, TK_Neutral },
 /* 0xe1 */    { TK_NULL, TK_Neutral },
 /* 0xe2 */    { TK_NULL, TK_Neutral },
 /* 0xe3 */    { TK_NULL, TK_Neutral },
-/* 0xe4 */    { TK_LeftBracket, TK_ForceNoShift },  /* ä */
+/* 0xe4 */    { TK_LeftBracket, TK_ForceNoShift },  /* ï¿½ */
 /* 0xe5 */    { TK_NULL, TK_Neutral },
 /* 0xe6 */    { TK_NULL, TK_Neutral },
 /* 0xe7 */    { TK_NULL, TK_Neutral },
@@ -410,13 +410,13 @@ KeyTable ascii_key_table[] = {
 /* 0xf3 */    { TK_NULL, TK_Neutral },
 /* 0xf4 */    { TK_NULL, TK_Neutral },
 /* 0xf5 */    { TK_NULL, TK_Neutral },
-/* 0xf6 */    { TK_Backslash, TK_ForceNoShift },    /* ö */
+/* 0xf6 */    { TK_Backslash, TK_ForceNoShift },    /* ï¿½ */
 /* 0xf7 */    { TK_NULL, TK_Neutral },
 /* 0xf8 */    { TK_NULL, TK_Neutral },
 /* 0xf9 */    { TK_NULL, TK_Neutral },
 /* 0xfa */    { TK_NULL, TK_Neutral },
 /* 0xfb */    { TK_NULL, TK_Neutral },
-/* 0xfc */    { TK_RightBracket, TK_ForceNoShift }, /* ü */
+/* 0xfc */    { TK_RightBracket, TK_ForceNoShift }, /* ï¿½ */
 /* 0xfd */    { TK_NULL, TK_Neutral },
 /* 0xfe */    { TK_NULL, TK_Neutral },
 /* 0xff */    { TK_NULL, TK_Neutral },
@@ -906,6 +906,13 @@ void queue_key(int state)
   }
 }
 
+static int k_waiting = 0;
+
+int trs_waiting_for_key()
+{
+    return k_waiting;
+}
+
 int dequeue_key()
 {
   int rval = -1;
@@ -924,6 +931,7 @@ int dequeue_key()
 
 int trs_next_key(int wait)
 {
+  k_waiting = wait;
   return dequeue_key();
 
 }

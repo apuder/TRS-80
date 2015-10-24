@@ -70,7 +70,11 @@ static unsigned char nmi_mask = M3_RESET_BIT;
 #define TIMER_HZ_4 60
 int timer_hz;
 int timer_overclock = 0;
+#ifdef ANDROID
+int timer_overclock_rate = 1000;
+#else
 int timer_overclock_rate = 5;
+#endif
 unsigned int cycles_per_timer;
 
 #define CLOCK_MHZ_1 1.77408

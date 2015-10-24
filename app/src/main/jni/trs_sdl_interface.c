@@ -78,6 +78,9 @@
 #include "SDL/SDL.h"
 #include "blit.h"
 
+extern int trs_timer_is_turbo();
+extern int trs_timer_switch_turbo();
+
 extern char trs_char_data[][MAXCHARS][TRS_CHAR_HEIGHT];
 
 #define MAX_RECTS 2048
@@ -1481,7 +1484,16 @@ void trs_end_copy()
 
 void trs_paste_started()
 {
-	paste_state = PASTE_GETNEXT;
+  // engage turbo
+  trs_timer_switch_turbo();
+  paste_state = PASTE_GETNEXT;
+}
+
+void trs_paste_ended()
+{
+  // stop turbo
+  trs_timer_switch_turbo();
+  paste_state = PASTE_IDLE;
 }
 
 void trs_select_all()
@@ -1603,13 +1615,15 @@ void trs_get_event(int wait)
 				if (paste_state == PASTE_KEYUP) {
 					trs_xlate_keysym(0x10000 | paste_key_uni);
 				}
-				paste_state = PASTE_IDLE;
+				trs_paste_ended();
 				return;
 			}
 		}
 
       if (paste_state == PASTE_GETNEXT) {
-			if (!PasteManagerGetChar(&paste_key_uni)) 
+            if (!trs_waiting_for_key())
+              return;
+			if (!PasteManagerGetChar(&paste_key_uni))
 				paste_lastkey = TRUE;
 			else
 				paste_lastkey = FALSE;
@@ -1622,7 +1636,7 @@ void trs_get_event(int wait)
 			return;
 		} else if (paste_state == PASTE_KEYUP) {
 			if (paste_lastkey)
-				paste_state = PASTE_IDLE;
+				trs_paste_ended();
 			else
 				paste_state = PASTE_GETNEXT;
 		}

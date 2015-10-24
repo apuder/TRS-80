@@ -34,7 +34,7 @@ void trs_joy_hat(unsigned char value);
 void trs_set_keypad_joystick(void);
 void trs_open_joystick(void);
 void trs_joy_axis(unsigned char axis, short value);
-
+int trs_waiting_for_key();
 
 
 
