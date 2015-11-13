@@ -20,6 +20,9 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.ndk.CrashlyticsNdk;
+import io.fabric.sdk.android.Fabric;
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.cast.CastMessageSender;
@@ -42,6 +45,7 @@ public class TRS80Application extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
         context = getApplicationContext();
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
