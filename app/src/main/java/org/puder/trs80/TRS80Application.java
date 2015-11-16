@@ -22,16 +22,13 @@ import android.graphics.Bitmap;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
-import io.fabric.sdk.android.Fabric;
-import org.acra.ACRA;
-import org.acra.annotation.ReportsCrashes;
+
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-import java.util.HashMap;
+import io.fabric.sdk.android.Fabric;
 
-@ReportsCrashes(formUri = "")
 public class TRS80Application extends Application {
 
     private static Context         context;
@@ -45,16 +42,13 @@ public class TRS80Application extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
         context = getApplicationContext();
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
         boolean debug = getApplicationContext().getResources().getBoolean(R.bool.debug);
         if (!debug) {
-            ACRA.init(this);
-            HashMap<String, String> ACRAData = new HashMap<>();
-            ACRA.getErrorReporter().setReportSender(new ACRAPostSender(ACRAData));
+            Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
         }
     }
 
