@@ -38,6 +38,8 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Dialog" />
+        <activity android:name=".market.MarketActivity"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>
