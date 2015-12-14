@@ -2,6 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_market"
+        android:title="@string/market"
+        android:icon="@drawable/ic_shop_black"
+        app:showAsAction="always"
+        />
+    <item
         android:id="@+id/action_cast_trs80"
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
         app:actionViewClass="android.support.v7.app.MediaRouteButton"

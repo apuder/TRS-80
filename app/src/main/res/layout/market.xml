@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/market_background">
+
+    <TextView
+        style="@style/MarketCategoryHeader"
+        android:text="@string/free_apps"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/free_list"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/market_list_height"/>
+    <TextView
+        style="@style/MarketCategoryHeader"
+        android:text="@string/paid_apps"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/paid_list"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/market_list_height"/>
+    <TextView
+        style="@style/MarketCategoryHeader"
+        android:text="@string/games"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/games_list"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/market_list_height"/>
+
+</LinearLayout>
+</ScrollView>

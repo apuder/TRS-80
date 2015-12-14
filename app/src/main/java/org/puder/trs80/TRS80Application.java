@@ -20,6 +20,8 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.raizlabs.android.dbflow.config.FlowManager;
+
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 import org.puder.trs80.cast.CastMessageSender;
@@ -46,6 +48,7 @@ public class TRS80Application extends Application {
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
+        FlowManager.init(this);
         boolean debug = getApplicationContext().getResources().getBoolean(R.bool.debug);
         if (!debug) {
             ACRA.init(this);

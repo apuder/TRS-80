@@ -26,4 +26,36 @@
         <item name="elevation">4sp</item>
     </style>
 
+
+    <style name="MarketCategoryHeader" parent="@android:style/TextAppearance.Large">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+    </style>
+
+    <style name="MarketAppTitle" parent="@android:style/TextAppearance.Small">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/terminal_green</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="MarketAppDetails">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="MarketAppPrice" parent="MarketAppDetails">
+        <item name="android:textColor">@color/terminal_green</item>
+        <item name="android:layout_marginTop">3dp</item>
+    </style>
 </resources>
