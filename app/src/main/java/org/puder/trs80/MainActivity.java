@@ -32,6 +32,7 @@ import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +41,7 @@ import com.emtronics.dragsortrecycler.DragSortRecycler;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.market.MarketActivity;
 
 import java.io.File;
 
@@ -193,20 +195,8 @@ public class MainActivity extends BaseActivity implements
             MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         }
 
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
-                        this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon),
-                MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
-                                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_RATE, Menu.NONE,
-                                this.getString(R.string.menu_rate)),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
+        getMenuInflater().inflate(R.menu.common, menu);
+
         return true;
     }
 
@@ -216,14 +206,16 @@ public class MainActivity extends BaseActivity implements
         case MENU_OPTION_DOWNLOAD:
             downloadROMs();
             return true;
-        case MENU_OPTION_HELP:
+        case R.id.action_help:
             showHelp();
             return true;
-        case MENU_OPTION_SETTINGS:
+        case R.id.action_settings:
             showSettings();
             return true;
         case MENU_OPTION_RATE:
             showRating();
+        case R.id.action_market:
+            showMarket();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -461,6 +453,10 @@ public class MainActivity extends BaseActivity implements
 
     private void showSettings() {
         startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
+    }
+
+    private void showMarket() {
+        startActivity(new Intent(this, MarketActivity.class));
     }
 
     private void crashAlert() {
