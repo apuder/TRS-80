@@ -3,6 +3,8 @@
     android:text="@string/conf_header"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/configuration_header_padding_start"
+    android:layout_marginLeft="@dimen/configuration_header_padding_start"
     android:layout_marginTop="@dimen/configuration_header_padding_top"
     android:layout_marginBottom="@dimen/configuration_header_padding_bottom"
     android:textAppearance="@android:style/TextAppearance.Large" />

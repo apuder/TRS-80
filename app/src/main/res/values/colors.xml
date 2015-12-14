@@ -2,4 +2,7 @@
 <resources>
     <color name="key_color">#fff</color>
     <color name="tutorial_background">#11ffffff</color>
+    <color name="terminal_green">#ff00bb00</color>
+    <color name="market_background">#ffcccccc</color>
+
 </resources>
