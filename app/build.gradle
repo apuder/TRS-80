@@ -54,10 +54,18 @@ android {
     }
 }
 
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
 dependencies {
     repositories {
         mavenCentral()
     }
+
+    apt 'com.raizlabs.android:DBFlow-Compiler:2.2.1'
+    compile "com.raizlabs.android:DBFlow-Core:2.2.1"
+    compile "com.raizlabs.android:DBFlow:2.2.1"
+
     compile 'com.android.support:design:23.1.+'
     compile 'com.android.support:appcompat-v7:23.1.+'
     compile 'com.android.support:mediarouter-v7:23.1.+'
