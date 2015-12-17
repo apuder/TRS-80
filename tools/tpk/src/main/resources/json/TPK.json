@@ -1,0 +1,23 @@
+{
+    "id": "uuid",
+    "name": "Name",
+    "configuration": {
+        "model": "III",
+        "disk1": "ext|base64-encoded",
+        "disk2": "ext|base64-encoded",
+        "disk3": "ext|base64-encoded",
+        "disk4": "ext|base64-encoded"
+    },
+    "listing": {
+        "version": 1,
+        "categories": ["game"],
+        "price": 0.0,
+        "screenshots": ["ext|base64-encoded"],
+        "upload_date": 1450326498723,
+        "publish_date": 402303600000,
+        "author": "John Doe",
+        "author_email": "john@doe.com",
+        "description": "Some description."
+    }
+}
+
