@@ -32,12 +32,9 @@
         <activity android:name=".EmulatorActivity"
             android:theme="@style/AppThemeDark"/>
         <activity android:name=".browser.FileBrowserActivity" />
-        <activity
-            android:name="org.acra.CrashReportDialog"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Dialog" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="aa3839f3c9b409dc8b9e60797ad78a242d42fdf3" />
     </application>
 
 </manifest>

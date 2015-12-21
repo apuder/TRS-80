@@ -29,7 +29,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
@@ -49,7 +48,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.acra.ACRA;
+import com.crashlytics.android.Crashlytics;
+
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
@@ -83,7 +83,6 @@ public class EmulatorActivity extends BaseActivity
     private int                rotation;
     private OrientationChanged orientationManager;
     private ClipboardManager   clipboardManager;
-    private Handler            handler        = new Handler();
 
 
     class OrientationChanged extends OrientationEventListener {
@@ -703,15 +702,14 @@ public class EmulatorActivity extends BaseActivity
         }
     }
 
-    public void notImplemented(final String msg) {
-        handler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                TRS80Application.setCrashedFlag(true);
-                ACRA.getErrorReporter().handleException(new NotImplementedException(msg));
-                finish();
-            }
-        });
+    public void notImplemented(String msg) {
+        TRS80Application.setCrashedFlag(true);
+        Crashlytics.setString("NOT_IMPLEMENTED", msg);
+        Configuration conf = TRS80Application.getCurrentConfiguration();
+        Crashlytics.setInt("MODEL", conf.getModel());
+        Crashlytics.setString("NAME", conf.getName());
+        String path = conf.getDiskPath(0);
+        Crashlytics.setString("DISK_0", path == null ? "-" : path);
+        throw new RuntimeException();
     }
 }

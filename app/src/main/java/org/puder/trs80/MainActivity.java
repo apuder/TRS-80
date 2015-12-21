@@ -18,11 +18,13 @@ package org.puder.trs80;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
@@ -53,6 +55,7 @@ public class MainActivity extends BaseActivity implements
     private static final int     MENU_OPTION_DOWNLOAD       = 0;
     private static final int     MENU_OPTION_HELP           = 1;
     private static final int     MENU_OPTION_SETTINGS       = 2;
+    private static final int     MENU_OPTION_RATE           = 3;
 
     // Context Menu
     private static final int     MENU_OPTION_START          = 0;
@@ -199,6 +202,11 @@ public class MainActivity extends BaseActivity implements
                         menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
                                 this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
                         MenuItemCompat.SHOW_AS_ACTION_NEVER);
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_RATE, Menu.NONE,
+                                this.getString(R.string.menu_rate)),
+                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
@@ -213,6 +221,9 @@ public class MainActivity extends BaseActivity implements
             return true;
         case MENU_OPTION_SETTINGS:
             showSettings();
+            return true;
+        case MENU_OPTION_RATE:
+            showRating();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -469,6 +480,20 @@ public class MainActivity extends BaseActivity implements
 
     private void showHelp() {
         showDialog(R.string.help_title_configurations, -1, R.string.help_configurations);
+    }
+
+    private void showRating() {
+        Uri uri = Uri.parse("market://details?id=" + getPackageName());
+        Intent playMarketIntent = new Intent(Intent.ACTION_VIEW, uri);
+        playMarketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(playMarketIntent);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + getPackageName())));
+        }
     }
 
     private void downloadROMs() {

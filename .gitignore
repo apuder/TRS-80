@@ -5,6 +5,7 @@
 /app/src/main/obj
 /app/app-release.apk
 /app/manifest-merger-release-report.txt
+/app/fabric.properties
 /obj
 /libs
 /gen
