@@ -41,6 +41,9 @@ static jboolean screenBufferIsCopy;
 
 static jmp_buf ex_buf;
 
+// Defined in trs_memory.c
+extern Uchar memory[];
+
 unsigned char trs_screen[2048];
 static int screenUpdateRequired = 0;
 
@@ -99,6 +102,17 @@ int PasteManagerGetChar(unsigned short *character)
     }
 }
 
+static int ends_with(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
 static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr, jstring xtrsCassette,
                       jstring xtrsDisk0, jstring xtrsDisk1, jstring xtrsDisk2, jstring xtrsDisk3) {
     int debug = FALSE;
@@ -150,7 +164,13 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     trs_disk_remove(0);
     if (xtrsDisk0 != NULL) {
         path = (*env)->GetStringUTFChars(env, xtrsDisk0, NULL);
-        trs_disk_insert(0, (char*) path);
+        if (ends_with(path, ".cmd")) {
+            FILE* f = fopen(path, "rb");
+            load_cmd(f, memory, NULL, 0, NULL, -1, NULL, &entryAddr, 1);
+            fclose(f);
+        } else {
+            trs_disk_insert(0, (char *) path);
+        }
         (*env)->ReleaseStringUTFChars(env, xtrsDisk0, path);
     }
     // Disk 1
