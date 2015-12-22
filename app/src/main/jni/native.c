@@ -41,6 +41,8 @@ static jboolean screenBufferIsCopy;
 
 static jmp_buf ex_buf;
 
+static int reset_required = 0;
+
 // Defined in trs_memory.c
 extern Uchar memory[];
 
@@ -318,10 +320,17 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     clear_paste_string();
     if (!setjmp(ex_buf)) {
         screenUpdateRequired = 1;
+        reset_required = 0;
         while (isRunning) {
             z80_run(0);
             if (screenUpdateRequired) {
                 trigger_screen_update();
+            }
+            if (reset_required) {
+                reset_required = 0;
+                clear_paste_string();
+                trs_timer_init();
+                trs_reset(0);
             }
         }
     } else {
@@ -331,9 +340,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
 }
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
-    clear_paste_string();
-    trs_timer_init();
-    trs_reset(0);
+    reset_required = 1;
 }
 
 void Java_org_puder_trs80_XTRS_rewindCassette(JNIEnv* env, jclass cls) {
