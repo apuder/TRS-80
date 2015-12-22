@@ -40,8 +40,12 @@ import com.emtronics.dragsortrecycler.DragSortRecycler;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.tpk.Util;
+import org.puder.trs80.tpk.json.TPK;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
@@ -334,9 +338,20 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void addConfiguration() {
+        InputStream is = null;
+        try {
+            is = getAssets().open("Missile_Defense.zip");
+            TPK tpk = Util.generateTPK(is, true);
+            ConfigurationUtil.fromTPK(tpk);
+            updateView(-1, -1, -1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /*
         currentConfiguration = Configuration.newConfiguration();
         currentConfigurationPosition = Configuration.getCount();
         editConfiguration(currentConfiguration, true);
+        */
     }
 
     private void editConfiguration(Configuration conf, boolean isNew) {
