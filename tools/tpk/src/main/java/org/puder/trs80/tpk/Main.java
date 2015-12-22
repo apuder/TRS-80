@@ -110,8 +110,10 @@ public class Main {
         checkPath(cli.getOptionValue(OPTION_DISK4));
 
         String[] screenshots = cli.getOptionValues(OPTION_SCREENSHOT);
-        for (String screenshot : screenshots) {
-            checkPath(screenshot);
+        if (screenshots != null) {
+            for (String screenshot : screenshots) {
+                checkPath(screenshot);
+            }
         }
 
         checkLong(cli.getOptionValue(OPTION_VERSION));
@@ -166,8 +168,10 @@ public class Main {
 
         String[] screenshots = cli.getOptionValues(OPTION_SCREENSHOT);
         List<String> screenshotsB64 = new ArrayList<>();
-        for (String screenshot : screenshots) {
-            screenshotsB64.add(convertToBase64(screenshot));
+        if (screenshots != null) {
+            for (String screenshot : screenshots) {
+                screenshotsB64.add(convertToBase64(screenshot));
+            }
         }
         listing.setScreenshots(screenshotsB64);
 
