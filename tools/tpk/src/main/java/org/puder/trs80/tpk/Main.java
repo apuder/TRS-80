@@ -3,6 +3,8 @@ package org.puder.trs80.tpk;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.iharder.Base64;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -10,7 +12,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.puder.trs80.tpk.json.Configuration;
@@ -186,7 +187,7 @@ public class Main {
         try {
             InputStream is = new FileInputStream(new File(path));
             byte[] data = IOUtils.toByteArray(is);
-            b64 = FilenameUtils.getExtension(path) + "|" + Base64.encodeBase64String(data);
+            b64 = FilenameUtils.getExtension(path) + "|" + Base64.encodeBytes(data);
         } catch (IOException e) {
             // Do nothing
         }
