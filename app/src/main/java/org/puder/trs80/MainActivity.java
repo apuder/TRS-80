@@ -340,9 +340,21 @@ public class MainActivity extends BaseActivity implements
     private void addConfiguration() {
         InputStream is = null;
         try {
-            is = getAssets().open("Missile_Defense.zip");
+            is = getAssets().open("Obstacle_Run.zip");
             TPK tpk = Util.generateTPK(is, true);
             ConfigurationUtil.fromTPK(tpk);
+            is.close();
+
+            is = getAssets().open("Eliminator.zip");
+            tpk = Util.generateTPK(is, true);
+            ConfigurationUtil.fromTPK(tpk);
+            is.close();
+
+            is = getAssets().open("Donkey_Kong.zip");
+            tpk = Util.generateTPK(is, true);
+            ConfigurationUtil.fromTPK(tpk);
+            is.close();
+
             updateView(-1, -1, -1);
         } catch (IOException e) {
             e.printStackTrace();
