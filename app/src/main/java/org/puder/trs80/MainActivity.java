@@ -345,6 +345,11 @@ public class MainActivity extends BaseActivity implements
             ConfigurationUtil.fromTPK(tpk);
             is.close();
 
+            is = getAssets().open("Sea_Dragon.zip");
+            tpk = Util.generateTPK(is, true);
+            ConfigurationUtil.fromTPK(tpk);
+            is.close();
+
             is = getAssets().open("Eliminator.zip");
             tpk = Util.generateTPK(is, true);
             ConfigurationUtil.fromTPK(tpk);

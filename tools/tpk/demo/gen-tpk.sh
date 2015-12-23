@@ -20,3 +20,9 @@ java -jar ../build/libs/tpk-all.jar \
     -d1 disk-donkey-kong.dsk \
     -s screenshot-donkey-kong-1.png screenshot-donkey-kong-2.png
 
+java -jar ../build/libs/tpk-all.jar \
+    -n "Sea Dragon" \
+    -m 3 \
+    -d1 disk-sea-dragon.dsk \
+    -s screenshot-sea-dragon-1.png screenshot-sea-dragon-2.png
+
