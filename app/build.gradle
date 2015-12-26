@@ -27,6 +27,9 @@ android {
         ndk {
             moduleName "xtrs"
         }
+
+        // Enabling multidex support.
+        multiDexEnabled true
     }
 
     sourceSets.main {
@@ -105,6 +108,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics-ndk:1.1.2@aar') {
         transitive = true;
     }
+    compile 'com.android.support:multidex:1.0.0'
 }
 
 crashlytics {

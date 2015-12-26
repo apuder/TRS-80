@@ -19,6 +19,7 @@ package org.puder.trs80;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
@@ -50,6 +51,11 @@ public class TRS80Application extends Application {
         if (!debug) {
             Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
         }
+    }
+
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     public static Context getAppContext() {
