@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+}
+
+sourceSets.main.java.srcDirs += '../tpk-base/src/main/java'
+
+dependencies {
+    compile 'org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:latest.integration'
+}
