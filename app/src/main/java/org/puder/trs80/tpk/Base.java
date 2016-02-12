@@ -1,4 +1,7 @@
 package org.puder.trs80.tpk;
 
-public class Base {
+import com.raizlabs.android.dbflow.structure.BaseModel;
+
+//@Table(allFields = true)
+class Base extends BaseModel {
 }
