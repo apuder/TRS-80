@@ -94,6 +94,6 @@ public class AppListViewAdapter extends RecyclerView.Adapter<AppListViewAdapter.
 
     @Override
     public int getItemCount() {
-        return mMarketApps.size();
+        return mMarketApps == null ? 0 : mMarketApps.size();
     }
 }

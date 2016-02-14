@@ -1,0 +1,52 @@
+dataClass=org.puder.trs80.market.MarketApp
+tableName=market_app
+# --table-fields-start--
+# --field-start--
+fieldName=id
+columnName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=name
+columnName=name
+# --field-end--
+# --field-start--
+fieldName=price
+columnName=price
+# --field-end--
+# --field-start--
+fieldName=category
+columnName=category
+# --field-end--
+# --table-fields-end--
+# --table-end--
+
+#################################
+# --table-start--
+#dataClass=com.androidbegin.studentdirectory.data.StudentDetails
+#tableName=student_details
+# --table-fields-start--
+# --field-start--
+#fieldName=studentId
+#columnName=student_id
+#generatedId=true
+# --field-end--
+# --field-start--
+#fieldName=studentName
+#columnName=student_name
+# --field-end--
+# --field-start--
+#fieldName=address
+# --field-end--
+# --field-start--
+#fieldName=addedDate
+#columnName=added_date
+# --field-end--
+# --field-start--
+#fieldName=teacher
+#columnName=teacher_id
+#foreign=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################

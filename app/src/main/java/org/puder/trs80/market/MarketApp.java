@@ -3,23 +3,27 @@ package org.puder.trs80.market;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "MarketApp")
-
+@DatabaseTable(tableName = "market_app")
 public class MarketApp {
-    @DatabaseField(generatedId = true)
-    long id;
+    public static final String ID_FIELD = "id";
+    @DatabaseField(generatedId = true, columnName = ID_FIELD)
+    Long id;
 
-    @DatabaseField
+    public static final String NAME_FIELD = "name";
+    @DatabaseField(columnName = NAME_FIELD)
     String name;
 
-    @DatabaseField
+    public static final String PRICE_FIELD = "price";
+    @DatabaseField(columnName = PRICE_FIELD)
     double price;
 
-    @DatabaseField
-    String thumbnail_url;
+    public static final String CATEGORY_FIELD = "category";
+    @DatabaseField(columnName = "CATEGORY_FIELD")
+    int category;
 
-    @DatabaseField
-    private int atype;
+    public static final String THUMBNAIL_URL_FIELD = "thumbnail_url";
+    @DatabaseField(columnName = THUMBNAIL_URL_FIELD)
+    String thumbnail_url;
 
     public void setId(long id) {
         this.id = id;
@@ -53,12 +57,12 @@ public class MarketApp {
         return this.thumbnail_url;
     }
 
-    public int getAtype() {
-        return atype;
+    public int getCategory() {
+        return category;
     }
 
-    public void setAtype(int atype) {
-        this.atype = atype;
+    public void setCategory(int category) {
+        this.category = category;
     }
 
 

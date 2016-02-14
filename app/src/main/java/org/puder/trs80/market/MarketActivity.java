@@ -10,9 +10,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
+
 import org.puder.trs80.BaseActivity;
 import org.puder.trs80.R;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class MarketActivity extends BaseActivity {
@@ -23,6 +28,7 @@ public class MarketActivity extends BaseActivity {
     private RecyclerView mPaidAppRecyclerView;
     private LinearLayoutManager mFreeAppLayoutManager;
     private LinearLayoutManager mPaidAppLayoutManager;
+    private LinearLayoutManager mGameAppLayoutManager;
     private AppListViewAdapter mFreeAppListAdapter;
     private AppListViewAdapter mGameAppListAdapter;
     private AppListViewAdapter mPaidAppListAdapter;
@@ -50,7 +56,27 @@ public class MarketActivity extends BaseActivity {
         mPaidAppLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
         mPaidAppRecyclerView.setLayoutManager(mPaidAppLayoutManager);
 
-        MarketDataHelper.loadMarket();
+        mGameAppRecyclerView = (RecyclerView)findViewById(R.id.games_list);
+        mGameAppRecyclerView.setHasFixedSize(false);
+        mGameAppLayoutManager = new LinearLayoutManager(this);
+        mGameAppLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
+        mGameAppRecyclerView.setLayoutManager(mGameAppLayoutManager);
+
+        MarketDataHelper helper = new MarketDataHelper(this);
+
+        helper.loadMarket();
+
+        List<MarketApp> marketList = helper.getFreeApps();
+        mFreeAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
+        mFreeAppRecyclerView.setAdapter(MarketActivity.this.mFreeAppListAdapter);
+
+        marketList = helper.getPaidApps();
+        mPaidAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
+        mPaidAppRecyclerView.setAdapter(mPaidAppListAdapter);
+
+        marketList = helper.getGames();
+        mGameAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
+        mGameAppRecyclerView.setAdapter(mGameAppListAdapter);
 
         /*
         Condition freeCondition = Condition.column(MarketApp$Table.PRICE).eq(0.0);
