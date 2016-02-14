@@ -1,17 +1,46 @@
-package org.puder.trs80.model;
+package org.puder.trs80.market;
 
-public class ConfigurationModel extends AppBaseModel {
+import java.io.Serializable;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
+@DatabaseTable(tableName = "Configuration")
+public class Configuration {
+
+    @DatabaseField(generatedId = true)
+    int id;
+
+    @DatabaseField
     String name;
+
+    @DatabaseField
     private int model;
+
+    @DatabaseField
     private String cassette;
+
+    @DatabaseField
     private boolean muteSound;
+
+    @DatabaseField
     private int characterColor;
+
+    @DatabaseField
     private int keyboardLayoutPortrait;
+
+    @DatabaseField
     private int keyboardLayoutLandscape;
+
+    @DatabaseField
     private String disk1;
+
+    @DatabaseField
     private String disk2;
+
+    @DatabaseField
     private String disk3;
+
+    @DatabaseField
     private String disk4;
 
     public String getCassette() {

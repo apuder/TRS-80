@@ -10,13 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import com.raizlabs.android.dbflow.runtime.TransactionManager;
-import com.raizlabs.android.dbflow.runtime.transaction.SelectListTransaction;
-import com.raizlabs.android.dbflow.runtime.transaction.TransactionListener;
-import com.raizlabs.android.dbflow.runtime.transaction.TransactionListenerAdapter;
-import com.raizlabs.android.dbflow.sql.builder.Condition;
-import com.raizlabs.android.dbflow.sql.language.Select;
-
 import org.puder.trs80.BaseActivity;
 import org.puder.trs80.R;
 
@@ -57,8 +50,9 @@ public class MarketActivity extends BaseActivity {
         mPaidAppLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
         mPaidAppRecyclerView.setLayoutManager(mPaidAppLayoutManager);
 
-        MarketLoadUtil.loadMarket();
+        MarketDataHelper.loadMarket();
 
+        /*
         Condition freeCondition = Condition.column(MarketApp$Table.PRICE).eq(0.0);
         fetchApps(freeCondition, new TransactionListenerAdapter<List<MarketApp>>() {
             @Override
@@ -85,7 +79,7 @@ public class MarketActivity extends BaseActivity {
             }
         });
 
-/*        Condition gameCondition = Condition.column(MarketApp$Table.ATYPE).eq(MarketApp.TYPE_GAME);
+       Condition gameCondition = Condition.column(MarketApp$Table.ATYPE).eq(MarketApp.TYPE_GAME);
         fetchApps(gameCondition, new TransactionListenerAdapter<List<MarketApp>>() {
             @Override
             public void onResultReceived(List<MarketApp> marketList) {
@@ -119,11 +113,11 @@ public class MarketActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchApps(Condition condition, TransactionListenerAdapter<List<MarketApp>> adapter) {
+/*    private void fetchApps(Condition condition, TransactionListenerAdapter<List<MarketApp>> adapter) {
         // Async Transaction Queue Retrieval (Recommended)
         TransactionManager.getInstance().addTransaction(new SelectListTransaction<>(
                 new Select()
                         .from(MarketApp.class)
                         .where(condition), adapter));
-    }
+    }*/
 }

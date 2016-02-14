@@ -23,7 +23,6 @@ import android.support.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
-import com.raizlabs.android.dbflow.config.FlowManager;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
@@ -48,7 +47,9 @@ public class TRS80Application extends Application {
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
-        FlowManager.init(this);
+
+        //FlowManager.init(this);
+
         boolean debug = getApplicationContext().getResources().getBoolean(R.bool.debug);
         if (!debug) {
             Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
