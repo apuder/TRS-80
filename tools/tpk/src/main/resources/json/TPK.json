@@ -6,18 +6,28 @@
         "disk1": "ext|base64-encoded",
         "disk2": "ext|base64-encoded",
         "disk3": "ext|base64-encoded",
-        "disk4": "ext|base64-encoded"
+        "disk4": "ext|base64-encoded",
+        "cassette": "ext|base64-encoded",
+        "mute": true,
+        "keywordLayoutLandscape": 0,
+        "keywordLayoutPortrait": 0,
+        "characterColor": 0
     },
     "listing": {
-        "version": 1,
+        "version": "1.0",
         "categories": ["game"],
         "price": 0.0,
         "screenshots": ["ext|base64-encoded"],
-        "upload_date": 1450326498723,
-        "publish_date": 402303600000,
-        "author": "John Doe",
-        "author_email": "john@doe.com",
+        "uploadDate": 1450326498723,
+        "publishDate": 402303600000,
+        "author": {
+            "name": "John Doe",
+            "authorEmail": "john@doe.com"
+        },
+        "publisher": {
+            "name": "John Doe",
+            "authorEmail": "john@doe.com"
+        },
         "description": "Some description."
     }
 }
-
