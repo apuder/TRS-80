@@ -14,6 +14,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.puder.trs80.tpk.json.Author;
 import org.puder.trs80.tpk.json.Configuration;
 import org.puder.trs80.tpk.json.Listing;
 import org.puder.trs80.tpk.json.TPK;
@@ -160,9 +161,11 @@ public class Main {
 
         Listing listing = new Listing();
         tpk.setListing(listing);
-        listing.setAuthor(cli.getOptionValue(OPTION_AUTHOR));
-        listing.setAuthor_email(cli.getOptionValue(OPTION_EMAIL));
-        listing.setVersion(Long.parseLong(cli.getOptionValue(OPTION_VERSION, "1")));
+        Author author = new Author();
+        author.setName(cli.getOptionValue(OPTION_AUTHOR));
+        author.setAuthorEmail(cli.getOptionValue(OPTION_EMAIL));
+        listing.setAuthor(author);
+        listing.setVersion(cli.getOptionValue(OPTION_VERSION));
         listing.setPrice(Double.parseDouble(cli.getOptionValue(OPTION_PRICE, "0")));
 
         String[] screenshots = cli.getOptionValues(OPTION_SCREENSHOT);
