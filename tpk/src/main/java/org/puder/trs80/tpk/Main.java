@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -167,7 +166,7 @@ public class Main {
         listing.setPrice(Double.parseDouble(cli.getOptionValue(OPTION_PRICE, "0")));
 
         String[] screenshots = cli.getOptionValues(OPTION_SCREENSHOT);
-        List<String> screenshotsB64 = new ArrayList<>();
+        ArrayList<String> screenshotsB64 = new ArrayList<>();
         if (screenshots != null) {
             for (String screenshot : screenshots) {
                 screenshotsB64.add(convertToBase64(screenshot));

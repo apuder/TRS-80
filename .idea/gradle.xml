@@ -12,7 +12,6 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/tpk" />
-            <option value="$PROJECT_DIR$/tpk-base" />
           </set>
         </option>
       </GradleProjectSettings>
