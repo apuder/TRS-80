@@ -10,14 +10,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.Where;
-
 import org.puder.trs80.BaseActivity;
 import org.puder.trs80.R;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class MarketActivity extends BaseActivity {
@@ -32,8 +27,6 @@ public class MarketActivity extends BaseActivity {
     private AppListViewAdapter mFreeAppListAdapter;
     private AppListViewAdapter mGameAppListAdapter;
     private AppListViewAdapter mPaidAppListAdapter;
-
-    private List<MarketApp> mMarketApps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +55,7 @@ public class MarketActivity extends BaseActivity {
         mGameAppLayoutManager.setOrientation(LinearLayout.HORIZONTAL);
         mGameAppRecyclerView.setLayoutManager(mGameAppLayoutManager);
 
-        MarketDataHelper helper = new MarketDataHelper(this);
+        DBHelper helper = new DBHelper(this);
 
         helper.loadMarket();
 
@@ -77,45 +70,6 @@ public class MarketActivity extends BaseActivity {
         marketList = helper.getGames();
         mGameAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
         mGameAppRecyclerView.setAdapter(mGameAppListAdapter);
-
-        /*
-        Condition freeCondition = Condition.column(MarketApp$Table.PRICE).eq(0.0);
-        fetchApps(freeCondition, new TransactionListenerAdapter<List<MarketApp>>() {
-            @Override
-            public void onResultReceived(List<MarketApp> marketList) {
-                // retrieved here
-                Log.d(LOG_TAG, "free result size:" + marketList.size());
-                for (MarketApp app : marketList) {
-                    Log.d(LOG_TAG, "app name:" + app.getName());
-                }
-                mFreeAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
-                mFreeAppRecyclerView.setAdapter(MarketActivity.this.mFreeAppListAdapter);
-            }
-        });
-
-        Condition paidCondition = Condition.column(MarketApp$Table.PRICE).greaterThan(0.0);
-        fetchApps(paidCondition, new TransactionListenerAdapter<List<MarketApp>>() {
-            @Override
-            public void onResultReceived(List<MarketApp> marketList) {
-                // retrieved here
-                Log.d(LOG_TAG, "paid result size:" + marketList.size());
-                for (MarketApp app : marketList) { Log.d(LOG_TAG, "app name:" + app.getName()); }
-                mPaidAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
-                mPaidAppRecyclerView.setAdapter(mPaidAppListAdapter);
-            }
-        });
-
-       Condition gameCondition = Condition.column(MarketApp$Table.ATYPE).eq(MarketApp.TYPE_GAME);
-        fetchApps(gameCondition, new TransactionListenerAdapter<List<MarketApp>>() {
-            @Override
-            public void onResultReceived(List<MarketApp> marketList) {
-                // retrieved here
-                Log.d(LOG_TAG, "game result size:" + marketList.size());
-                for (MarketApp app : marketList) { Log.d(LOG_TAG, "app name:" + app.getName()); }
-                mGameAppListAdapter = new AppListViewAdapter(MarketActivity.this, marketList);
-                mGameAppRecyclerView.setAdapter(mGameAppListAdapter);
-            }
-        });*/
 
     }
 
@@ -138,12 +92,4 @@ public class MarketActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-/*    private void fetchApps(Condition condition, TransactionListenerAdapter<List<MarketApp>> adapter) {
-        // Async Transaction Queue Retrieval (Recommended)
-        TransactionManager.getInstance().addTransaction(new SelectListTransaction<>(
-                new Select()
-                        .from(MarketApp.class)
-                        .where(condition), adapter));
-    }*/
 }
