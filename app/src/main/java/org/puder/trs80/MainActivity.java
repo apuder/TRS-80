@@ -32,20 +32,21 @@ import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.emtronics.dragsortrecycler.DragSortRecycler;
-
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.helper.OnStartDragListener;
+import org.puder.trs80.helper.SimpleItemTouchHelperCallback;
 
 import java.io.File;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
-        PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
+        PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener, OnStartDragListener {
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
@@ -65,7 +66,7 @@ public class MainActivity extends BaseActivity implements
     private static final int     MENU_OPTION_DELETE         = 4;
 
     private RecyclerView         configurationListView;
-    private RecyclerView.Adapter configurationListViewAdapter;
+    private ConfigurationListViewAdapter configurationListViewAdapter;
     private Configuration        currentConfiguration;
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
@@ -74,6 +75,8 @@ public class MainActivity extends BaseActivity implements
 
     private CastMessageSender    castMessageSender;
 
+
+    private ItemTouchHelper mItemTouchHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,32 +87,14 @@ public class MainActivity extends BaseActivity implements
         this.setContentView(R.layout.main_activity);
 
         castMessageSender = CastMessageSender.get();
-        configurationListViewAdapter = new ConfigurationListViewAdapter(this);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(this, this);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(new LinearLayoutManager(this));
         configurationListView.setAdapter(configurationListViewAdapter);
 
-        DragSortRecycler dragSortRecycler = new DragSortRecycler();
-        dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
-        dragSortRecycler.setFloatingAlpha(0.4f);
-        dragSortRecycler.setFloatingBgColor(0x80FFFFFF);
-        dragSortRecycler.setAutoScrollSpeed(0.3f);
-        dragSortRecycler.setAutoScrollWindow(0.1f);
-        dragSortRecycler.addExcludedDraggingPosition(0);
-        dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
-            @Override
-            public void onItemMoved(int from, int to) {
-                if (from == to) {
-                    return;
-                }
-                Configuration.move(from - 1, to - 1);
-                configurationListViewAdapter.notifyDataSetChanged();
-            }
-        });
-
-        configurationListView.addItemDecoration(dragSortRecycler);
-        configurationListView.addOnItemTouchListener(dragSortRecycler);
-        configurationListView.setOnScrollListener(dragSortRecycler.getScrollListener());
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(configurationListViewAdapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(configurationListView);
     }
 
     @Override
@@ -521,5 +506,10 @@ public class MainActivity extends BaseActivity implements
         }
         updateView(-1, -1, -1);
         AlertDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
     }
 }

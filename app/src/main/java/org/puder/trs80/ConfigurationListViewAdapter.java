@@ -18,17 +18,36 @@ package org.puder.trs80;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.puder.trs80.helper.ItemTouchHelperAdapter;
+import org.puder.trs80.helper.OnStartDragListener;
+
 public class ConfigurationListViewAdapter extends
-        RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> {
+        RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {
 
     private ConfigurationMenuListener listener;
+    private final OnStartDragListener mDragStartListener;
+
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        Configuration.move(fromPosition - 1, fromPosition - 1);
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+
+    }
 
 
     class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -41,6 +60,7 @@ public class ConfigurationListViewAdapter extends
         public TextView       sound;
         public TextView       keyboards;
         public ScreenshotView screenshot;
+        public ImageView      reorderHandle;
 
         private View          menu;
 
@@ -57,6 +77,7 @@ public class ConfigurationListViewAdapter extends
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
             keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
             screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
+            reorderHandle = (ImageView) itemView.findViewById(R.id.configuration_reorder);
             menu = itemView.findViewById(R.id.configuration_menu);
             menu.setOnClickListener(this);
             itemView.setOnClickListener(this);
@@ -76,8 +97,9 @@ public class ConfigurationListViewAdapter extends
     }
 
 
-    public ConfigurationListViewAdapter(ConfigurationMenuListener listener) {
+    public ConfigurationListViewAdapter(ConfigurationMenuListener listener, OnStartDragListener dragListener) {
         this.listener = listener;
+        this.mDragStartListener = dragListener;
     }
 
     @Override
@@ -92,6 +114,16 @@ public class ConfigurationListViewAdapter extends
             return;
         }
         Configuration conf = Configuration.getNthConfiguration(position - 1);
+
+        holder.reorderHandle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                    mDragStartListener.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
 
         // Position
         holder.position = position;
