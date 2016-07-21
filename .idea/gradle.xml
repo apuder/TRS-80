@@ -14,6 +14,14 @@
             <option value="$PROJECT_DIR$/tools/tpk" />
           </set>
         </option>
+        <option name="myModules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/tools" />
+            <option value="$PROJECT_DIR$/tools/tpk" />
+          </set>
+        </option>
       </GradleProjectSettings>
     </option>
   </component>
