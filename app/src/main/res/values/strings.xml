@@ -139,12 +139,13 @@
     <string name="hint_emulator"><![CDATA[Use the virtual keyboard or an attached external
                         keyboard to type TRS commands. Consult the help menu for further
                         information.<p>
-                        The following action bar commands are available in portrait mode:<br/>
+                        The following menu options are available in portrait mode:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Pause emulator<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Reset emulator<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Rewind cassette<br/>
                         &nbsp;&nbsp;<img src="paste_icon"/>: Paste clipboard to keyboard<br/>
-                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound]]></string>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<br/>
+                        &nbsp;&nbsp;<img src="keyboard_icon"/>: Switch keyboard type]]></string>
     <string name="hint_keyboard_tilt">Tilt the device to trigger cursor keys. Press anywhere
                         on the screen to fire (space bar). Use icon in top-right corner to
                         unlock orientation-lock.</string>

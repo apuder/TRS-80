@@ -37,10 +37,14 @@ public class AlertDialogUtil {
     static private Map<Context, Dialog> dialogs = new HashMap<>();
 
 
+    public static Builder createAlertDialog(Context context) {
+        dismissDialog(context);
+        return new AlertDialog.Builder(context);
+    }
+
     public static Builder createAlertDialog(final Context context, int titleId, int iconId,
             CharSequence message) {
-        dismissDialog(context);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = createAlertDialog(context);
         builder.setTitle(titleId);
         if (iconId != -1) {
             builder.setIcon(iconId);

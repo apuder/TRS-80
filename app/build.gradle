@@ -35,6 +35,14 @@ android {
         jniLibs.srcDir 'src/main/libs'
     }
 
+    sourceSets {
+        main {
+            java {
+                exclude '**/ConfigurationUtil.java'
+            }
+        }
+    }
+
     buildTypes {
         debug{
             resValue "bool", "debug", "true"
@@ -90,7 +98,7 @@ dependencies {
     repositories {
         mavenCentral()
     }
-    compile project (':tools:tpk')
+    //compile project (':tools:tpk')
     compile 'com.android.support:design:23.2.1'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:mediarouter-v7:23.2.1'

@@ -27,6 +27,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
 
     private View             tutorialRoot;
     private View             keyboardRoot;
+    private View             keyboardSwitchView;
     private String           currentCommand;
     private int              currentKeyStroke;
 
@@ -58,12 +59,14 @@ public class Tutorial implements View.OnClickListener, Runnable {
     private int      nextCommand;
 
 
-    public Tutorial(View tutorialRoot, View keyboardRoot) {
+    public Tutorial(View root) {
         XTRS.reset();
         XTRS.rewindCassette();
-        this.tutorialRoot = tutorialRoot;
-        this.keyboardRoot = keyboardRoot;
+        tutorialRoot = root.findViewById(R.id.tutorial);
+        keyboardRoot = root.findViewById(R.id.keyboard_container);
+        keyboardSwitchView = root.findViewById(R.id.switch_keyboard);
         keyboardRoot.setVisibility(View.GONE);
+        keyboardSwitchView.setVisibility(View.GONE);
         nextButton = (Button) tutorialRoot.findViewById(R.id.tutorial_next);
         nextButton.setOnClickListener(this);
         ImageView buttonCancel = (ImageView) tutorialRoot.findViewById(R.id.tutorial_cancel);
@@ -105,6 +108,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
     }
 
     private void showKeyboard() {
+        keyboardSwitchView.setVisibility(View.VISIBLE);
         keyboardRoot.setVisibility(View.VISIBLE);
         keyboardRoot.requestLayout();
         keyboardRoot.invalidate();

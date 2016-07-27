@@ -30,7 +30,8 @@
                         &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
-                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten]]></string>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<br/>
+                        &nbsp;&nbsp;<img src="keyboard_icon"/>: Tastaturtyp auswählen]]></string>
     <string name="hint_keyboard_external"><![CDATA[&lt;Ctrl&gt;-B für BREAK und &lt;Ctrl&gt;-C für
                         CLEAR.]]></string>
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten

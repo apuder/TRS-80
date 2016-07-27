@@ -36,5 +36,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom" />
 
+    <ImageView
+        android:id="@+id/switch_keyboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.4"
+        android:padding="5dp"
+        android:layout_gravity="bottom|left"
+        android:onClick="onKeyboardSwitchClicked"
+        android:src="@drawable/keyboard_icon"/>
+
     <include layout="@layout/tutorial"/>
 </FrameLayout>

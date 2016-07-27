@@ -27,7 +27,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 
 import org.puder.trs80.Hardware;
 import org.puder.trs80.R;
@@ -119,8 +119,8 @@ public class Key extends View {
     private boolean isShiftKey;
     private boolean isAltKey;
 
-    private View keyboardView1;
-    private View keyboardView2;
+    private View keyboardView1 = null;
+    private View keyboardView2 = null;
 
     private int   size;
     private Paint paint;
@@ -270,44 +270,45 @@ public class Key extends View {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int desiredWidth = keyWidth * size;
+        int desiredHeight = keyHeight;
 
-        if (isAltKey) {
-            // We can only do this here to ensure that this view has already
-            // been
-            // added to the view hierarchy
-            keyboardView1 = this.getRootView().findViewById(R.id.keyboard_view_1);
-            keyboardView2 = this.getRootView().findViewById(R.id.keyboard_view_2);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width;
+        int height;
+
+        if (widthMode == MeasureSpec.EXACTLY) {
+            width = widthSize;
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            width = Math.min(desiredWidth, widthSize);
+        } else {
+            width = desiredWidth;
         }
 
-        MarginLayoutParams params = (MarginLayoutParams) this.getLayoutParams();
+        if (heightMode == MeasureSpec.EXACTLY) {
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            height = Math.min(desiredHeight, heightSize);
+        } else {
+            height = desiredHeight;
+        }
+
+        setMeasuredDimension(width, height);
+
+        rect.set(1, 1, width - 1, height - 1);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) this.getLayoutParams();
         if (posX != -1 && posY != -1) {
             params.setMargins(posX, posY, 0, 0);
         } else {
             params.setMargins(keyMargin, keyMargin, keyMargin, keyMargin);
         }
         this.setLayoutParams(params);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width;
-        int height;
-        if ((widthMeasureSpec & MeasureSpec.EXACTLY) != 0) {
-            // Layout specifies specific size. Use that.
-            width = widthMeasureSpec & ~MeasureSpec.EXACTLY;
-        } else {
-            width = keyWidth * size;
-        }
-        if ((heightMeasureSpec & MeasureSpec.EXACTLY) != 0) {
-            // Layout specifies specific size. Use that.
-            height = heightMeasureSpec & ~MeasureSpec.EXACTLY;
-        } else {
-            height = keyHeight;
-        }
-        setMeasuredDimension(width | MeasureSpec.EXACTLY, height | MeasureSpec.EXACTLY);
-        rect.set(1, 1, width - 1, height - 1);
     }
 
     public void setPosition(int x, int y) {
@@ -330,6 +331,10 @@ public class Key extends View {
     }
 
     public void switchKeyboard() {
+        if (keyboardView1 == null || keyboardView2 == null) {
+            keyboardView1 = this.getRootView().findViewById(R.id.keyboard_view_1);
+            keyboardView2 = this.getRootView().findViewById(R.id.keyboard_view_2);
+        }
         if (keyboardView1.getVisibility() == View.GONE) {
             keyboardView1.setVisibility(View.VISIBLE);
             keyboardView2.setVisibility(View.GONE);

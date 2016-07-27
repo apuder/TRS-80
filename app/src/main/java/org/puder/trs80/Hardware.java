@@ -202,6 +202,14 @@ abstract public class Hardware {
             trsScreenHeight = trsCharHeight * screenConfig.trsScreenRows;
         }
 
+        generateGraphicsFont();
+        generateASCIIFont();
+    }
+
+    public void computeKeyDimensions(Window window) {
+        ScreenConfiguration screenConfig = getScreenConfiguration();
+        Rect rect = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rect);
         // Compute size of keyboard keys
         int orientation = TRS80Application.getAppContext().getResources().getConfiguration().orientation;
         int keyboardLayout;
@@ -231,9 +239,6 @@ abstract public class Hardware {
         }
         keyWidth = keyHeight = (int) (boxWidth * 0.9f);
         keyMargin = (boxWidth - keyWidth) / 2;
-
-        generateGraphicsFont();
-        generateASCIIFont();
     }
 
     private void generateASCIIFont() {
