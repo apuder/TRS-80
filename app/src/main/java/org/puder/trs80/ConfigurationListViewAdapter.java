@@ -39,7 +39,7 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Configuration.move(fromPosition - 1, fromPosition - 1);
+        Configuration.move(fromPosition - 1, toPosition - 1);
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
