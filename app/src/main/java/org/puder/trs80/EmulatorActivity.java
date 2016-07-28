@@ -16,12 +16,10 @@
 
 package org.puder.trs80;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
@@ -33,13 +31,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,72 +81,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private ViewGroup          keyboardContainer     = null;
     private GameController     gameController;
     private int                rotation;
-    private OrientationChanged orientationManager;
     private ClipboardManager   clipboardManager;
-
-
-    class OrientationChanged extends OrientationEventListener {
-
-        public OrientationChanged(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void onOrientationChanged(int orientation) {
-            if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
-                disable();
-                // Lock screen orientation for tilt interface
-                lockOrientation();
-            }
-        }
-
-        @SuppressLint("NewApi")
-        private void lockOrientation() {
-            Log.d("TRS80", "Locking screen orientation");
-            Display display = getWindowManager().getDefaultDisplay();
-            rotation = display.getRotation();
-            int height;
-            int width;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-                height = display.getHeight();
-                width = display.getWidth();
-            } else {
-                Point size = new Point();
-                display.getSize(size);
-                height = size.y;
-                width = size.x;
-            }
-            switch (rotation) {
-            case Surface.ROTATION_90:
-                if (width > height) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                }
-                break;
-            case Surface.ROTATION_180:
-                if (height > width) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                }
-                break;
-            case Surface.ROTATION_270:
-                if (width > height) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                }
-                break;
-            default:
-                if (height > width) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                }
-            }
-        }
-    }
 
 
     @Override
@@ -190,9 +121,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         startRenderThread();
         initRootView();
 
-        orientationManager = new OrientationChanged(this);
-        orientationManager.enable();
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         AlertDialogUtil.showHint(this, R.string.hint_emulator, R.string.menu_tutorial,
@@ -228,7 +156,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             return;
         }
         RemoteCastScreen.get().endSession();
-        orientationManager.disable();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
         }
@@ -455,6 +382,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void startAccelerometer() {
+        lockOrientation();
         if (sensorManager == null) {
             sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
             sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -463,6 +391,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void stopAccelerometer() {
+        unlockScreenOrientation();
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
@@ -551,6 +480,55 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         if (keyboardType == Configuration.KEYBOARD_TILT) {
             startAccelerometer();
         }
+    }
+
+    private void lockOrientation() {
+        Display display = getWindowManager().getDefaultDisplay();
+        rotation = display.getRotation();
+        int height;
+        int width;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            height = display.getHeight();
+            width = display.getWidth();
+        } else {
+            Point size = new Point();
+            display.getSize(size);
+            height = size.y;
+            width = size.x;
+        }
+        switch (rotation) {
+            case Surface.ROTATION_90:
+                if (width > height) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                }
+                break;
+            case Surface.ROTATION_180:
+                if (height > width) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                }
+                break;
+            case Surface.ROTATION_270:
+                if (width > height) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                }
+                break;
+            default:
+                if (height > width) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+        }
+    }
+
+    private void unlockScreenOrientation() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
     private void showKeyboardHint(int keyboardType) {
