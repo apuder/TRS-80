@@ -21,9 +21,9 @@
     <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
     <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
     <string name="hint_configuration_usage"><![CDATA[Tippen Sie auf eine Konfiguration um diese fortzusetzen.
-                        Tippen Sie auf den Menü-Knopf (<img src="menu_icon"/>) um ein Kontext-Menü mit weiteren Optionen zu
-                        zeigen. Ziehen Sie den Sortier-Knopf (<img src="reorder_icon"/>) um die Reihenfolge der Konfigurationen
-                        zu ändern.]]></string>
+                        Tippen Sie auf den Info-Knopf (<img src="info_icon"/>) um ein Kontext-Menü mit weiteren Optionen zu
+                        zeigen. Halten Sie eine Konfiguration gedrückt um die Reihenfolge
+                        umzusortieren.]]></string>
     <string name="hint_emulator"><![CDATA[Benutzen Sie die virtuelle Tastatur oder externe Tastatur
                         um TRS Kommandos einzugeben. Das Hilfe-Menü bietet weitere Informationen.<p>
                         Die folgenden Aktionen sind im Hochformat verfügbar:<br/>

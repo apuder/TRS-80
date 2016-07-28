@@ -16,30 +16,32 @@
 
 package org.puder.trs80;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
+
+import com.tekle.oss.android.animation.AnimationFactory;
 
 import org.puder.trs80.drag.ItemTouchHelperAdapter;
-import org.puder.trs80.drag.OnStartDragListener;
 
 public class ConfigurationListViewAdapter extends
         RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {
 
-    private ConfigurationMenuListener listener;
-    private final OnStartDragListener mDragStartListener;
+    private ConfigurationItemListener listener;
+    private boolean                   usesGridLayout;
+
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Configuration.move(fromPosition - 1, toPosition - 1);
+        int positionOffset = usesGridLayout ? 0 : -1;
+        Configuration.move(fromPosition + positionOffset, toPosition + positionOffset);
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
@@ -50,56 +52,82 @@ public class ConfigurationListViewAdapter extends
     }
 
 
-    class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public boolean        draggable;
         public int            position;
         public Configuration  configuration;
-        public TextView       name;
+        public TextView       nameFront;
+        public TextView       nameBack;
         public TextView       model;
         public TextView       disks;
         public TextView       cassette;
         public TextView       sound;
         public TextView       keyboards;
         public ScreenshotView screenshot;
-        public ImageView      reorderHandle;
-
-        private View          menu;
+        public ViewFlipper    viewFlipper;
+        public View           stopButton;
 
 
         public Holder(View itemView) {
             super(itemView);
-            if (!(itemView instanceof CardView)) {
+            if (!(itemView instanceof RelativeLayout)) {
+                draggable = false;
                 return;
             }
-            name = (TextView) itemView.findViewById(R.id.configuration_name);
+            draggable = true;
+            nameFront = (TextView) itemView.findViewById(R.id.configuration_name_front);
+            nameBack = (TextView) itemView.findViewById(R.id.configuration_name_back);
             model = (TextView) itemView.findViewById(R.id.configuration_model);
             disks = (TextView) itemView.findViewById(R.id.configuration_disks);
             cassette = (TextView) itemView.findViewById(R.id.configuration_cassette);
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
             keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
             screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
-            reorderHandle = (ImageView) itemView.findViewById(R.id.configuration_reorder);
-            menu = itemView.findViewById(R.id.configuration_menu);
-            menu.setOnClickListener(this);
+            viewFlipper = (ViewFlipper) itemView.findViewById(R.id.configuration_view_flipper);
+            viewFlipper.setDisplayedChild(0);
             itemView.setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_info).setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_back).setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_edit).setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_delete).setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_run).setOnClickListener(this);
+            stopButton = itemView.findViewById(R.id.configuration_stop);
+            stopButton.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-            case R.id.configuration_menu:
-                listener.onConfigurationMenuClicked(menu, configuration, position);
+            case R.id.configuration_info:
+            case R.id.configuration_back:
+                AnimationFactory.flipTransition(viewFlipper,
+                        AnimationFactory.FlipDirection.LEFT_RIGHT);
+                break;
+            case R.id.configuration_edit:
+                listener.onConfigurationEdit(configuration, position);
+                break;
+            case R.id.configuration_stop:
+                listener.onConfigurationStop(configuration, position);
+                break;
+            case R.id.configuration_delete:
+                listener.onConfigurationDelete(configuration, position);
+                break;
+            case R.id.configuration_run:
+                listener.onConfigurationRun(configuration, position);
                 break;
             default:
-                listener.onConfigurationSelected(configuration, position);
+                if (viewFlipper.getDisplayedChild() == 0) {
+                    listener.onConfigurationRun(configuration, position);
+                }
                 break;
             }
         }
     }
 
 
-    public ConfigurationListViewAdapter(ConfigurationMenuListener listener, OnStartDragListener dragListener) {
+    public ConfigurationListViewAdapter(boolean usesGridLayout, ConfigurationItemListener listener) {
+        this.usesGridLayout = usesGridLayout;
         this.listener = listener;
-        this.mDragStartListener = dragListener;
     }
 
     @Override
@@ -110,20 +138,22 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
-        if (position == 0 || position == Configuration.getCount() + 1) {
+        if (!usesGridLayout && (position == 0 || position == Configuration.getCount() + 1)) {
             return;
         }
-        Configuration conf = Configuration.getNthConfiguration(position - 1);
 
-        holder.reorderHandle.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                    mDragStartListener.onStartDrag(holder);
-                }
-                return false;
-            }
-        });
+        int positionOffset = usesGridLayout ? 0 : -1;
+        Configuration conf = Configuration.getNthConfiguration(position + positionOffset);
+
+        if (holder.position != position && holder.viewFlipper.getDisplayedChild() != 0) {
+            Context context = TRS80Application.getAppContext();
+            holder.viewFlipper.setInAnimation(context, R.anim.no_animation);
+            holder.viewFlipper.setOutAnimation(context, R.anim.no_animation);
+            holder.viewFlipper.setDisplayedChild(0);
+        }
+
+        holder.stopButton.setVisibility(EmulatorState.hasSavedState(conf.getId()) ? View.VISIBLE
+                : View.GONE);
 
         // Position
         holder.position = position;
@@ -132,7 +162,9 @@ public class ConfigurationListViewAdapter extends
         holder.configuration = conf;
 
         // Name
-        holder.name.setText(conf.getName());
+        String name = conf.getName();
+        holder.nameFront.setText(name);
+        holder.nameBack.setText(name);
 
         // Hardware
         String model = "-";
@@ -192,10 +224,10 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
+        if (!usesGridLayout && position == 0) {
             return R.layout.configuration_header;
         }
-        if (position == Configuration.getCount() + 1) {
+        if (!usesGridLayout && position == Configuration.getCount() + 1) {
             return R.layout.configuration_footer;
         }
         return R.layout.configuration_item;
@@ -203,7 +235,11 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public int getItemCount() {
-        return Configuration.getCount() + 2 /* header  + footer */;
+        int count = Configuration.getCount();
+        if (!usesGridLayout) {
+            count += 2; /* header + footer */
+        }
+        return count;
     }
 
     private String getKeyboardLabel(int type) {

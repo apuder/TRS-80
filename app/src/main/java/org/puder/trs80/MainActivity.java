@@ -24,13 +24,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
@@ -39,14 +40,14 @@ import android.view.View;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
-import org.puder.trs80.drag.OnStartDragListener;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 
 import java.io.File;
 
 public class MainActivity extends BaseActivity implements
-        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
-        PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener, OnStartDragListener {
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener {
+
+    private static final int     COLUMN_WIDTH_DP            = 300;
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
@@ -58,25 +59,14 @@ public class MainActivity extends BaseActivity implements
     private static final int     MENU_OPTION_SETTINGS       = 2;
     private static final int     MENU_OPTION_RATE           = 3;
 
-    // Context Menu
-    private static final int     MENU_OPTION_START          = 0;
-    private static final int     MENU_OPTION_RESUME         = 1;
-    private static final int     MENU_OPTION_STOP           = 2;
-    private static final int     MENU_OPTION_EDIT           = 3;
-    private static final int     MENU_OPTION_DELETE         = 4;
-
     private RecyclerView         configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
-    private Configuration        currentConfiguration;
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
-    private PopupMenu            popup                      = null;
 
     private CastMessageSender    castMessageSender;
 
-
-    private ItemTouchHelper mItemTouchHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,14 +77,29 @@ public class MainActivity extends BaseActivity implements
         this.setContentView(R.layout.main_activity);
 
         castMessageSender = CastMessageSender.get();
-        configurationListViewAdapter = new ConfigurationListViewAdapter(this, this);
+
+        Rect rect = new Rect();
+        getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+        int screenWidth = rect.right;
+        int screenWidthDp = (int) ((float) screenWidth / getResources().getDisplayMetrics().density);
+        int numColumns = screenWidthDp / COLUMN_WIDTH_DP;
+        RecyclerView.LayoutManager lm = null;
+        boolean usesGridLayout;
+        if (numColumns <= 1) {
+            lm = new LinearLayoutManager(this);
+            usesGridLayout = false;
+        } else {
+            lm = new GridLayoutManager(this, numColumns);
+            usesGridLayout = true;
+        }
+        configurationListViewAdapter = new ConfigurationListViewAdapter(usesGridLayout, this);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
-        configurationListView.setLayoutManager(new LinearLayoutManager(this));
+        configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
 
         ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback(configurationListViewAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
-        mItemTouchHelper.attachToRecyclerView(configurationListView);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(configurationListView);
     }
 
     @Override
@@ -127,16 +132,6 @@ public class MainActivity extends BaseActivity implements
             // AudioHttpServer.get().stop();
         }
         super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (popup != null) {
-            popup.dismiss();
-            popup = null;
-        }
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -219,57 +214,23 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
-    public void onConfigurationSelected(Configuration configuration, int position) {
+    public void onConfigurationEdit(Configuration configuration, int position) {
+        editConfiguration(configuration, false);
+    }
+
+    @Override
+    public void onConfigurationDelete(Configuration configuration, int position) {
+        deleteConfiguration(configuration, position);
+    }
+
+    @Override
+    public void onConfigurationStop(Configuration configuration, int position) {
+        stopEmulator(configuration, position);
+    }
+
+    @Override
+    public void onConfigurationRun(Configuration configuration, int position) {
         runEmulator(configuration);
-    }
-
-    @Override
-    public void onConfigurationMenuClicked(View anchor, Configuration configuration, int position) {
-        currentConfiguration = configuration;
-        currentConfigurationPosition = position;
-        popup = new PopupMenu(this, anchor);
-        popup.setOnMenuItemClickListener(this);
-        popup.setOnDismissListener(this);
-        Menu menu = popup.getMenu();
-        if (EmulatorState.hasSavedState(configuration.getId())) {
-            menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
-            menu.add(Menu.NONE, MENU_OPTION_STOP, Menu.NONE, this.getString(R.string.menu_stop));
-        } else {
-            menu.add(Menu.NONE, MENU_OPTION_START, Menu.NONE, this.getString(R.string.menu_start));
-        }
-        menu.add(Menu.NONE, MENU_OPTION_EDIT, Menu.NONE, this.getString(R.string.menu_edit));
-        menu.add(Menu.NONE, MENU_OPTION_DELETE, Menu.NONE, this.getString(R.string.menu_delete));
-        popup.show();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-        case MENU_OPTION_START:
-            EmulatorState.deleteSavedState(currentConfiguration.getId());
-            runEmulator(currentConfiguration);
-            return true;
-        case MENU_OPTION_RESUME:
-            runEmulator(currentConfiguration);
-            return true;
-        case MENU_OPTION_STOP:
-            stopEmulator(currentConfiguration, currentConfigurationPosition);
-            return true;
-        case MENU_OPTION_EDIT:
-            editConfiguration(currentConfiguration, false);
-            return true;
-        case MENU_OPTION_DELETE:
-            deleteConfiguration(currentConfiguration, currentConfigurationPosition);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void onDismiss(PopupMenu popupMenu) {
-        if (popup == popupMenu) {
-            popup = null;
-        }
     }
 
     @Override
@@ -319,7 +280,7 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void addConfiguration() {
-        currentConfiguration = Configuration.newConfiguration();
+        Configuration currentConfiguration = Configuration.newConfiguration();
         currentConfigurationPosition = Configuration.getCount();
         editConfiguration(currentConfiguration, true);
     }
@@ -506,10 +467,5 @@ public class MainActivity extends BaseActivity implements
         }
         updateView(-1, -1, -1);
         AlertDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
-    }
-
-    @Override
-    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-        mItemTouchHelper.startDrag(viewHolder);
     }
 }

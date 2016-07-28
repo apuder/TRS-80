@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2015 Paul Burke
+ * Copyright 2012-2013, Arno Puder
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.drag;
+package org.puder.trs80;
 
-import android.support.v7.widget.RecyclerView;
+public interface ConfigurationItemListener {
 
-/**
- * Listener for manual initiation of a drag.
- */
-public interface OnStartDragListener {
+    void onConfigurationEdit(Configuration configuration, int position);
 
-    /**
-     * Called when a view is requesting a start of a drag.
-     *
-     * @param viewHolder The holder of the view to drag.
-     */
-    void onStartDrag(RecyclerView.ViewHolder viewHolder);
+    void onConfigurationDelete(Configuration configuration, int position);
+
+    void onConfigurationStop(Configuration configuration, int position);
+
+    void onConfigurationRun(Configuration configuration, int position);
 
 }

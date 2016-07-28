@@ -21,6 +21,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
+import org.puder.trs80.ConfigurationListViewAdapter;
+
 import java.util.List;
 
 public class ConfigurationItemTouchHelperCallback extends ItemTouchHelper.Callback {
@@ -36,7 +38,7 @@ public class ConfigurationItemTouchHelperCallback extends ItemTouchHelper.Callba
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -46,6 +48,9 @@ public class ConfigurationItemTouchHelperCallback extends ItemTouchHelper.Callba
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        if (!((ConfigurationListViewAdapter.Holder) viewHolder).draggable) {
+            return 0;
+        }
         // Set movement flags based on the layout manager
         if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
             final int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT
