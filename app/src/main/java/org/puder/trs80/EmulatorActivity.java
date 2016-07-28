@@ -405,15 +405,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         AlertDialogUtil.showDialog(this, builder);
     }
 
-    public void onScreenRotationClick(View view) {
-        view.setVisibility(View.GONE);
-        stopAccelerometer();
-        orientationManager.disable();
-        keyboardManager.allCursorKeysUp();
-        keyboardManager.unpressKeySpace();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
     private void startRenderThread() {
         renderThread = new RenderThread();
         renderThread.setRunning(true);

@@ -147,8 +147,7 @@
                         &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<br/>
                         &nbsp;&nbsp;<img src="keyboard_icon"/>: Switch keyboard type]]></string>
     <string name="hint_keyboard_tilt">Tilt the device to trigger cursor keys. Press anywhere
-                        on the screen to fire (space bar). Use icon in top-right corner to
-                        unlock orientation-lock.</string>
+                        on the screen to fire (space bar).</string>
     <string name="hint_keyboard_joystick">Use virtual joystick to trigger cursor keys. Press
                         anywhere on screen to fire (space bar).</string>
     <string name="hint_keyboard_external"><![CDATA[Use &lt;Ctrl&gt;-B for BREAK and &lt;Ctrl&gt;-C

@@ -37,8 +37,7 @@
     <string name="hint_keyboard_joystick">Verwenden Sie den virtuellen Joystick um die Cursor-Tasten
                         zu betätigen. Tippen Sie auf den Bildschirm um zu feuern (Leertaste).</string>
     <string name="hint_keyboard_tilt">Kippen Sie das Gerät, um Cursor-Tasten zu betätigen. Tippen
-                        Sie auf den Bildschirm um zu feuern (Leertaste). Tippen auf der Symbol in der
-                        oberen rechten Ecke um die Orientierungssperre zu deaktivieren.</string>
+                        Sie auf den Bildschirm um zu feuern (Leertaste).</string>
     <string name="initial_setup">Sollen die benötigten TRS-80 ROM-Dateien von bekannten
                         Web-Seiten heruntergeladen werden?</string>
     <string name="keyboard_original_layout">Original Layout</string>
