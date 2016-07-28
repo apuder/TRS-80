@@ -13,7 +13,7 @@
     <dimen name="configuration_table_padding_top">5dp</dimen>
     <dimen name="configuration_table_padding_vertical">0dp</dimen>
     <dimen name="configuration_table_padding_horizontal">5dp</dimen>
-    <dimen name="configuration_button_padding">5dp</dimen>
+    <dimen name="configuration_button_padding">7dp</dimen>
     <dimen name="configuration_button_margin">5dp</dimen>
     <dimen name="configuration_screenshot_padding_top">10dp</dimen>
     <dimen name="configuration_screenshot_border">12dp</dimen>

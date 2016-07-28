@@ -44,7 +44,8 @@
     <string name="conf_item_hardware">Hardware:</string>
     <string name="conf_item_disks">Disks:</string>
     <string name="conf_item_sound">Sound:</string>
-    <string name="conf_item_keyboards">Keyboards:</string>
+    <string name="conf_item_keyboard_portrait">Keyboard (P):</string>
+    <string name="conf_item_keyboard_landscape">Keyboard (L):</string>
     <string name="conf_cassette">Cassette:</string>
     <string name="cassette_rewound">rewound</string>
     <string name="cassette_not_rewound">not rewound</string>

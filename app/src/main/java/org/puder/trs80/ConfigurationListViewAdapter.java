@@ -62,7 +62,8 @@ public class ConfigurationListViewAdapter extends
         public TextView       disks;
         public TextView       cassette;
         public TextView       sound;
-        public TextView       keyboards;
+        public TextView       keyboardPortrait;
+        public TextView       keyboardLandscape;
         public ScreenshotView screenshot;
         public ViewFlipper    viewFlipper;
         public View           stopButton;
@@ -81,7 +82,8 @@ public class ConfigurationListViewAdapter extends
             disks = (TextView) itemView.findViewById(R.id.configuration_disks);
             cassette = (TextView) itemView.findViewById(R.id.configuration_cassette);
             sound = (TextView) itemView.findViewById(R.id.configuration_sound);
-            keyboards = (TextView) itemView.findViewById(R.id.configuration_keyboards);
+            keyboardPortrait = (TextView) itemView.findViewById(R.id.configuration_keyboard_portrait);
+            keyboardLandscape = (TextView) itemView.findViewById(R.id.configuration_keyboard_landscape);
             screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
             viewFlipper = (ViewFlipper) itemView.findViewById(R.id.configuration_view_flipper);
             viewFlipper.setDisplayedChild(0);
@@ -200,11 +202,11 @@ public class ConfigurationListViewAdapter extends
         // Sound
         holder.sound.setText(conf.muteSound() ? R.string.sound_disabled : R.string.sound_enabled);
 
-        // Keyboards
-        String keyboards = getKeyboardLabel(conf.getKeyboardLayoutPortrait());
-        keyboards += "/";
-        keyboards += getKeyboardLabel(conf.getKeyboardLayoutLandscape());
-        holder.keyboards.setText(keyboards);
+        // Keyboard portrait
+        holder.keyboardPortrait.setText(getKeyboardLabel(conf.getKeyboardLayoutPortrait()));
+
+        // Keyboard landscape
+        holder.keyboardLandscape.setText(getKeyboardLabel(conf.getKeyboardLayoutLandscape()));
 
         // Screenshot
         holder.screenshot.setScreenshotBitmap(null);

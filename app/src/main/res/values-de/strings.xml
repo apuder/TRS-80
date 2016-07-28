@@ -9,7 +9,8 @@
     <string name="conf_header">Konfigurationen</string>
     <string name="conf_item_disks">Laufwerke:</string>
     <string name="conf_item_hardware">Hardware:</string>
-    <string name="conf_item_keyboards">Tastaturen:</string>
+    <string name="conf_item_keyboard_portrait">Tastatur (H):</string>
+    <string name="conf_item_keyboard_landscape">Tastatur (Q):</string>
     <string name="conf_item_sound">Ton:</string>
     <string name="conf_cassette">Kassette:</string>
     <string name="cassette_rewound">zurückgespult</string>

@@ -73,7 +73,6 @@
                 android:layout_height="wrap_content"
                 android:alpha="0.8"
                 android:layout_below="@+id/configuration_name_back"
-                android:padding="@dimen/configuration_table_padding"
                 android:layout_marginTop="@dimen/configuration_table_padding_top">
 
                 <TableRow
@@ -152,30 +151,38 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="@android:style/TextAppearance.Medium"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
-                        android:text="@string/conf_item_keyboards"/>
+                        android:text="@string/conf_item_keyboard_portrait"/>
                     <TextView
-                        android:id="@+id/configuration_keyboards"
+                        android:id="@+id/configuration_keyboard_portrait"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/configuration_table_padding_vertical" >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:paddingRight="@dimen/configuration_table_padding_horizontal"
+                        android:text="@string/conf_item_keyboard_landscape"/>
+                    <TextView
+                        android:id="@+id/configuration_keyboard_landscape"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@android:style/TextAppearance.Medium" />
                 </TableRow>
             </TableLayout>
 
-            <ImageView
-                android:id="@+id/configuration_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/configuration_button_padding"
-                android:layout_marginTop="@dimen/configuration_button_margin_top"
-                android:alpha="0.4"
-                android:src="@drawable/back_icon_black"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@+id/configuration_details" />
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/configuration_button_margin_top"
                 android:alpha="0.4"
+                android:gravity="bottom"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_below="@+id/configuration_details">
@@ -208,6 +215,17 @@
                     android:padding="@dimen/configuration_button_padding"
                     android:src="@drawable/play_icon_black"/>
             </LinearLayout>
+
+            <ImageView
+                android:id="@+id/configuration_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/configuration_button_padding"
+                android:layout_marginTop="@dimen/configuration_button_margin_top"
+                android:gravity="bottom"
+                android:alpha="0.4"
+                android:src="@drawable/back_icon_black"
+                android:layout_alignParentBottom="true" />
         </RelativeLayout>
 </ViewFlipper>
 </RelativeLayout>
