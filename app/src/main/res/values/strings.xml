@@ -133,10 +133,9 @@
                         from well-known Internet locations?</string>
 
     <string name="hint_title">Hint</string>
-    <string name="hint_configuration_usage"><![CDATA[Tapping a configuration resumes the emulator.
-                        Use the menu button (<img src="menu_icon"/>) to show a context menu. Drag
-                        the re-arrange icon (<img src="reorder_icon"/>) to re-order the
-                        configurations.]]></string>
+    <string name="hint_configuration_usage"><![CDATA[Tapping a configuration runs the emulator.
+                        Long-press a configuration to reorder it. Use the info button
+                        <img src="info_icon"/> for more details.]]></string>
     <string name="hint_emulator"><![CDATA[Use the virtual keyboard or an attached external
                         keyboard to type TRS commands. Consult the help menu for further
                         information.<p>
@@ -159,7 +158,7 @@
     <string name="help_configurations"><![CDATA[Tap on the add icon (<img src="add_icon"/>) to create
                         a new configuration. A configuration defines the TRS-80 model and the disk
                         images used for the emulation. Tap on a configuration to run the emulator.
-                        Use the info button (<img src="menu_info"/>) to show a context menu.
+                        Use the info button <img src="info_icon"/> to show more details.
                         Long-press to re-order configurations.
                         Note that currently only Model I and Model III emulation is supported.]]></string>
     <string name="help_title_edit_configuration">Help: Edit Configuration</string>
@@ -195,11 +194,12 @@
                         images can be mounted while emulator is paused from
                         the main configurations list view. Attach an external physical keyboard for better
                         usability.<p>
-                        The following action bar commands are available in portrait mode:<br/>
+                        The following menu options are available in portrait mode:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Pause emulator<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Reset emulator<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Rewind cassette<br/>
-                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<p>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Mute sound<br/>
+                        &nbsp;&nbsp;<img src="keyboard_icon"/>: Switch keyboard type<p>
                         Start the tutorial to run some TRS-commands.]]></string>
 
     <string name="tutorial_next">Next (%1$d/%2$d)</string>

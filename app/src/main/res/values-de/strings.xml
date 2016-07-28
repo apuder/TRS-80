@@ -22,9 +22,9 @@
     <string name="crash_toast_text">TRS-80 ist abgestürzt!</string>
     <string name="downloading">Herunterladen (%1$d/%2$d)&#8230;</string>
     <string name="hint_configuration_usage"><![CDATA[Tippen Sie auf eine Konfiguration um diese fortzusetzen.
-                        Tippen Sie auf den Info-Knopf (<img src="info_icon"/>) um ein Kontext-Menü mit weiteren Optionen zu
+                        Tippen Sie auf den Info-Knopf <img src="info_icon"/> um ein Kontext-Menü mit weiteren Optionen zu
                         zeigen. Halten Sie eine Konfiguration gedrückt um die Reihenfolge
-                        umzusortieren.]]></string>
+                        zu ändern.]]></string>
     <string name="hint_emulator"><![CDATA[Benutzen Sie die virtuelle Tastatur oder externe Tastatur
                         um TRS Kommandos einzugeben. Das Hilfe-Menü bietet weitere Informationen.<p>
                         Die folgenden Aktionen sind im Hochformat verfügbar:<br/>
@@ -41,10 +41,6 @@
                         Sie auf den Bildschirm um zu feuern (Leertaste).</string>
     <string name="initial_setup">Sollen die benötigten TRS-80 ROM-Dateien von bekannten
                         Web-Seiten heruntergeladen werden?</string>
-    <string name="keyboard_original_layout">Original Layout</string>
-    <string name="keyboard_compact_layout">Kompaktes Layout</string>
-    <string name="keyboard_joystick_control">Joystick-Steuerung</string>
-    <string name="keyboard_tilt_interface">Kipp-Steuerung</string>
 
     <string name="menu_add">Hinzufügen</string>
     <string name="menu_cancel">Abbrechen</string>
@@ -135,8 +131,8 @@
     <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
     <string name="help_configurations"><![CDATA[Tippen Sie den Hinzufügen-Button (<img src="add_icon"/>) um eine neue Konfiguration zu erzeugen.
         Eine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
-        Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Menu-Button (<img src="menu_icon"/>)
-        gelangen Sie in ein Kontext-Menü. Ziehen Sie den Sortier-Button (<img src="reorder_icon"/>) um
+        Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Info-Knopf <img src="info_icon"/>
+        gelangen Sie in ein Kontext-Menü. Halten die eine Konfiguration gedrückt um
         die Reihenfolge der Konfigurationen zu ändern.
         Bitte beachten Sie, dass im Moment nur Model I und Model III unterstützt werden.]]></string>
     <string name="help_edit_configuration"><![CDATA[Eine Konfiguration definiert die Parameter die für die
@@ -167,12 +163,13 @@
                         wird, können verschiedene Floppy- und Kassetten-Dateien, sowie verschiedene Tastaturen
                         für Hoch- und Querformat individuell für jede Konfiguration definiert werden. Es wird
                         empfohlen, eine externe Tastatur zu benutzen.<p>
-                        Die folgenden Aktionen sind über das Menü im Hochformat verfügbar:<br/>
+                        Die folgenden Aktionen sind im Hochformat verfügbar:<br/>
                         &nbsp;&nbsp;<img src="pause_icon"/>: Emulator pausieren<br/>
                         &nbsp;&nbsp;<img src="reset_icon"/>: Emulator neustarten<br/>
                         &nbsp;&nbsp;<img src="rewind_icon"/>: Kassette zurückspulen<br/>
                         &nbsp;&nbsp;<img src="paste_icon"/>: Ablage in die Tastatur einfügen<br/>
-                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<p>
+                        &nbsp;&nbsp;<img src="sound_on_icon"/>: Stummschalten<br/>
+                        &nbsp;&nbsp;<img src="keyboard_icon"/>: Tastaturtyp auswählen<p>
                         Das Tutorium zeigt einige TRS-Kommandos.]]></string>
 
     <string name="tutorial_next">Weiter (%1$d/%2$d)</string>
