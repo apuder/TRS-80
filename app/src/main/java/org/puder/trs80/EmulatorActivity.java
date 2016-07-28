@@ -573,8 +573,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
     private int getKeyboardType() {
         final android.content.res.Configuration conf = getResources().getConfiguration();
-        if (conf.keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS
-                && conf.hardKeyboardHidden == android.content.res.Configuration.HARDKEYBOARDHIDDEN_YES) {
+        if (conf.keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
             return Configuration.KEYBOARD_EXTERNAL;
         }
 
