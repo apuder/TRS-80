@@ -54,7 +54,6 @@ public class ConfigurationListViewAdapter extends
 
     public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public boolean        draggable;
-        public int            position;
         public Configuration  configuration;
         public TextView       nameFront;
         public TextView       nameBack;
@@ -99,6 +98,7 @@ public class ConfigurationListViewAdapter extends
 
         @Override
         public void onClick(View v) {
+            int position = getAdapterPosition();
             switch (v.getId()) {
             case R.id.configuration_info:
             case R.id.configuration_back:
@@ -147,7 +147,7 @@ public class ConfigurationListViewAdapter extends
         int positionOffset = usesGridLayout ? 0 : -1;
         Configuration conf = Configuration.getNthConfiguration(position + positionOffset);
 
-        if (holder.position != position && holder.viewFlipper.getDisplayedChild() != 0) {
+        if (holder.getAdapterPosition() != position && holder.viewFlipper.getDisplayedChild() != 0) {
             Context context = TRS80Application.getAppContext();
             holder.viewFlipper.setInAnimation(context, R.anim.no_animation);
             holder.viewFlipper.setOutAnimation(context, R.anim.no_animation);
@@ -156,9 +156,6 @@ public class ConfigurationListViewAdapter extends
 
         holder.stopButton.setVisibility(EmulatorState.hasSavedState(conf.getId()) ? View.VISIBLE
                 : View.GONE);
-
-        // Position
-        holder.position = position;
 
         // Configuration
         holder.configuration = conf;
