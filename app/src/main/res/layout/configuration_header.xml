@@ -4,5 +4,5 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/configuration_header_margin_top"
-    android:layout_marginLeft="@dimen/configuration_header_margin_left"
+    android:paddingLeft="@dimen/configuration_outer_horizontal_padding"
     android:textAppearance="@android:style/TextAppearance.Large" />

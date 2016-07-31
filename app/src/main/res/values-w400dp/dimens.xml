@@ -5,8 +5,6 @@
     <dimen name="padding_large">20dp</dimen>
     <dimen name="configuration_header_padding_top">20dp</dimen>
     <dimen name="configuration_header_padding_bottom">10dp</dimen>
-    <dimen name="configuration_list_padding_side">30dp</dimen>
-    <dimen name="configuration_card_padding">10dp</dimen>
     <dimen name="configuration_table_padding">5dp</dimen>
     <dimen name="configuration_table_padding_vertical">0dp</dimen>
     <dimen name="configuration_table_padding_horizontal">5dp</dimen>

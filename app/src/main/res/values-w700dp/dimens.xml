@@ -1,8 +1,8 @@
 <resources>
 
-    <dimen name="configuration_list_padding_side">50dp</dimen>
     <dimen name="configuration_screenshot_border">10dp</dimen>
-    <dimen name="configuration_card_padding">15dp</dimen>
+    <dimen name="configuration_outer_horizontal_padding">30dp</dimen>
+    <dimen name="configuration_outer_top_padding">60dp</dimen>
     <integer name="configuration_details_weight">3</integer>
     <integer name="configuration_screenshot_weight">3</integer>
 

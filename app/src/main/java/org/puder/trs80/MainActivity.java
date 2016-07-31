@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -78,11 +77,10 @@ public class MainActivity extends BaseActivity implements
 
         castMessageSender = CastMessageSender.get();
 
-        Rect rect = new Rect();
-        getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
-        int screenWidth = rect.right;
-        int screenWidthDp = (int) ((float) screenWidth / getResources().getDisplayMetrics().density);
-        int numColumns = screenWidthDp / COLUMN_WIDTH_DP;
+        int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
+        int numColumns =
+                (screenWidthDp == android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED) ?
+                        1 : screenWidthDp / COLUMN_WIDTH_DP;
         RecyclerView.LayoutManager lm = null;
         boolean usesGridLayout;
         if (numColumns <= 1) {
@@ -92,7 +90,7 @@ public class MainActivity extends BaseActivity implements
             lm = new GridLayoutManager(this, numColumns);
             usesGridLayout = true;
         }
-        configurationListViewAdapter = new ConfigurationListViewAdapter(usesGridLayout, this);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(true /*usesGridLayout*/, this);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);

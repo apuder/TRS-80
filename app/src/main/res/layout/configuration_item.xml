@@ -3,44 +3,56 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:layout_centerInParent="true"
+    android:paddingTop="@dimen/configuration_outer_top_padding"
+    android:paddingRight="@dimen/configuration_outer_horizontal_padding"
+    android:paddingLeft="@dimen/configuration_outer_horizontal_padding"
     android:layout_gravity="center">
 
     <ViewFlipper
         android:id="@+id/configuration_view_flipper"
         android:layout_gravity="center"
         android:gravity="center"
-        android:layout_centerInParent="true"
-        android:paddingLeft="@dimen/configuration_outer_horizontal_padding"
-        android:paddingRight="@dimen/configuration_outer_horizontal_padding"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/configuration_inner_spacing"
-            android:layout_marginBottom="@dimen/configuration_inner_spacing"
+            android:orientation="vertical"
             android:padding="@dimen/configuration_inner_spacing"
             android:background="@drawable/configure_item_background">
 
-            <ImageView
-                android:id="@+id/configuration_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:padding="@dimen/configuration_button_padding"
-                android:alpha="0.4"
-                android:src="@drawable/info_icon"
-                android:layout_alignParentRight="true" />
+            <RelativeLayout
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
 
-            <TextView
-                android:id="@+id/configuration_name_front"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/configuration_info"
-                android:layout_alignParentLeft="true"
-                android:textAppearance="@android:style/TextAppearance.Large" />
+                <ImageView
+                    android:id="@+id/configuration_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:padding="@dimen/configuration_button_padding"
+                    android:alpha="0.4"
+                    android:src="@drawable/info_icon"
+                    android:layout_alignParentRight="true" />
+
+                <TextView
+                    android:id="@+id/configuration_name_front"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/configuration_info"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:gravity="top"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </RelativeLayout>
 
             <org.puder.trs80.ScreenshotView
                 android:id="@+id/configuration_screenshot"
@@ -48,16 +60,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/configuration_screenshot_padding_top"
-                android:padding="@dimen/configuration_screenshot_border"
-                android:layout_below="@+id/configuration_name_front"/>
-        </RelativeLayout>
+                android:padding="@dimen/configuration_screenshot_border"/>
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/configuration_inner_spacing"
-            android:layout_marginBottom="@dimen/configuration_inner_spacing"
             android:padding="@dimen/configuration_inner_spacing"
             android:background="@drawable/configure_item_background">
 
@@ -227,5 +236,5 @@
                 android:src="@drawable/back_icon_black"
                 android:layout_alignParentBottom="true" />
         </RelativeLayout>
-</ViewFlipper>
+    </ViewFlipper>
 </RelativeLayout>
