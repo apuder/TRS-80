@@ -16,11 +16,11 @@
 
 package org.puder.trs80;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -31,14 +31,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,99 +51,37 @@ import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
 
-public class EmulatorActivity extends BaseActivity
-        implements SensorEventListener, GameControllerListener {
+import java.util.Arrays;
+import java.util.List;
+
+public class EmulatorActivity extends BaseActivity implements SensorEventListener,
+        GameControllerListener {
 
     // Action Menu
-    private static final int MENU_OPTION_PAUSE     = 0;
-    private static final int MENU_OPTION_REWIND    = 1;
-    private static final int MENU_OPTION_RESET     = 2;
-    private static final int MENU_OPTION_PASTE     = 3;
-    private static final int MENU_OPTION_SOUND_ON  = 4;
-    private static final int MENU_OPTION_SOUND_OFF = 5;
-    private static final int MENU_OPTION_TUTORIAL  = 6;
-    private static final int MENU_OPTION_HELP      = 7;
+    private static final int   MENU_OPTION_PAUSE     = 0;
+    private static final int   MENU_OPTION_REWIND    = 1;
+    private static final int   MENU_OPTION_RESET     = 2;
+    private static final int   MENU_OPTION_PASTE     = 3;
+    private static final int   MENU_OPTION_SOUND_ON  = 4;
+    private static final int   MENU_OPTION_SOUND_OFF = 5;
+    private static final int   MENU_OPTION_TUTORIAL  = 6;
+    private static final int   MENU_OPTION_HELP      = 7;
 
     private Thread             cpuThread;
     private RenderThread       renderThread;
     private TextView           logView;
     private int                orientation;
-    private boolean            soundMuted     = false;
-    private MenuItem           pasteMenuItem  = null;
-    private MenuItem           muteMenuItem   = null;
-    private MenuItem           unmuteMenuItem = null;
-    private SensorManager      sensorManager  = null;
+    private boolean            soundMuted            = false;
+    private MenuItem           pasteMenuItem         = null;
+    private MenuItem           muteMenuItem          = null;
+    private MenuItem           unmuteMenuItem        = null;
+    private SensorManager      sensorManager         = null;
     private Sensor             sensorAccelerometer;
     private KeyboardManager    keyboardManager;
-    private ViewGroup          keyboardContainer = null;
+    private ViewGroup          keyboardContainer     = null;
     private GameController     gameController;
     private int                rotation;
-    private OrientationChanged orientationManager;
     private ClipboardManager   clipboardManager;
-
-
-    class OrientationChanged extends OrientationEventListener {
-
-        public OrientationChanged(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void onOrientationChanged(int orientation) {
-            if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
-                disable();
-                // Lock screen orientation for tilt interface
-                lockOrientation();
-            }
-        }
-
-        @SuppressLint("NewApi")
-        private void lockOrientation() {
-            Log.d("TRS80", "Locking screen orientation");
-            Display display = getWindowManager().getDefaultDisplay();
-            rotation = display.getRotation();
-            int height;
-            int width;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-                height = display.getHeight();
-                width = display.getWidth();
-            } else {
-                Point size = new Point();
-                display.getSize(size);
-                height = size.y;
-                width = size.x;
-            }
-            switch (rotation) {
-            case Surface.ROTATION_90:
-                if (width > height) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                }
-                break;
-            case Surface.ROTATION_180:
-                if (height > width) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                }
-                break;
-            case Surface.ROTATION_270:
-                if (width > height) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                }
-                break;
-            default:
-                if (height > width) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                }
-            }
-        }
-    }
 
 
     @Override
@@ -184,10 +119,7 @@ public class EmulatorActivity extends BaseActivity
         gameController = new GameController(this);
 
         startRenderThread();
-        initView();
-
-        orientationManager = new OrientationChanged(this);
-        orientationManager.enable();
+        initRootView();
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -224,7 +156,6 @@ public class EmulatorActivity extends BaseActivity
             return;
         }
         RemoteCastScreen.get().endSession();
-        orientationManager.disable();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
         }
@@ -277,10 +208,11 @@ public class EmulatorActivity extends BaseActivity
                 menu.add(Menu.NONE, MENU_OPTION_TUTORIAL, Menu.NONE,
                         this.getString(R.string.menu_tutorial)),
                 MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, this.getString(R.string.menu_help))
-                        .setIcon(R.drawable.help_icon_white),
-                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                                this.getString(R.string.menu_help)).setIcon(
+                                R.drawable.help_icon_white), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         updateMenuIcons();
         return true;
     }
@@ -376,13 +308,28 @@ public class EmulatorActivity extends BaseActivity
         }
     }
 
-    public void onScreenRotationClick(View view) {
-        view.setVisibility(View.GONE);
-        stopAccelerometer();
-        orientationManager.disable();
-        keyboardManager.allCursorKeysUp();
-        keyboardManager.unpressKeySpace();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+    public void onKeyboardSwitchClicked(View view) {
+        List<String> keyboardTypes = Arrays.asList(getResources().getStringArray(
+                R.array.conf_keyboard_type));
+        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this);
+        builder.setSingleChoiceItems(keyboardTypes.toArray(new String[keyboardTypes.size()]),
+                getKeyboardType(), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AlertDialogUtil.dismissDialog(EmulatorActivity.this);
+                        final Configuration conf = TRS80Application.getCurrentConfiguration();
+                        switch (orientation) {
+                        case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+                            conf.setKeyboardLayoutLandscape(which);
+                            break;
+                        default:
+                            conf.setKeyboardLayoutPortrait(which);
+                            break;
+                        }
+                        initKeyboardView();
+                    }
+                });
+        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void startRenderThread() {
@@ -435,6 +382,7 @@ public class EmulatorActivity extends BaseActivity
     }
 
     private void startAccelerometer() {
+        lockOrientation();
         if (sensorManager == null) {
             sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
             sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -443,12 +391,13 @@ public class EmulatorActivity extends BaseActivity
     }
 
     private void stopAccelerometer() {
+        unlockScreenOrientation();
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
     }
 
-    private void initView() {
+    private void initRootView() {
         setContentView(R.layout.emulator);
         View top = this.findViewById(R.id.emulator);
         top.setFocusable(true);
@@ -464,15 +413,23 @@ public class EmulatorActivity extends BaseActivity
             screen.setVisibility(View.VISIBLE);
         }
 
-        int keyboardType = getKeyboardType();
+        initKeyboardView();
+    }
+
+    private void initKeyboardView() {
+        stopAccelerometer();
+        keyboardContainer = (ViewGroup) findViewById(R.id.keyboard_container);
+        keyboardContainer.removeAllViews();
+        final int keyboardType = getKeyboardType();
         showKeyboardHint(keyboardType);
         if (keyboardType == Configuration.KEYBOARD_GAME_CONTROLLER
                 || keyboardType == Configuration.KEYBOARD_EXTERNAL) {
+            keyboardContainer.getRootView().findViewById(R.id.switch_keyboard)
+                    .setVisibility(View.GONE);
             return;
         }
-        keyboardContainer = (ViewGroup) findViewById(R.id.keyboard_container);
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        keyboardContainer.getRootView().findViewById(R.id.switch_keyboard)
+                .setVisibility(View.VISIBLE);
         // if (android.os.Build.VERSION.SDK_INT >=
         // Build.VERSION_CODES.HONEYCOMB) {
         // root.setMotionEventSplittingEnabled(true);
@@ -492,7 +449,8 @@ public class EmulatorActivity extends BaseActivity
             layoutId = R.layout.keyboard_tilt;
             break;
         }
-        inflater.inflate(layoutId, keyboardContainer);
+        TRS80Application.getHardware().computeKeyDimensions(getWindow());
+        getLayoutInflater().inflate(layoutId, keyboardContainer, true);
 
         /*
          * The following code is a hack to work around a problem with the
@@ -518,6 +476,59 @@ public class EmulatorActivity extends BaseActivity
                 obs.removeGlobalOnLayoutListener(this);
             }
         });
+        keyboardContainer.requestLayout();
+        if (keyboardType == Configuration.KEYBOARD_TILT) {
+            startAccelerometer();
+        }
+    }
+
+    private void lockOrientation() {
+        Display display = getWindowManager().getDefaultDisplay();
+        rotation = display.getRotation();
+        int height;
+        int width;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            height = display.getHeight();
+            width = display.getWidth();
+        } else {
+            Point size = new Point();
+            display.getSize(size);
+            height = size.y;
+            width = size.x;
+        }
+        switch (rotation) {
+            case Surface.ROTATION_90:
+                if (width > height) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                }
+                break;
+            case Surface.ROTATION_180:
+                if (height > width) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                }
+                break;
+            case Surface.ROTATION_270:
+                if (width > height) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                }
+                break;
+            default:
+                if (height > width) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+        }
+    }
+
+    private void unlockScreenOrientation() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
     private void showKeyboardHint(int keyboardType) {
@@ -557,14 +568,12 @@ public class EmulatorActivity extends BaseActivity
     }
 
     private void showTutorial() {
-        View tutorialRoot = findViewById(R.id.tutorial);
-        View keyboardRoot = findViewById(R.id.keyboard_container);
-        new Tutorial(tutorialRoot, keyboardRoot).show();
+        new Tutorial(findViewById(R.id.emulator)).show();
     }
 
     private int getKeyboardType() {
-        if (getResources()
-                .getConfiguration().keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
+        final android.content.res.Configuration conf = getResources().getConfiguration();
+        if (conf.keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
             return Configuration.KEYBOARD_EXTERNAL;
         }
 
@@ -649,18 +658,18 @@ public class EmulatorActivity extends BaseActivity
     /**
      * negateX, negateY, xSrc, ySrc
      */
-    final static int[][] axisSwap = { { 1, -1, 0, 1 }, // ROTATION_0
+    final static int[][] axisSwap                        = { { 1, -1, 0, 1 }, // ROTATION_0
             { -1, -1, 1, 0 }, // ROTATION_90
             { -1, 1, 0, 1 }, // ROTATION_180
-            { 1, 1, 1, 0 } }; // ROTATION_270
+            { 1, 1, 1, 0 }                              };      // ROTATION_270
 
-    final static float ACCELEROMETER_PRESS_THRESHOLD   = 1.0f;
-    final static float ACCELEROMETER_UNPRESS_THRESHOLD = 0.3f;
+    final static float   ACCELEROMETER_PRESS_THRESHOLD   = 1.0f;
+    final static float   ACCELEROMETER_UNPRESS_THRESHOLD = 0.3f;
 
-    private boolean leftKeyPressed  = false;
-    private boolean rightKeyPressed = false;
-    private boolean upKeyPressed    = false;
-    private boolean downKeyPressed  = false;
+    private boolean      leftKeyPressed                  = false;
+    private boolean      rightKeyPressed                 = false;
+    private boolean      upKeyPressed                    = false;
+    private boolean      downKeyPressed                  = false;
 
 
     @Override

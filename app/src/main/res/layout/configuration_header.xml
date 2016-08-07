@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:text="@string/conf_header"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="@dimen/configuration_header_padding_top"
-    android:layout_marginBottom="@dimen/configuration_header_padding_bottom"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/configuration_header_margin_top"
+    android:paddingLeft="@dimen/configuration_outer_horizontal_padding"
     android:textAppearance="@android:style/TextAppearance.Large" />

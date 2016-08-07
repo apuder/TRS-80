@@ -210,6 +210,18 @@ public class Configuration {
         return Integer.parseInt(v);
     }
 
+    public void setKeyboardLayoutPortrait(int kb) {
+        Editor editor = sharedPrefs.edit();
+        editor.putString(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT, Integer.toString(kb));
+        editor.apply();
+    }
+
+    public void setKeyboardLayoutLandscape(int kb) {
+        Editor editor = sharedPrefs.edit();
+        editor.putString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE, Integer.toString(kb));
+        editor.apply();
+    }
+
     public int getKeyboardLayoutLandscape() {
         String v = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE, "0");
         return Integer.parseInt(v);

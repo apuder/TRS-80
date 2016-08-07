@@ -29,23 +29,24 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.MediaRouteButton;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.emtronics.dragsortrecycler.DragSortRecycler;
-
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 
 import java.io.File;
 
 public class MainActivity extends BaseActivity implements
-        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationMenuListener,
-        PopupMenu.OnMenuItemClickListener, PopupMenu.OnDismissListener {
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener {
+
+    private static final int     COLUMN_WIDTH_DP            = 300;
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
     private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
@@ -57,20 +58,11 @@ public class MainActivity extends BaseActivity implements
     private static final int     MENU_OPTION_SETTINGS       = 2;
     private static final int     MENU_OPTION_RATE           = 3;
 
-    // Context Menu
-    private static final int     MENU_OPTION_START          = 0;
-    private static final int     MENU_OPTION_RESUME         = 1;
-    private static final int     MENU_OPTION_STOP           = 2;
-    private static final int     MENU_OPTION_EDIT           = 3;
-    private static final int     MENU_OPTION_DELETE         = 4;
-
     private RecyclerView         configurationListView;
-    private RecyclerView.Adapter configurationListViewAdapter;
-    private Configuration        currentConfiguration;
+    private ConfigurationListViewAdapter configurationListViewAdapter;
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
-    private PopupMenu            popup                      = null;
 
     private CastMessageSender    castMessageSender;
 
@@ -84,32 +76,28 @@ public class MainActivity extends BaseActivity implements
         this.setContentView(R.layout.main_activity);
 
         castMessageSender = CastMessageSender.get();
-        configurationListViewAdapter = new ConfigurationListViewAdapter(this);
+
+        int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
+        int numColumns =
+                (screenWidthDp == android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED) ?
+                        1 : screenWidthDp / COLUMN_WIDTH_DP;
+        RecyclerView.LayoutManager lm = null;
+        boolean usesGridLayout;
+        if (numColumns <= 1) {
+            lm = new LinearLayoutManager(this);
+            usesGridLayout = false;
+        } else {
+            lm = new GridLayoutManager(this, numColumns);
+            usesGridLayout = true;
+        }
+        configurationListViewAdapter = new ConfigurationListViewAdapter(true /*usesGridLayout*/, this);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
-        configurationListView.setLayoutManager(new LinearLayoutManager(this));
+        configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
 
-        DragSortRecycler dragSortRecycler = new DragSortRecycler();
-        dragSortRecycler.setViewHandleId(R.id.configuration_reorder);
-        dragSortRecycler.setFloatingAlpha(0.4f);
-        dragSortRecycler.setFloatingBgColor(0x80FFFFFF);
-        dragSortRecycler.setAutoScrollSpeed(0.3f);
-        dragSortRecycler.setAutoScrollWindow(0.1f);
-        dragSortRecycler.addExcludedDraggingPosition(0);
-        dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
-            @Override
-            public void onItemMoved(int from, int to) {
-                if (from == to) {
-                    return;
-                }
-                Configuration.move(from - 1, to - 1);
-                configurationListViewAdapter.notifyDataSetChanged();
-            }
-        });
-
-        configurationListView.addItemDecoration(dragSortRecycler);
-        configurationListView.addOnItemTouchListener(dragSortRecycler);
-        configurationListView.setOnScrollListener(dragSortRecycler.getScrollListener());
+        ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback(configurationListViewAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(configurationListView);
     }
 
     @Override
@@ -142,16 +130,6 @@ public class MainActivity extends BaseActivity implements
             // AudioHttpServer.get().stop();
         }
         super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (popup != null) {
-            popup.dismiss();
-            popup = null;
-        }
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -234,57 +212,23 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
-    public void onConfigurationSelected(Configuration configuration, int position) {
+    public void onConfigurationEdit(Configuration configuration, int position) {
+        editConfiguration(configuration, false);
+    }
+
+    @Override
+    public void onConfigurationDelete(Configuration configuration, int position) {
+        deleteConfiguration(configuration, position);
+    }
+
+    @Override
+    public void onConfigurationStop(Configuration configuration, int position) {
+        stopEmulator(configuration, position);
+    }
+
+    @Override
+    public void onConfigurationRun(Configuration configuration, int position) {
         runEmulator(configuration);
-    }
-
-    @Override
-    public void onConfigurationMenuClicked(View anchor, Configuration configuration, int position) {
-        currentConfiguration = configuration;
-        currentConfigurationPosition = position;
-        popup = new PopupMenu(this, anchor);
-        popup.setOnMenuItemClickListener(this);
-        popup.setOnDismissListener(this);
-        Menu menu = popup.getMenu();
-        if (EmulatorState.hasSavedState(configuration.getId())) {
-            menu.add(Menu.NONE, MENU_OPTION_RESUME, Menu.NONE, this.getString(R.string.menu_resume));
-            menu.add(Menu.NONE, MENU_OPTION_STOP, Menu.NONE, this.getString(R.string.menu_stop));
-        } else {
-            menu.add(Menu.NONE, MENU_OPTION_START, Menu.NONE, this.getString(R.string.menu_start));
-        }
-        menu.add(Menu.NONE, MENU_OPTION_EDIT, Menu.NONE, this.getString(R.string.menu_edit));
-        menu.add(Menu.NONE, MENU_OPTION_DELETE, Menu.NONE, this.getString(R.string.menu_delete));
-        popup.show();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-        case MENU_OPTION_START:
-            EmulatorState.deleteSavedState(currentConfiguration.getId());
-            runEmulator(currentConfiguration);
-            return true;
-        case MENU_OPTION_RESUME:
-            runEmulator(currentConfiguration);
-            return true;
-        case MENU_OPTION_STOP:
-            stopEmulator(currentConfiguration, currentConfigurationPosition);
-            return true;
-        case MENU_OPTION_EDIT:
-            editConfiguration(currentConfiguration, false);
-            return true;
-        case MENU_OPTION_DELETE:
-            deleteConfiguration(currentConfiguration, currentConfigurationPosition);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void onDismiss(PopupMenu popupMenu) {
-        if (popup == popupMenu) {
-            popup = null;
-        }
     }
 
     @Override
@@ -334,7 +278,7 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void addConfiguration() {
-        currentConfiguration = Configuration.newConfiguration();
+        Configuration currentConfiguration = Configuration.newConfiguration();
         currentConfigurationPosition = Configuration.getCount();
         editConfiguration(currentConfiguration, true);
     }

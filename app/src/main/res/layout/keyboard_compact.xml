@@ -205,7 +205,7 @@
                 keyboard:id="key_SPACE"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                keyboard:size="5" />
+                keyboard:size="4" />
 
             <org.puder.trs80.keyboard.Key
                 keyboard:id="key_CLEAR_SHORT"
