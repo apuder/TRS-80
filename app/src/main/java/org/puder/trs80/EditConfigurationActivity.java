@@ -37,9 +37,8 @@ public class EditConfigurationActivity extends BaseActivity {
     public static final String CONF_MUTE_SOUND         = "conf_mute_sound";
 
     // Action Menu
-    private static final int   MENU_OPTION_DONE        = 0;
-    private static final int   MENU_OPTION_CANCEL      = 1;
-    private static final int   MENU_OPTION_HELP        = 2;
+    private static final int   MENU_OPTION_CANCEL      = 0;
+    private static final int   MENU_OPTION_HELP        = 1;
 
 
     @Override
@@ -47,6 +46,7 @@ public class EditConfigurationActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         // Dummy view. Will be replaced by EditConfigurationFragment.
         setContentView(new View(this));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new EditConfigurationFragment()).commit();
     }
@@ -59,11 +59,6 @@ public class EditConfigurationActivity extends BaseActivity {
                 MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         MenuItemCompat
                 .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_DONE, Menu.NONE,
-                                this.getString(R.string.menu_done)).setIcon(R.drawable.ok_icon),
-                        MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat
-                .setShowAsAction(
                         menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
                                 this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
                         MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
@@ -73,7 +68,7 @@ public class EditConfigurationActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case MENU_OPTION_DONE:
+        case android.R.id.home:
             doneEditing(false);
             return true;
         case MENU_OPTION_CANCEL:

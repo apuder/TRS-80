@@ -108,6 +108,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         XTRS.setEmulatorActivity(this);
@@ -178,7 +180,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE,
                         this.getString(R.string.menu_pause)).setIcon(R.drawable.pause_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE,
                         this.getString(R.string.menu_reset)).setIcon(R.drawable.reset_icon),
@@ -220,6 +222,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case android.R.id.home:
         case MENU_OPTION_PAUSE:
             pauseEmulator();
             return true;
