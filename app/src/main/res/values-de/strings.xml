@@ -50,6 +50,7 @@
     <string name="menu_edit">Bearbeiten</string>
     <string name="menu_eject">Auswerfen</string>
     <string name="menu_help">Hilfe</string>
+    <string name="menu_community">Neuigkeiten</string>
     <string name="menu_rate">Bewerten</string>
     <string name="menu_pause">Pause</string>
     <string name="menu_reset">Zurücksetzen</string>
@@ -184,4 +185,6 @@
     <string name="tutorial_step_7">Beendet den BASIC Interpreter.</string>
     <string name="tutorial_step_8">Zeigt den Inhalt des Floppy-Verzeichnisses mit der neuen Datei
                         FIRST/BAS an.</string>
+    <string name="navigation_drawer_open">Leiste offen</string>
+    <string name="navigation_drawer_close">Leiste geschlossen</string>
 </resources>

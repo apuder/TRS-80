@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_settings"
+        android:title="@string/menu_settings"
+        android:icon="@drawable/settings_icon"/>
+    <item
+        android:id="@+id/nav_community"
+        android:title="@string/menu_community"
+        android:icon="@drawable/community_icon"/>
+    <item
+        android:id="@+id/nav_rate"
+        android:title="@string/menu_rate"
+        android:icon="@drawable/rate_icon"/>
+    <item
+        android:id="@+id/nav_help"
+        android:title="@string/menu_help"
+        android:icon="@drawable/help_icon"/>
+
+</menu>

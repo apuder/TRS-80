@@ -5,6 +5,8 @@
     <string name="chromecast_app_id" translatable="false">E0F0F42C</string>
     <string name="start_casting">Start Casting</string>
 
+    <string name="google_plus_url" translatable="false">https://plus.google.com/communities/110959098806298034548</string>
+
     <string name="crash_toast_text">TRS-80 has crashed!</string>
     <string name="crash_dialog_title">TRS-80 has crashed</string>
     <string name="crash_dialog_text">The emulator has crashed forcing the application to stop.
@@ -27,6 +29,7 @@
     <string name="menu_add">Add</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_help">Help</string>
+    <string name="menu_community">Community</string>
     <string name="menu_rate">Rate</string>
     <string name="menu_start">Start</string>
     <string name="menu_resume">Resume</string>
@@ -221,4 +224,7 @@
     <string name="tutorial_step_7">Exit the BASIC interpreter.</string>
     <string name="tutorial_step_8_cmd" translatable="false">DIR</string>
     <string name="tutorial_step_8">Display the directory again. Note the file FIRST/BAS.</string>
+    <string name="navigation_drawer_open">Drawer open</string>
+    <string name="navigation_drawer_close">Drawer closed</string>
+    <string name="navigation_drawer_caption" translatable="false">TRS-80 Emulator</string>
 </resources>

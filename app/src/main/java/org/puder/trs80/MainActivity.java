@@ -26,12 +26,17 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,7 +49,8 @@ import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import java.io.File;
 
 public class MainActivity extends BaseActivity implements
-        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener {
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private static final int     COLUMN_WIDTH_DP            = 300;
 
@@ -54,15 +60,14 @@ public class MainActivity extends BaseActivity implements
 
     // Action Menu
     private static final int     MENU_OPTION_DOWNLOAD       = 0;
-    private static final int     MENU_OPTION_HELP           = 1;
-    private static final int     MENU_OPTION_SETTINGS       = 2;
-    private static final int     MENU_OPTION_RATE           = 3;
 
     private RecyclerView         configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
+
+    private ActionBarDrawerToggle toggle;
 
     private CastMessageSender    castMessageSender;
 
@@ -73,7 +78,15 @@ public class MainActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
-        this.setContentView(R.layout.main_activity);
+        setContentView(R.layout.main_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         castMessageSender = CastMessageSender.get();
 
@@ -98,6 +111,12 @@ public class MainActivity extends BaseActivity implements
         ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback(configurationListViewAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(configurationListView);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        toggle.syncState();
     }
 
     @Override
@@ -130,6 +149,16 @@ public class MainActivity extends BaseActivity implements
             // AudioHttpServer.get().stop();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -170,41 +199,39 @@ public class MainActivity extends BaseActivity implements
             downloadMenuItem.setIcon(R.drawable.download_icon);
             MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         }
-
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
-                        this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon),
-                MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
-                                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_RATE, Menu.NONE,
-                                this.getString(R.string.menu_rate)),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (toggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         switch (item.getItemId()) {
         case MENU_OPTION_DOWNLOAD:
             downloadROMs();
             return true;
-        case MENU_OPTION_HELP:
-            showHelp();
-            return true;
-        case MENU_OPTION_SETTINGS:
-            showSettings();
-            return true;
-        case MENU_OPTION_RATE:
-            showRating();
-            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_settings) {
+            showSettings();
+        } else if (id == R.id.nav_rate) {
+            showRating();
+        } else if (id == R.id.nav_help) {
+            showHelp();
+        } else if (id == R.id.nav_community) {
+            showCommunity();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     public void onFloatingActionButtonClicked(View view) {
@@ -438,6 +465,11 @@ public class MainActivity extends BaseActivity implements
             startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=" + getPackageName())));
         }
+    }
+
+    private void showCommunity() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.google_plus_url)));
+        startActivity(browserIntent);
     }
 
     private void downloadROMs() {
