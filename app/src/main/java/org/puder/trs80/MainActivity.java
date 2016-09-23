@@ -95,15 +95,12 @@ public class MainActivity extends BaseActivity implements
                 (screenWidthDp == android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED) ?
                         1 : screenWidthDp / COLUMN_WIDTH_DP;
         RecyclerView.LayoutManager lm = null;
-        boolean usesGridLayout;
         if (numColumns <= 1) {
             lm = new LinearLayoutManager(this);
-            usesGridLayout = false;
         } else {
             lm = new GridLayoutManager(this, numColumns);
-            usesGridLayout = true;
         }
-        configurationListViewAdapter = new ConfigurationListViewAdapter(true /*usesGridLayout*/, this);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(this, numColumns);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
