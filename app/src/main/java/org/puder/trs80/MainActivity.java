@@ -408,9 +408,13 @@ public class MainActivity extends BaseActivity implements
             return;
         }
 
-        if (romFile == null || !new File(romFile).exists()) {
-            Snackbar.make(root, R.string.error_no_rom, Snackbar.LENGTH_LONG).show();
+        if (!checkIfFileExists(romFile, false, R.string.error_no_rom)) {
             return;
+        }
+        for (int i = 0; i < 4; i++) {
+            if (!checkIfFileExists(conf.getDiskPath(i), true, R.string.error_no_disk)) {
+                return;
+            }
         }
 
         TRS80Application.setCurrentConfiguration(conf);
@@ -424,6 +428,18 @@ public class MainActivity extends BaseActivity implements
         EmulatorState.loadState(conf.getId());
         Intent i = new Intent(this, EmulatorActivity.class);
         startActivityForResult(i, REQUEST_CODE_RUN_EMULATOR);
+    }
+
+    private boolean checkIfFileExists(String path, boolean allowNull, int errMsg) {
+        if (path == null && allowNull) {
+            return true;
+        }
+        if (path == null || !new File(path).exists()) {
+            View root = findViewById(R.id.main);
+            Snackbar.make(root, errMsg, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 
     private void showError(int err) {

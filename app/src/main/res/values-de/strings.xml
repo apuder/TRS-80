@@ -130,6 +130,7 @@
     <string name="error_init">Fehler während der Emulator-Initialisierung. (Error Code: %1$d).
         Bitte senden Sie den Fehler Code und Ihr Android Geräte-Typ an mobile@puder.org.</string>
     <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
+    <string name="error_no_disk">Laufwerksdatei nicht gefunden.</string>
     <string name="help_configurations"><![CDATA[Tippen Sie den Hinzufügen-Button (<img src="add_icon"/>) um eine neue Konfiguration zu erzeugen.
         Eine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
         Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Info-Knopf <img src="info_icon"/>

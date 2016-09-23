@@ -126,6 +126,7 @@
 
     <string name="error_model_not_supported">Only Model I and Model III are supported at this time.</string>
     <string name="error_no_rom">No valid ROM found. Please use Settings to set ROM.</string>
+    <string name="error_no_disk">Disk image not found.</string>
 
     <string name="no_configurations">Tap on the \'+\' icon to create a new configuration.</string>
     <string name="error_init">Error during initialization of the emulator (error code: %1$d).
