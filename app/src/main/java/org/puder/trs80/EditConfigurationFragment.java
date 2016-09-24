@@ -33,6 +33,8 @@ public class EditConfigurationFragment extends PreferenceFragment implements
     private SharedPreferences sharedPrefs;
     private Handler           handler;
 
+    private boolean           configurationWasEdited;
+
     private Preference        model;
     private Preference        name;
     private Preference        cassette;
@@ -53,6 +55,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        configurationWasEdited = false;
         handler = new Handler();
         Intent i = getActivity().getIntent();
         int configId = i.getExtras().getInt("CONFIG_ID");
@@ -219,6 +222,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        configurationWasEdited = true;
         /*
          * When we get to this point, the preferences have not yet been updated
          * yet. For this reason updateSummaries() is called via a handler to
@@ -232,5 +236,9 @@ public class EditConfigurationFragment extends PreferenceFragment implements
             }
         });
         return true;
+    }
+
+    public boolean configurationWasEdited() {
+        return configurationWasEdited;
     }
 }

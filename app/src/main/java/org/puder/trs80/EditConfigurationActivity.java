@@ -40,6 +40,7 @@ public class EditConfigurationActivity extends BaseActivity {
     private static final int   MENU_OPTION_CANCEL      = 0;
     private static final int   MENU_OPTION_HELP        = 1;
 
+    private EditConfigurationFragment fragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,8 +48,9 @@ public class EditConfigurationActivity extends BaseActivity {
         // Dummy view. Will be replaced by EditConfigurationFragment.
         setContentView(new View(this));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        fragment = new EditConfigurationFragment();
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new EditConfigurationFragment()).commit();
+                .replace(android.R.id.content, fragment).commit();
     }
 
     @Override
@@ -69,7 +71,7 @@ public class EditConfigurationActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case android.R.id.home:
-            doneEditing(false);
+            doneEditing(!fragment.configurationWasEdited());
             return true;
         case MENU_OPTION_CANCEL:
             doneEditing(true);
@@ -83,7 +85,7 @@ public class EditConfigurationActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        doneEditing(false);
+        doneEditing(!fragment.configurationWasEdited());
     }
 
     private void doneEditing(boolean cancel) {
