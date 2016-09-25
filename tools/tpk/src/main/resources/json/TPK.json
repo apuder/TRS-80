@@ -16,7 +16,7 @@
     "listing": {
         "version": "1.0",
         "categories": ["game"],
-        "price": 0.0,
+        "license": "some license",
         "screenshots": ["ext|base64-encoded"],
         "uploadDate": 1450326498723,
         "publishDate": 402303600000,
