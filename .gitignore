@@ -6,6 +6,7 @@
 /app/app-release.apk
 /app/manifest-merger-release-report.txt
 /app/fabric.properties
+/appstore/build
 /obj
 /libs
 /gen
@@ -28,3 +29,4 @@
 .idea/runConfigurations.xml
 *.iml
 local.properties
+*.swp
