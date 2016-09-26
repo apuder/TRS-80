@@ -3,14 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <!-- Serves the initial content of the page. -->
-    <!--<servlet>
-        <servlet-name>mainservlet</servlet-name>
-        <servlet-class>org.puder.trs80.appstore.MainServlet</servlet-class>
+    <servlet>
+        <servlet-name>debugservlet</servlet-name>
+        <servlet-class>org.puder.trs80.appstore.DebugServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>mainservlet</servlet-name>
-        <url-pattern>/main</url-pattern>
-    </servlet-mapping>-->
+        <servlet-name>debugservlet</servlet-name>
+        <url-pattern>/debug</url-pattern>
+    </servlet-mapping>
 
     <!-- Empty list avoid jsp files from being served directly. -->
     <welcome-file-list>
