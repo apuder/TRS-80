@@ -19,9 +19,11 @@ def devEmail = props.getProperty("devEmail")
 def appengineVersion = "1.9.42"
 
 dependencies {
- appengineSdk "com.google.appengine:appengine-java-sdk:${appengineVersion}"
- compile "javax.servlet:servlet-api:2.5"
- compile "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}"
+  appengineSdk "com.google.appengine:appengine-java-sdk:${appengineVersion}"
+  compile "javax.servlet:servlet-api:2.5"
+  compile "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}"
+  compile 'com.google.guava:guava:19.0'
+  compile group: 'com.googlecode.objectify', name: 'objectify', version: '5.1.13'
 }
 
 appengine {
@@ -32,7 +34,8 @@ appengine {
     noCookies = true
     oauth2 = true
   }
+  jvmFlags = ["-Ddatastore.backing_store=$rootDir/local_db.bin"]
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_7  
-targetCompatibility = JavaVersion.VERSION_1_7  
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
