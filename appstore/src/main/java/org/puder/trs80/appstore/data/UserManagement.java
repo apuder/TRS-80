@@ -16,6 +16,8 @@
 
 package org.puder.trs80.appstore.data;
 
+import com.google.common.base.Optional;
+
 import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -59,5 +61,9 @@ public class UserManagement {
    */
   public List<Trs80User> getAllUsers() {
     return ofy().load().type(Trs80User.class).list();
+  }
+
+  public Optional<Trs80User> getUserById(long id) {
+    return Optional.fromNullable(ofy().load().type(Trs80User.class).id(id).now());
   }
 }

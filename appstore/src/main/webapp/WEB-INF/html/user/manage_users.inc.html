@@ -1,0 +1,74 @@
+<style>
+.add-user-card {
+  margin-left:20px;
+  padding:15px;
+}
+</style>
+
+<h1>User management</h1>
+
+<table>
+    <tr>
+        <td valign="top">
+            <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">User ID</th>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>E-mail</th>
+                    <th>Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!--TRS user_rows TRS-->
+                </tbody>
+            </table>
+        </td>
+        <td valign="top">
+            <div class="add-user-card mdl-card mdl-shadow--2dp">
+
+                <h2 class="mdl-card__title-text">Add/edit user</h2>
+
+                <form method="post">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="userId" name="userId">
+                        <label class="mdl-textfield__label" for="userId">User ID</label>
+                    </div>
+                    <br/>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="firstName" name="firstName">
+                        <label class="mdl-textfield__label" for="firstName">First name</label>
+                    </div>
+                    <br/>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="lastName" name="lastName">
+                        <label class="mdl-textfield__label" for="lastName">Last name</label>
+                    </div>
+                    <br/>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" id="email" name="email">
+                        <label class="mdl-textfield__label" for="email">E-Mail</label>
+                    </div>
+                    <br/>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+                        <input type="radio" id="option-1" class="mdl-radio__button" name="type" value="publisher"
+                               checked>
+                        <span class="mdl-radio__label">Publisher</span>
+                    </label>
+                    &nbsp;&nbsp;
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+                        <input type="radio" id="option-2" class="mdl-radio__button" name="type" value="admin">
+                        <span class="mdl-radio__label">Admin</span>
+                    </label>
+                    <div class="mdl-card__actions mdl-card--border">
+                        <input type="hidden" name="request" value="addEditUser" />
+                        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                            Add/Change user
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </td>
+    </tr>
+</table>

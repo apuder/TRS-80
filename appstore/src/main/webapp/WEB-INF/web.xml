@@ -2,18 +2,25 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-    <!-- Serves the initial content of the page. -->
     <servlet>
-        <servlet-name>debugservlet</servlet-name>
-        <servlet-class>org.puder.trs80.appstore.DebugServlet</servlet-class>
+        <servlet-name>mainServlet</servlet-name>
+        <servlet-class>org.puder.trs80.appstore.MainServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>debugservlet</servlet-name>
-        <url-pattern>/debug</url-pattern>
+        <servlet-name>mainServlet</servlet-name>
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
 
-    <!-- Empty list avoid jsp files from being served directly. -->
+    <filter>
+        <filter-name>ObjectifyFilter</filter-name>
+        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ObjectifyFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Don't serve static files. -->
     <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-    </welcome-file-list>    
+    </welcome-file-list>
 </web-app>
