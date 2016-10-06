@@ -37,41 +37,50 @@ public class UserViewUtil {
     this.userManagement = userManagement;
   }
 
+  public void handleAccountCreateRequest(HttpServletRequest req, HttpServletResponse resp) {
+    Optional<String> email = userManagement.getLoggedInEmail();
+    if (!email.isPresent()) {
+      return;
+    }
+
+    Trs80User newUser = new Trs80User();
+    newUser.firstName = req.getParameter("firstName");
+    newUser.lastName = req.getParameter("lastName");
+    newUser.email = email.get();
+
+    // If there is no admin in the system, this user will be an admin. This helps bootstrapping the process on a fresh
+    // install.
+    newUser.type = userManagement.hasAdmin() ? Trs80User.AccountType.PUBLISHER : Trs80User.AccountType.ADMIN;
+    userManagement.addOrChangeUser(newUser);
+    LOG.info("New user created (" + newUser.email + ") with role " + newUser.type);
+  }
 
   public void handleAddEditRequest(HttpServletRequest req, HttpServletResponse resp) {
-    String userIdStr = req.getParameter("userId");
     String firstName = req.getParameter("firstName");
     String lastName = req.getParameter("lastName");
     String email = req.getParameter("email");
     String type = req.getParameter("type");
-    LOG.info("userId: " + userIdStr);
     LOG.info("firstName: " + firstName);
     LOG.info("lastName: " + lastName);
     LOG.info("email: " + email);
     LOG.info("type: " + type);
 
-    Trs80User trs80User = new Trs80User();
-    // If a user ID is given it means we change an existing user.
-    if (userIdStr != null && !userIdStr.isEmpty()) {
-      long userId;
-      try {
-        userId = Long.parseLong(userIdStr);
-      } catch (NumberFormatException ex) {
-        LOG.warning("ID is not valid: '" + userIdStr + "'.");
-        return;
-      }
-      Optional<Trs80User> user = userManagement.getUserById(userId);
-      if (user.isPresent()) {
-        LOG.info("Editing existing user");
-        trs80User = user.get();
-      }
-    }
+    // If the given e-mail matches an existing user, we edit the entry.
+    Optional<Trs80User> existingUser = userManagement.getUserByEmail(email);
+    Trs80User trs80User = existingUser.isPresent() ? existingUser.get() : new Trs80User();
 
     trs80User.firstName = firstName;
     trs80User.lastName = lastName;
     trs80User.email = email;
     trs80User.type = "admin".equals(type) ? Trs80User.AccountType.ADMIN : Trs80User.AccountType.PUBLISHER;
     userManagement.addOrChangeUser(trs80User);
+    LOG.info("User updated/created (" + trs80User.email + ")");
+  }
+
+  public void handleRemoveRequest(HttpServletRequest req, HttpServletResponse resp) {
+    String email = req.getParameter("email");
+    LOG.info("email: " + email);
+    userManagement.removeUser(email);
   }
 
   public Template fillUserManagementView(UserManagement userManagement) throws IOException {
@@ -80,10 +89,9 @@ public class UserViewUtil {
 
     for (Trs80User user : users) {
       builder.append(Template.fromFile("WEB-INF/html/user/user_table_row.inc.html")
-          .with("user_id", user.id)
+          .with("e_mail", user.email)
           .with("first_name", user.firstName)
           .with("last_name", user.lastName)
-          .with("e_mail", user.email)
           .with("role", user.type.name())
           .render());
     }

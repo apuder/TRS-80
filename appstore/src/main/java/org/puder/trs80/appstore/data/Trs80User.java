@@ -16,6 +16,8 @@
 
 package org.puder.trs80.appstore.data;
 
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -24,6 +26,7 @@ import com.googlecode.objectify.annotation.Index;
  * Data model for a users in the TRS80 app store system.
  */
 @Entity
+@Cache
 public class Trs80User {
   /**
    * Roles that a user can have.
@@ -32,14 +35,20 @@ public class Trs80User {
     ADMIN, PUBLISHER
   }
 
+  /**
+   * Create a key based on the email.
+   */
+  public static Key<Trs80User> key(String email) {
+    return Key.create(Trs80User.class, email);
+  }
+
   Trs80User() {
   }
 
   @Id
-  public Long id;
+  public String email;
   public String firstName;
   public String lastName;
-  public String email;
   @Index
   public AccountType type;
 

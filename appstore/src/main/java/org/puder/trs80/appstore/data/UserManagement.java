@@ -16,6 +16,8 @@
 
 package org.puder.trs80.appstore.data;
 
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
 import com.google.common.base.Optional;
 
 import java.util.List;
@@ -26,6 +28,23 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
  * Functionality to manage users.
  */
 public class UserManagement {
+
+  private final UserService userService;
+
+  public UserManagement(UserService userService) {
+    this.userService = userService;
+  }
+
+  /**
+   * @return The e-mail address of the currently logged in user.
+   */
+  public Optional<String> getLoggedInEmail() {
+    User currentUser = userService.getCurrentUser();
+    if (currentUser == null) {
+      return Optional.absent();
+    }
+    return Optional.fromNullable(currentUser.getEmail());
+  }
 
   /**
    * @return Whether an admin exists in the system.
@@ -48,12 +67,12 @@ public class UserManagement {
   }
 
   /**
-   * Remote the user with the given ID.
+   * Remote the user with the given email.
    *
-   * @param user the user to delete.
+   * @param email the email of the user to delete.
    */
-  public void removeUser(Trs80User user) {
-    ofy().delete().entities(user).now();
+  public void removeUser(String email) {
+    ofy().delete().key(Trs80User.key(email)).now();
   }
 
   /**
@@ -63,7 +82,10 @@ public class UserManagement {
     return ofy().load().type(Trs80User.class).list();
   }
 
-  public Optional<Trs80User> getUserById(long id) {
-    return Optional.fromNullable(ofy().load().type(Trs80User.class).id(id).now());
+  /**
+   * If it exists in the system, returns the user with the given email address.
+   */
+  public Optional<Trs80User> getUserByEmail(String email) {
+    return Optional.fromNullable(ofy().load().key(Trs80User.key(email)).now());
   }
 }

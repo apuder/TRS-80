@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServlet;
  * Common servlet class for all TRS80 app store servlets. Ensures that all required data classes are registered with
  * Objectify.
  */
-public class Trs80Servlet extends HttpServlet {
+public abstract class Trs80Servlet extends HttpServlet {
   static {
     Register.ensureRegistered();
   }
