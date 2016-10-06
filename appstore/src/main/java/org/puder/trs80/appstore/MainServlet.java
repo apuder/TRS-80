@@ -58,12 +58,16 @@ public class MainServlet extends Trs80Servlet {
     if (sUserManagement.isCurrentUserAdmin()) {
       if (REQUEST_ADD_EDIT_USER.equals(requestParam)) {
         sUserViewUtil.handleAddEditRequest(req, resp);
-      } else if (REQUEST_CREATE_ACCOUNT.equals(requestParam)) {
-        sUserViewUtil.handleAccountCreateRequest(req, resp);
       } else if (REQUEST_REMOVE_USER.equals(requestParam)) {
         sUserViewUtil.handleRemoveRequest(req, resp);
       }
     }
+
+    // Users create their own account, so no need for admin rights. Only the logged in user's e-mail will be used.
+    if (REQUEST_CREATE_ACCOUNT.equals(requestParam)) {
+      sUserViewUtil.handleAccountCreateRequest(req, resp);
+    }
+
     serveMainHtml(req, resp);
   }
 
