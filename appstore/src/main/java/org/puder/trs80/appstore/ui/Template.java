@@ -41,6 +41,10 @@ public class Template {
     this.content = content;
   }
 
+  public static Template empty() {
+    return new Template("");
+  }
+
   public static Template fromFile(String filename) throws IOException {
     // TODO: need to cache file contents.
     InputStream fileStream = new FileInputStream(new File(filename));

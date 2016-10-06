@@ -47,20 +47,22 @@ public class MainServlet extends Trs80Servlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    LOG.info("Hello new version world!");
     serveMainHtml(req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    // TODO: Check for 'admin' role.
     String requestParam = req.getParameter("request");
-    if (REQUEST_ADD_EDIT_USER.equals(requestParam)) {
-      sUserViewUtil.handleAddEditRequest(req, resp);
-    } else if (REQUEST_CREATE_ACCOUNT.equals(requestParam)) {
-      sUserViewUtil.handleAccountCreateRequest(req, resp);
-    } else if (REQUEST_REMOVE_USER.equals(requestParam)) {
-      sUserViewUtil.handleRemoveRequest(req, resp);
+
+    // The following actions are only allowed for admin users.
+    if (sUserManagement.isCurrentUserAdmin()) {
+      if (REQUEST_ADD_EDIT_USER.equals(requestParam)) {
+        sUserViewUtil.handleAddEditRequest(req, resp);
+      } else if (REQUEST_CREATE_ACCOUNT.equals(requestParam)) {
+        sUserViewUtil.handleAccountCreateRequest(req, resp);
+      } else if (REQUEST_REMOVE_USER.equals(requestParam)) {
+        sUserViewUtil.handleRemoveRequest(req, resp);
+      }
     }
     serveMainHtml(req, resp);
   }
@@ -79,24 +81,23 @@ public class MainServlet extends Trs80Servlet {
       return;
     }
     LOG.info("Logout URL: " + sUserService.createLogoutURL(thisUrl));
-
-    User currentUser = sUserService.getCurrentUser();
-    Optional<Trs80User> trs80User = sUserManagement.getUserByEmail(currentUser.getEmail());
+    Optional<String> loggedInEmail = sUserManagement.getLoggedInEmail();
 
     // User needs to create an account first.
-    if (!trs80User.isPresent()) {
+    if (!sUserManagement.getCurrentUser().isPresent()) {
       String content = Template.fromFile("WEB-INF/html/create_account.html")
-          .with("logged_in_email", currentUser.getEmail())
+          .with("logged_in_email", loggedInEmail.get())
           .render();
       resp.getWriter().write(content);
       return;
     }
 
     if ("/".equals(req.getRequestURI())) {
-      Template userManagementTpl = sUserViewUtil.fillUserManagementView(sUserManagement);
+      Template userManagementTpl = sUserManagement.isCurrentUserAdmin() ?
+          sUserViewUtil.fillUserManagementView(sUserManagement) : Template.empty();
       String content = Template.fromFile("WEB-INF/html/index.html")
           .withHtml("user_management_content", userManagementTpl.render())
-          .withHtml("logged_in_email", currentUser.getEmail())
+          .withHtml("logged_in_email", loggedInEmail.get())
           .render();
       resp.getWriter().write(content);
     }

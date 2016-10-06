@@ -36,6 +36,21 @@ public class UserManagement {
   }
 
   /**
+   * @return Whether the currently logged in user is an admin of the TRS80 app store.
+   */
+  public boolean isCurrentUserAdmin() {
+    Optional<String> loggedInEmail = getLoggedInEmail();
+    if (!loggedInEmail.isPresent()) {
+      return false;
+    }
+    Optional<Trs80User> user = getUserByEmail(loggedInEmail.get());
+    if (!user.isPresent()) {
+      return false;
+    }
+    return user.get().type == Trs80User.AccountType.ADMIN;
+  }
+
+  /**
    * @return The e-mail address of the currently logged in user.
    */
   public Optional<String> getLoggedInEmail() {
@@ -87,5 +102,13 @@ public class UserManagement {
    */
   public Optional<Trs80User> getUserByEmail(String email) {
     return Optional.fromNullable(ofy().load().key(Trs80User.key(email)).now());
+  }
+
+  public Optional<Trs80User> getCurrentUser() {
+    User systemUser = userService.getCurrentUser();
+    if (systemUser == null) {
+      return Optional.absent();
+    }
+    return getUserByEmail(systemUser.getEmail());
   }
 }
