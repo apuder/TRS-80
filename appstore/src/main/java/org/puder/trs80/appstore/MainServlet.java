@@ -82,9 +82,10 @@ public class MainServlet extends Trs80Servlet {
     }
     LOG.info("Logout URL: " + sUserService.createLogoutURL(thisUrl));
     Optional<String> loggedInEmail = sUserManagement.getLoggedInEmail();
+    Optional<Trs80User> currentUser = sUserManagement.getCurrentUser();
 
     // User needs to create an account first.
-    if (!sUserManagement.getCurrentUser().isPresent()) {
+    if (!currentUser.isPresent()) {
       String content = Template.fromFile("WEB-INF/html/create_account.html")
           .with("logged_in_email", loggedInEmail.get())
           .render();
@@ -97,7 +98,7 @@ public class MainServlet extends Trs80Servlet {
           sUserViewUtil.fillUserManagementView(sUserManagement) : Template.empty();
       String content = Template.fromFile("WEB-INF/html/index.html")
           .withHtml("user_management_content", userManagementTpl.render())
-          .withHtml("logged_in_email", loggedInEmail.get())
+          .withHtml("logged_in_user", currentUser.get().firstName)
           .render();
       resp.getWriter().write(content);
     }
