@@ -14,43 +14,27 @@
  * limitations under the License.
  */
 
+
 package org.puder.trs80.appstore.data;
 
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
 
 /**
- * Data model for a users in the TRS80 app store system.
+ * Every TPK has an original author for the application or game it contains.
  */
 @Entity
 @Cache
-public class Trs80User {
-  /**
-   * Roles that a user can have.
-   */
-  public enum AccountType {
-    ADMIN, PUBLISHER
-  }
-
-  /**
-   * Create a key based on the email.
-   */
-  public static Key<Trs80User> key(String email) {
-    return Key.create(Trs80User.class, email);
-  }
-
-  Trs80User() {
+public class Author {
+  Author() {
   }
 
   @Id
-  public String email;
+  public Long id;
+
   public String firstName;
   public String lastName;
-  @Index
-  public AccountType type;
-
-  // TODO: Add sanity checks before persisting the data.
+  public String email;
+  public String websiteUrl;
 }

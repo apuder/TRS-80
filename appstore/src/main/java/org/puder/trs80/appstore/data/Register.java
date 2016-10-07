@@ -26,6 +26,9 @@ public class Register {
 
   public static void ensureRegistered() {
     if (!isRegistered) {
+      ObjectifyService.register(AppStoreItem.class);
+      ObjectifyService.register(Author.class);
+      ObjectifyService.register(ScreenshotSet.class);
       ObjectifyService.register(Trs80User.class);
       isRegistered = true;
     }
