@@ -16,20 +16,21 @@
 
 package org.puder.trs80;
 
-import java.util.Arrays;
-
-import org.puder.trs80.cast.RemoteCastScreen;
-import org.puder.trs80.cast.RemoteDisplayChannel;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.view.SurfaceHolder;
 
+import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.cast.RemoteDisplayChannel;
+
+import java.util.Arrays;
+
 public class RenderThread extends Thread {
 
     private int              model;
+    private Hardware         hardware;
 
     private int              trsScreenCols;
     private int              trsScreenRows;
@@ -53,16 +54,16 @@ public class RenderThread extends Thread {
 
     private StringBuilder    screenCharBuffer;
 
-    public RenderThread() {
+    public RenderThread(Hardware hardware) {
+        this.hardware = hardware;
         surfaceHolder = null;
-        Hardware h = TRS80Application.getHardware();
-        model = h.getModel();
-        screenBuffer = h.getScreenBuffer();
-        trsScreenCols = h.getScreenConfiguration().trsScreenCols;
-        trsScreenRows = h.getScreenConfiguration().trsScreenRows;
-        trsCharWidth = h.getCharWidth();
-        trsCharHeight = h.getCharHeight();
-        font = h.getFont();
+        model = hardware.getModel();
+        screenBuffer = XTRS.getScreenBuffer();
+        trsScreenCols = hardware.getScreenConfiguration().trsScreenCols;
+        trsScreenRows = hardware.getScreenConfiguration().trsScreenRows;
+        trsCharWidth = hardware.getCharWidth();
+        trsCharHeight = hardware.getCharHeight();
+        font = hardware.getFont();
         screenCharBuffer = new StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows);
         lastScreenBuffer = new short[trsScreenCols * trsScreenRows];
         Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
@@ -94,7 +95,7 @@ public class RenderThread extends Thread {
             }
             isRendering = true;
 
-            boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+            boolean expandedMode = XTRS.isExpandedMode();
             int d = expandedMode ? 2 : 1;
             computeDirtyRect(d);
             if (dirtyRectBottom == -1) {
@@ -222,10 +223,9 @@ public class RenderThread extends Thread {
     }
 
     public synchronized Bitmap takeScreenshot() {
-        Hardware h = TRS80Application.getHardware();
-        Bitmap screenshot = Bitmap.createBitmap(h.getScreenWidth(), h.getScreenHeight(),
+        Bitmap screenshot = Bitmap.createBitmap(hardware.getScreenWidth(), hardware.getScreenHeight(),
                 Config.RGB_565);
-        boolean expandedMode = TRS80Application.getHardware().getExpandedScreenMode();
+        boolean expandedMode = XTRS.isExpandedMode();
         int d = expandedMode ? 2 : 1;
         dirtyRectLeft = dirtyRectTop = 0;
         dirtyRectRight = trsScreenCols / d - 1;

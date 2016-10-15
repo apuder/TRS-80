@@ -18,24 +18,18 @@ package org.puder.trs80;
 
 import android.app.Application;
 import android.content.Context;
-import android.graphics.Bitmap;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
-import org.puder.trs80.keyboard.KeyboardManager;
 
 import io.fabric.sdk.android.Fabric;
 
 public class TRS80Application extends Application {
 
     private static Context         context;
-    private static Hardware        hardware;
-    private static KeyboardManager keyboard;
-    private static Configuration   configuration;
-    private static Bitmap          screenshot;
     private static boolean         hasCrashed = false;
 
 
@@ -54,38 +48,6 @@ public class TRS80Application extends Application {
 
     public static Context getAppContext() {
         return context;
-    }
-
-    public static void setCurrentConfiguration(Configuration conf) {
-        configuration = conf;
-    }
-
-    public static Configuration getCurrentConfiguration() {
-        return configuration;
-    }
-
-    public static void setScreenshot(Bitmap s) {
-        screenshot = s;
-    }
-
-    public static Bitmap getScreenshot() {
-        return screenshot;
-    }
-
-    public static void setHardware(Hardware theHardware) {
-        hardware = theHardware;
-    }
-
-    public static Hardware getHardware() {
-        return hardware;
-    }
-
-    public static void setKeyboardManager(KeyboardManager theKeyboard) {
-        keyboard = theKeyboard;
-    }
-
-    public static KeyboardManager getKeyboardManager() {
-        return keyboard;
     }
 
     public static boolean hasCrashed() {

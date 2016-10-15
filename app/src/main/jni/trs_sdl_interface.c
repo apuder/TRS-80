@@ -71,6 +71,8 @@
 #include "trs_state_save.h"
 #ifndef ANDROID
 #include "trs_sdl_gui.h"
+#else
+#include "atrs.h"
 #endif
 #include "trs_cassette.h"
 #include "trs_sdl_keyboard.h"
@@ -2102,8 +2104,17 @@ void trs_screen_expanded(int flag)
     trs_screen_refresh();
 #endif
   }
-  set_expanded_screen_mode(flag);
+#ifdef ANDROID
+  trigger_screen_update(TRUE);
+#endif
 }
+
+#ifdef ANDROID
+int is_expanded_mode()
+{
+  return currentmode & EXPANDED;
+}
+#endif
 
 void trs_screen_inverse(int flag)
 {
@@ -2545,7 +2556,7 @@ void trs_screen_write_char(int position, int char_index)
 {
 #ifdef ANDROID
   trs_screen[position] = char_index;
-  trigger_screen_update();
+  trigger_screen_update(FALSE);
 #else
   int row,col,destx,desty;
   int plane;
@@ -2795,7 +2806,7 @@ void trs_screen_scroll()
     trs_screen[i-row_chars] = trs_screen[i];
 
 #ifdef ANDROID
-  trigger_screen_update();
+  trigger_screen_update(FALSE);
 #else
   if (grafyx_enable) {
     if (grafyx_overlay) {
@@ -3455,7 +3466,7 @@ void trs_main_load(FILE *file)
   trs_load_int(file,&row_chars,1);
   trs_load_int(file,&currentmode,1);
 #ifdef ANDROID
-  set_expanded_screen_mode(currentmode);
+  trigger_screen_update(TRUE);
 #endif
   trs_load_int(file,&text80x24,1);
   trs_load_int(file,&screen640x240,1);

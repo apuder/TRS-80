@@ -16,6 +16,7 @@
 
 package org.puder.trs80;
 
+
 /**
  * Class XTRS acts as a gateway to the native layer. The native methods declared
  * in this class are implemented in jni/native.c. Note that XTRS also handles
@@ -26,9 +27,33 @@ package org.puder.trs80;
 public class XTRS {
 
     static {
+        final int screenBufferSize = 0x3fff - 0x3c00 + 1;
+        xtrsScreenBuffer = new byte[screenBufferSize];
         System.loadLibrary("xtrs");
     }
 
+    /*
+     * The following fields with prefix "xtrs" are configuration parameters for
+     * xtrs. They are read via JNI within native.c
+     */
+    @SuppressWarnings("unused")
+    private static int             xtrsModel;
+    @SuppressWarnings("unused")
+    private static String          xtrsRomFile;
+    @SuppressWarnings("unused")
+    private static byte[]          xtrsScreenBuffer;
+    @SuppressWarnings("unused")
+    private static int             xtrsEntryAddr;
+    @SuppressWarnings("unused")
+    private static String          xtrsCassette;
+    @SuppressWarnings("unused")
+    private static String          xtrsDisk0;
+    @SuppressWarnings("unused")
+    private static String          xtrsDisk1;
+    @SuppressWarnings("unused")
+    private static String          xtrsDisk2;
+    @SuppressWarnings("unused")
+    private static String          xtrsDisk3;
 
     private static RenderThread renderer = null;
 
@@ -36,14 +61,47 @@ public class XTRS {
 
     private static EmulatorActivity emulator = null;
 
+    public static int init(Configuration configuration) {
+        xtrsModel = configuration.getModel();
+        xtrsCassette = configuration.getCassettePath();
+        if (xtrsCassette == null) {
+            xtrsCassette = EmulatorState.getDefaultCassettePath(configuration.getId());
+        }
+        xtrsDisk0 = configuration.getDiskPath(0);
+        xtrsDisk1 = configuration.getDiskPath(1);
+        xtrsDisk2 = configuration.getDiskPath(2);
+        xtrsDisk3 = configuration.getDiskPath(3);
+
+        switch (xtrsModel) {
+            case Hardware.MODEL1:
+                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
+                break;
+            case Hardware.MODEL3:
+                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
+                break;
+            case Hardware.MODEL4:
+                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
+                break;
+            case Hardware.MODEL4P:
+                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
+                break;
+            default:
+                //TODO return -1?
+                break;
+        }
+
+        return initNative();
+    }
 
     public static native void setRunning(boolean run);
 
-    public static native int init(Hardware hardware);
+    public static native int initNative();
 
     public static native void saveState(String fileName);
 
     public static native void loadState(String fileName);
+
+    public static native boolean isExpandedMode();
 
     public static native void reset();
 
@@ -75,16 +133,13 @@ public class XTRS {
         return (renderer != null) && !renderer.isRendering();
     }
 
-    public static void updateScreen() {
+    public static void updateScreen(boolean forceUpdate) {
         if (renderer != null) {
-            renderer.triggerScreenUpdate();
-        }
-    }
-
-    public static void setExpandedScreenMode(boolean flag) {
-        TRS80Application.getHardware().setExpandedScreenMode(flag);
-        if (renderer != null) {
-            renderer.forceScreenUpdate();
+            if (forceUpdate) {
+                renderer.forceScreenUpdate();
+            } else {
+                renderer.triggerScreenUpdate();
+            }
         }
     }
 
@@ -96,5 +151,9 @@ public class XTRS {
 
     public static void notImplemented(String msg) {
         emulator.notImplemented(msg);
+    }
+
+    public static byte[] getScreenBuffer() {
+        return xtrsScreenBuffer;
     }
 }

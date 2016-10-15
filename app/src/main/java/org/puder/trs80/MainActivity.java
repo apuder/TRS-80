@@ -43,7 +43,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.puder.trs80.cast.CastMessageSender;
-import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 
 import java.io.File;
@@ -55,8 +54,7 @@ public class MainActivity extends BaseActivity implements
     private static final int     COLUMN_WIDTH_DP            = 300;
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
-    private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
-    private static final int     REQUEST_CODE_EDIT_SETTINGS = 3;
+    private static final int     REQUEST_CODE_EDIT_SETTINGS = 2;
 
     // Action Menu
     private static final int     MENU_OPTION_DOWNLOAD       = 0;
@@ -280,25 +278,6 @@ public class MainActivity extends BaseActivity implements
                 backup.save();
             }
         }
-
-        if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
-            if (TRS80Application.hasCrashed()) {
-                crashAlert();
-                finish();
-                return;
-            }
-            Configuration conf = TRS80Application.getCurrentConfiguration();
-
-            if (conf == null) {
-                // If the application was killed/crashed in the meantime there
-                // is not configuration.
-                crashAlert();
-                return;
-            }
-            int id = conf.getId();
-            EmulatorState.saveScreenshot(id);
-            EmulatorState.saveState(id);
-        }
     }
 
     private void addConfiguration() {
@@ -371,41 +350,17 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void runEmulator(Configuration conf) {
-        Hardware hardware = null;
-        int model = conf.getModel();
-
-        String romFile = null;
-        switch (model) {
-        case Hardware.MODEL1:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
-            hardware = new Model1(conf, romFile);
-            break;
-        case Hardware.MODEL3:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
-            hardware = new Model3(conf, romFile);
-            break;
-        case Hardware.MODEL4:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
-            // TODO Change this to correct model when implemented
-            hardware = null;
-            break;
-        case Hardware.MODEL4P:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
-            // TODO Change this to correct model when implemented
-            hardware = null;
-            break;
-        default:
-            hardware = null;
-            break;
-        }
-
         View root = findViewById(R.id.main);
-        if (hardware == null) {
+
+        int model = conf.getModel();
+        if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {
             Snackbar.make(root, R.string.error_model_not_supported, Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        if (!checkIfFileExists(romFile, false, R.string.error_no_rom)) {
+
+        if (!ROMs.hasROMs()) {
+            Snackbar.make(root, R.string.error_no_rom, Snackbar.LENGTH_LONG).show();
             return;
         }
         for (int i = 0; i < 4; i++) {
@@ -414,17 +369,9 @@ public class MainActivity extends BaseActivity implements
             }
         }
 
-        TRS80Application.setCurrentConfiguration(conf);
-        TRS80Application.setHardware(hardware);
-        int err = XTRS.init(hardware);
-        if (err != 0) {
-            showError(err);
-            return;
-        }
-        RemoteCastScreen.get().sendConfiguration(conf);
-        EmulatorState.loadState(conf.getId());
-        Intent i = new Intent(this, EmulatorActivity.class);
-        startActivityForResult(i, REQUEST_CODE_RUN_EMULATOR);
+        Intent intent = new Intent(this, EmulatorActivity.class);
+        intent.putExtra(EmulatorActivity.EXTRA_CONFIGURATION_ID, conf.getId());
+        startActivity(intent);
     }
 
     private boolean checkIfFileExists(String path, boolean allowNull, int errMsg) {
@@ -439,27 +386,8 @@ public class MainActivity extends BaseActivity implements
         return true;
     }
 
-    private void showError(int err) {
-        showDialog(R.string.app_name, -1, this.getString(R.string.error_init, err));
-    }
-
     private void showSettings() {
         startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
-    }
-
-    private void crashAlert() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
-                R.drawable.warning_icon, R.string.alert_dialog_inform_crash);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(MainActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void showHelp() {

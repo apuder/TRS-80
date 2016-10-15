@@ -16,12 +16,12 @@
 
 package org.puder.trs80;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 public class EmulatorState {
 
@@ -66,8 +66,7 @@ public class EmulatorState {
         return new File(dirName).isDirectory();
     }
 
-    public static void saveScreenshot(int configurationID) {
-        Bitmap screenshot = TRS80Application.getScreenshot();
+    public static void saveScreenshot(int configurationID, Bitmap screenshot) {
         if (screenshot == null) {
             // Can happen when NotImplementedException is thrown
             return;

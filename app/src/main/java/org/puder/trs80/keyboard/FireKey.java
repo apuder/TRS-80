@@ -16,12 +16,12 @@
 
 package org.puder.trs80.keyboard;
 
-import org.puder.trs80.TRS80Application;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import org.puder.trs80.EmulatorActivity;
 
 public class FireKey extends View {
 
@@ -30,7 +30,9 @@ public class FireKey extends View {
     public FireKey(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        keyboard = TRS80Application.getKeyboardManager();
+        EmulatorActivity emulator = (EmulatorActivity) context;
+        this.keyboard = emulator.getKeyboardManager();
+
         this.setOnTouchListener(new OnTouchListener() {
 
             @Override

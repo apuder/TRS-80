@@ -81,6 +81,15 @@ public class Configuration {
         return configurations.get(n);
     }
 
+    public static Configuration getConfigurationById(int id) {
+        for (Configuration configuration : configurations) {
+            if (configuration.getId() == id) {
+                return configuration;
+            }
+        }
+        return null;
+    }
+
     public static Configuration newConfiguration() {
         int nextId = globalPrefs.getInt("NEXT_ID", 0);
         nextId++;

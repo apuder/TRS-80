@@ -21,10 +21,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.puder.trs80.keyboard.KeyboardManager;
+
 public class Tutorial implements View.OnClickListener, Runnable {
 
     final private static int KEY_DELAY = 180;
 
+    private KeyboardManager  keyboardManager;
     private View             tutorialRoot;
     private View             keyboardRoot;
     private View             keyboardSwitchView;
@@ -62,7 +65,8 @@ public class Tutorial implements View.OnClickListener, Runnable {
     private int      nextCommand;
 
 
-    public Tutorial(View root) {
+    public Tutorial(KeyboardManager keyboardManager, View root) {
+        this.keyboardManager = keyboardManager;
         XTRS.reset();
         XTRS.rewindCassette();
         tutorialRoot = root.findViewById(R.id.tutorial);
@@ -129,7 +133,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
             return;
         }
         char ch = currentCommand.charAt(currentKeyStroke++);
-        TRS80Application.getKeyboardManager().injectKey(ch);
+        keyboardManager.injectKey(ch);
         tutorialRoot.postDelayed(this, KEY_DELAY);
     }
 }

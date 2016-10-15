@@ -53,8 +53,8 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Hardware h = TRS80Application.getHardware();
-        setMeasuredDimension(h.getScreenWidth() | MeasureSpec.EXACTLY, h.getScreenHeight()
-                | MeasureSpec.EXACTLY);
+        EmulatorActivity emulator = (EmulatorActivity) getContext();
+        setMeasuredDimension(emulator.getScreenWidth() | MeasureSpec.EXACTLY,
+                emulator.getScreenHeight() | MeasureSpec.EXACTLY);
     }
 }
