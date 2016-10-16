@@ -16,10 +16,10 @@
 
 package org.puder.trs80.appstore;
 
-import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.base.Optional;
+import org.puder.trs80.appstore.data.ItemsViewUtil;
 import org.puder.trs80.appstore.data.Trs80User;
 import org.puder.trs80.appstore.data.UserManagement;
 import org.puder.trs80.appstore.data.UserViewUtil;
@@ -41,9 +41,11 @@ public class MainServlet extends Trs80Servlet {
   private static final String REQUEST_ADD_EDIT_USER = "addEditUser";
   private static final String REQUEST_CREATE_ACCOUNT = "createAccount";
 
+  private static GfxServingUtil sGfxServingUtil = new GfxServingUtil();
   private static UserService sUserService = UserServiceFactory.getUserService();
   private static UserManagement sUserManagement = new UserManagement(sUserService);
   private static UserViewUtil sUserViewUtil = new UserViewUtil(sUserManagement);
+  private static ItemsViewUtil sItemsViewUtil = new ItemsViewUtil();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -98,13 +100,22 @@ public class MainServlet extends Trs80Servlet {
     }
 
     if ("/".equals(req.getRequestURI())) {
+      Template newItemTpl = sItemsViewUtil.fillNewItemView();
       Template userManagementTpl = sUserManagement.isCurrentUserAdmin() ?
           sUserViewUtil.fillUserManagementView(sUserManagement) : Template.empty();
       String content = Template.fromFile("WEB-INF/html/index.html")
+          .withHtml("new_item_content", newItemTpl.render())
           .withHtml("user_management_content", userManagementTpl.render())
           .withHtml("logged_in_user", currentUser.get().firstName)
           .render();
       resp.getWriter().write(content);
+      return;
     }
+
+    if (sGfxServingUtil.serve(req, resp)) {
+      return;
+    }
+
+    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
   }
 }
