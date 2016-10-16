@@ -25,6 +25,8 @@ import com.googlecode.objectify.annotation.Load;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * An app store item (TPK) such as a game or application.
  */
@@ -32,15 +34,56 @@ import java.util.Set;
 @Cache
 public class AppStoreItem {
   public enum Model {
-    Model_I, Model_III, Model_4, MMODEL_4P
+    MODEL_I("Model I"),
+    MODEL_III("Model III"),
+    MODEL_4("Model 4"),
+    MODEL_4P("Model 4P");
+
+    private final String readableName;
+
+    Model(String readableName) {
+      this.readableName = checkNotNull(readableName);
+    }
+
+    @Override
+    public String toString() {
+      return readableName;
+    }
   }
 
   public enum KeyboardLayout {
-    ORIGINAL, COMPACT, JOYSTICK, GAME, TILT
+    ORIGINAL("Original"),
+    COMPACT("Compact"),
+    JOYSTICK("Joystick"),
+    GAME("Game"),
+    TILT("Tilt");
+
+    private final String readableName;
+
+    KeyboardLayout(String readableName) {
+      this.readableName = readableName;
+    }
+
+    @Override
+    public String toString() {
+      return readableName;
+    }
+
   }
 
   public enum CharacterColor {
-    GREEN, WHITE
+    GREEN("Green"), WHITE("White");
+
+    private final String readableName;
+
+    CharacterColor(String readableName) {
+      this.readableName = readableName;
+    }
+
+    @Override
+    public String toString() {
+      return readableName;
+    }
   }
 
   // E.g. Casette or disk image.
@@ -51,7 +94,21 @@ public class AppStoreItem {
   }
 
   public enum ListingCategory {
-    GAME, OFFICE, OTHER
+    GAME("Game"),
+    OFFICE("Office"),
+    OTHER("Other");
+
+    private final String readableName;
+
+    ListingCategory(String readableName) {
+      this.readableName = readableName;
+    }
+
+    @Override
+    public String toString() {
+      return readableName;
+    }
+
   }
 
   /**
