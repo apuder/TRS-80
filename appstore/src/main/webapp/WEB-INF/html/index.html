@@ -12,6 +12,9 @@
 <body>
 
 <style>
+body {
+  background: #F5F5F5;
+}
 .user-login {
   position: absolute;
   right: 20px;
@@ -22,6 +25,35 @@
 .mdl-card {
   margin: 20px;
 }
+
+.mdl-button--file input {
+    cursor: pointer;
+    height: 100%;
+    right: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 300px;
+    z-index: 4;
+}
+
+.mdl-textfield--file .mdl-textfield__input {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+}
+.mdl-textfield--file .mdl-button--file {
+    right: 0;
+}
+.mdl-textfield--file {
+    padding: 10px 0;
+}
+.mdl-layout__content {
+  background: url(/gfx/logo-large.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 </style>
 
 <!-- Simple header with scrollable tabs. -->
@@ -34,9 +66,9 @@
         </div>
         <!-- Tabs -->
         <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-            <a href="#scroll-tab-1" class="mdl-layout__tab is-active">User Management</a>
-            <a href="#scroll-tab-2" class="mdl-layout__tab">Entries</a>
-            <a href="#scroll-tab-3" class="mdl-layout__tab">Incoming</a>
+            <a href="#scroll-tab-1" class="mdl-layout__tab is-active">New Entry</a>
+            <a href="#scroll-tab-2" class="mdl-layout__tab">All Entries</a>
+            <a href="#scroll-tab-3" class="mdl-layout__tab">User Management</a>
         </div>
     </header>
     <div class="mdl-layout__drawer">
@@ -44,15 +76,15 @@
     </div>
     <main class="mdl-layout__content">
         <section class="mdl-layout__tab-panel is-active" id="scroll-tab-1">
-            <div class="page-content">
-                <!--TRS user_management_content TRS-->
-            </div>
+            <div class="page-content"><!--TRS new_item_content TRS--></div>
         </section>
         <section class="mdl-layout__tab-panel" id="scroll-tab-2">
             <div class="page-content"><!-- Your content goes here --></div>
         </section>
         <section class="mdl-layout__tab-panel" id="scroll-tab-3">
-            <div class="page-content"><!-- Your content goes here --></div>
+            <div class="page-content">
+                <!--TRS user_management_content TRS-->
+            </div>
         </section>
     </main>
 </div>
