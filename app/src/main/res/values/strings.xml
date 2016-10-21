@@ -7,6 +7,12 @@
 
     <string name="google_plus_url" translatable="false">https://plus.google.com/communities/110959098806298034548</string>
 
+    <string name="share_title">Share with...</string>
+    <string name="share_subject">TRS-80 Emulator for Android</string>
+    <string name="share_message">
+        Check out this free TRS-80 emulator for Android:
+        https://play.google.com/store/apps/details?id=org.puder.trs80</string>
+
     <string name="crash_toast_text">TRS-80 has crashed!</string>
     <string name="crash_dialog_title">TRS-80 has crashed</string>
     <string name="crash_dialog_text">The emulator has crashed forcing the application to stop.
@@ -31,6 +37,7 @@
     <string name="menu_help">Help</string>
     <string name="menu_community">Community</string>
     <string name="menu_rate">Rate</string>
+    <string name="menu_share">Share</string>
     <string name="menu_start">Start</string>
     <string name="menu_resume">Resume</string>
     <string name="menu_stop">Stop</string>

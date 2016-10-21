@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="share_title">Teilen mit...</string>
+    <string name="share_subject">TRS-80 Emulator für Android</string>
+    <string name="share_message">
+        Kostenloser TRS-80 Emulator für Android:
+        https://play.google.com/store/apps/details?id=org.puder.trs80</string>
+
     <string name="alert_dialog_cancel">Abbrechen</string>
     <string name="alert_dialog_confirm_delete">Sind Sie sicher, dass Sie die Konfiguration \'%1$s\' löschen möchten?</string>
     <string name="alert_dialog_confirm_eject">Sind Sie sicher, dass Sie die derzeit gemountete Datei auswerfen möchten?</string>
@@ -51,6 +57,7 @@
     <string name="menu_eject">Auswerfen</string>
     <string name="menu_help">Hilfe</string>
     <string name="menu_community">Neuigkeiten</string>
+    <string name="menu_share">Teilen</string>
     <string name="menu_rate">Bewerten</string>
     <string name="menu_pause">Pause</string>
     <string name="menu_reset">Zurücksetzen</string>

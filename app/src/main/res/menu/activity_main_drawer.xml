@@ -10,6 +10,10 @@
         android:title="@string/menu_community"
         android:icon="@drawable/community_icon"/>
     <item
+        android:id="@+id/nav_share"
+        android:title="@string/menu_share"
+        android:icon="@drawable/share_icon"/>
+    <item
         android:id="@+id/nav_rate"
         android:title="@string/menu_rate"
         android:icon="@drawable/rate_icon"/>

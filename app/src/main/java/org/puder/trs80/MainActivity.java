@@ -222,6 +222,8 @@ public class MainActivity extends BaseActivity implements
             showHelp();
         } else if (id == R.id.nav_community) {
             showCommunity();
+        } else if (id == R.id.nav_share) {
+            showShare();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -429,6 +431,15 @@ public class MainActivity extends BaseActivity implements
         });
 
         AlertDialogUtil.showDialog(this, builder);
+    }
+
+    private void showShare() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
+        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message));
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_title)));
     }
 
     @Override
