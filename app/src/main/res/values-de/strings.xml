@@ -12,6 +12,10 @@
     <string name="alert_dialog_confirm_stop_emu">Sind Sie sicher, dass Sie die Emulation für die Konfiguration \'%1$s\' stoppen möchten?</string>
     <string name="alert_dialog_inform_crash"><![CDATA[Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.]]></string>
     <string name="alert_dialog_ok">OK</string>
+    <string name="permission_explanation">Der Emulator benötigt Schreibrechte für den externen Speicher
+                des Geräts um TRS-80 ROM- und Disketten-Images zu speichern. Der Emulator funktioniert ohne diese
+                Schreibrechte nicht.</string>
+    <string name="permission_request">Schreibrechte anfragen</string>
     <string name="conf_header">Konfigurationen</string>
     <string name="conf_item_disks">Laufwerke:</string>
     <string name="conf_item_hardware">Hardware:</string>

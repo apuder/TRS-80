@@ -30,6 +30,12 @@
                 email <a href="mailto:mobile@puder.org">mobile@puder.org</a> with the name of the TRS-80 app
                 you were trying to run.]]></string>
 
+    <!-- WelcomeActivity -->
+    <string name="permission_explanation">The emulator needs access to the external storage of the
+                device in order to save TRS-80 ROM- and disk-images. Without this permission, the
+                emulator cannot work.</string>
+    <string name="permission_request">Request permission</string>
+
     <!-- MainActivity -->
     <string name="menu_download">Download</string>
     <string name="menu_add">Add</string>
