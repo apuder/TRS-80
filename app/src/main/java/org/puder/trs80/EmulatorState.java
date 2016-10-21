@@ -22,14 +22,15 @@ import android.os.Environment;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class EmulatorState {
 
     private static String getBaseDir(int configurationID) {
         File sdcard = Environment.getExternalStorageDirectory();
-        String dirName = sdcard.getAbsolutePath() + "/"
-                + TRS80Application.getAppContext().getString(R.string.trs80_dir) + "/";
-        dirName += Integer.toString(configurationID) + "/";
+        String dirName = sdcard.getAbsolutePath() + File.separator
+                + TRS80Application.getAppContext().getString(R.string.trs80_dir) + File.separator;
+        dirName += Integer.toString(configurationID) + File.separator;
         return dirName;
     }
 
@@ -37,6 +38,12 @@ public class EmulatorState {
         File dir = new File(dirName);
         if (!dir.exists()) {
             dir.mkdirs();
+            // Create a .nomedia file
+            String noMediaFn = dirName + ".nomedia";
+            try {
+                new File(noMediaFn).createNewFile();
+            } catch (IOException e) {
+            }
         }
         return dirName;
     }
