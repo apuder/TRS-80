@@ -1,5 +1,2 @@
 include ':app'
-if (file('appstore/local.properties').exists()) {
-    include ':appstore'
-}
 include ':tools:tpk'
