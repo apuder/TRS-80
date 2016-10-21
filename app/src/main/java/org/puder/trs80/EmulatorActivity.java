@@ -28,6 +28,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -42,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -87,6 +89,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private GameController     gameController;
     private int                rotation;
     private ClipboardManager   clipboardManager;
+    private AsyncTask          taskSetup;
+    private AsyncTask          taskThreads;
 
 
     @Override
@@ -136,12 +140,24 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        currentHardware.computeFontDimensions(getWindow());
-        keyboardManager = new KeyboardManager(currentConfiguration);
+        taskSetup = new AsyncTask<Window, Void, Void>() {
+            @Override
+            protected Void doInBackground(Window... windows) {
+                currentHardware.generateFont(windows[0], this);
+                return null;
+            }
 
+            @Override
+            protected void onPostExecute(Void result) {
+                findViewById(R.id.spinner).setVisibility(View.GONE);
+            }
+        }.execute(getWindow());
+
+        keyboardManager = new KeyboardManager(currentConfiguration);
         gameController = new GameController(this);
 
-        startRenderThread();
+        createRenderThread();
+
         initRootView();
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -169,7 +185,32 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             startAccelerometer();
         }
 
-        startCPUThread();
+        /*
+         * The following AsyncTask may look a little strange because nothing is done in
+         * doInBackground() (which is the whole point of an AsyncTask). The purpose of
+         * the following AsyncTask is to schedule some work *after* setupTask finishes
+         * (see onCreate). This is guaranteed since we use a serial executor that will
+         * run one AsyncTask at a time. There is a reason that the following task performs
+         * its work in onPostExecute(). This method is executed on the UI thread. Should
+         * EmulatorActivity be destroyed, this AsyncTask will be cancelled in onPause().
+         * In this case the AsyncTask will not call onPostExecute() (which we don't want
+         * in case the EmulatorActivity gets destroyed). We take advantage of the fact
+         * that both onPause() and onPostExecute() will run on the UI thread. When we
+         * are in onPause(), onPostExecute() cannot be executed (which would not be true
+         * if we did the work in doInBackground())
+         */
+        taskThreads = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                renderThread.start();
+                startCPUThread();
+            }
+        }.execute();
     }
 
     @Override
@@ -182,13 +223,20 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
         }
+        taskThreads.cancel(true);
         stopCPUThread();
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         takeScreenshot();
         stopRenderThread();
         XTRS.setEmulatorActivity(null);
         currentConfiguration.setCassettePosition(XTRS.getCassettePosition());
         EmulatorState.saveState(currentConfiguration.getId());
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        taskSetup.cancel(true);
     }
 
     @Override
@@ -350,24 +398,24 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         AlertDialogUtil.showDialog(this, builder);
     }
 
-    private void startRenderThread() {
+    private void createRenderThread() {
         renderThread = new RenderThread(currentHardware);
-        renderThread.setRunning(true);
         renderThread.setPriority(Thread.MAX_PRIORITY);
-        renderThread.start();
         XTRS.setRenderer(renderThread);
     }
 
     private void stopRenderThread() {
         boolean retry = true;
         XTRS.setRenderer(null);
-        renderThread.setRunning(false);
-        renderThread.interrupt();
-        while (retry) {
-            try {
-                renderThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
+        if (renderThread.isAlive()) {
+            renderThread.setRunning(false);
+            renderThread.interrupt();
+            while (retry) {
+                try {
+                    renderThread.join();
+                    retry = false;
+                } catch (InterruptedException e) {
+                }
             }
         }
         renderThread = null;
@@ -387,6 +435,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void stopCPUThread() {
+        if (cpuThread == null) {
+            return;
+        }
         boolean retry = true;
         XTRS.setRunning(false);
         while (retry) {

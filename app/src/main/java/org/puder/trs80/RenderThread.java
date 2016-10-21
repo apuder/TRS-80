@@ -44,11 +44,9 @@ public class RenderThread extends Thread {
     final private Rect       clipRect;
     final private Rect       adjustedClipRect;
 
-    final private Bitmap     font[];
-
-    private boolean          run         = false;
+    private volatile boolean run         = true;
     private volatile boolean isRendering = true;
-    protected SurfaceHolder  surfaceHolder;
+    private SurfaceHolder    surfaceHolder;
     private byte[]           screenBuffer;
     private short[]          lastScreenBuffer;
 
@@ -59,14 +57,7 @@ public class RenderThread extends Thread {
         surfaceHolder = null;
         model = hardware.getModel();
         screenBuffer = XTRS.getScreenBuffer();
-        trsScreenCols = hardware.getScreenConfiguration().trsScreenCols;
-        trsScreenRows = hardware.getScreenConfiguration().trsScreenRows;
-        trsCharWidth = hardware.getCharWidth();
-        trsCharHeight = hardware.getCharHeight();
-        font = hardware.getFont();
-        screenCharBuffer = new StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows);
-        lastScreenBuffer = new short[trsScreenCols * trsScreenRows];
-        Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
+        lastScreenBuffer = new short[0];
         clipRect = new Rect();
         adjustedClipRect = new Rect();
     }
@@ -84,8 +75,24 @@ public class RenderThread extends Thread {
         return this.isRendering;
     }
 
+    private void init() {
+        /*
+         * We cannot call init() from the constructor because the various
+         * hardware dimensions have now yet been computed at that time. They are only
+         * available once the rendering thread begins to run.
+         */
+        trsScreenCols = hardware.getScreenConfiguration().trsScreenCols;
+        trsScreenRows = hardware.getScreenConfiguration().trsScreenRows;
+        trsCharWidth = hardware.getCharWidth();
+        trsCharHeight = hardware.getCharHeight();
+        screenCharBuffer = new StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows);
+        lastScreenBuffer = new short[trsScreenCols * trsScreenRows];
+        Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
+    }
+
     @Override
     public synchronized void run() {
+        init();
         while (run) {
             isRendering = false;
             try {
@@ -131,6 +138,8 @@ public class RenderThread extends Thread {
     }
 
     private void renderScreenToCanvas(Canvas canvas, boolean expandedMode) {
+        Bitmap[] font = hardware.getFont();
+
         if (expandedMode) {
             canvas.scale(2, 1);
         }

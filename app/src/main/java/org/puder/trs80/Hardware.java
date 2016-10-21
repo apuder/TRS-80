@@ -22,6 +22,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.view.Window;
 
 /**
@@ -125,7 +126,7 @@ public class Hardware {
         return font;
     }
 
-    public void computeFontDimensions(Window window) {
+    public void generateFont(Window window, AsyncTask task) {
         ScreenConfiguration screenConfig = getScreenConfiguration();
         Rect rect = new Rect();
         window.getDecorView().getWindowVisibleDisplayFrame(rect);
@@ -158,8 +159,8 @@ public class Hardware {
             trsScreenHeight = trsCharHeight * screenConfig.trsScreenRows;
         }
 
-        generateGraphicsFont();
-        generateASCIIFont();
+        generateGraphicsFont(task);
+        generateASCIIFont(task);
     }
 
     public void computeKeyDimensions(Window window, int keyboardLayout) {
@@ -187,7 +188,7 @@ public class Hardware {
         keyMargin = (boxWidth - keyWidth) / 2;
     }
 
-    private void generateASCIIFont() {
+    private void generateASCIIFont(AsyncTask task) {
         String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
@@ -200,6 +201,9 @@ public class Hardware {
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
         for (int i = 0; i < ascii.length(); i++) {
+            if (task.isCancelled()) {
+                return;
+            }
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
             c.drawColor(configuration.getScreenColorAsRGB());
@@ -233,9 +237,12 @@ public class Hardware {
         p.setTextSize(fontSize - delta);
     }
 
-    private void generateGraphicsFont() {
+    private void generateGraphicsFont(AsyncTask task) {
         Paint p = new Paint();
         for (int i = 128; i <= 191; i++) {
+            if (task.isCancelled()) {
+                return;
+            }
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
             c.drawColor(configuration.getScreenColorAsRGB());
