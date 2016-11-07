@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="share_title">Teilen mit...</string>
+    <string name="share_title">Teilen mit…</string>
     <string name="share_subject">TRS-80 Emulator für Android</string>
     <string name="share_message">
         Kostenloser TRS-80 Emulator für Android:
@@ -15,7 +15,7 @@
     <string name="permission_explanation">Der Emulator benötigt Schreibrechte für den externen Speicher
                 des Geräts um TRS-80 ROM- und Disketten-Images zu speichern. Der Emulator funktioniert ohne diese
                 Schreibrechte nicht.</string>
-    <string name="permission_request">Schreibrechte anfragen</string>
+    <string name="permission_request">OK ich verstehe</string>
     <string name="conf_header">Konfigurationen</string>
     <string name="conf_item_disks">Laufwerke:</string>
     <string name="conf_item_hardware">Hardware:</string>
