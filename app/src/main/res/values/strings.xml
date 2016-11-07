@@ -34,7 +34,7 @@
     <string name="permission_explanation">The emulator needs access to the external storage of the
                 device in order to save TRS-80 ROM- and disk-images. Without this permission, the
                 emulator cannot work.</string>
-    <string name="permission_request">Request permission</string>
+    <string name="permission_request">OK, I understand</string>
 
     <!-- MainActivity -->
     <string name="menu_download">Download</string>
