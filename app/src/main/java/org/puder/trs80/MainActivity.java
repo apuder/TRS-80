@@ -417,7 +417,7 @@ public class MainActivity extends BaseActivity implements
 
     private void downloadROMs() {
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
-                R.string.title_initial_setup, R.drawable.warning_icon, R.string.initial_setup);
+                R.string.title_initial_setup, R.drawable.ic_info_black_24dp, R.string.initial_setup);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int whichButton) {
                 AlertDialogUtil.dismissDialog(MainActivity.this);
