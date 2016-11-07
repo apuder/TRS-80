@@ -23,7 +23,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.view.Window;
 
 /**
  * Class Hardware is the base class for the various different TRS-80 models. It
@@ -126,13 +125,9 @@ public class Hardware {
         return font;
     }
 
-    public void generateFont(Window window, AsyncTask task) {
+    public void generateFont(Rect rect, AsyncTask task) {
         ScreenConfiguration screenConfig = getScreenConfiguration();
-        Rect rect = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rect);
-        int StatusBarHeight = rect.top;
-        int contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-        int TitleBarHeight = contentViewTop - StatusBarHeight;
+        int contentViewTop = rect.top;
         int contentHeight = rect.bottom - contentViewTop;
         int contentWidth = rect.right;
         if ((contentWidth / screenConfig.trsScreenCols)
@@ -163,9 +158,7 @@ public class Hardware {
         generateASCIIFont(task);
     }
 
-    public void computeKeyDimensions(Window window, int keyboardLayout) {
-        Rect rect = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rect);
+    public void computeKeyDimensions(Rect rect, int keyboardLayout) {
         // The maximum number of key "boxes" per row
         int maxKeyBoxes = 15;
         switch (keyboardLayout) {

@@ -30,8 +30,7 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // TODO Auto-generated method stub
-
+        setSurfaceHolder(holder);
     }
 
     @Override
@@ -45,10 +44,8 @@ public class Screen extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void setSurfaceHolder(SurfaceHolder holder) {
-        RenderThread renderThread = XTRS.getRenderer();
-        if (renderThread != null) {
-            renderThread.setSurfaceHolder(holder);
-        }
+        EmulatorActivity emulator = (EmulatorActivity) getContext();
+        emulator.setSurfaceHolder(holder);
     }
 
     @Override

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -39,11 +40,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,7 +59,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EmulatorActivity extends BaseActivity implements SensorEventListener,
-        GameControllerListener {
+        GameControllerListener, OnGlobalLayoutListener {
 
     public static final String  EXTRA_CONFIGURATION_ID = "conf_id";
 
@@ -90,7 +91,11 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private int                rotation;
     private ClipboardManager   clipboardManager;
     private AsyncTask          taskSetup;
-    private AsyncTask          taskThreads;
+    private Rect               windowRect;
+    private boolean            isCasting;
+    private SurfaceHolder      surfaceHolder;
+    private boolean            isGeneratingFont;
+    private boolean            isStopped;
 
 
     @Override
@@ -112,55 +117,19 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             return;
         }
 
-        XTRS.setEmulatorActivity(this);
+        init(savedInstanceState, id);
 
-        currentConfiguration = Configuration.getConfigurationById(id);
-        currentHardware = new Hardware(currentConfiguration);
-
-        if (savedInstanceState == null) {
-            int err = XTRS.init(currentConfiguration);
-            if (err != 0) {
-                //showError(err);
-                finish();
-                return;
-            }
-            RemoteCastScreen.get().sendConfiguration(currentConfiguration);
-            EmulatorState.loadState(id);
-        }
-
-        clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-
-        orientation = getResources().getConfiguration().orientation;
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-                && !CastMessageSender.get().isReadyToSend()) {
-            getSupportActionBar().hide();
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        } else {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
-        taskSetup = new AsyncTask<Window, Void, Void>() {
-            @Override
-            protected Void doInBackground(Window... windows) {
-                currentHardware.generateFont(windows[0], this);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                findViewById(R.id.spinner).setVisibility(View.GONE);
-            }
-        }.execute(getWindow());
-
-        keyboardManager = new KeyboardManager(currentConfiguration);
-        gameController = new GameController(this);
-
-        createRenderThread();
-
-        initRootView();
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        /*
+         * We first set a dummy layout that only consists of one empty view. We set
+         * a layout listener on this view in order to measure the screen dimensions.
+         * This seems to be the only workable way to properly do this with N's split-
+         * screen mode.
+         */
+        isGeneratingFont = true;
+        isStopped = false;
+        setContentView(R.layout.emulator_measure);
+        final View root = findViewById(R.id.emulator_measure);
+        root.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
         AlertDialogUtil.showHint(this, R.string.hint_emulator, R.string.menu_tutorial,
                 new Runnable() {
@@ -172,11 +141,72 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (TRS80Application.hasCrashed()) {
+    public void onGlobalLayout() {
+        removeGlobalLayoutListener();
+        setupEmulator();
+    }
+
+    private void removeGlobalLayoutListener() {
+        final View root = findViewById(R.id.emulator_measure);
+        if (root == null || !root.getViewTreeObserver().isAlive()) {
             return;
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        } else {
+            //noinspection deprecation
+            root.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        }
+    }
+
+    private void init(Bundle savedInstanceState, int id) {
+        isCasting = CastMessageSender.get().isReadyToSend();
+
+        currentConfiguration = Configuration.getConfigurationById(id);
+        currentHardware = new Hardware(currentConfiguration);
+
+        clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
+        keyboardManager = new KeyboardManager(currentConfiguration);
+        gameController = new GameController(this);
+
+        orientation = getResources().getConfiguration().orientation;
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                && !isCasting) {
+            getSupportActionBar().hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        if (savedInstanceState == null) {
+            int err = XTRS.init(currentConfiguration);
+            if (err != 0) {
+                //showError(err);
+                finish();
+                return;
+            }
+            RemoteCastScreen.get().sendConfiguration(currentConfiguration);
+            EmulatorState.loadState(id);
+        }
+    }
+
+    private void setupEmulator() {
+        windowRect = new Rect();
+        View root = findViewById(R.id.emulator_measure);
+        windowRect.top = 0;
+        windowRect.left = 0;
+        windowRect.right = root.getWidth();
+        windowRect.bottom = root.getHeight();
+        initRootView();
+        startEmulation();
+    }
+
+    private void startEmulation() {
+        XTRS.setEmulatorActivity(this);
 
         updateMenuIcons();
 
@@ -185,58 +215,71 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             startAccelerometer();
         }
 
-        /*
-         * The following AsyncTask may look a little strange because nothing is done in
-         * doInBackground() (which is the whole point of an AsyncTask). The purpose of
-         * the following AsyncTask is to schedule some work *after* setupTask finishes
-         * (see onCreate). This is guaranteed since we use a serial executor that will
-         * run one AsyncTask at a time. There is a reason that the following task performs
-         * its work in onPostExecute(). This method is executed on the UI thread. Should
-         * EmulatorActivity be destroyed, this AsyncTask will be cancelled in onPause().
-         * In this case the AsyncTask will not call onPostExecute() (which we don't want
-         * in case the EmulatorActivity gets destroyed). We take advantage of the fact
-         * that both onPause() and onPostExecute() will run on the UI thread. When we
-         * are in onPause(), onPostExecute() cannot be executed (which would not be true
-         * if we did the work in doInBackground())
-         */
-        taskThreads = new AsyncTask<Void, Void, Void>() {
+        isGeneratingFont = true;
+
+        taskSetup = new AsyncTask<Rect, Void, Void>() {
             @Override
-            protected Void doInBackground(Void... voids) {
+            protected Void doInBackground(Rect... rects) {
+                currentHardware.generateFont(rects[0], this);
                 return null;
             }
 
             @Override
             protected void onPostExecute(Void result) {
+                isGeneratingFont = false;
+                if (isStopped) {
+                    return;
+                }
+                findViewById(R.id.spinner).setVisibility(View.GONE);
+                /*
+                 * The following requestLayout is necessary because sometimes layouting
+                 * R.layout.emulator that is set in initRootView() finishes before the
+                 * TRS screen dimensions have been computed in doInBackground() of this
+                 * AsyncTask.
+                 */
+                findViewById(R.id.screen).requestLayout();
+                createRenderThread();
+                renderThread.setHardwareSpecs(currentHardware);
+                renderThread.setSurfaceHolder(surfaceHolder);
                 renderThread.start();
                 startCPUThread();
             }
-        }.execute();
+        }.execute(windowRect);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onRestart() {
+        super.onRestart();
         if (TRS80Application.hasCrashed()) {
             return;
         }
-        RemoteCastScreen.get().endSession();
-        if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
-            stopAccelerometer();
+        isStopped = false;
+        if (taskSetup == null && !isGeneratingFont) {
+            startEmulation();
         }
-        taskThreads.cancel(true);
-        stopCPUThread();
-        takeScreenshot();
-        stopRenderThread();
-        XTRS.setEmulatorActivity(null);
-        currentConfiguration.setCassettePosition(XTRS.getCassettePosition());
-        EmulatorState.saveState(currentConfiguration.getId());
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        taskSetup.cancel(true);
+        if (TRS80Application.hasCrashed()) {
+            return;
+        }
+        isStopped = true;
+        removeGlobalLayoutListener();
+        RemoteCastScreen.get().endSession();
+        if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
+            stopAccelerometer();
+        }
+        if (taskSetup != null) {
+            taskSetup.cancel(true);
+            taskSetup = null;
+        }
+        stopCPUThread();
+        takeScreenshot();
+        stopRenderThread();
+        XTRS.setEmulatorActivity(null);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -399,15 +442,20 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void createRenderThread() {
-        renderThread = new RenderThread(currentHardware);
+        if (renderThread != null) {
+            return;
+        }
+        renderThread = new RenderThread(isCasting);
         renderThread.setPriority(Thread.MAX_PRIORITY);
+        renderThread.setHardwareSpecs(currentHardware);
+        renderThread.setSurfaceHolder(surfaceHolder);
         XTRS.setRenderer(renderThread);
     }
 
     private void stopRenderThread() {
         boolean retry = true;
         XTRS.setRenderer(null);
-        if (renderThread.isAlive()) {
+        if (renderThread != null && renderThread.isAlive()) {
             renderThread.setRunning(false);
             renderThread.interrupt();
             while (retry) {
@@ -448,6 +496,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             }
         }
         cpuThread = null;
+        currentConfiguration.setCassettePosition(XTRS.getCassettePosition());
+        EmulatorState.saveState(currentConfiguration.getId());
     }
 
     private void startAccelerometer() {
@@ -503,7 +553,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         // Build.VERSION_CODES.HONEYCOMB) {
         // root.setMotionEventSplittingEnabled(true);
         // }
-        currentHardware.computeKeyDimensions(getWindow(), getKeyboardType());
+        currentHardware.computeKeyDimensions(windowRect, getKeyboardType());
 
         int layoutId = 0;
         switch (keyboardType) {
@@ -543,7 +593,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                     kb2.setVisibility(View.GONE);
                 }
                 ViewTreeObserver obs = keyboardContainer.getViewTreeObserver();
-                obs.removeGlobalOnLayoutListener(this);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    obs.removeOnGlobalLayoutListener(this);
+                } else {
+                    //noinspection deprecation
+                    obs.removeGlobalOnLayoutListener(this);
+                }
             }
         });
         keyboardContainer.requestLayout();
@@ -660,8 +715,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void takeScreenshot() {
-        Bitmap screenshot = renderThread.takeScreenshot();
-        EmulatorState.saveScreenshot(currentConfiguration.getId(), screenshot);
+        int width = currentHardware.getScreenWidth();
+        int height = currentHardware.getScreenHeight();
+        if (renderThread != null && width > 0 && height > 0) {
+            Bitmap screenshot = renderThread.takeScreenshot(currentHardware);
+            EmulatorState.saveScreenshot(currentConfiguration.getId(), screenshot);
+        }
     }
 
     private void updateMenuIcons() {
@@ -790,5 +849,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
     public int getScreenHeight() {
         return currentHardware.getScreenHeight();
+    }
+
+    public void setSurfaceHolder(SurfaceHolder holder) {
+        surfaceHolder = holder;
+        if (renderThread != null) {
+            renderThread.setSurfaceHolder(holder);
+        }
     }
 }

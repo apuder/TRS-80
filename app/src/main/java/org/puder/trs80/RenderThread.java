@@ -29,8 +29,9 @@ import java.util.Arrays;
 
 public class RenderThread extends Thread {
 
+    private boolean          isCasting;
     private int              model;
-    private Hardware         hardware;
+    private Bitmap[]         font;
 
     private int              trsScreenCols;
     private int              trsScreenRows;
@@ -52,10 +53,9 @@ public class RenderThread extends Thread {
 
     private StringBuilder    screenCharBuffer;
 
-    public RenderThread(Hardware hardware) {
-        this.hardware = hardware;
+    public RenderThread(boolean isCasting) {
+        this.isCasting = isCasting;
         surfaceHolder = null;
-        model = hardware.getModel();
         screenBuffer = XTRS.getScreenBuffer();
         lastScreenBuffer = new short[0];
         clipRect = new Rect();
@@ -75,12 +75,9 @@ public class RenderThread extends Thread {
         return this.isRendering;
     }
 
-    private void init() {
-        /*
-         * We cannot call init() from the constructor because the various
-         * hardware dimensions have now yet been computed at that time. They are only
-         * available once the rendering thread begins to run.
-         */
+    public synchronized void setHardwareSpecs(Hardware hardware) {
+        model = hardware.getModel();
+        font = hardware.getFont();
         trsScreenCols = hardware.getScreenConfiguration().trsScreenCols;
         trsScreenRows = hardware.getScreenConfiguration().trsScreenRows;
         trsCharWidth = hardware.getCharWidth();
@@ -92,7 +89,6 @@ public class RenderThread extends Thread {
 
     @Override
     public synchronized void run() {
-        init();
         while (run) {
             isRendering = false;
             try {
@@ -110,6 +106,10 @@ public class RenderThread extends Thread {
                 continue;
             }
 
+            if (isCasting) {
+                renderScreenToCast(RemoteCastScreen.get(), expandedMode);
+                continue;
+            }
             if (surfaceHolder != null) {
                 /*
                  * The Android documentation does not mention that lockCanvas()
@@ -131,15 +131,11 @@ public class RenderThread extends Thread {
                 }
                 renderScreenToCanvas(canvas, expandedMode);
                 surfaceHolder.unlockCanvasAndPost(canvas);
-            } else {
-                renderScreenToCast(RemoteCastScreen.get(), expandedMode);
             }
         }
     }
 
     private void renderScreenToCanvas(Canvas canvas, boolean expandedMode) {
-        Bitmap[] font = hardware.getFont();
-
         if (expandedMode) {
             canvas.scale(2, 1);
         }
@@ -231,7 +227,7 @@ public class RenderThread extends Thread {
         this.notify();
     }
 
-    public synchronized Bitmap takeScreenshot() {
+    public synchronized Bitmap takeScreenshot(Hardware hardware) {
         Bitmap screenshot = Bitmap.createBitmap(hardware.getScreenWidth(), hardware.getScreenHeight(),
                 Config.RGB_565);
         boolean expandedMode = XTRS.isExpandedMode();
