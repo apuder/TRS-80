@@ -7,7 +7,7 @@
 
     <string name="google_plus_url" translatable="false">https://plus.google.com/communities/110959098806298034548</string>
 
-    <string name="share_title">Share with...</string>
+    <string name="share_title">Share with…</string>
     <string name="share_subject">TRS-80 Emulator for Android</string>
     <string name="share_message">
         Check out this free TRS-80 emulator for Android:
