@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="share_title">Teilen mit...</string>
+    <string name="share_title">Teilen mit…</string>
     <string name="share_subject">TRS-80 Emulator für Android</string>
     <string name="share_message">
         Kostenloser TRS-80 Emulator für Android:
