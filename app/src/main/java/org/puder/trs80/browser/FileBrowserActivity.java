@@ -42,8 +42,7 @@ import java.util.List;
 public class FileBrowserActivity extends BaseActivity implements OnItemClickListener {
 
     // Action Menu
-    private static final int       MENU_OPTION_CANCEL = 0;
-    private static final int       MENU_OPTION_EJECT  = 1;
+    private static final int       MENU_OPTION_EJECT  = 0;
 
     private List<String>           items              = new ArrayList<String>();
     private String                 pathPrefix;
@@ -56,6 +55,7 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.file_browser);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         pathPrefix = this.getString(R.string.path) + ": ";
         pathLabel = (TextView) this.findViewById(R.id.path);
         fileListAdapter = new BrowserListViewAdapter(this, items);
@@ -71,17 +71,13 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
                 menu.add(Menu.NONE, MENU_OPTION_EJECT, Menu.NONE,
                         this.getString(R.string.menu_eject)).setIcon(R.drawable.eject_icon),
                 MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_CANCEL, Menu.NONE,
-                        this.getString(R.string.menu_cancel)).setIcon(R.drawable.cancel_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case MENU_OPTION_CANCEL:
+        case android.R.id.home:
             setResult(RESULT_CANCELED, getIntent());
             finish();
             return true;

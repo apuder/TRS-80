@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="share_title">Teilen mit...</string>
+    <string name="share_subject">TRS-80 Emulator für Android</string>
+    <string name="share_message">
+        Kostenloser TRS-80 Emulator für Android:
+        https://play.google.com/store/apps/details?id=org.puder.trs80</string>
+
     <string name="alert_dialog_cancel">Abbrechen</string>
     <string name="alert_dialog_confirm_delete">Sind Sie sicher, dass Sie die Konfiguration \'%1$s\' löschen möchten?</string>
     <string name="alert_dialog_confirm_eject">Sind Sie sicher, dass Sie die derzeit gemountete Datei auswerfen möchten?</string>
     <string name="alert_dialog_confirm_stop_emu">Sind Sie sicher, dass Sie die Emulation für die Konfiguration \'%1$s\' stoppen möchten?</string>
     <string name="alert_dialog_inform_crash"><![CDATA[Der Emulator ist abgestürzt. Es wäre hilfreich, wenn Sie eine E-Mail an <a href="mailto:mobile@puder.org">mobile@puder.org</a> mit dem Namen der TRS-80 app schicken könnten, die Sie versucht haben, auszuführen.]]></string>
     <string name="alert_dialog_ok">OK</string>
+    <string name="permission_explanation">Der Emulator benötigt Schreibrechte für den externen Speicher
+                des Geräts um TRS-80 ROM- und Disketten-Images zu speichern. Der Emulator funktioniert ohne diese
+                Schreibrechte nicht.</string>
+    <string name="permission_request">Schreibrechte anfragen</string>
     <string name="conf_header">Konfigurationen</string>
     <string name="conf_item_disks">Laufwerke:</string>
     <string name="conf_item_hardware">Hardware:</string>
@@ -50,6 +60,8 @@
     <string name="menu_edit">Bearbeiten</string>
     <string name="menu_eject">Auswerfen</string>
     <string name="menu_help">Hilfe</string>
+    <string name="menu_community">Neuigkeiten</string>
+    <string name="menu_share">Teilen</string>
     <string name="menu_rate">Bewerten</string>
     <string name="menu_pause">Pause</string>
     <string name="menu_reset">Zurücksetzen</string>
@@ -129,6 +141,7 @@
     <string name="error_init">Fehler während der Emulator-Initialisierung. (Error Code: %1$d).
         Bitte senden Sie den Fehler Code und Ihr Android Geräte-Typ an mobile@puder.org.</string>
     <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
+    <string name="error_no_disk">Laufwerksdatei nicht gefunden.</string>
     <string name="help_configurations"><![CDATA[Tippen Sie den Hinzufügen-Button (<img src="add_icon"/>) um eine neue Konfiguration zu erzeugen.
         Eine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
         Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Info-Knopf <img src="info_icon"/>
@@ -184,4 +197,6 @@
     <string name="tutorial_step_7">Beendet den BASIC Interpreter.</string>
     <string name="tutorial_step_8">Zeigt den Inhalt des Floppy-Verzeichnisses mit der neuen Datei
                         FIRST/BAS an.</string>
+    <string name="navigation_drawer_open">Leiste offen</string>
+    <string name="navigation_drawer_close">Leiste geschlossen</string>
 </resources>

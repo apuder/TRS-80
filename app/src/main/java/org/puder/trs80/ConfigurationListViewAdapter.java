@@ -35,13 +35,12 @@ public class ConfigurationListViewAdapter extends
         RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {
 
     private ConfigurationItemListener listener;
-    private boolean                   usesGridLayout;
+    private int                       numColumns;
 
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        int positionOffset = usesGridLayout ? 0 : -1;
-        Configuration.move(fromPosition + positionOffset, toPosition + positionOffset);
+        Configuration.move(fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
@@ -71,6 +70,7 @@ public class ConfigurationListViewAdapter extends
         public Holder(View itemView) {
             super(itemView);
             if (!(itemView instanceof RelativeLayout)) {
+                // Footers are not draggable
                 draggable = false;
                 return;
             }
@@ -127,9 +127,9 @@ public class ConfigurationListViewAdapter extends
     }
 
 
-    public ConfigurationListViewAdapter(boolean usesGridLayout, ConfigurationItemListener listener) {
-        this.usesGridLayout = usesGridLayout;
+    public ConfigurationListViewAdapter(ConfigurationItemListener listener, int numColumns) {
         this.listener = listener;
+        this.numColumns = numColumns;
     }
 
     @Override
@@ -140,12 +140,11 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
-        if (!usesGridLayout && (position == 0 || position == Configuration.getCount() + 1)) {
+        if (position >= Configuration.getCount()) {
             return;
         }
 
-        int positionOffset = usesGridLayout ? 0 : -1;
-        Configuration conf = Configuration.getNthConfiguration(position + positionOffset);
+        Configuration conf = Configuration.getNthConfiguration(position);
 
         if (holder.getAdapterPosition() != position && holder.viewFlipper.getDisplayedChild() != 0) {
             Context context = TRS80Application.getAppContext();
@@ -223,10 +222,7 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public int getItemViewType(int position) {
-        if (!usesGridLayout && position == 0) {
-            return R.layout.configuration_header;
-        }
-        if (!usesGridLayout && position == Configuration.getCount() + 1) {
+        if (position >= Configuration.getCount()) {
             return R.layout.configuration_footer;
         }
         return R.layout.configuration_item;
@@ -234,11 +230,12 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public int getItemCount() {
-        int count = Configuration.getCount();
-        if (!usesGridLayout) {
-            count += 2; /* header + footer */
-        }
-        return count;
+        /*
+         * Return the number of configurations plus the number of columns in the current
+         * GridLayout. This will guarantee that at least the last configuration_footer will
+         * spill over to the next row.
+         */
+        return Configuration.getCount() + numColumns;
     }
 
     private String getKeyboardLabel(int type) {

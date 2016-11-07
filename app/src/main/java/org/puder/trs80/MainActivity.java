@@ -26,43 +26,46 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import org.puder.trs80.cast.CastMessageSender;
-import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 
 import java.io.File;
 
 public class MainActivity extends BaseActivity implements
-        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener {
+        InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private static final int     COLUMN_WIDTH_DP            = 300;
 
     private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
-    private static final int     REQUEST_CODE_RUN_EMULATOR  = 2;
-    private static final int     REQUEST_CODE_EDIT_SETTINGS = 3;
+    private static final int     REQUEST_CODE_EDIT_SETTINGS = 2;
 
     // Action Menu
     private static final int     MENU_OPTION_DOWNLOAD       = 0;
-    private static final int     MENU_OPTION_HELP           = 1;
-    private static final int     MENU_OPTION_SETTINGS       = 2;
-    private static final int     MENU_OPTION_RATE           = 3;
 
     private RecyclerView         configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
     private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
+
+    private ActionBarDrawerToggle toggle;
 
     private CastMessageSender    castMessageSender;
 
@@ -73,7 +76,15 @@ public class MainActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
-        this.setContentView(R.layout.main_activity);
+        setContentView(R.layout.main_activity);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         castMessageSender = CastMessageSender.get();
 
@@ -82,15 +93,12 @@ public class MainActivity extends BaseActivity implements
                 (screenWidthDp == android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED) ?
                         1 : screenWidthDp / COLUMN_WIDTH_DP;
         RecyclerView.LayoutManager lm = null;
-        boolean usesGridLayout;
         if (numColumns <= 1) {
             lm = new LinearLayoutManager(this);
-            usesGridLayout = false;
         } else {
             lm = new GridLayoutManager(this, numColumns);
-            usesGridLayout = true;
         }
-        configurationListViewAdapter = new ConfigurationListViewAdapter(true /*usesGridLayout*/, this);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(this, numColumns);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
@@ -98,6 +106,12 @@ public class MainActivity extends BaseActivity implements
         ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback(configurationListViewAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(configurationListView);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        toggle.syncState();
     }
 
     @Override
@@ -130,6 +144,16 @@ public class MainActivity extends BaseActivity implements
             // AudioHttpServer.get().stop();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -170,41 +194,41 @@ public class MainActivity extends BaseActivity implements
             downloadMenuItem.setIcon(R.drawable.download_icon);
             MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         }
-
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_SETTINGS, Menu.NONE,
-                        this.getString(R.string.menu_settings)).setIcon(R.drawable.settings_icon),
-                MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
-                                this.getString(R.string.menu_help)).setIcon(R.drawable.help_icon),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
-        MenuItemCompat
-                .setShowAsAction(
-                        menu.add(Menu.NONE, MENU_OPTION_RATE, Menu.NONE,
-                                this.getString(R.string.menu_rate)),
-                        MenuItemCompat.SHOW_AS_ACTION_NEVER);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (toggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         switch (item.getItemId()) {
         case MENU_OPTION_DOWNLOAD:
             downloadROMs();
             return true;
-        case MENU_OPTION_HELP:
-            showHelp();
-            return true;
-        case MENU_OPTION_SETTINGS:
-            showSettings();
-            return true;
-        case MENU_OPTION_RATE:
-            showRating();
-            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_settings) {
+            showSettings();
+        } else if (id == R.id.nav_rate) {
+            showRating();
+        } else if (id == R.id.nav_help) {
+            showHelp();
+        } else if (id == R.id.nav_community) {
+            showCommunity();
+        } else if (id == R.id.nav_share) {
+            showShare();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     public void onFloatingActionButtonClicked(View view) {
@@ -255,25 +279,6 @@ public class MainActivity extends BaseActivity implements
             } else {
                 backup.save();
             }
-        }
-
-        if (requestCode == REQUEST_CODE_RUN_EMULATOR) {
-            if (TRS80Application.hasCrashed()) {
-                crashAlert();
-                finish();
-                return;
-            }
-            Configuration conf = TRS80Application.getCurrentConfiguration();
-
-            if (conf == null) {
-                // If the application was killed/crashed in the meantime there
-                // is not configuration.
-                crashAlert();
-                return;
-            }
-            int id = conf.getId();
-            EmulatorState.saveScreenshot(id);
-            EmulatorState.saveState(id);
         }
     }
 
@@ -347,79 +352,44 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void runEmulator(Configuration conf) {
-        Hardware hardware = null;
-        int model = conf.getModel();
-
-        String romFile = null;
-        switch (model) {
-        case Hardware.MODEL1:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
-            hardware = new Model1(conf, romFile);
-            break;
-        case Hardware.MODEL3:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
-            hardware = new Model3(conf, romFile);
-            break;
-        case Hardware.MODEL4:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
-            // TODO Change this to correct model when implemented
-            hardware = null;
-            break;
-        case Hardware.MODEL4P:
-            romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
-            // TODO Change this to correct model when implemented
-            hardware = null;
-            break;
-        default:
-            hardware = null;
-            break;
-        }
-
         View root = findViewById(R.id.main);
-        if (hardware == null) {
+
+        int model = conf.getModel();
+        if (model != Hardware.MODEL1 && model != Hardware.MODEL3) {
             Snackbar.make(root, R.string.error_model_not_supported, Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        if (romFile == null || !new File(romFile).exists()) {
+
+        if (!ROMs.hasROMs()) {
             Snackbar.make(root, R.string.error_no_rom, Snackbar.LENGTH_LONG).show();
             return;
         }
-
-        TRS80Application.setCurrentConfiguration(conf);
-        TRS80Application.setHardware(hardware);
-        int err = XTRS.init(hardware);
-        if (err != 0) {
-            showError(err);
-            return;
+        for (int i = 0; i < 4; i++) {
+            if (!checkIfFileExists(conf.getDiskPath(i), true, R.string.error_no_disk)) {
+                return;
+            }
         }
-        RemoteCastScreen.get().sendConfiguration(conf);
-        EmulatorState.loadState(conf.getId());
-        Intent i = new Intent(this, EmulatorActivity.class);
-        startActivityForResult(i, REQUEST_CODE_RUN_EMULATOR);
+
+        Intent intent = new Intent(this, EmulatorActivity.class);
+        intent.putExtra(EmulatorActivity.EXTRA_CONFIGURATION_ID, conf.getId());
+        startActivity(intent);
     }
 
-    private void showError(int err) {
-        showDialog(R.string.app_name, -1, this.getString(R.string.error_init, err));
+    private boolean checkIfFileExists(String path, boolean allowNull, int errMsg) {
+        if (path == null && allowNull) {
+            return true;
+        }
+        if (path == null || !new File(path).exists()) {
+            View root = findViewById(R.id.main);
+            Snackbar.make(root, errMsg, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 
     private void showSettings() {
         startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
-    }
-
-    private void crashAlert() {
-        AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
-                R.drawable.warning_icon, R.string.alert_dialog_inform_crash);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(MainActivity.this);
-            }
-
-        });
-
-        AlertDialogUtil.showDialog(this, builder);
     }
 
     private void showHelp() {
@@ -440,6 +410,11 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
+    private void showCommunity() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.google_plus_url)));
+        startActivity(browserIntent);
+    }
+
     private void downloadROMs() {
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this,
                 R.string.title_initial_setup, R.drawable.warning_icon, R.string.initial_setup);
@@ -456,6 +431,15 @@ public class MainActivity extends BaseActivity implements
         });
 
         AlertDialogUtil.showDialog(this, builder);
+    }
+
+    private void showShare() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
+        sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message));
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_title)));
     }
 
     @Override

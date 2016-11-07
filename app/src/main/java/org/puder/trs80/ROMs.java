@@ -19,6 +19,8 @@ package org.puder.trs80;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.io.File;
+
 public class ROMs {
 
     static private SharedPreferences sharedPrefs;
@@ -33,11 +35,24 @@ public class ROMs {
     }
 
     static public boolean hasModel1ROM() {
-        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL1, null) != null;
+        return checkIfFileExists(SettingsActivity.CONF_ROM_MODEL1);
     }
 
     static public boolean hasModel3ROM() {
-        return sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null) != null;
+        return checkIfFileExists(SettingsActivity.CONF_ROM_MODEL3);
     }
 
+    static private boolean checkIfFileExists(String prop) {
+        String fn = sharedPrefs.getString(prop, null);
+        if (fn == null) {
+            return false;
+        }
+        if (new File(fn).exists()) {
+            return true;
+        }
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.remove(prop);
+        editor.apply();
+        return false;
+    }
 }

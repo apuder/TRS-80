@@ -29,9 +29,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.puder.trs80.Hardware;
+import org.puder.trs80.EmulatorActivity;
 import org.puder.trs80.R;
-import org.puder.trs80.TRS80Application;
 import org.puder.trs80.TypefaceCache;
 
 public class Key extends View {
@@ -141,12 +140,12 @@ public class Key extends View {
 
         this.setBackgroundResource(R.drawable.key_background);
 
-        Hardware h = TRS80Application.getHardware();
-        keyWidth = h.getKeyWidth();
-        keyHeight = h.getKeyHeight();
-        keyMargin = h.getKeyMargin();
+        EmulatorActivity emulator = (EmulatorActivity) context;
+        keyWidth = emulator.getKeyWidth();
+        keyHeight = emulator.getKeyHeight();
+        keyMargin = emulator.getKeyMargin();
+        keyboard = emulator.getKeyboardManager();
 
-        keyboard = TRS80Application.getKeyboardManager();
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Keyboard, 0, 0);
         idNormal = ta.getInt(R.styleable.Keyboard_id, -1);
         idShifted = ta.getInt(R.styleable.Keyboard_idShifted, -1);

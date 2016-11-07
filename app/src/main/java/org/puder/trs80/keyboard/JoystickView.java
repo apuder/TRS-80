@@ -28,7 +28,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.puder.trs80.TRS80Application;
+import org.puder.trs80.EmulatorActivity;
 
 /**
  * http://www.trs-80.com/wordpress/zaps-patches-pokes-tips/internals/#keyboard13
@@ -55,6 +55,9 @@ public class JoystickView extends View {
 
     public JoystickView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        EmulatorActivity emulator = (EmulatorActivity) context;
+        this.keyboardManager = emulator.getKeyboardManager();
 
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -89,8 +92,6 @@ public class JoystickView extends View {
                 return true;
             }
         });
-
-        keyboardManager = TRS80Application.getKeyboardManager();
     }
 
     private void pressKeyDown() {

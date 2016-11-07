@@ -1,11 +1,13 @@
 /bin
 /build
+/app/.externalNativeBuild
 /app/build
 /app/src/main/libs
 /app/src/main/obj
 /app/app-release.apk
 /app/manifest-merger-release-report.txt
 /app/fabric.properties
+/appstore/build
 /obj
 /libs
 /gen
@@ -28,3 +30,5 @@
 .idea/runConfigurations.xml
 *.iml
 local.properties
+*.swp
+local_db.bin

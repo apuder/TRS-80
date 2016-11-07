@@ -195,6 +195,10 @@ public class InitialSetupDialogFragment extends DialogFragment {
                     boolean isZipped = download.fileInZip != null;
                     String fileInZip = download.fileInZip;
                     String destFilePath = dirName + download.destinationPath;
+                    if (!download.isROM && new File(destFilePath).exists()) {
+                        // Image file already exists. Skip
+                        continue;
+                    }
                     boolean ok = download(url, isZipped, fileInZip, destFilePath);
                     if (!ok) {
                         continue;

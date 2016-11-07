@@ -16,17 +16,20 @@
 
 package org.puder.trs80;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -37,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -55,7 +59,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EmulatorActivity extends BaseActivity implements SensorEventListener,
-        GameControllerListener {
+        GameControllerListener, OnGlobalLayoutListener {
+
+    public static final String  EXTRA_CONFIGURATION_ID = "conf_id";
 
     // Action Menu
     private static final int   MENU_OPTION_PAUSE     = 0;
@@ -67,6 +73,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private static final int   MENU_OPTION_TUTORIAL  = 6;
     private static final int   MENU_OPTION_HELP      = 7;
 
+    private Configuration      currentConfiguration;
+    private Hardware           currentHardware;
     private Thread             cpuThread;
     private RenderThread       renderThread;
     private TextView           logView;
@@ -82,6 +90,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private GameController     gameController;
     private int                rotation;
     private ClipboardManager   clipboardManager;
+    private AsyncTask          taskSetup;
+    private Rect               windowRect;
+    private boolean            isCasting;
+    private SurfaceHolder      surfaceHolder;
+    private boolean            isGeneratingFont;
+    private boolean            isStopped;
 
 
     @Override
@@ -90,7 +104,10 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
         TRS80Application.setCrashedFlag(false);
 
-        if (TRS80Application.getCurrentConfiguration() == null) {
+        Intent intent = getIntent();
+        int id = intent.getIntExtra(EXTRA_CONFIGURATION_ID, -1);
+
+        if (id == -1) {
             /*
              * We got killed by Android and then re-launched. The only thing we
              * can do is exit.
@@ -100,28 +117,19 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             return;
         }
 
-        clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        init(savedInstanceState, id);
 
-        orientation = getResources().getConfiguration().orientation;
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-                && !CastMessageSender.get().isReadyToSend()) {
-            getSupportActionBar().hide();
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
-
-        XTRS.setEmulatorActivity(this);
-        Hardware hardware = TRS80Application.getHardware();
-        hardware.computeFontDimensions(getWindow());
-        keyboardManager = new KeyboardManager(TRS80Application.getCurrentConfiguration());
-        TRS80Application.setKeyboardManager(keyboardManager);
-
-        gameController = new GameController(this);
-
-        startRenderThread();
-        initRootView();
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        /*
+         * We first set a dummy layout that only consists of one empty view. We set
+         * a layout listener on this view in order to measure the screen dimensions.
+         * This seems to be the only workable way to properly do this with N's split-
+         * screen mode.
+         */
+        isGeneratingFont = true;
+        isStopped = false;
+        setContentView(R.layout.emulator_measure);
+        final View root = findViewById(R.id.emulator_measure);
+        root.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
         AlertDialogUtil.showHint(this, R.string.hint_emulator, R.string.menu_tutorial,
                 new Runnable() {
@@ -133,11 +141,72 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (TRS80Application.hasCrashed()) {
+    public void onGlobalLayout() {
+        removeGlobalLayoutListener();
+        setupEmulator();
+    }
+
+    private void removeGlobalLayoutListener() {
+        final View root = findViewById(R.id.emulator_measure);
+        if (root == null || !root.getViewTreeObserver().isAlive()) {
             return;
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        } else {
+            //noinspection deprecation
+            root.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        }
+    }
+
+    private void init(Bundle savedInstanceState, int id) {
+        isCasting = CastMessageSender.get().isReadyToSend();
+
+        currentConfiguration = Configuration.getConfigurationById(id);
+        currentHardware = new Hardware(currentConfiguration);
+
+        clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
+        keyboardManager = new KeyboardManager(currentConfiguration);
+        gameController = new GameController(this);
+
+        orientation = getResources().getConfiguration().orientation;
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                && !isCasting) {
+            getSupportActionBar().hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        if (savedInstanceState == null) {
+            int err = XTRS.init(currentConfiguration);
+            if (err != 0) {
+                //showError(err);
+                finish();
+                return;
+            }
+            RemoteCastScreen.get().sendConfiguration(currentConfiguration);
+            EmulatorState.loadState(id);
+        }
+    }
+
+    private void setupEmulator() {
+        windowRect = new Rect();
+        View root = findViewById(R.id.emulator_measure);
+        windowRect.top = 0;
+        windowRect.left = 0;
+        windowRect.right = root.getWidth();
+        windowRect.bottom = root.getHeight();
+        initRootView();
+        startEmulation();
+    }
+
+    private void startEmulation() {
+        XTRS.setEmulatorActivity(this);
 
         updateMenuIcons();
 
@@ -146,31 +215,71 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             startAccelerometer();
         }
 
-        startCPUThread();
+        isGeneratingFont = true;
+
+        taskSetup = new AsyncTask<Rect, Void, Void>() {
+            @Override
+            protected Void doInBackground(Rect... rects) {
+                currentHardware.generateFont(rects[0], this);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                isGeneratingFont = false;
+                if (isStopped) {
+                    return;
+                }
+                findViewById(R.id.spinner).setVisibility(View.GONE);
+                /*
+                 * The following requestLayout is necessary because sometimes layouting
+                 * R.layout.emulator that is set in initRootView() finishes before the
+                 * TRS screen dimensions have been computed in doInBackground() of this
+                 * AsyncTask.
+                 */
+                findViewById(R.id.screen).requestLayout();
+                createRenderThread();
+                renderThread.setHardwareSpecs(currentHardware);
+                renderThread.setSurfaceHolder(surfaceHolder);
+                renderThread.start();
+                startCPUThread();
+            }
+        }.execute(windowRect);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onRestart() {
+        super.onRestart();
         if (TRS80Application.hasCrashed()) {
             return;
         }
+        isStopped = false;
+        if (taskSetup == null && !isGeneratingFont) {
+            startEmulation();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (TRS80Application.hasCrashed()) {
+            return;
+        }
+        isStopped = true;
+        removeGlobalLayoutListener();
         RemoteCastScreen.get().endSession();
         if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
             stopAccelerometer();
         }
-        stopCPUThread();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (TRS80Application.hasCrashed()) {
-            return;
+        if (taskSetup != null) {
+            taskSetup.cancel(true);
+            taskSetup = null;
         }
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        stopCPUThread();
+        takeScreenshot();
         stopRenderThread();
         XTRS.setEmulatorActivity(null);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -178,7 +287,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_PAUSE, Menu.NONE,
                         this.getString(R.string.menu_pause)).setIcon(R.drawable.pause_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+                MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_RESET, Menu.NONE,
                         this.getString(R.string.menu_reset)).setIcon(R.drawable.reset_icon),
@@ -191,7 +300,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                 this.getString(R.string.menu_paste));
         MenuItemCompat.setShowAsAction(pasteMenuItem.setIcon(R.drawable.paste_icon),
                 MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
-        if (TRS80Application.getCurrentConfiguration().muteSound()) {
+        if (currentConfiguration.muteSound()) {
             // Mute sound permanently and don't show mute/unmute icons
             setSoundMuted(true);
         } else {
@@ -220,8 +329,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case android.R.id.home:
         case MENU_OPTION_PAUSE:
-            pauseEmulator();
+            finish();
             return true;
         case MENU_OPTION_REWIND:
             View root = findViewById(R.id.emulator);
@@ -317,13 +427,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AlertDialogUtil.dismissDialog(EmulatorActivity.this);
-                        final Configuration conf = TRS80Application.getCurrentConfiguration();
                         switch (orientation) {
                         case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-                            conf.setKeyboardLayoutLandscape(which);
+                            currentConfiguration.setKeyboardLayoutLandscape(which);
                             break;
                         default:
-                            conf.setKeyboardLayoutPortrait(which);
+                            currentConfiguration.setKeyboardLayoutPortrait(which);
                             break;
                         }
                         initKeyboardView();
@@ -332,24 +441,29 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         AlertDialogUtil.showDialog(this, builder);
     }
 
-    private void startRenderThread() {
-        renderThread = new RenderThread();
-        renderThread.setRunning(true);
+    private void createRenderThread() {
+        if (renderThread != null) {
+            return;
+        }
+        renderThread = new RenderThread(isCasting);
         renderThread.setPriority(Thread.MAX_PRIORITY);
-        renderThread.start();
+        renderThread.setHardwareSpecs(currentHardware);
+        renderThread.setSurfaceHolder(surfaceHolder);
         XTRS.setRenderer(renderThread);
     }
 
     private void stopRenderThread() {
         boolean retry = true;
         XTRS.setRenderer(null);
-        renderThread.setRunning(false);
-        renderThread.interrupt();
-        while (retry) {
-            try {
-                renderThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
+        if (renderThread != null && renderThread.isAlive()) {
+            renderThread.setRunning(false);
+            renderThread.interrupt();
+            while (retry) {
+                try {
+                    renderThread.join();
+                    retry = false;
+                } catch (InterruptedException e) {
+                }
             }
         }
         renderThread = null;
@@ -369,6 +483,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void stopCPUThread() {
+        if (cpuThread == null) {
+            return;
+        }
         boolean retry = true;
         XTRS.setRunning(false);
         while (retry) {
@@ -379,6 +496,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             }
         }
         cpuThread = null;
+        currentConfiguration.setCassettePosition(XTRS.getCassettePosition());
+        EmulatorState.saveState(currentConfiguration.getId());
     }
 
     private void startAccelerometer() {
@@ -434,6 +553,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         // Build.VERSION_CODES.HONEYCOMB) {
         // root.setMotionEventSplittingEnabled(true);
         // }
+        currentHardware.computeKeyDimensions(windowRect, getKeyboardType());
+
         int layoutId = 0;
         switch (keyboardType) {
         case Configuration.KEYBOARD_LAYOUT_COMPACT:
@@ -449,7 +570,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             layoutId = R.layout.keyboard_tilt;
             break;
         }
-        TRS80Application.getHardware().computeKeyDimensions(getWindow());
         getLayoutInflater().inflate(layoutId, keyboardContainer, true);
 
         /*
@@ -473,7 +593,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                     kb2.setVisibility(View.GONE);
                 }
                 ViewTreeObserver obs = keyboardContainer.getViewTreeObserver();
-                obs.removeGlobalOnLayoutListener(this);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    obs.removeOnGlobalLayoutListener(this);
+                } else {
+                    //noinspection deprecation
+                    obs.removeGlobalOnLayoutListener(this);
+                }
             }
         });
         keyboardContainer.requestLayout();
@@ -550,11 +675,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         AlertDialogUtil.showHint(this, messageId);
     }
 
-    @Override
-    public void onBackPressed() {
-        pauseEmulator();
-    }
-
     private void paste() {
         if (!clipboardManager.hasPrimaryClip()) {
             return;
@@ -568,7 +688,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void showTutorial() {
-        new Tutorial(findViewById(R.id.emulator)).show();
+        new Tutorial(keyboardManager, findViewById(R.id.emulator)).show();
     }
 
     private int getKeyboardType() {
@@ -580,32 +700,13 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         int keyboardType;
         switch (orientation) {
         case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-            keyboardType = TRS80Application.getCurrentConfiguration().getKeyboardLayoutLandscape();
+            keyboardType = currentConfiguration.getKeyboardLayoutLandscape();
             break;
         default:
-            keyboardType = TRS80Application.getCurrentConfiguration().getKeyboardLayoutPortrait();
+            keyboardType = currentConfiguration.getKeyboardLayoutPortrait();
             break;
         }
         return keyboardType;
-    }
-
-    private void showKeyboard() {
-        if (keyboardContainer != null) {
-            keyboardContainer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void hideKeyboard() {
-        if (keyboardContainer != null) {
-            keyboardContainer.setVisibility(View.GONE);
-        }
-    }
-
-    private void pauseEmulator() {
-        takeScreenshot();
-        TRS80Application.getCurrentConfiguration().setCassettePosition(XTRS.getCassettePosition());
-        setResult(Activity.RESULT_OK, getIntent());
-        finish();
     }
 
     private void setSoundMuted(boolean muted) {
@@ -614,7 +715,12 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void takeScreenshot() {
-        TRS80Application.setScreenshot(renderThread.takeScreenshot());
+        int width = currentHardware.getScreenWidth();
+        int height = currentHardware.getScreenHeight();
+        if (renderThread != null && width > 0 && height > 0) {
+            Bitmap screenshot = renderThread.takeScreenshot(currentHardware);
+            EmulatorState.saveScreenshot(currentConfiguration.getId(), screenshot);
+        }
     }
 
     private void updateMenuIcons() {
@@ -714,11 +820,41 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     public void notImplemented(String msg) {
         TRS80Application.setCrashedFlag(true);
         Crashlytics.setString("NOT_IMPLEMENTED", msg);
-        Configuration conf = TRS80Application.getCurrentConfiguration();
-        Crashlytics.setInt("MODEL", conf.getModel());
-        Crashlytics.setString("NAME", conf.getName());
-        String path = conf.getDiskPath(0);
+        Crashlytics.setInt("MODEL", currentConfiguration.getModel());
+        Crashlytics.setString("NAME", currentConfiguration.getName());
+        String path = currentConfiguration.getDiskPath(0);
         Crashlytics.setString("DISK_0", path == null ? "-" : path);
         throw new RuntimeException();
+    }
+
+    public int getKeyWidth() {
+        return currentHardware.getKeyWidth();
+    }
+
+    public int getKeyHeight() {
+        return currentHardware.getKeyHeight();
+    }
+
+    public int getKeyMargin() {
+        return currentHardware.getKeyMargin();
+    }
+
+    public KeyboardManager getKeyboardManager() {
+        return keyboardManager;
+    }
+
+    public int getScreenWidth() {
+        return currentHardware.getScreenWidth();
+    }
+
+    public int getScreenHeight() {
+        return currentHardware.getScreenHeight();
+    }
+
+    public void setSurfaceHolder(SurfaceHolder holder) {
+        surfaceHolder = holder;
+        if (renderThread != null) {
+            renderThread.setSurfaceHolder(holder);
+        }
     }
 }

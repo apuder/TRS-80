@@ -22,7 +22,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.view.Window;
+import android.os.AsyncTask;
 
 /**
  * Class Hardware is the base class for the various different TRS-80 models. It
@@ -36,7 +36,7 @@ import android.view.Window;
  * TRS-80 pseudo-graphics we compute the bitmaps for the 2x3-per character
  * pseudo pixel graphics (see generateGraphicsFont()).
  */
-abstract public class Hardware {
+public class Hardware {
     static class ScreenConfiguration {
         public ScreenConfiguration(int trsScreenCols, int trsScreenRows, float aspectRatio) {
             this.trsScreenCols = trsScreenCols;
@@ -44,10 +44,12 @@ abstract public class Hardware {
             this.aspectRatio = aspectRatio;
         }
 
+
         public int   trsScreenCols;
         public int   trsScreenRows;
         public float aspectRatio;
     }
+
 
     final private float     maxKeyBoxSize = 55; // 55dp
 
@@ -57,12 +59,11 @@ abstract public class Hardware {
     final public static int MODEL4        = 4;
     final public static int MODEL4P       = 5;
 
+    private Configuration   configuration;
     private int             trsScreenWidth;
     private int             trsScreenHeight;
     private int             trsCharWidth;
     private int             trsCharHeight;
-
-    private boolean         expandedScreenMode;
 
     private int             keyWidth;
     private int             keyHeight;
@@ -70,68 +71,26 @@ abstract public class Hardware {
 
     private Bitmap[]        font;
 
-    /*
-     * The following fields with prefix "xtrs" are configuration parameters for
-     * xtrs. They are read via JNI within native.c
-     */
-    @SuppressWarnings("unused")
-    private int             xtrsModel;
-    @SuppressWarnings("unused")
-    private String          xtrsRomFile;
-    private byte[]          xtrsScreenBuffer;
-    @SuppressWarnings("unused")
-    private int             xtrsEntryAddr;
-    @SuppressWarnings("unused")
-    private String          xtrsCassette;
-    @SuppressWarnings("unused")
-    private String          xtrsDisk0;
-    @SuppressWarnings("unused")
-    private String          xtrsDisk1;
-    @SuppressWarnings("unused")
-    private String          xtrsDisk2;
-    @SuppressWarnings("unused")
-    private String          xtrsDisk3;
 
-    protected Hardware(int model, Configuration conf, String xtrsRomFile) {
-        this.xtrsModel = model;
-        this.xtrsRomFile = xtrsRomFile;
-        this.xtrsCassette = conf.getCassettePath();
-        if (this.xtrsCassette == null) {
-            this.xtrsCassette = EmulatorState.getDefaultCassettePath(conf.getId());
-        }
-        this.xtrsDisk0 = conf.getDiskPath(0);
-        this.xtrsDisk1 = conf.getDiskPath(1);
-        this.xtrsDisk2 = conf.getDiskPath(2);
-        this.xtrsDisk3 = conf.getDiskPath(3);
-
-        expandedScreenMode = false;
-
+    protected Hardware(Configuration configuration) {
+        this.configuration = configuration;
         font = new Bitmap[256];
-
-        setScreenBuffer(0x3fff - 0x3c00 + 1);
-        setEntryAddress(0);
     }
 
-    abstract protected ScreenConfiguration getScreenConfiguration();
-
-    protected int getModel() {
-        return this.xtrsModel;
+    public int getModel() {
+        return configuration.getModel();
     }
 
-    public void setExpandedScreenMode(boolean flag) {
-        expandedScreenMode = flag;
-    }
-
-    public boolean getExpandedScreenMode() {
-        return expandedScreenMode;
-    }
-
-    protected void setScreenBuffer(int size) {
-        xtrsScreenBuffer = new byte[size];
-    }
-
-    public byte[] getScreenBuffer() {
-        return this.xtrsScreenBuffer;
+    public ScreenConfiguration getScreenConfiguration() {
+        switch (configuration.getModel()) {
+        case Hardware.MODEL1:
+        case Hardware.MODEL3:
+            final int trsScreenCols = 64;
+            final int trsScreenRows = 16;
+            final float aspectRatio = 3f;
+            return new ScreenConfiguration(trsScreenCols, trsScreenRows, aspectRatio);
+        }
+        return null;
     }
 
     public int getScreenWidth() {
@@ -162,24 +121,17 @@ abstract public class Hardware {
         return keyMargin;
     }
 
-    protected void setEntryAddress(int addr) {
-        this.xtrsEntryAddr = addr;
-    }
-
     public Bitmap[] getFont() {
         return font;
     }
 
-    public void computeFontDimensions(Window window) {
+    public void generateFont(Rect rect, AsyncTask task) {
         ScreenConfiguration screenConfig = getScreenConfiguration();
-        Rect rect = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rect);
-        int StatusBarHeight = rect.top;
-        int contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-        int TitleBarHeight = contentViewTop - StatusBarHeight;
+        int contentViewTop = rect.top;
         int contentHeight = rect.bottom - contentViewTop;
         int contentWidth = rect.right;
-        if ((contentWidth / screenConfig.trsScreenCols) * screenConfig.aspectRatio > (contentHeight / screenConfig.trsScreenRows)) {
+        if ((contentWidth / screenConfig.trsScreenCols)
+                * screenConfig.aspectRatio > (contentHeight / screenConfig.trsScreenRows)) {
             // Screen height is not sufficient to let the TRS80 screen span the
             // whole width
             trsCharHeight = contentHeight / screenConfig.trsScreenRows;
@@ -202,23 +154,11 @@ abstract public class Hardware {
             trsScreenHeight = trsCharHeight * screenConfig.trsScreenRows;
         }
 
-        generateGraphicsFont();
-        generateASCIIFont();
+        generateGraphicsFont(task);
+        generateASCIIFont(task);
     }
 
-    public void computeKeyDimensions(Window window) {
-        ScreenConfiguration screenConfig = getScreenConfiguration();
-        Rect rect = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rect);
-        // Compute size of keyboard keys
-        int orientation = TRS80Application.getAppContext().getResources().getConfiguration().orientation;
-        int keyboardLayout;
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-            keyboardLayout = TRS80Application.getCurrentConfiguration()
-                    .getKeyboardLayoutLandscape();
-        } else {
-            keyboardLayout = TRS80Application.getCurrentConfiguration().getKeyboardLayoutPortrait();
-        }
+    public void computeKeyDimensions(Rect rect, int keyboardLayout) {
         // The maximum number of key "boxes" per row
         int maxKeyBoxes = 15;
         switch (keyboardLayout) {
@@ -241,23 +181,25 @@ abstract public class Hardware {
         keyMargin = (boxWidth - keyWidth) / 2;
     }
 
-    private void generateASCIIFont() {
+    private void generateASCIIFont(AsyncTask task) {
         String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        Configuration config = TRS80Application.getCurrentConfiguration();
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
-        Typeface tf = Fonts.getTypeface(config.getModel());
+        Typeface tf = Fonts.getTypeface(configuration.getModel());
         p.setTypeface(tf);
         p.setTextScaleX(1.0f);
-        p.setColor(config.getCharacterColorAsRGB());
+        p.setColor(configuration.getCharacterColorAsRGB());
         p.setAntiAlias(true);
         setFontSize(p);
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
         for (int i = 0; i < ascii.length(); i++) {
+            if (task.isCancelled()) {
+                return;
+            }
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(config.getScreenColorAsRGB());
+            c.drawColor(configuration.getScreenColorAsRGB());
             c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
             font[i + 32] = b;
         }
@@ -288,14 +230,16 @@ abstract public class Hardware {
         p.setTextSize(fontSize - delta);
     }
 
-    private void generateGraphicsFont() {
-        Configuration config = TRS80Application.getCurrentConfiguration();
+    private void generateGraphicsFont(AsyncTask task) {
         Paint p = new Paint();
         for (int i = 128; i <= 191; i++) {
+            if (task.isCancelled()) {
+                return;
+            }
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
-            c.drawColor(config.getScreenColorAsRGB());
-            p.setColor(config.getCharacterColorAsRGB());
+            c.drawColor(configuration.getScreenColorAsRGB());
+            p.setColor(configuration.getCharacterColorAsRGB());
             Rect r = new Rect();
             // Top-left
             if ((i & 1) != 0) {

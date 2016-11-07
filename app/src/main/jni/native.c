@@ -21,7 +21,6 @@
 #define ERR_GET_JVM -1
 #define ERR_GET_METHOD_IS_RENDERING -2
 #define ERR_GET_METHOD_UPDATE_SCREEN -3
-#define ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE -4
 #define ERR_GET_METHOD_XLOG -5
 #define ERR_GET_METHOD_NOT_IMPLEMENTED -10
 
@@ -31,7 +30,6 @@ static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
 static jmethodID rendererIsReadyMethodId;
 static jmethodID updateScreenMethodId;
-static jmethodID setExpandedScreenModeMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
 
@@ -48,6 +46,7 @@ extern Uchar memory[];
 
 unsigned char trs_screen[2048];
 static int screenUpdateRequired = 0;
+static int isForcedScreenUpdateRequired = 0;
 
 
 extern char *program_name;
@@ -202,23 +201,27 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     clear_paste_string();
 }
 
-void trigger_screen_update() {
+void trigger_screen_update(int force_update) {
     screenUpdateRequired = 1;
     JNIEnv *env = getEnv();
     jboolean isReady = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
             rendererIsReadyMethodId);
     if (!isReady) {
+        isForcedScreenUpdateRequired = force_update;
         return;
     }
     memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
     if (screenBufferIsCopy) {
         (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
     }
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId);
+    (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId,
+                                 force_update ? JNI_TRUE : JNI_FALSE);
     screenUpdateRequired = 0;
+    isForcedScreenUpdateRequired = 0;
 }
 
-int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
+JNIEXPORT jint JNICALL
+Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
     int status = (*env)->GetJavaVM(env, &jvm);
     if(status != 0) {
         return ERR_GET_JVM;
@@ -235,14 +238,9 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
     }
 
     updateScreenMethodId = (*env)->GetStaticMethodID(env, cls, "updateScreen",
-            "()V");
+            "(Z)V");
     if (updateScreenMethodId == 0) {
         return ERR_GET_METHOD_UPDATE_SCREEN;
-    }
-
-    setExpandedScreenModeMethodId = (*env)->GetStaticMethodID(env, cls, "setExpandedScreenMode", "(Z)V");
-    if (setExpandedScreenModeMethodId == 0) {
-        return ERR_GET_METHOD_SET_EXPANDED_SCREEN_MODE;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
@@ -257,25 +255,24 @@ int Java_org_puder_trs80_XTRS_init(JNIEnv* env, jclass cls, jobject hardware) {
         return ERR_GET_METHOD_NOT_IMPLEMENTED;
     }
 
-    jclass hardwareClass = (*env)->GetObjectClass(env, hardware);
-    jfieldID xtrsModelID = (*env)->GetFieldID(env, hardwareClass, "xtrsModel", "I");
-    jfieldID xtrsRomFileID = (*env)->GetFieldID(env, hardwareClass, "xtrsRomFile", "Ljava/lang/String;");
-    jfieldID xtrsScreenBufferID = (*env)->GetFieldID(env, hardwareClass, "xtrsScreenBuffer", "[B");
-    jfieldID xtrsEntryAddrID = (*env)->GetFieldID(env, hardwareClass, "xtrsEntryAddr", "I");
-    jfieldID xtrsCassetteID = (*env)->GetFieldID(env, hardwareClass, "xtrsCassette", "Ljava/lang/String;");
-    jfieldID xtrsDisk0ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk0", "Ljava/lang/String;");
-    jfieldID xtrsDisk1ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk1", "Ljava/lang/String;");
-    jfieldID xtrsDisk2ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk2", "Ljava/lang/String;");
-    jfieldID xtrsDisk3ID = (*env)->GetFieldID(env, hardwareClass, "xtrsDisk3", "Ljava/lang/String;");
-    jint xtrsModel = (*env)->GetIntField(env, hardware, xtrsModelID);
-    jstring xtrsRomFile = (*env)->GetObjectField(env, hardware, xtrsRomFileID);
-    jbyteArray xtrsScreenBuffer = (*env)->GetObjectField(env, hardware, xtrsScreenBufferID);
-    jint xtrsEntryAddr = (*env)->GetIntField(env, hardware, xtrsEntryAddrID);
-    jstring xtrsCassette = (*env)->GetObjectField(env, hardware, xtrsCassetteID);
-    jstring xtrsDisk0 = (*env)->GetObjectField(env, hardware, xtrsDisk0ID);
-    jstring xtrsDisk1 = (*env)->GetObjectField(env, hardware, xtrsDisk1ID);
-    jstring xtrsDisk2 = (*env)->GetObjectField(env, hardware, xtrsDisk2ID);
-    jstring xtrsDisk3 = (*env)->GetObjectField(env, hardware, xtrsDisk3ID);
+    jfieldID xtrsModelID = (*env)->GetStaticFieldID(env, cls, "xtrsModel", "I");
+    jfieldID xtrsRomFileID = (*env)->GetStaticFieldID(env, cls, "xtrsRomFile", "Ljava/lang/String;");
+    jfieldID xtrsScreenBufferID = (*env)->GetStaticFieldID(env, cls, "xtrsScreenBuffer", "[B");
+    jfieldID xtrsEntryAddrID = (*env)->GetStaticFieldID(env, cls, "xtrsEntryAddr", "I");
+    jfieldID xtrsCassetteID = (*env)->GetStaticFieldID(env, cls, "xtrsCassette", "Ljava/lang/String;");
+    jfieldID xtrsDisk0ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk0", "Ljava/lang/String;");
+    jfieldID xtrsDisk1ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk1", "Ljava/lang/String;");
+    jfieldID xtrsDisk2ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk2", "Ljava/lang/String;");
+    jfieldID xtrsDisk3ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk3", "Ljava/lang/String;");
+    jint xtrsModel = (*env)->GetStaticIntField(env, cls, xtrsModelID);
+    jstring xtrsRomFile = (*env)->GetStaticObjectField(env, cls, xtrsRomFileID);
+    jbyteArray xtrsScreenBuffer = (*env)->GetStaticObjectField(env, cls, xtrsScreenBufferID);
+    jint xtrsEntryAddr = (*env)->GetStaticIntField(env, cls, xtrsEntryAddrID);
+    jstring xtrsCassette = (*env)->GetStaticObjectField(env, cls, xtrsCassetteID);
+    jstring xtrsDisk0 = (*env)->GetStaticObjectField(env, cls, xtrsDisk0ID);
+    jstring xtrsDisk1 = (*env)->GetStaticObjectField(env, cls, xtrsDisk1ID);
+    jstring xtrsDisk2 = (*env)->GetStaticObjectField(env, cls, xtrsDisk2ID);
+    jstring xtrsDisk3 = (*env)->GetStaticObjectField(env, cls, xtrsDisk3ID);
 
     if (screenArray != NULL) {
         (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_ABORT);
@@ -324,7 +321,7 @@ void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
         while (isRunning) {
             z80_run(0);
             if (screenUpdateRequired) {
-                trigger_screen_update();
+                trigger_screen_update(isForcedScreenUpdateRequired);
             }
             if (reset_required) {
                 reset_required = 0;
@@ -364,9 +361,9 @@ jfloat Java_org_puder_trs80_XTRS_getCassettePosition(JNIEnv* e, jclass clazz) {
     return (jfloat) trs_get_cassette_position() / (jfloat) trs_get_cassette_length();
 }
 
-void set_expanded_screen_mode(int flag) {
-    JNIEnv *env = getEnv();
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, setExpandedScreenModeMethodId, (jboolean) flag);
+JNIEXPORT jboolean JNICALL
+Java_org_puder_trs80_XTRS_isExpandedMode(JNIEnv *env, jclass type) {
+    return is_expanded_mode() ? JNI_TRUE : JNI_FALSE;
 }
 
 void xlog(const char* msg) {

@@ -1,5 +1,6 @@
 <resources>
 
+    <dimen name="emulator_top_margin">0dp</dimen>
     <dimen name="configuration_screenshot_border">10dp</dimen>
     <dimen name="configuration_outer_horizontal_padding">30dp</dimen>
     <dimen name="configuration_outer_top_padding">60dp</dimen>
