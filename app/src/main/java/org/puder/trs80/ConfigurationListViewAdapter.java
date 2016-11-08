@@ -101,6 +101,9 @@ public class ConfigurationListViewAdapter extends
             int position = getAdapterPosition();
             switch (v.getId()) {
             case R.id.configuration_info:
+                if (listener.showHint()) {
+                    break;
+                }
             case R.id.configuration_back:
                 AnimationFactory.flipTransition(viewFlipper,
                         AnimationFactory.FlipDirection.LEFT_RIGHT);
@@ -118,6 +121,9 @@ public class ConfigurationListViewAdapter extends
                 listener.onConfigurationRun(configuration, position);
                 break;
             default:
+                if (listener.showHint()) {
+                    break;
+                }
                 if (viewFlipper.getDisplayedChild() == 0) {
                     listener.onConfigurationRun(configuration, position);
                 }

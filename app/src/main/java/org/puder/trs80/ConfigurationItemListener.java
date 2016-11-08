@@ -18,6 +18,8 @@ package org.puder.trs80;
 
 public interface ConfigurationItemListener {
 
+    boolean showHint();
+
     void onConfigurationEdit(Configuration configuration, int position);
 
     void onConfigurationDelete(Configuration configuration, int position);

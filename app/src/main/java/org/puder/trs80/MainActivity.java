@@ -42,6 +42,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 
@@ -115,6 +118,12 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         updateView(-1, -1, -1);
@@ -147,6 +156,12 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -154,6 +169,11 @@ public class MainActivity extends BaseActivity implements
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(ScreenshotTakenEvent event) {
+        updateView(currentConfigurationPosition, -1, -1);
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -252,7 +272,7 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onConfigurationRun(Configuration configuration, int position) {
-        runEmulator(configuration);
+        runEmulator(configuration, position);
     }
 
     @Override
@@ -351,7 +371,7 @@ public class MainActivity extends BaseActivity implements
         AlertDialogUtil.showDialog(this, builder);
     }
 
-    private void runEmulator(Configuration conf) {
+    private void runEmulator(Configuration conf, int position) {
         View root = findViewById(R.id.main);
 
         int model = conf.getModel();
@@ -370,6 +390,8 @@ public class MainActivity extends BaseActivity implements
                 return;
             }
         }
+
+        currentConfigurationPosition = position;
 
         Intent intent = new Intent(this, EmulatorActivity.class);
         intent.putExtra(EmulatorActivity.EXTRA_CONFIGURATION_ID, conf.getId());
@@ -448,6 +470,9 @@ public class MainActivity extends BaseActivity implements
             downloadMenuItem.setVisible(false);
         }
         updateView(-1, -1, -1);
-        AlertDialogUtil.showHint(MainActivity.this, R.string.hint_configuration_usage);
+    }
+
+    public boolean showHint() {
+        return AlertDialogUtil.showHint(this, R.string.hint_configuration_usage);
     }
 }

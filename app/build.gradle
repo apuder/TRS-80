@@ -83,6 +83,7 @@ android {
         compile 'com.google.android.gms:play-services-cast:+'
         compile 'commons-io:commons-io:2.4'
         compile 'org.simpleframework:simple-http:6.+'
+        compile 'org.greenrobot:eventbus:3.0.0'
         compile('com.crashlytics.sdk.android:crashlytics:2.6.4@aar') {
             transitive = true;
         }

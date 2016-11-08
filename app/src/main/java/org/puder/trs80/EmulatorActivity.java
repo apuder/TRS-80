@@ -51,6 +51,7 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.greenrobot.eventbus.EventBus;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.keyboard.KeyboardManager;
@@ -720,6 +721,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         if (renderThread != null && width > 0 && height > 0) {
             Bitmap screenshot = renderThread.takeScreenshot(currentHardware);
             EmulatorState.saveScreenshot(currentConfiguration.getId(), screenshot);
+            EventBus.getDefault().post(new ScreenshotTakenEvent());
         }
     }
 
