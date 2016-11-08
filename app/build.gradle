@@ -84,7 +84,7 @@ android {
         compile 'commons-io:commons-io:2.4'
         compile 'org.simpleframework:simple-http:6.+'
         compile 'org.greenrobot:eventbus:3.0.0'
-        compile('com.crashlytics.sdk.android:crashlytics:2.6.4@aar') {
+        compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
             transitive = true;
         }
         compile('com.crashlytics.sdk.android:crashlytics-ndk:1.1.5@aar') {
