@@ -171,9 +171,14 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         keyboardManager = new KeyboardManager(currentConfiguration);
         gameController = new GameController(this);
 
+        boolean isInMultiWindowMode = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            isInMultiWindowMode = isInMultiWindowMode();
+        }
+
         orientation = getResources().getConfiguration().orientation;
         if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-                && !isCasting) {
+                && !isCasting && !isInMultiWindowMode) {
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
