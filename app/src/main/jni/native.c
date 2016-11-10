@@ -114,15 +114,30 @@ static int ends_with(const char *str, const char *suffix)
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
+static void init_emulator() {
+    trs_main_init();
+    trs_cassette_init();
+    trs_disk__init();
+    trs_hard__init();
+    trs_interrupt_init();
+    trs_io_init();
+    trs_mem_init();
+    trs_keyboard_init();
+#ifndef ANDROID
+    trs_uart_init();
+#endif
+    trs_z80_init();
+}
+
 static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr, jstring xtrsCassette,
                       jstring xtrsDisk0, jstring xtrsDisk1, jstring xtrsDisk2, jstring xtrsDisk3) {
     int debug = FALSE;
 
-    /* program_name must be set first because the error
-     * printing routines use it. */
     program_name = "xtrs";
     check_endian();
     trs_model = model;
+    init_emulator();
+
     const char* path = (*env)->GetStringUTFChars(env, romFile, NULL);
     char* dest = NULL;
     switch(model) {

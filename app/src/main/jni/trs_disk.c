@@ -3908,3 +3908,23 @@ real_writetrk()
 #endif
 }
 
+#ifdef ANDROID
+void trs_disk__init()
+{
+  int i;
+
+  for (i=0;i<NDRIVES;i++) {
+    if (disk[i].file != NULL)
+      fclose(disk[i].file);
+      disk[i].file = NULL;
+  }
+  trs_disk_nocontroller = 0;
+  trs_disk_doubler = TRSDISK_BOTH;
+  trs_disk_holewidth = 0.01;
+  trs_disk_truedam = 0;
+  trs_disk_debug_flags = 0;
+  bzero(&state, sizeof(FDCState));
+  bzero(&other_state, sizeof(FDCState));
+  trs_disk_init(1);
+}
+#endif

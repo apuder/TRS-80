@@ -528,6 +528,18 @@ void trs_keyboard_load(FILE *file)
   fread(&trs_kb_bracket_state,1,sizeof(int),file);
 }
 
+#ifdef ANDROID
+void trs_keyboard_init()
+{
+    keystate[0] = 0;
+    force_shift = TK_Neutral;
+    joystate = 0;
+    bzero(&key_stretch_timeout, sizeof(tstate_t));
+    stretch_amount = STRETCH_AMOUNT;
+    trs_kb_bracket_state = 0;
+}
+#endif
+
 void trs_kb_reset()
 {
   key_stretch_timeout = z80_state.t_count;

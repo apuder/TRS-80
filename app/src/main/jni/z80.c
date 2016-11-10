@@ -4433,3 +4433,10 @@ void trs_z80_load(FILE *file)
   trs_load_uint64(file,(unsigned long long *)&last_t_count,1);
 }
 
+#ifdef ANDROID
+void trs_z80_init()
+{
+    bzero(&z80_state, sizeof(struct z80_state_struct));
+    last_t_count = 0;
+}
+#endif

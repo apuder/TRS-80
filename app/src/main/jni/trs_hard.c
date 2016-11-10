@@ -638,3 +638,16 @@ void trs_hard_load(FILE *file)
   }
 }
 
+#ifdef ANDROID
+void trs_hard__init()
+{
+  int i;
+
+  for (i=0;i<TRS_HARD_MAXDRIVES;i++) {
+    if (state.d[i].file != NULL)
+      fclose(state.d[i].file);
+      state.d[i].file = NULL;
+  }
+  trs_hard_init();
+}
+#endif

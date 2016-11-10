@@ -606,3 +606,27 @@ void trs_mem_load(FILE *file)
   }
 }
 
+#ifdef ANDROID
+void trs_mem_init()
+{
+	int i;
+
+	for (i = 0; i < 0x20001; i++) {
+		memory[i] = 0;
+	}
+	trs_rom_size = 0;
+	trs_video_size = 0;
+	memory_map = 0;
+	bank_offset[0] = 0;
+	bank_offset[1] = 0;
+	video_offset = (-VIDEO_START + VIDEO_PAGE_0);
+	romin = 0;
+	if (trs_model <= 3) {
+		rom = &memory[ROM_START];
+		video = &memory[VIDEO_START];
+	} else {
+		rom = rom_4;
+		video = video_4;
+	}
+}
+#endif

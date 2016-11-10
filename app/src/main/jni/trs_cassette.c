@@ -1420,3 +1420,53 @@ trs_cassette_load(FILE *file)
   }
 }
 
+#ifdef ANDROID
+void
+trs_cassette_init()
+{
+  int currentOpened = soundDeviceOpen;
+
+  cassette_filename[0] = 0;
+  cassette_position = 0;
+  cassette_format = DEFAULT_FORMAT;
+  cassette_state = CLOSE;
+  cassette_motor = 0;
+  cassette_avg = 0;
+  cassette_env = 0;
+  cassette_noisefloor = 0;
+  cassette_sample_rate = 0;
+  cassette_default_sample_rate = DEFAULT_SAMPLE_RATE;
+  cassette_stereo = 0;
+  cassette_silence = 0;
+  cassette_afmt = AUDIO_U8;
+  bzero(&last_sound, sizeof(tstate_t));
+  bzero(&cassette_transition, sizeof(tstate_t));
+  bzero(&cassette_firstoutread, sizeof(tstate_t));
+  cassette_value = 0;
+  cassette_next = 0;
+  cassette_flipflop = 0;
+  cassette_lastnonzero = 0;
+  cassette_transitionsout = 0;
+  cassette_delta = 0;
+  cassette_roundoff_error = 0;
+  cassette_byte = 0;
+  cassette_bitnumber = 0;
+  cassette_pulsestate = 0;
+  cassette_speed = SPEED_500;
+  orch90_left = 128;
+  orch90_right = 128;
+  SDL_LockAudio();
+  sound_ring_read_ptr = sound_ring;
+  sound_ring_write_ptr = sound_ring;
+  sound_ring_count = 0;
+  SDL_UnlockAudio();
+  soundDeviceOpen = FALSE;
+  if (currentOpened != soundDeviceOpen) {
+    if (soundDeviceOpen) {
+      set_audio_format(cassette_state);
+    } else {
+      SDL_CloseAudio();
+    }
+  }
+}
+#endif

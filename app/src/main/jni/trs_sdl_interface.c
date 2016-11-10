@@ -3484,3 +3484,23 @@ void trs_main_load(FILE *file)
   trs_load_int(file,&key_queue_head,1);
   trs_load_int(file,&key_queue_entries,1);
 }
+
+#ifdef ANDROID
+void trs_main_init()
+{
+  int i;
+
+  for (i = 0; i < 2048; i++) {
+    trs_screen[i] = 0;
+  };
+  screen_chars = 1024;
+  col_chars = 16;
+  row_chars = 64;
+  currentmode = NORMAL;
+  text80x24 = 0;
+  screen640x240 = 0;
+  trs_charset = 3;
+  key_queue_head = 0;
+  key_queue_entries = 0;
+}
+#endif

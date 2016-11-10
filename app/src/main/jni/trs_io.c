@@ -458,3 +458,12 @@ void trs_io_load(FILE *file)
   trs_load_int(file,&rominimage,1);
 }
 
+#ifdef ANDROID
+void trs_io_init()
+{
+  modesel = 0;
+  modeimage = 0x8;
+  ctrlimage = 0;
+  rominimage = 0;
+}
+#endif

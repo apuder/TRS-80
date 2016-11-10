@@ -659,3 +659,17 @@ void trs_interrupt_load(FILE *file)
   trs_load_int(file, &event_arg, 1);
 }
 
+#ifdef ANDROID
+void trs_interrupt_init()
+{
+    interrupt_latch = 0;
+    interrupt_mask = 0;
+    nmi_latch = 1;
+    timer_hz = 0;
+    cycles_per_timer = 0;
+    timer_on = 1;
+    saved_delay = 0;
+    event_func = NULL;
+    event_arg = 0;
+}
+#endif
