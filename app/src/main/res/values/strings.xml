@@ -128,7 +128,7 @@
     <string name="menu_reset">Reset</string>
     <string name="menu_sound_on">Sound On</string>
     <string name="menu_sound_off">Sound Off</string>
-    <string name="menu_tutorial">Tutorial</string>
+    <string name="menu_tutorial">TRS-80 Tutorial</string>
     <string name="rewinding_cassette">Rewinding cassette&#8230;</string>
 
     <!-- FileBrowserActivity -->

@@ -80,7 +80,7 @@
                 android:id="@+id/configuration_details"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.8"
+                android:stretchColumns="1"
                 android:layout_below="@+id/configuration_name_back"
                 android:layout_marginTop="@dimen/configuration_table_padding_top">
 
@@ -88,16 +88,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_item_hardware"/>
                     <TextView
                         android:id="@+id/configuration_model"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
 
                 <TableRow
@@ -105,16 +101,12 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/configuration_table_padding_vertical" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_item_disks"/>
                     <TextView
                         android:id="@+id/configuration_disks"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
 
                 <TableRow
@@ -122,16 +114,12 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/configuration_table_padding_vertical" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_cassette"/>
                     <TextView
                         android:id="@+id/configuration_cassette"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
 
                 <TableRow
@@ -139,16 +127,12 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/configuration_table_padding_vertical" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_item_sound"/>
                     <TextView
                         android:id="@+id/configuration_sound"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
 
                 <TableRow
@@ -156,16 +140,12 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/configuration_table_padding_vertical" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_item_keyboard_portrait"/>
                     <TextView
                         android:id="@+id/configuration_keyboard_portrait"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
 
                 <TableRow
@@ -173,16 +153,12 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/configuration_table_padding_vertical" >
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        style="@style/TableTextTheme"
                         android:paddingRight="@dimen/configuration_table_padding_horizontal"
                         android:text="@string/conf_item_keyboard_landscape"/>
                     <TextView
                         android:id="@+id/configuration_keyboard_landscape"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium" />
+                        style="@style/TableTextTheme" />
                 </TableRow>
             </TableLayout>
 

@@ -2,4 +2,5 @@
 <resources>
     <color name="key_color">#fff</color>
     <color name="tutorial_background">#11ffffff</color>
+    <color name="gray">#808080</color>
 </resources>

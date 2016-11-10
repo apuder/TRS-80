@@ -31,6 +31,8 @@ import com.tekle.oss.android.animation.AnimationFactory;
 
 import org.puder.trs80.drag.ItemTouchHelperAdapter;
 
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
+
 public class ConfigurationListViewAdapter extends
         RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {
 
@@ -99,6 +101,9 @@ public class ConfigurationListViewAdapter extends
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
+            if (position == NO_POSITION) {
+                return;
+            }
             switch (v.getId()) {
             case R.id.configuration_info:
                 if (listener.showHint()) {
