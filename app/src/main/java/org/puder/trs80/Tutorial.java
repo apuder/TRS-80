@@ -55,7 +55,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
             new Step(R.string.tutorial_step_2_cmd, R.string.tutorial_step_2, 1000),
             new Step(R.string.tutorial_step_3_cmd, R.string.tutorial_step_3, 100),
             new Step(R.string.tutorial_step_4_cmd, R.string.tutorial_step_4, 100),
-            new Step(R.string.tutorial_step_5_cmd, R.string.tutorial_step_5, 2000),
+            new Step(R.string.tutorial_step_5_cmd, R.string.tutorial_step_5, 3500),
             new Step(R.string.tutorial_step_6_cmd, R.string.tutorial_step_6, 1800),
             new Step(R.string.tutorial_step_7_cmd, R.string.tutorial_step_7, 500),
             new Step(R.string.tutorial_step_8_cmd, R.string.tutorial_step_8, 0), };
