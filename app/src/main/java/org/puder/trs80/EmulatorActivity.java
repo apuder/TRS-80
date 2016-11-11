@@ -724,9 +724,10 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         int width = currentHardware.getScreenWidth();
         int height = currentHardware.getScreenHeight();
         if (renderThread != null && width > 0 && height > 0) {
+            int id = currentConfiguration.getId();
             Bitmap screenshot = renderThread.takeScreenshot(currentHardware);
-            EmulatorState.saveScreenshot(currentConfiguration.getId(), screenshot);
-            EventBus.getDefault().post(new ScreenshotTakenEvent());
+            EmulatorState.saveScreenshot(id, screenshot);
+            EventBus.getDefault().post(new ScreenshotTakenEvent(id));
         }
     }
 

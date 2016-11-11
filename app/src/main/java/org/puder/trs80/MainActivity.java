@@ -64,7 +64,6 @@ public class MainActivity extends BaseActivity implements
 
     private RecyclerView         configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
-    private int                  currentConfigurationPosition;
     private SharedPreferences    sharedPrefs;
     private MenuItem             downloadMenuItem           = null;
 
@@ -173,7 +172,8 @@ public class MainActivity extends BaseActivity implements
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(ScreenshotTakenEvent event) {
-        updateView(currentConfigurationPosition, -1, -1);
+        int position = Configuration.getConfigurationPosition(event.configurationId);
+        updateView(position, -1, -1);
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
@@ -283,10 +283,12 @@ public class MainActivity extends BaseActivity implements
             }
             boolean isNew = data.getBooleanExtra("IS_NEW", false);
             if (resultCode == Activity.RESULT_OK) {
+                int id = data.getIntExtra("CONFIG_ID", -1);
+                int position = Configuration.getConfigurationPosition(id);
                 if (isNew) {
-                    updateView(-1, currentConfigurationPosition, -1);
+                    updateView(-1, position, -1);
                 } else {
-                    updateView(currentConfigurationPosition, -1, -1);
+                    updateView(position, -1, -1);
                 }
                 return;
             }
@@ -304,7 +306,6 @@ public class MainActivity extends BaseActivity implements
 
     private void addConfiguration() {
         Configuration currentConfiguration = Configuration.newConfiguration();
-        currentConfigurationPosition = Configuration.getCount();
         editConfiguration(currentConfiguration, true);
     }
 
@@ -390,8 +391,6 @@ public class MainActivity extends BaseActivity implements
                 return;
             }
         }
-
-        currentConfigurationPosition = position;
 
         Intent intent = new Intent(this, EmulatorActivity.class);
         intent.putExtra(EmulatorActivity.EXTRA_CONFIGURATION_ID, conf.getId());

@@ -90,6 +90,15 @@ public class Configuration {
         return null;
     }
 
+    public static int getConfigurationPosition(int id) {
+        for (int i = 0; i < configurations.size(); i++) {
+            if (configurations.get(i).getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static Configuration newConfiguration() {
         int nextId = globalPrefs.getInt("NEXT_ID", 0);
         nextId++;
