@@ -167,7 +167,7 @@ public class Main {
         author.setAuthorEmail(cli.getOptionValue(OPTION_EMAIL));
         listing.setAuthor(author);
         listing.setVersion(cli.getOptionValue(OPTION_VERSION));
-        listing.setPrice(Double.parseDouble(cli.getOptionValue(OPTION_PRICE, "0")));
+        //listing.setPrice(Double.parseDouble(cli.getOptionValue(OPTION_PRICE, "0")));
 
         String[] screenshots = cli.getOptionValues(OPTION_SCREENSHOT);
         List<String> screenshotsB64 = new ArrayList<>();
