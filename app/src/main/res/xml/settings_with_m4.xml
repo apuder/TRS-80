@@ -11,5 +11,13 @@
             android:title="@string/pref_rom_model3_title"
             android:summary="@string/pref_rom_model3_summary"
             android:key="conf_rom_model3" />
+        <Preference
+            android:title="@string/pref_rom_model4_title"
+            android:summary="@string/pref_rom_model4_summary"
+            android:key="conf_rom_model4" />
+        <Preference
+            android:title="@string/pref_rom_model4p_title"
+            android:summary="@string/pref_rom_model4p_summary"
+            android:key="conf_rom_model4p" />
     </PreferenceCategory>
 </PreferenceScreen>

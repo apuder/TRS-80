@@ -66,6 +66,7 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         romModel3.setOnPreferenceClickListener(listener);
         defaultRomModel3Summary = romModel3.getSummary();
 
+        /*
         romModel4 = findPreference(SettingsActivity.CONF_ROM_MODEL4);
         romModel4.setOnPreferenceChangeListener(this);
         romModel4.setOnPreferenceClickListener(listener);
@@ -75,7 +76,7 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         romModel4p.setOnPreferenceChangeListener(this);
         romModel4p.setOnPreferenceClickListener(listener);
         defaultRomModel4PSummary = romModel4p.getSummary();
-
+        */
         updateSummaries();
     }
 
@@ -84,10 +85,12 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         romModel1.setSummary(val != null ? val : defaultRomModel1Summary);
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL3, null);
         romModel3.setSummary(val != null ? val : defaultRomModel3Summary);
+        /*
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4, null);
         romModel4.setSummary(val != null ? val : defaultRomModel4Summary);
         val = sharedPrefs.getString(SettingsActivity.CONF_ROM_MODEL4P, null);
         romModel4p.setSummary(val != null ? val : defaultRomModel4PSummary);
+        */
     }
 
     @Override
