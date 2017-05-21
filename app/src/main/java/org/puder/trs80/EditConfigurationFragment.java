@@ -206,6 +206,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
+            configurationWasEdited = true;
             String newValue = data.getStringExtra("PATH");
             SharedPreferences.Editor editor = sharedPrefs.edit();
             String key;
