@@ -182,7 +182,6 @@ public class Hardware {
     }
 
     private void generateASCIIFont(AsyncTask task) {
-        String ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         Paint p = new Paint();
         p.setTextAlign(Align.CENTER);
         Typeface tf = Fonts.getTypeface(configuration.getModel());
@@ -193,21 +192,23 @@ public class Hardware {
         setFontSize(p);
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
-        for (int i = 0; i < ascii.length(); i++) {
+        for (int i = 0; i < 0xff; i++) {
             if (task.isCancelled()) {
                 return;
+            }
+            if (i >= 128 && i <= 191) {
+                // Graphic character. Skip. Will be generated in generateGraphicsFont()
+                continue;
             }
             Bitmap b = Bitmap.createBitmap(trsCharWidth, trsCharHeight, Bitmap.Config.RGB_565);
             Canvas c = new Canvas(b);
             c.drawColor(configuration.getScreenColorAsRGB());
-            c.drawText(ascii.substring(i, i + 1), xPos, yPos, p);
-            font[i + 32] = b;
-        }
-        // Use space for all other characters
-        for (int i = 0; i < font.length; i++) {
-            if (font[i] == null) {
-                font[i] = font[32];
-            }
+            // http://www.kreativekorp.com/software/fonts/trs80.shtml
+            // TRS font starts at code point 0xe000
+            int codePoint = 0xe000 + i;
+            char[] charPair = Character.toChars(codePoint);
+            c.drawText(charPair, 0, charPair.length, xPos, yPos, p);
+            font[i] = b;
         }
     }
 

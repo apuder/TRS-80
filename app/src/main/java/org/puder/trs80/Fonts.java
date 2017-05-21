@@ -20,7 +20,7 @@ import android.graphics.Typeface;
 
 public class Fonts {
     static public Typeface getTypeface(int model) {
-        String fontName = "fonts/DejaVuSansMono.ttf";
+        String fontName = null;
         switch (model) {
         case Hardware.MODEL1:
             fontName = "fonts/AnotherMansTreasureMIB64C2X3Y.ttf";
