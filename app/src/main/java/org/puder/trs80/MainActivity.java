@@ -285,6 +285,11 @@ public class MainActivity extends BaseActivity implements
             if (resultCode == Activity.RESULT_OK) {
                 int id = data.getIntExtra("CONFIG_ID", -1);
                 int position = Configuration.getConfigurationPosition(id);
+                // Delete emulator state
+                EmulatorState.deleteSavedState(id);
+                Configuration conf = Configuration.getConfigurationById(id);
+                conf.setCassettePosition(0);
+                // Update UI
                 if (isNew) {
                     updateView(-1, position, -1);
                 } else {
