@@ -192,7 +192,7 @@ public class Hardware {
         setFontSize(p);
         int xPos = trsCharWidth / 2;
         int yPos = (int) ((trsCharHeight / 2) - ((p.descent() + p.ascent()) / 2));
-        for (int i = 0; i < 0xff; i++) {
+        for (int i = 0; i <= 0xff; i++) {
             if (task.isCancelled()) {
                 return;
             }
