@@ -131,7 +131,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
                         data.get());
                 Log.i(TAG, "Adding ROM success: " + success);
             } else {
-                boolean success = localStore.addNewEntry(download.model,
+                boolean success = localStore.addNewConfiguration(download.model,
                         download.configurationName,
                         download.destinationFilename,
                         data.get());

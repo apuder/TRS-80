@@ -37,7 +37,7 @@ import java.io.IOException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * This class manages the installed ROMs.
+ * This class manages the installed ROMs and configuration resources.
  */
 public class LocalStore {
     private static final String TAG = "LocalStore";
@@ -88,17 +88,17 @@ public class LocalStore {
      * @param content    the byte content of the entry.
      * @return Whether the file was successfully added.
      */
-    public boolean addNewEntry(int model,
-                               String configName,
-                               String filename,
-                               byte[] content) {
+    public boolean addNewConfiguration(int model,
+                                       String configName,
+                                       String filename,
+                                       byte[] content) {
         ConfigurationBackup newConfig = new ConfigurationBackup(
                 Configuration.newConfiguration());
         newConfig.setName(configName);
         newConfig.setModel(model);
         newConfig.setDiskPath(0, getPathForFile(filename));
         newConfig.save();
-        return addNewEntry(filename, content);
+        return addNewFile(filename, content);
     }
 
     /**
@@ -115,7 +115,7 @@ public class LocalStore {
         SharedPreferences.Editor editor = getEditor();
         editor.putString(getKeyFromModel(model), getPathForFile(filename));
         editor.apply();
-        return addNewEntry(filename, content);
+        return addNewFile(filename, content);
     }
 
     private SharedPreferences.Editor getEditor() {
@@ -132,7 +132,7 @@ public class LocalStore {
      * @param content  the byte content of the new entry.
      * @return Whether the file was successfully added.
      */
-    private boolean addNewEntry(String filename, byte[] content) {
+    private boolean addNewFile(String filename, byte[] content) {
         // TODO: ROMs should go into their own sub-directories to avoid conflict.
         File newFile = new File(storePath, filename);
         if (newFile.exists()) {
