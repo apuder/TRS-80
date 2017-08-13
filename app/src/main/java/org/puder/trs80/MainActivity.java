@@ -47,29 +47,31 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
+import org.puder.trs80.localstore.LocalStore;
 
 import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private static final int     COLUMN_WIDTH_DP            = 300;
+    private static final int COLUMN_WIDTH_DP = 300;
 
-    private static final int     REQUEST_CODE_EDIT_CONFIG   = 1;
-    private static final int     REQUEST_CODE_EDIT_SETTINGS = 2;
+    private static final int REQUEST_CODE_EDIT_CONFIG = 1;
+    private static final int REQUEST_CODE_EDIT_SETTINGS = 2;
 
     // Action Menu
-    private static final int     MENU_OPTION_DOWNLOAD       = 0;
+    private static final int MENU_OPTION_DOWNLOAD = 0;
 
-    private RecyclerView         configurationListView;
+    private RecyclerView configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
-    private SharedPreferences    sharedPrefs;
-    private MenuItem             downloadMenuItem           = null;
+    private SharedPreferences sharedPrefs;
+    private MenuItem downloadMenuItem = null;
 
     private ActionBarDrawerToggle toggle;
 
-    private CastMessageSender    castMessageSender;
+    private CastMessageSender castMessageSender;
 
 
     @Override
@@ -83,12 +85,20 @@ public class MainActivity extends BaseActivity implements
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string
+                .navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         castMessageSender = CastMessageSender.get();
+        try {
+            LocalStore.initDefault(getResources());
+        } catch (IOException e) {
+            // Cannot really launch the app if initialization fails.
+            // TODO: Show an error message before exiting.
+            return;
+        }
 
         int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
         int numColumns =
@@ -105,7 +115,8 @@ public class MainActivity extends BaseActivity implements
         configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
 
-        ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback(configurationListViewAdapter);
+        ItemTouchHelper.Callback callback = new ConfigurationItemTouchHelperCallback
+                (configurationListViewAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(configurationListView);
     }
@@ -223,9 +234,9 @@ public class MainActivity extends BaseActivity implements
             return true;
         }
         switch (item.getItemId()) {
-        case MENU_OPTION_DOWNLOAD:
-            downloadROMs();
-            return true;
+            case MENU_OPTION_DOWNLOAD:
+                downloadROMs();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -415,7 +426,8 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void showSettings() {
-        startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_CODE_EDIT_SETTINGS);
+        startActivityForResult(new Intent(this, SettingsActivity.class),
+                REQUEST_CODE_EDIT_SETTINGS);
     }
 
     private void showHelp() {
@@ -437,7 +449,8 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void showCommunity() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.google_plus_url)));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string
+                .google_plus_url)));
         startActivity(browserIntent);
     }
 
@@ -465,7 +478,8 @@ public class MainActivity extends BaseActivity implements
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
         sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message));
         sendIntent.setType("text/plain");
-        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_title)));
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string
+                .share_title)));
     }
 
     @Override
@@ -477,6 +491,10 @@ public class MainActivity extends BaseActivity implements
     }
 
     public boolean showHint() {
-        return AlertDialogUtil.showHint(this, R.string.hint_configuration_usage);
+        return showHint(R.string.hint_configuration_usage);
+    }
+
+    public boolean showHint(int id) {
+        return AlertDialogUtil.showHint(this, id);
     }
 }

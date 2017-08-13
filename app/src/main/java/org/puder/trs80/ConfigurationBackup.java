@@ -44,7 +44,7 @@ public class ConfigurationBackup extends Configuration {
         return conf;
     }
 
-    protected ConfigurationBackup(Configuration other) {
+    public ConfigurationBackup(Configuration other) {
         super(other.id);
         this.backupName = other.getName();
         this.backupModel = other.getModel();
