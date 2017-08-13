@@ -76,6 +76,7 @@ android {
             mavenCentral()
         }
         //compile project (':tools:tpk')
+        compile 'com.google.guava:guava:20.0'
         compile 'com.android.support:design:25.3.1'
         compile 'com.android.support:appcompat-v7:25.3.1'
         compile 'com.android.support:mediarouter-v7:25.3.1'
@@ -98,3 +99,4 @@ crashlytics {
     androidNdkOut 'src/main/obj'
     androidNdkLibsOut 'src/main/libs'
 }
+
