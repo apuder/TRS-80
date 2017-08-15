@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name" translatable="false">TRS-80</string>
+    <string name="retrostore_activity_name" translatable="false">TRS-80 / RetroStore</string>
     <string name="chromecast_app_id" translatable="false">E0F0F42C</string>
     <string name="start_casting">Start Casting</string>
 

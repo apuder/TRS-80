@@ -135,11 +135,11 @@ public class LocalStore {
     private boolean addNewFile(String filename, byte[] content) {
         // TODO: ROMs should go into their own sub-directories to avoid conflict.
         File newFile = new File(storePath, filename);
-        if (newFile.exists()) {
-            // TODO: Should we override this in case there is an update?
-            Log.i(TAG, StrUtil.form("File already exists: '%s'.", newFile.getAbsolutePath()));
-            return false;
-        }
+//        if (newFile.exists()) {
+//            // TODO: Should we override this in case there is an update?
+//            Log.i(TAG, StrUtil.form("File already exists: '%s'.", newFile.getAbsolutePath()));
+//            return false;
+//        }
         try {
             FileOutputStream out = new FileOutputStream(newFile);
             out.write(content);

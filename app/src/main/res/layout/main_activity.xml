@@ -57,13 +57,29 @@
         </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            android:onClick="onFloatingActionButtonClicked"
+            android:onClick="onAddManualConfigBtnClicked"
             android:tint="@android:color/white"
             android:src="@drawable/add_icon"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            android:onClick="onRetrostoreBtnClicked"
+            android:src="@drawable/ic_shopping_cart_white_24dp"
+            app:layout_anchor="@id/fab"
+            app:layout_anchorGravity="top" />
 
     </android.support.design.widget.CoordinatorLayout>
 

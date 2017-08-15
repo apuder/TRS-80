@@ -38,9 +38,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -48,6 +50,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import org.puder.trs80.localstore.LocalStore;
+import org.retrostore.android.AppInstallListener;
+import org.retrostore.android.RetrostoreActivity;
+import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +84,12 @@ public class MainActivity extends BaseActivity implements
     public void onCreate(Bundle savedInstanceState) {
         // StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
+        RetrostoreActivity.addListener(new AppInstallListener() {
+            @Override
+            public void onInstallApp(App app) {
+                installApp(app);
+            }
+        });
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
         setContentView(R.layout.main_activity);
@@ -262,8 +274,14 @@ public class MainActivity extends BaseActivity implements
         return true;
     }
 
-    public void onFloatingActionButtonClicked(View view) {
+    public void onAddManualConfigBtnClicked(View view) {
         addConfiguration();
+    }
+
+    public void onRetrostoreBtnClicked(View view) {
+
+        Intent intent = new Intent(this, RetrostoreActivity.class);
+        MainActivity.this.startActivity(intent);
     }
 
     @Override
@@ -496,5 +514,15 @@ public class MainActivity extends BaseActivity implements
 
     public boolean showHint(int id) {
         return AlertDialogUtil.showHint(this, id);
+    }
+
+    public void installApp(App app) {
+        MediaImage mediaImage = app.getMediaImage(0);
+        Log.i("DEBUG", "=== MediaImageSize: " + mediaImage.getData().toByteArray().length);
+
+        LocalStore.getDefault().addNewConfiguration(
+                3, app.getName(), mediaImage.getFilename(), mediaImage.getData().toByteArray()
+        );
+        Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
     }
 }
