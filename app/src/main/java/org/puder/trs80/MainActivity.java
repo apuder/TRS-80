@@ -38,7 +38,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +53,7 @@ import org.retrostore.android.AppInstallListener;
 import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
+import org.retrostore.client.common.proto.Trs80Model;
 
 import java.io.File;
 import java.io.IOException;
@@ -518,11 +518,27 @@ public class MainActivity extends BaseActivity implements
 
     public void installApp(App app) {
         MediaImage mediaImage = app.getMediaImage(0);
-        Log.i("DEBUG", "=== MediaImageSize: " + mediaImage.getData().toByteArray().length);
-
         LocalStore.getDefault().addNewConfiguration(
-                3, app.getName(), mediaImage.getFilename(), mediaImage.getData().toByteArray()
+                getHardwareModelId(app.getTrs80Params().getModel()), app.getName(), mediaImage
+                        .getFilename(), mediaImage.getData().toByteArray()
         );
         Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
+    }
+
+    private static int getHardwareModelId(Trs80Model model) {
+        switch (model) {
+            case MODEL_I:
+                return 1;
+            case MODEL_III:
+                return 3;
+            case MODEL_4:
+                return 4;
+            case MODEL_4P:
+                return 5;
+            default:
+            case UNKNOWN_MODEL:
+            case UNRECOGNIZED:
+                return 0;
+        }
     }
 }
