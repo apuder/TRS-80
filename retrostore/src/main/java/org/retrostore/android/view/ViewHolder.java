@@ -52,13 +52,13 @@ public class ViewHolder extends RecyclerView.ViewHolder {
     public void setData(final App app, final AppInstallListener installListener) {
         mAppNameView.setText(app.getName());
         mAppDescriptionView.setText(app.getDescription());
-        // TODO: mAuthorView.setText(app.getAuthor);
+        mAuthorView.setText(app.getAuthor());
         mVersionView.setText(getFormattedString(R.string.app_version, app.getVersion()));
         if (app.getScreenshotUrlCount() > 0) {
             mImageLoader.loadUrlIntoView(app.getScreenshotUrl(0), mThumbnailView);
             // TODO: Add an icon to indicate that loading failed.
         } else {
-            // TODO: Display something indicating that there is no screenshots.
+            // TODO: Display something indicating that there are no screenshots.
         }
         this.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
