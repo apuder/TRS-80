@@ -56,7 +56,8 @@ public class LocalStore {
      */
     public static void initDefault(Resources res) throws IOException {
         if (singleton != null) {
-            throw new IOException("LocalStore already initialized.");
+            Log.i(TAG, "LocalStore singleton already initialized.");
+            return;
         }
 
         File sdcard = Environment.getExternalStorageDirectory();
