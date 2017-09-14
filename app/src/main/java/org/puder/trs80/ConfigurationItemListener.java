@@ -16,6 +16,8 @@
 
 package org.puder.trs80;
 
+import org.puder.trs80.configuration.Configuration;
+
 public interface ConfigurationItemListener {
 
     boolean showHint();

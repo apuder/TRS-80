@@ -20,7 +20,7 @@ import org.puder.trs80.Hardware;
 import org.puder.trs80.InitialSetupDialogFragment;
 
 /**
- * ROMs and entries to be downloaded initially when the app starts up.
+ * RomManager and entries to be downloaded initially when the app starts up.
  */
 public class InitialDownloads {
 

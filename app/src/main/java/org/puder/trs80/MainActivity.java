@@ -38,17 +38,23 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.common.base.Optional;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.puder.trs80.cast.CastMessageSender;
+import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.ConfigurationManager;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
-import org.puder.trs80.localstore.LocalStore;
+import org.puder.trs80.io.FileManager;
+import org.puder.trs80.localstore.RomManager;
 import org.retrostore.android.AppInstallListener;
 import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.client.common.proto.App;
@@ -61,6 +67,10 @@ import java.io.IOException;
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
         NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "MainActivity";
+
+    private static final String EXTRA_KEY_NEW_CONFIG_ID = "CONFIG_ID";
+    private static final String EXTRA_KEY_IS_NEW = "IS_NEW";
 
     private static final int COLUMN_WIDTH_DP = 300;
 
@@ -76,7 +86,10 @@ public class MainActivity extends BaseActivity implements
     private MenuItem downloadMenuItem = null;
 
     private ActionBarDrawerToggle toggle;
+    private Configuration backupConfiguration;
 
+    private ConfigurationManager configManager;
+    private RomManager romManager;
     private CastMessageSender castMessageSender;
 
 
@@ -103,14 +116,20 @@ public class MainActivity extends BaseActivity implements
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        castMessageSender = CastMessageSender.get();
+        FileManager.Creator fileManagerCreator = FileManager.Creator.get(getResources());
+
         try {
-            LocalStore.initDefault(getResources());
+            configManager = ConfigurationManager.initDefault(
+                    fileManagerCreator, getApplicationContext());
+            romManager = RomManager.init(fileManagerCreator);
         } catch (IOException e) {
+            Log.e(TAG, "Cannot initialize RomManager / ConfigurationManager.", e);
+            finish();
             // Cannot really launch the app if initialization fails.
             // TODO: Show an error message before exiting.
             return;
         }
+        castMessageSender = CastMessageSender.get();
 
         int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
         int numColumns =
@@ -122,7 +141,8 @@ public class MainActivity extends BaseActivity implements
         } else {
             lm = new GridLayoutManager(this, numColumns);
         }
-        configurationListViewAdapter = new ConfigurationListViewAdapter(this, numColumns);
+        configurationListViewAdapter = new ConfigurationListViewAdapter(
+                configManager, this, numColumns);
         configurationListView = (RecyclerView) this.findViewById(R.id.list_configurations);
         configurationListView.setLayoutManager(lm);
         configurationListView.setAdapter(configurationListViewAdapter);
@@ -162,7 +182,7 @@ public class MainActivity extends BaseActivity implements
         editor.putBoolean(SettingsActivity.CONF_RAN_NEW_ASSISTANT, true);
         editor.apply();
 
-        if (!ranNewAssistant || (!ROMs.hasROMs() && firstTime)) {
+        if (!ranNewAssistant || (!romManager.hasAllRoms() && firstTime)) {
             downloadROMs();
         }
     }
@@ -195,14 +215,14 @@ public class MainActivity extends BaseActivity implements
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(ScreenshotTakenEvent event) {
-        int position = Configuration.getConfigurationPosition(event.configurationId);
+        int position = configManager.getPositionOfConfigWithId(event.configurationId);
         updateView(position, -1, -1);
     }
 
     private void updateView(int positionChanged, int positionInserted, int positionDeleted) {
         View withoutConfigurationsView = this.findViewById(R.id.without_configurations);
         View withConfigurationsView = this.findViewById(R.id.with_configurations);
-        if (Configuration.getCount() == 0) {
+        if (configManager.getConfigCount() == 0) {
             withoutConfigurationsView.setVisibility(View.VISIBLE);
             withConfigurationsView.setVisibility(View.GONE);
             return;
@@ -231,7 +251,7 @@ public class MainActivity extends BaseActivity implements
                 .getActionView(mediaRouteItem);
         mediaRouteButton.setRouteSelector(castMessageSender.getRouteSelector());
 
-        if (!ROMs.hasROMs()) {
+        if (!romManager.hasAllRoms()) {
             downloadMenuItem = menu.add(Menu.NONE, MENU_OPTION_DOWNLOAD, Menu.NONE,
                     this.getString(R.string.menu_download));
             downloadMenuItem.setIcon(R.drawable.download_icon);
@@ -310,14 +330,20 @@ public class MainActivity extends BaseActivity implements
             if (data == null) {
                 return;
             }
-            boolean isNew = data.getBooleanExtra("IS_NEW", false);
+            boolean isNew = data.getBooleanExtra(EXTRA_KEY_IS_NEW, false);
             if (resultCode == Activity.RESULT_OK) {
-                int id = data.getIntExtra("CONFIG_ID", -1);
-                int position = Configuration.getConfigurationPosition(id);
+                int id = data.getIntExtra(EXTRA_KEY_NEW_CONFIG_ID, -1);
+                int position = configManager.getPositionOfConfigWithId(id);
                 // Delete emulator state
-                EmulatorState.deleteSavedState(id);
-                Configuration conf = Configuration.getConfigurationById(id);
-                conf.setCassettePosition(0);
+                try {
+                    configManager.getEmulatorState(id).deleteSavedState();
+                } catch (IOException e) {
+                    Log.e(TAG, "Could not delete emulator state.", e);
+                }
+                Optional<Configuration> conf = configManager.getConfigById(id);
+                if (conf.isPresent()) {
+                    conf.get().setCassettePosition(0f);
+                }
                 // Update UI
                 if (isNew) {
                     updateView(-1, position, -1);
@@ -326,28 +352,28 @@ public class MainActivity extends BaseActivity implements
                 }
                 return;
             }
-            ConfigurationBackup backup = ConfigurationBackup.retrieveBackup();
-            if (backup == null) {
+            if (backupConfiguration == null) {
                 return;
             }
             if (isNew) {
-                backup.delete();
+                configManager.deleteConfigWithId(backupConfiguration.getId());
             } else {
-                backup.save();
+                configManager.persistConfig(backupConfiguration);
             }
+            backupConfiguration = null;
         }
     }
 
     private void addConfiguration() {
-        Configuration currentConfiguration = Configuration.newConfiguration();
+        Configuration currentConfiguration = configManager.newConfiguration();
         editConfiguration(currentConfiguration, true);
     }
 
     private void editConfiguration(Configuration conf, boolean isNew) {
-        conf.backup();
+        backupConfiguration = conf.createBackup();
         Intent i = new Intent(this, EditConfigurationActivity.class);
-        i.putExtra("CONFIG_ID", conf.getId());
-        i.putExtra("IS_NEW", isNew);
+        i.putExtra(EXTRA_KEY_NEW_CONFIG_ID, conf.getId());
+        i.putExtra(EXTRA_KEY_IS_NEW, isNew);
         startActivityForResult(i, REQUEST_CODE_EDIT_CONFIG);
     }
 
@@ -360,7 +386,7 @@ public class MainActivity extends BaseActivity implements
             @Override
             public void onClick(DialogInterface d, int which) {
                 AlertDialogUtil.dismissDialog(MainActivity.this);
-                conf.delete();
+                configManager.deleteConfigWithId(conf.getId());
                 updateView(-1, -1, position);
             }
 
@@ -387,7 +413,11 @@ public class MainActivity extends BaseActivity implements
             @Override
             public void onClick(DialogInterface d, int which) {
                 AlertDialogUtil.dismissDialog(MainActivity.this);
-                EmulatorState.deleteSavedState(conf.getId());
+                try {
+                    configManager.getEmulatorState(conf.getId()).deleteSavedState();
+                } catch (IOException e) {
+                    Log.e(TAG, "Could not delete emulator state.", e);
+                }
                 conf.setCassettePosition(0);
                 updateView(position, -1, -1);
             }
@@ -407,6 +437,7 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void runEmulator(Configuration conf, int position) {
+        Log.i(TAG, "RUN EMULATOR");
         View root = findViewById(R.id.main);
 
         int model = conf.getModel();
@@ -416,12 +447,12 @@ public class MainActivity extends BaseActivity implements
         }
 
 
-        if (!ROMs.hasROMs()) {
+        if (!romManager.hasAllRoms()) {
             Snackbar.make(root, R.string.error_no_rom, Snackbar.LENGTH_LONG).show();
             return;
         }
         for (int i = 0; i < 4; i++) {
-            if (!checkIfFileExists(conf.getDiskPath(i), true, R.string.error_no_disk)) {
+            if (!checkIfFileExists(conf.getDiskPath(i).orNull(), true, R.string.error_no_disk)) {
                 return;
             }
         }
@@ -518,7 +549,7 @@ public class MainActivity extends BaseActivity implements
 
     public void installApp(App app) {
         MediaImage mediaImage = app.getMediaImage(0);
-        LocalStore.getDefault().addNewConfiguration(
+        configManager.addNewConfiguration(
                 getHardwareModelId(app.getTrs80Params().getModel()), app.getName(), mediaImage
                         .getFilename(), mediaImage.getData().toByteArray()
         );

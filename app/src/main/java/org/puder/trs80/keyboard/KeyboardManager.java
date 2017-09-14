@@ -23,7 +23,6 @@ import android.view.KeyEvent;
 import org.puder.trs80.R;
 import org.puder.trs80.TRS80Application;
 import org.puder.trs80.XTRS;
-import org.puder.trs80.Configuration;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -41,7 +40,6 @@ public class KeyboardManager {
      */
     final static private int KEY_UP_DELAY = 100;
 
-    private Configuration configuration;
     private List<Key>     shiftableKeys;
     private int           pressedShiftKey;
 
@@ -97,9 +95,8 @@ public class KeyboardManager {
         return keyMap;
     }
 
-    public KeyboardManager(Configuration configuration) {
-        this.configuration = configuration;
-        shiftableKeys = new ArrayList<Key>();
+    public KeyboardManager() {
+        shiftableKeys = new ArrayList<>();
         pressedShiftKey = Key.TK_NONE;
     }
 
@@ -261,7 +258,7 @@ public class KeyboardManager {
 
     private int mapKeyEventToTRS(KeyEvent event) {
         int keyCode = event.getKeyCode();
-        int keyController = configuration.mapGameControllerButton(keyCode);
+        int keyController = mapGameControllerButton(keyCode);
         if (keyController != Key.TK_NONE) {
             return keyController;
         }
@@ -351,6 +348,24 @@ public class KeyboardManager {
             return Key.TK_MINUS;
         case 0x8:
             return Key.TK_LEFT;
+        }
+        return Key.TK_NONE;
+    }
+
+    private int mapGameControllerButton(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_L1:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_R1:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_X:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_Y:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_B:
+                return Key.TK_SPACE;
+            case KeyEvent.KEYCODE_BUTTON_A:
+                return Key.TK_SPACE;
         }
         return Key.TK_NONE;
     }

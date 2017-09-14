@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -50,19 +51,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.common.base.Optional;
 
 import org.greenrobot.eventbus.EventBus;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
+import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.ConfigurationManager;
+import org.puder.trs80.configuration.EmulatorState;
+import org.puder.trs80.configuration.KeyboardLayout;
+import org.puder.trs80.io.FileManager;
 import org.puder.trs80.keyboard.KeyboardManager;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.puder.trs80.configuration.KeyboardLayout.KEYBOARD_EXTERNAL;
+import static org.puder.trs80.configuration.KeyboardLayout.KEYBOARD_GAME_CONTROLLER;
+import static org.puder.trs80.configuration.KeyboardLayout.KEYBOARD_TILT;
 
 public class EmulatorActivity extends BaseActivity implements SensorEventListener,
         GameControllerListener, OnGlobalLayoutListener {
 
     public static final String  EXTRA_CONFIGURATION_ID = "conf_id";
+    private static final String TAG = "EmulatorActivity";
 
     // Action Menu
     private static final int   MENU_OPTION_PAUSE     = 0;
@@ -75,6 +88,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private static final int   MENU_OPTION_HELP      = 7;
 
     private Configuration      currentConfiguration;
+    private EmulatorState      emulatorState;
     private Hardware           currentHardware;
     private Thread             cpuThread;
     private RenderThread       renderThread;
@@ -161,14 +175,24 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void init(Bundle savedInstanceState, int id) {
+        try {
+            emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get(getResources()));
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot create emulator state.", e);
+            return;
+        }
         isCasting = CastMessageSender.get().isReadyToSend();
-
-        currentConfiguration = Configuration.getConfigurationById(id);
+        ConfigurationManager configManager = ConfigurationManager.getDefault();
+        Optional<Configuration> configOpt = configManager.getConfigById(id);
+        if (!configOpt.isPresent()) {
+            return;
+        }
+        currentConfiguration = configOpt.get();
         currentHardware = new Hardware(currentConfiguration);
 
         clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
-        keyboardManager = new KeyboardManager(currentConfiguration);
+        keyboardManager = new KeyboardManager();
         gameController = new GameController(this);
 
         boolean isInMultiWindowMode = false;
@@ -189,14 +213,14 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState == null) {
-            int err = XTRS.init(currentConfiguration);
+            int err = XTRS.init(currentConfiguration, emulatorState);
             if (err != 0) {
                 //showError(err);
                 finish();
                 return;
             }
             RemoteCastScreen.get().sendConfiguration(currentConfiguration);
-            EmulatorState.loadState(id);
+            emulatorState.loadState();
         }
     }
 
@@ -217,7 +241,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         updateMenuIcons();
 
         RemoteCastScreen.get().startSession();
-        if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
+        if (getKeyboardType() == KEYBOARD_TILT) {
             startAccelerometer();
         }
 
@@ -274,7 +298,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         isStopped = true;
         removeGlobalLayoutListener();
         RemoteCastScreen.get().endSession();
-        if (getKeyboardType() == Configuration.KEYBOARD_TILT) {
+        if (getKeyboardType() == KEYBOARD_TILT) {
             stopAccelerometer();
         }
         if (taskSetup != null) {
@@ -306,7 +330,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                 this.getString(R.string.menu_paste));
         MenuItemCompat.setShowAsAction(pasteMenuItem.setIcon(R.drawable.paste_icon),
                 MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
-        if (currentConfiguration.muteSound()) {
+        if (currentConfiguration.isSoundMuted()) {
             // Mute sound permanently and don't show mute/unmute icons
             setSoundMuted(true);
         } else {
@@ -429,16 +453,21 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                 R.array.conf_keyboard_type));
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this);
         builder.setSingleChoiceItems(keyboardTypes.toArray(new String[keyboardTypes.size()]),
-                getKeyboardType(), new DialogInterface.OnClickListener() {
+                getKeyboardType().id, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AlertDialogUtil.dismissDialog(EmulatorActivity.this);
+                        Optional<KeyboardLayout> layout = KeyboardLayout.fromId(which);
+                        if (!layout.isPresent()) {
+                            return;
+                        }
+
                         switch (orientation) {
                         case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-                            currentConfiguration.setKeyboardLayoutLandscape(which);
+                            currentConfiguration.setKeyboardLayoutLandscape(layout.get());
                             break;
                         default:
-                            currentConfiguration.setKeyboardLayoutPortrait(which);
+                            currentConfiguration.setKeyboardLayoutPortrait(layout.get());
                             break;
                         }
                         initKeyboardView();
@@ -503,7 +532,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         }
         cpuThread = null;
         currentConfiguration.setCassettePosition(XTRS.getCassettePosition());
-        EmulatorState.saveState(currentConfiguration.getId());
+        emulatorState.saveState();
     }
 
     private void startAccelerometer() {
@@ -545,10 +574,10 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         stopAccelerometer();
         keyboardContainer = (ViewGroup) findViewById(R.id.keyboard_container);
         keyboardContainer.removeAllViews();
-        final int keyboardType = getKeyboardType();
+        final KeyboardLayout keyboardType = getKeyboardType();
         showKeyboardHint(keyboardType);
-        if (keyboardType == Configuration.KEYBOARD_GAME_CONTROLLER
-                || keyboardType == Configuration.KEYBOARD_EXTERNAL) {
+        if (keyboardType == KEYBOARD_GAME_CONTROLLER
+                || keyboardType == KEYBOARD_EXTERNAL) {
             keyboardContainer.getRootView().findViewById(R.id.switch_keyboard)
                     .setVisibility(View.GONE);
             return;
@@ -563,16 +592,16 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
         int layoutId = 0;
         switch (keyboardType) {
-        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+        case KEYBOARD_LAYOUT_COMPACT:
             layoutId = R.layout.keyboard_compact;
             break;
-        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+        case KEYBOARD_LAYOUT_ORIGINAL:
             layoutId = R.layout.keyboard_original;
             break;
-        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+        case KEYBOARD_LAYOUT_JOYSTICK:
             layoutId = R.layout.keyboard_joystick;
             break;
-        case Configuration.KEYBOARD_TILT:
+        case KEYBOARD_TILT:
             layoutId = R.layout.keyboard_tilt;
             break;
         }
@@ -608,7 +637,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             }
         });
         keyboardContainer.requestLayout();
-        if (keyboardType == Configuration.KEYBOARD_TILT) {
+        if (keyboardType == KEYBOARD_TILT) {
             startAccelerometer();
         }
     }
@@ -662,16 +691,16 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
-    private void showKeyboardHint(int keyboardType) {
+    private void showKeyboardHint(KeyboardLayout keyboardType) {
         int messageId = -1;
         switch (keyboardType) {
-        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+        case KEYBOARD_LAYOUT_JOYSTICK:
             messageId = R.string.hint_keyboard_joystick;
             break;
-        case Configuration.KEYBOARD_TILT:
+        case KEYBOARD_TILT:
             messageId = R.string.hint_keyboard_tilt;
             break;
-        case Configuration.KEYBOARD_EXTERNAL:
+        case KEYBOARD_EXTERNAL:
             messageId = R.string.hint_keyboard_external;
             break;
         }
@@ -697,22 +726,27 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         new Tutorial(keyboardManager, findViewById(R.id.emulator)).show();
     }
 
-    private int getKeyboardType() {
+    private KeyboardLayout getKeyboardType() {
         final android.content.res.Configuration conf = getResources().getConfiguration();
         if (conf.keyboard != android.content.res.Configuration.KEYBOARD_NOKEYS) {
-            return Configuration.KEYBOARD_EXTERNAL;
+            return KEYBOARD_EXTERNAL;
         }
 
-        int keyboardType;
+
+        Optional<KeyboardLayout> landscape = currentConfiguration.getKeyboardLayoutLandscape();
+        Optional<KeyboardLayout> portrait = currentConfiguration.getKeyboardLayoutPortrait();
+
         switch (orientation) {
-        case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
-            keyboardType = currentConfiguration.getKeyboardLayoutLandscape();
-            break;
-        default:
-            keyboardType = currentConfiguration.getKeyboardLayoutPortrait();
-            break;
+            case android.content.res.Configuration.ORIENTATION_LANDSCAPE:
+                if (landscape.isPresent()) {
+                    return landscape.get();
+                }
+            default:
+                if (portrait.isPresent()) {
+                    return portrait.get();
+                }
         }
-        return keyboardType;
+        return KeyboardLayout.KEYBOARD_LAYOUT_ORIGINAL;
     }
 
     private void setSoundMuted(boolean muted) {
@@ -726,7 +760,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         if (renderThread != null && width > 0 && height > 0) {
             int id = currentConfiguration.getId();
             Bitmap screenshot = renderThread.takeScreenshot(currentHardware);
-            EmulatorState.saveScreenshot(id, screenshot);
+            emulatorState.saveScreenshot(screenshot);
             EventBus.getDefault().post(new ScreenshotTakenEvent(id));
         }
     }
@@ -829,9 +863,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         TRS80Application.setCrashedFlag(true);
         Crashlytics.setString("NOT_IMPLEMENTED", msg);
         Crashlytics.setInt("MODEL", currentConfiguration.getModel());
-        Crashlytics.setString("NAME", currentConfiguration.getName());
-        String path = currentConfiguration.getDiskPath(0);
-        Crashlytics.setString("DISK_0", path == null ? "-" : path);
+        Crashlytics.setString("NAME", currentConfiguration.getName().or("-"));
+        Optional<String> path = currentConfiguration.getDiskPath(0);
+        Crashlytics.setString("DISK_0", path.or("-"));
         throw new RuntimeException();
     }
 

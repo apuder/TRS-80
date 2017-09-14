@@ -24,18 +24,6 @@ import android.view.View;
 
 public class EditConfigurationActivity extends BaseActivity {
 
-    public static final String CONF_NAME               = "conf_name";
-    public static final String CONF_MODEL              = "conf_model";
-    public static final String CONF_CASSETTE           = "conf_cassette";
-    public static final String CONF_DISK1              = "conf_disk1";
-    public static final String CONF_DISK2              = "conf_disk2";
-    public static final String CONF_DISK3              = "conf_disk3";
-    public static final String CONF_DISK4              = "conf_disk4";
-    public static final String CONF_CHARACTER_COLOR    = "conf_character_color";
-    public static final String CONF_KEYBOARD_PORTRAIT  = "conf_keyboard_portrait";
-    public static final String CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape";
-    public static final String CONF_MUTE_SOUND         = "conf_mute_sound";
-
     // Action Menu
     private static final int   MENU_OPTION_CANCEL      = 0;
     private static final int   MENU_OPTION_HELP        = 1;

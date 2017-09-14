@@ -18,23 +18,28 @@ package org.puder.trs80;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 
+import com.google.common.base.Optional;
+
 import org.puder.trs80.browser.FileBrowserActivity;
+import org.puder.trs80.configuration.ConfigurationPersistence;
+import org.puder.trs80.configuration.ConfigurationPersistence.PreferenceFinder;
+import org.puder.trs80.configuration.ConfigurationPersistence.PreferenceProvider;
 
 public class EditConfigurationFragment extends PreferenceFragment implements
         OnPreferenceChangeListener {
 
-    private SharedPreferences sharedPrefs;
     private Handler           handler;
 
     private boolean           configurationWasEdited;
 
+    private ConfigurationPersistence  configPersitence;
+    private PreferenceFinder  prefFinder;
     private Preference        model;
     private Preference        name;
     private Preference        cassette;
@@ -46,11 +51,11 @@ public class EditConfigurationFragment extends PreferenceFragment implements
     private Preference        keyboardPortrait;
     private Preference        keyboardLandscape;
 
-    private CharSequence      defaultCassetteSummary;
-    private CharSequence      defaultDisk1Summary;
-    private CharSequence      defaultDisk2Summary;
-    private CharSequence      defaultDisk3Summary;
-    private CharSequence      defaultDisk4Summary;
+    private String      defaultCassetteSummary;
+    private String      defaultDisk1Summary;
+    private String      defaultDisk2Summary;
+    private String      defaultDisk3Summary;
+    private String      defaultDisk4Summary;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,17 +64,23 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         handler = new Handler();
         Intent i = getActivity().getIntent();
         int configId = i.getExtras().getInt("CONFIG_ID");
-        getPreferenceManager().setSharedPreferencesName("CONFIG_" + configId);
+        configPersitence = ConfigurationPersistence.forIdAndManager(
+                configId, getPreferenceManager());
+        prefFinder = configPersitence.forPreferenceProvider(new PreferenceProvider() {
+            @Override
+            public Preference findPreference(String name) {
+                return EditConfigurationFragment.this.findPreference(name);
+            }
+        });
         addPreferencesFromResource(R.xml.configuration);
-        sharedPrefs = this.getPreferenceManager().getSharedPreferences();// this.getPreferences(MODE_PRIVATE);
-        name = findPreference(EditConfigurationActivity.CONF_NAME);
+        name = prefFinder.forName();
         name.setOnPreferenceChangeListener(this);
         Preference.OnPreferenceClickListener listener = new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference pref) {
                 String key = pref.getKey();
                 int requestCode;
-                if (key.equals(EditConfigurationActivity.CONF_CASSETTE)) {
+                if (key.equals("conf_cassette")) {
                     requestCode = 0;
                 } else {
                     requestCode = Integer.parseInt(key.substring(key.length() - 1));
@@ -80,53 +91,54 @@ public class EditConfigurationFragment extends PreferenceFragment implements
             }
         };
 
-        cassette = findPreference(EditConfigurationActivity.CONF_CASSETTE);
+        cassette = prefFinder.forCasette();
         cassette.setOnPreferenceChangeListener(this);
         cassette.setOnPreferenceClickListener(listener);
-        defaultCassetteSummary = cassette.getSummary();
+        defaultCassetteSummary = cassette.getSummary().toString();
 
-        disk1 = findPreference(EditConfigurationActivity.CONF_DISK1);
+        disk1 = prefFinder.forDisk1();
         disk1.setOnPreferenceChangeListener(this);
         disk1.setOnPreferenceClickListener(listener);
-        defaultDisk1Summary = disk1.getSummary();
+        defaultDisk1Summary = disk1.getSummary().toString();
 
-        disk2 = findPreference(EditConfigurationActivity.CONF_DISK2);
+        disk2 = prefFinder.forDisk2();
         disk2.setOnPreferenceChangeListener(this);
         disk2.setOnPreferenceClickListener(listener);
-        defaultDisk2Summary = disk2.getSummary();
+        defaultDisk2Summary = disk2.getSummary().toString();
 
-        disk3 = findPreference(EditConfigurationActivity.CONF_DISK3);
+        disk3 = prefFinder.forDisk3();
         disk3.setOnPreferenceChangeListener(this);
         disk3.setOnPreferenceClickListener(listener);
-        defaultDisk3Summary = disk3.getSummary();
+        defaultDisk3Summary = disk3.getSummary().toString();
 
-        disk4 = findPreference(EditConfigurationActivity.CONF_DISK4);
+        disk4 = prefFinder.forDisk4();
         disk4.setOnPreferenceChangeListener(this);
         disk4.setOnPreferenceClickListener(listener);
-        defaultDisk4Summary = disk4.getSummary();
+        defaultDisk4Summary = disk4.getSummary().toString();
 
-        model = findPreference(EditConfigurationActivity.CONF_MODEL);
+        model = prefFinder.forModel();
         model.setOnPreferenceChangeListener(this);
 
-        characterColor = findPreference(EditConfigurationActivity.CONF_CHARACTER_COLOR);
+        characterColor = prefFinder.forCharacterColor();
         characterColor.setOnPreferenceChangeListener(this);
 
-        keyboardPortrait = findPreference(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT);
+        keyboardPortrait = prefFinder.forKeyboardPortrait();
         keyboardPortrait.setOnPreferenceChangeListener(this);
 
-        keyboardLandscape = findPreference(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE);
+        keyboardLandscape = prefFinder.forKeyboardLandscape();
         keyboardLandscape.setOnPreferenceChangeListener(this);
 
         updateSummaries();
     }
 
     private void updateSummaries() {
-        String val = sharedPrefs.getString(EditConfigurationActivity.CONF_NAME, null);
-        if (val != null) {
-            name.setSummary(val);
+        Optional<String> valOpt = configPersitence.getName();
+        if (valOpt.isPresent()) {
+            name.setSummary(valOpt.get());
         }
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_MODEL, null);
-        if (val != null) {
+        valOpt = configPersitence.getModel();
+        if (valOpt.isPresent()) {
+            String val = valOpt.get();
             if (val.equals("1")) {
                 val = "I";
             } else if (val.equals("3")) {
@@ -138,68 +150,63 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         }
 
         // Cassette
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_CASSETTE, null);
-        cassette.setSummary(val != null ? val : defaultCassetteSummary);
+        valOpt = configPersitence.getCasettePath();
+        cassette.setSummary(valOpt.or(defaultCassetteSummary));
 
         // Disk 1
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK1, null);
-        disk1.setSummary(val != null ? val : defaultDisk1Summary);
+        valOpt = configPersitence.getDiskPath(0);
+        disk1.setSummary(valOpt.or(defaultDisk1Summary));
 
         // Disk 2
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK2, null);
-        disk2.setSummary(val != null ? val : defaultDisk2Summary);
+        valOpt = configPersitence.getDiskPath(1);
+        disk2.setSummary(valOpt.or(defaultDisk2Summary));
 
         // Disk 3
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK3, null);
-        disk3.setSummary(val != null ? val : defaultDisk3Summary);
+        valOpt = configPersitence.getDiskPath(2);
+        disk3.setSummary(valOpt.or(defaultDisk3Summary));
 
         // Disk 4
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_DISK4, null);
-        disk4.setSummary(val != null ? val : defaultDisk4Summary);
+        valOpt = configPersitence.getDiskPath(3);
+        disk4.setSummary(valOpt.or(defaultDisk4Summary));
 
         // Character color
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_CHARACTER_COLOR, null);
-        setCharacterColorSummary(val);
+        setCharacterColorSummary(configPersitence.getCharacterColor(-1));
 
         // Keyboard portrait
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_PORTRAIT, null);
-        setKeyboardSummary(keyboardPortrait, val);
+        setKeyboardSummary(keyboardPortrait, configPersitence.getKeyboardLayoutPortrait());
 
         // Keyboard landscape
-        val = sharedPrefs.getString(EditConfigurationActivity.CONF_KEYBOARD_LANDSCAPE, null);
-        setKeyboardSummary(keyboardLandscape, val);
+        setKeyboardSummary(keyboardLandscape, configPersitence.getKeyboardLayoutLandscape());
     }
 
-    private void setCharacterColorSummary(String val) {
-        if (val == null) {
-            return;
-        }
-        if ("0".equals(val)) {
-            characterColor.setSummary(this.getString(R.string.green));
-        }
-        if ("1".equals(val)) {
-            characterColor.setSummary(this.getString(R.string.white));
+    private void setCharacterColorSummary(int val) {
+        switch (val) {
+            case 0:
+                characterColor.setSummary(this.getString(R.string.green));
+                return;
+            case 1:
+                characterColor.setSummary(this.getString(R.string.white));
+                return;
+            default:
+                return;
         }
     }
 
-    private void setKeyboardSummary(Preference pref, String val) {
-        if (val == null) {
-            return;
-        }
-        if ("0".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_original));
-        }
-        if ("1".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_compact));
-        }
-        if ("2".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_joystick));
-        }
-        if ("3".equals(val)) {
-            pref.setSummary(R.string.keyboard_game_controller);
-        }
-        if ("4".equals(val)) {
-            pref.setSummary(this.getString(R.string.keyboard_tilt));
+    private void setKeyboardSummary(Preference pref, int val) {
+        switch (val) {
+            case 0:
+                pref.setSummary(this.getString(R.string.keyboard_original));
+                break;
+            case 1:
+                pref.setSummary(this.getString(R.string.keyboard_compact));
+                break;
+            case 2:
+                pref.setSummary(this.getString(R.string.keyboard_joystick));
+                break;
+            case 3:
+                pref.setSummary(R.string.keyboard_game_controller);
+            case 4:
+                pref.setSummary(this.getString(R.string.keyboard_tilt));
         }
     }
 
@@ -208,15 +215,17 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         if (resultCode == Activity.RESULT_OK) {
             configurationWasEdited = true;
             String newValue = data.getStringExtra("PATH");
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            String key;
-            if (requestCode == 0) {
-                key = EditConfigurationActivity.CONF_CASSETTE;
-            } else {
-                key = "conf_disk" + requestCode;
+            switch (requestCode){
+                case 0:
+                    configPersitence.setCasettePath(newValue);
+                    break;
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    configPersitence.setDiskPath(requestCode - 1, newValue);
+
             }
-            editor.putString(key, newValue);
-            editor.apply();
             updateSummaries();
         }
     }

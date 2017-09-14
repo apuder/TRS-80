@@ -24,6 +24,9 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 
+import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.KeyboardLayout;
+
 /**
  * Class Hardware is the base class for the various different TRS-80 models. It
  * encapsulates various hardware characteristics of different TRS-80 models. In
@@ -38,28 +41,27 @@ import android.os.AsyncTask;
  */
 public class Hardware {
     static class ScreenConfiguration {
-        public ScreenConfiguration(int trsScreenCols, int trsScreenRows, float aspectRatio) {
+        final int   trsScreenCols;
+        final int   trsScreenRows;
+        final float aspectRatio;
+
+        ScreenConfiguration(int trsScreenCols, int trsScreenRows, float aspectRatio) {
             this.trsScreenCols = trsScreenCols;
             this.trsScreenRows = trsScreenRows;
             this.aspectRatio = aspectRatio;
         }
-
-
-        public int   trsScreenCols;
-        public int   trsScreenRows;
-        public float aspectRatio;
     }
 
 
     final private float     maxKeyBoxSize = 55; // 55dp
 
-    final public static int MODEL_NONE    = 0;
-    final public static int MODEL1        = 1;
-    final public static int MODEL3        = 3;
-    final public static int MODEL4        = 4;
-    final public static int MODEL4P       = 5;
+    public static final int MODEL_NONE    = 0;
+    public static final int MODEL1        = 1;
+    public static final int MODEL3        = 3;
+    public static final int MODEL4        = 4;
+    public static final int MODEL4P       = 5;
 
-    private Configuration   configuration;
+    private final Configuration configuration;
     private int             trsScreenWidth;
     private int             trsScreenHeight;
     private int             trsCharWidth;
@@ -81,7 +83,7 @@ public class Hardware {
         return configuration.getModel();
     }
 
-    public ScreenConfiguration getScreenConfiguration() {
+    ScreenConfiguration getScreenConfiguration() {
         switch (configuration.getModel()) {
         case Hardware.MODEL1:
         case Hardware.MODEL3:
@@ -93,39 +95,39 @@ public class Hardware {
         return null;
     }
 
-    public int getScreenWidth() {
+    int getScreenWidth() {
         return trsScreenWidth;
     }
 
-    public int getScreenHeight() {
+    int getScreenHeight() {
         return trsScreenHeight;
     }
 
-    public int getCharWidth() {
+    int getCharWidth() {
         return trsCharWidth;
     }
 
-    public int getCharHeight() {
+    int getCharHeight() {
         return trsCharHeight;
     }
 
-    public int getKeyWidth() {
+    int getKeyWidth() {
         return keyWidth;
     }
 
-    public int getKeyHeight() {
+    int getKeyHeight() {
         return keyHeight;
     }
 
-    public int getKeyMargin() {
+    int getKeyMargin() {
         return keyMargin;
     }
 
-    public Bitmap[] getFont() {
+    Bitmap[] getFont() {
         return font;
     }
 
-    public void generateFont(Rect rect, AsyncTask task) {
+    void generateFont(Rect rect, AsyncTask task) {
         ScreenConfiguration screenConfig = getScreenConfiguration();
         int contentViewTop = rect.top;
         int contentHeight = rect.bottom - contentViewTop;
@@ -158,17 +160,17 @@ public class Hardware {
         generateASCIIFont(task);
     }
 
-    public void computeKeyDimensions(Rect rect, int keyboardLayout) {
+    void computeKeyDimensions(Rect rect, KeyboardLayout keyboardLayout) {
         // The maximum number of key "boxes" per row
         int maxKeyBoxes = 15;
         switch (keyboardLayout) {
-        case Configuration.KEYBOARD_LAYOUT_COMPACT:
+        case KEYBOARD_LAYOUT_COMPACT:
             maxKeyBoxes = 10;
             break;
-        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
+        case KEYBOARD_LAYOUT_ORIGINAL:
             maxKeyBoxes = 15;
             break;
-        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
+        case KEYBOARD_LAYOUT_JOYSTICK:
             maxKeyBoxes = 8;
             break;
         }

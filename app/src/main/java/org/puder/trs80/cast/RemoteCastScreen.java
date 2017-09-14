@@ -16,9 +16,9 @@
 
 package org.puder.trs80.cast;
 
-import java.util.Locale;
+import org.puder.trs80.configuration.Configuration;
 
-import org.puder.trs80.Configuration;
+import java.util.Locale;
 
 /**
  * A remote display channel that controls a remote screen using the google cast

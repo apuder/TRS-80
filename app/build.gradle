@@ -26,14 +26,6 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            java {
-                exclude '**/ConfigurationUtil.java'
-            }
-        }
-    }
-
     buildTypes {
         debug {
             resValue "bool", "debug", "true"

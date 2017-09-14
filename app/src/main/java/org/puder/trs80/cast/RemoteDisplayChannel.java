@@ -16,7 +16,7 @@
 
 package org.puder.trs80.cast;
 
-import org.puder.trs80.Configuration;
+import org.puder.trs80.configuration.Configuration;
 
 /**
  * Defines a protocol for communicating with a remote TRS80 display.
@@ -26,13 +26,13 @@ public interface RemoteDisplayChannel {
      * Session is being started. Causes the splash screen to disappear and the
      * screen to show.
      */
-    public void startSession();
+    void startSession();
 
     /**
      * Ends the session which will cause the monitor content to hide and the
      * splash screen to show .
      */
-    public void endSession();
+    void endSession();
 
     /**
      * Updates the screen buffer. Ony has an effect during an active session.
@@ -43,7 +43,7 @@ public interface RemoteDisplayChannel {
      * @param buffer
      *            the contents of the screen, row-priority.
      */
-    public void sendScreenBuffer(boolean expandedMode, String buffer);
+    void sendScreenBuffer(boolean expandedMode, String buffer);
 
     /**
      * Sends an initial configuration to the remote display.
@@ -53,5 +53,5 @@ public interface RemoteDisplayChannel {
      *            to be run. Contains information such as the background and
      *            foreground colors.
      */
-    public void sendConfiguration(Configuration configuration);
+    void sendConfiguration(Configuration configuration);
 }

@@ -17,6 +17,9 @@
 package org.puder.trs80;
 
 
+import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.EmulatorState;
+
 /**
  * Class XTRS acts as a gateway to the native layer. The native methods declared
  * in this class are implemented in jni/native.c. Note that XTRS also handles
@@ -57,20 +60,15 @@ public class XTRS {
 
     private static RenderThread renderer = null;
 
-    private static Thread audioThread = null;
-
     private static EmulatorActivity emulator = null;
 
-    public static int init(Configuration configuration) {
+    public static int init(Configuration configuration, EmulatorState emulatorState) {
         xtrsModel = configuration.getModel();
-        xtrsCassette = configuration.getCassettePath();
-        if (xtrsCassette == null) {
-            xtrsCassette = EmulatorState.getDefaultCassettePath(configuration.getId());
-        }
-        xtrsDisk0 = configuration.getDiskPath(0);
-        xtrsDisk1 = configuration.getDiskPath(1);
-        xtrsDisk2 = configuration.getDiskPath(2);
-        xtrsDisk3 = configuration.getDiskPath(3);
+        xtrsCassette = configuration.getCassettePath().or(emulatorState.getDefaultCassettePath());
+        xtrsDisk0 = configuration.getDiskPath(0).orNull();
+        xtrsDisk1 = configuration.getDiskPath(1).orNull();
+        xtrsDisk2 = configuration.getDiskPath(2).orNull();
+        xtrsDisk3 = configuration.getDiskPath(3).orNull();
 
         switch (xtrsModel) {
             case Hardware.MODEL1:

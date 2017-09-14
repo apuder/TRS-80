@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,22 +28,32 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.tekle.oss.android.animation.AnimationFactory;
 
+import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.ConfigurationManager;
+import org.puder.trs80.configuration.EmulatorState;
+import org.puder.trs80.configuration.KeyboardLayout;
 import org.puder.trs80.drag.ItemTouchHelperAdapter;
+
+import java.io.IOException;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 
 public class ConfigurationListViewAdapter extends
         RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {
-
+    private static final String TAG = "ConfListViewAdapter";
+    private final ConfigurationManager configurationManager;
     private ConfigurationItemListener listener;
-    private int                       numColumns;
+    private int numColumns;
 
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Configuration.move(fromPosition, toPosition);
+        configurationManager.moveConfiguration(fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }
@@ -54,22 +65,22 @@ public class ConfigurationListViewAdapter extends
 
 
     public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public boolean        draggable;
-        public Configuration  configuration;
-        public TextView       nameFront;
-        public TextView       nameBack;
-        public TextView       model;
-        public TextView       disks;
-        public TextView       cassette;
-        public TextView       sound;
-        public TextView       keyboardPortrait;
-        public TextView       keyboardLandscape;
-        public ScreenshotView screenshot;
-        public ViewFlipper    viewFlipper;
-        public View           stopButton;
+        public boolean draggable;
+        Configuration configuration;
+        TextView nameFront;
+        TextView nameBack;
+        TextView model;
+        TextView disks;
+        TextView cassette;
+        TextView sound;
+        TextView keyboardPortrait;
+        TextView keyboardLandscape;
+        ScreenshotView screenshot;
+        ViewFlipper viewFlipper;
+        View stopButton;
 
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
             if (!(itemView instanceof RelativeLayout)) {
                 // Footers are not draggable
@@ -77,16 +88,16 @@ public class ConfigurationListViewAdapter extends
                 return;
             }
             draggable = true;
-            nameFront = (TextView) itemView.findViewById(R.id.configuration_name_front);
-            nameBack = (TextView) itemView.findViewById(R.id.configuration_name_back);
-            model = (TextView) itemView.findViewById(R.id.configuration_model);
-            disks = (TextView) itemView.findViewById(R.id.configuration_disks);
-            cassette = (TextView) itemView.findViewById(R.id.configuration_cassette);
-            sound = (TextView) itemView.findViewById(R.id.configuration_sound);
-            keyboardPortrait = (TextView) itemView.findViewById(R.id.configuration_keyboard_portrait);
-            keyboardLandscape = (TextView) itemView.findViewById(R.id.configuration_keyboard_landscape);
-            screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
-            viewFlipper = (ViewFlipper) itemView.findViewById(R.id.configuration_view_flipper);
+            nameFront = itemView.findViewById(R.id.configuration_name_front);
+            nameBack = itemView.findViewById(R.id.configuration_name_back);
+            model = itemView.findViewById(R.id.configuration_model);
+            disks = itemView.findViewById(R.id.configuration_disks);
+            cassette = itemView.findViewById(R.id.configuration_cassette);
+            sound = itemView.findViewById(R.id.configuration_sound);
+            keyboardPortrait = itemView.findViewById(R.id.configuration_keyboard_portrait);
+            keyboardLandscape = itemView.findViewById(R.id.configuration_keyboard_landscape);
+            screenshot = itemView.findViewById(R.id.configuration_screenshot);
+            viewFlipper = itemView.findViewById(R.id.configuration_view_flipper);
             viewFlipper.setDisplayedChild(0);
             itemView.setOnClickListener(this);
             itemView.findViewById(R.id.configuration_info).setOnClickListener(this);
@@ -105,41 +116,43 @@ public class ConfigurationListViewAdapter extends
                 return;
             }
             switch (v.getId()) {
-            case R.id.configuration_info:
-                if (listener.showHint()) {
+                case R.id.configuration_info:
+                    if (listener.showHint()) {
+                        break;
+                    }
+                case R.id.configuration_back:
+                    AnimationFactory.flipTransition(viewFlipper,
+                            AnimationFactory.FlipDirection.LEFT_RIGHT);
                     break;
-                }
-            case R.id.configuration_back:
-                AnimationFactory.flipTransition(viewFlipper,
-                        AnimationFactory.FlipDirection.LEFT_RIGHT);
-                break;
-            case R.id.configuration_edit:
-                listener.onConfigurationEdit(configuration, position);
-                break;
-            case R.id.configuration_stop:
-                listener.onConfigurationStop(configuration, position);
-                break;
-            case R.id.configuration_delete:
-                listener.onConfigurationDelete(configuration, position);
-                break;
-            case R.id.configuration_run:
-                listener.onConfigurationRun(configuration, position);
-                break;
-            default:
-                if (listener.showHint()) {
+                case R.id.configuration_edit:
+                    listener.onConfigurationEdit(configuration, position);
                     break;
-                }
-                if (viewFlipper.getDisplayedChild() == 0) {
+                case R.id.configuration_stop:
+                    listener.onConfigurationStop(configuration, position);
+                    break;
+                case R.id.configuration_delete:
+                    listener.onConfigurationDelete(configuration, position);
+                    break;
+                case R.id.configuration_run:
                     listener.onConfigurationRun(configuration, position);
-                }
-                break;
+                    break;
+                default:
+                    if (listener.showHint()) {
+                        break;
+                    }
+                    if (viewFlipper.getDisplayedChild() == 0) {
+                        listener.onConfigurationRun(configuration, position);
+                    }
+                    break;
             }
         }
     }
 
 
-    public ConfigurationListViewAdapter(ConfigurationItemListener listener, int numColumns) {
-        this.listener = listener;
+    ConfigurationListViewAdapter(ConfigurationManager configurationManager,
+                                 ConfigurationItemListener listener, int numColumns) {
+        this.configurationManager = Preconditions.checkNotNull(configurationManager);
+        this.listener = Preconditions.checkNotNull(listener);
         this.numColumns = numColumns;
     }
 
@@ -151,52 +164,59 @@ public class ConfigurationListViewAdapter extends
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
-        if (position >= Configuration.getCount()) {
+        if (position >= configurationManager.getConfigCount()){
             return;
         }
 
-        Configuration conf = Configuration.getNthConfiguration(position);
-
+        Configuration conf = configurationManager.getConfig(position);
         if (holder.getAdapterPosition() != position && holder.viewFlipper.getDisplayedChild() != 0) {
             Context context = TRS80Application.getAppContext();
             holder.viewFlipper.setInAnimation(context, R.anim.no_animation);
             holder.viewFlipper.setOutAnimation(context, R.anim.no_animation);
             holder.viewFlipper.setDisplayedChild(0);
         }
+        EmulatorState emulatorState;
+        try {
+            emulatorState = configurationManager.getEmulatorState(conf.getId());
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot create emulator state.", e);
+            return;
+        }
 
-        holder.stopButton.setVisibility(EmulatorState.hasSavedState(conf.getId()) ? View.VISIBLE
-                : View.GONE);
+        holder.stopButton.setVisibility(emulatorState.hasState() ? View.VISIBLE : View.GONE);
 
-        // Configuration
+        // ConfigurationOld
         holder.configuration = conf;
 
         // Name
-        String name = conf.getName();
-        holder.nameFront.setText(name);
-        holder.nameBack.setText(name);
+        Optional<String> name = conf.getName();
+        if (name.isPresent()) {
+            holder.nameFront.setText(name.get());
+            holder.nameBack.setText(name.get());
+        }
 
         // Hardware
         String model = "-";
         switch (conf.getModel()) {
-        case Hardware.MODEL1:
-            model = "Model I";
-            break;
-        case Hardware.MODEL3:
-            model = "Model III";
-            break;
-        case Hardware.MODEL4:
-            model = "Model 4";
-            break;
-        case Hardware.MODEL4P:
-            model = "Model 4P";
-            break;
+            case Hardware.MODEL1:
+                model = "Model I";
+                break;
+            case Hardware.MODEL3:
+                model = "Model III";
+                break;
+            case Hardware.MODEL4:
+                model = "Model 4";
+                break;
+            case Hardware.MODEL4P:
+                model = "Model 4P";
+                break;
         }
         holder.model.setText(model);
 
         // Disks
         int count = 0;
         for (int i = 0; i < 4; i++) {
-            if (conf.getDiskPath(i) != null) {
+            if (!Strings.isNullOrEmpty(conf.getDiskPath(i).orNull())) {
                 count++;
             }
         }
@@ -207,33 +227,33 @@ public class ConfigurationListViewAdapter extends
                 : R.string.cassette_rewound);
 
         // Sound
-        holder.sound.setText(conf.muteSound() ? R.string.sound_disabled : R.string.sound_enabled);
+        holder.sound.setText(conf.isSoundMuted() ? R.string.sound_disabled : R.string.sound_enabled);
 
         // Keyboard portrait
-        holder.keyboardPortrait.setText(getKeyboardLabel(conf.getKeyboardLayoutPortrait()));
+        holder.keyboardPortrait.setText(getKeyboardLabel(conf.getKeyboardLayoutPortrait().get()));
 
         // Keyboard landscape
-        holder.keyboardLandscape.setText(getKeyboardLabel(conf.getKeyboardLayoutLandscape()));
+        holder.keyboardLandscape.setText(getKeyboardLabel(conf.getKeyboardLayoutLandscape().get()));
 
         // Screenshot
         holder.screenshot.setScreenshotBitmap(null);
-        new AsyncTask<Integer, Void, Bitmap>() {
+        new AsyncTask<EmulatorState, Void, Bitmap>() {
 
             @Override
-            protected Bitmap doInBackground(Integer... params) {
-                return EmulatorState.loadScreenshot(params[0]);
+            protected Bitmap doInBackground(EmulatorState... params) {
+                return params[0].loadScreenshot();
             }
 
             @Override
             protected void onPostExecute(Bitmap result) {
                 holder.screenshot.setScreenshotBitmap(result);
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, conf.getId());
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, emulatorState);
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position >= Configuration.getCount()) {
+        if (position >= configurationManager.getConfigCount()) {
             return R.layout.configuration_footer;
         }
         return R.layout.configuration_item;
@@ -246,30 +266,36 @@ public class ConfigurationListViewAdapter extends
          * GridLayout. This will guarantee that at least the last configuration_footer will
          * spill over to the next row.
          */
-        return Configuration.getCount() + numColumns;
+        return configurationManager.getConfigCount() + numColumns;
     }
 
-    private String getKeyboardLabel(int type) {
-        int id;
-        switch (type) {
-        case Configuration.KEYBOARD_LAYOUT_ORIGINAL:
-            id = R.string.keyboard_abbrev_original;
-            break;
-        case Configuration.KEYBOARD_LAYOUT_COMPACT:
-            id = R.string.keyboard_abbrev_compact;
-            break;
-        case Configuration.KEYBOARD_LAYOUT_JOYSTICK:
-            id = R.string.keyboard_abbrev_joystick;
-            break;
-        case Configuration.KEYBOARD_TILT:
-            id = R.string.keyboard_abbrev_tilt;
-            break;
-        case Configuration.KEYBOARD_GAME_CONTROLLER:
-            id = R.string.keyboard_abbrev_game_controller;
-            break;
-        default:
-            return "-";
+    private String getKeyboardLabel(KeyboardLayout type) {
+        final String defaultLabel = "-";
+        if (type == null) {
+            return defaultLabel;
         }
-        return TRS80Application.getAppContext().getString(id);
+        try {
+            return TRS80Application.getAppContext().getString(getKeyboardResource(type));
+        } catch (IllegalArgumentException ex) {
+            return defaultLabel;
+        }
+    }
+
+    private int getKeyboardResource(KeyboardLayout layout) {
+        switch (layout) {
+            case KEYBOARD_LAYOUT_ORIGINAL:
+                return R.string.keyboard_abbrev_original;
+            case KEYBOARD_LAYOUT_COMPACT:
+                return R.string.keyboard_abbrev_compact;
+            case KEYBOARD_LAYOUT_JOYSTICK:
+                return R.string.keyboard_abbrev_joystick;
+            case KEYBOARD_GAME_CONTROLLER:
+                return R.string.keyboard_abbrev_game_controller;
+            case KEYBOARD_TILT:
+                return R.string.keyboard_abbrev_tilt;
+            default:
+            case KEYBOARD_EXTERNAL:
+                throw new IllegalArgumentException();
+        }
     }
 }

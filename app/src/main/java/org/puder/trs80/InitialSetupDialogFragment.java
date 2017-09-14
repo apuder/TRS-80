@@ -28,10 +28,11 @@ import android.view.View;
 import com.google.common.base.Optional;
 
 import org.puder.trs80.async.UiExecutor;
+import org.puder.trs80.configuration.ConfigurationManager;
 import org.puder.trs80.io.FileDownloader;
 import org.puder.trs80.localstore.InitialDownloads;
 import org.puder.trs80.localstore.InitialDownloads.Download;
-import org.puder.trs80.localstore.LocalStore;
+import org.puder.trs80.localstore.RomManager;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,16 +44,18 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     private DownloadCompletionListener listener;
     private int downloadCounter = 0;
-    private final LocalStore localStore;
+    private final ConfigurationManager configurationManager;
     private final FileDownloader fileDownloader;
     private final Executor downloadExecutor;
     private final Executor uiExecutor;
+    private final RomManager romManager;
 
     public InitialSetupDialogFragment() {
-        localStore = checkNotNull(LocalStore.getDefault());
+        configurationManager = checkNotNull(ConfigurationManager.getDefault());
         fileDownloader = new FileDownloader();
         downloadExecutor = Executors.newSingleThreadExecutor();
         uiExecutor = UiExecutor.create();
+        romManager = RomManager.get();
     }
 
     @Override
@@ -124,14 +127,14 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
         Optional<byte[]> data = fileDownloader.download(url, download.fileInZip);
         if (data.isPresent()) {
-            // Add a new ROM or entry to the local store.
+            // Add a new ROM or entry.
             if (download.isROM) {
-                boolean success = localStore.addRom(download.model,
+                boolean success = romManager.addRom(download.model,
                         download.destinationFilename,
                         data.get());
                 Log.i(TAG, "Adding ROM success: " + success);
             } else {
-                boolean success = localStore.addNewConfiguration(download.model,
+                boolean success = configurationManager.addNewConfiguration(download.model,
                         download.configurationName,
                         download.destinationFilename,
                         data.get());
@@ -158,7 +161,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
     private void doneDownloading() {
         dismissAllowingStateLoss();
         View root = getActivity().findViewById(R.id.main);
-        if (ROMs.hasROMs()) {
+        if (romManager.hasAllRoms()) {
             listener.onDownloadCompleted();
         } else {
             Snackbar.make(root, R.string.roms_download_failure_msg,
