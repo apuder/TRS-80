@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -63,6 +64,7 @@ import org.retrostore.client.common.proto.Trs80Model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
@@ -550,10 +552,14 @@ public class MainActivity extends BaseActivity implements
     public void installApp(App app) {
         MediaImage mediaImage = app.getMediaImage(0);
         configManager.addNewConfiguration(
-                getHardwareModelId(app.getTrs80Params().getModel()), app.getName(), mediaImage
-                        .getFilename(), mediaImage.getData().toByteArray()
+                getHardwareModelId(app.getTrs80Params().getModel()), app.getName(),
+                makeFilenameUnique(mediaImage.getFilename()), mediaImage.getData().toByteArray()
         );
         Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
+    }
+
+    private static String makeFilenameUnique(String filename) {
+        return String.format(Locale.US, "%d_%s", SystemClock.elapsedRealtime(), filename);
     }
 
     private static int getHardwareModelId(Trs80Model model) {
