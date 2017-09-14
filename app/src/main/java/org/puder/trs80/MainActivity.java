@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -46,10 +47,15 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.puder.trs80.async.UiExecutor;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
@@ -58,6 +64,8 @@ import org.puder.trs80.io.FileManager;
 import org.puder.trs80.localstore.RomManager;
 import org.retrostore.android.AppInstallListener;
 import org.retrostore.android.RetrostoreActivity;
+import org.retrostore.android.RetrostoreApi;
+import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
 import org.retrostore.client.common.proto.Trs80Model;
@@ -92,6 +100,8 @@ public class MainActivity extends BaseActivity implements
 
     private ConfigurationManager configManager;
     private RomManager romManager;
+    // Note: This is in the RetroStore package.
+    private ImageLoader imageLoader;
     private CastMessageSender castMessageSender;
 
 
@@ -99,7 +109,7 @@ public class MainActivity extends BaseActivity implements
     public void onCreate(Bundle savedInstanceState) {
         // StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
-        RetrostoreActivity.addListener(new AppInstallListener() {
+        RetrostoreApi.get().registerAppInstallListener(new AppInstallListener() {
             @Override
             public void onInstallApp(App app) {
                 installApp(app);
@@ -131,6 +141,7 @@ public class MainActivity extends BaseActivity implements
             // TODO: Show an error message before exiting.
             return;
         }
+        imageLoader = ImageLoader.get(getApplicationContext());
         castMessageSender = CastMessageSender.get();
 
         int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
@@ -549,13 +560,40 @@ public class MainActivity extends BaseActivity implements
         return AlertDialogUtil.showHint(this, id);
     }
 
-    public void installApp(App app) {
+    public boolean installApp(App app) {
         MediaImage mediaImage = app.getMediaImage(0);
-        configManager.addNewConfiguration(
+        Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
                 getHardwareModelId(app.getTrs80Params().getModel()), app.getName(),
-                makeFilenameUnique(mediaImage.getFilename()), mediaImage.getData().toByteArray()
-        );
+                makeFilenameUnique(mediaImage.getFilename()), mediaImage.getData().toByteArray());
+        if (!newConfiguration.isPresent()) {
+            return false;
+        }
+
+        // So that it doesn't show up blank, set the screenshot to the logo of the just downloaded
+        // app. It will later be replaces by actual screenshots.
+        final int configId = newConfiguration.get().getId();
+        String screenshotUrl = app.getScreenshotUrl(0);
+        if (!Strings.isNullOrEmpty(screenshotUrl)) {
+            ListenableFuture<Bitmap> screenshotBitmap =
+                    imageLoader.loadAsBitmapAsync(screenshotUrl, 800, 600);
+            Futures.addCallback(screenshotBitmap, new FutureCallback<Bitmap>() {
+                @Override
+                public void onSuccess(Bitmap result) {
+                    try {
+                        configManager.getEmulatorState(configId).saveScreenshot(result);
+                    } catch (IOException e) {
+                        e.printStackTrace();Log.e(TAG, "Cannot emulator state", e);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    Log.e(TAG, "Cannot load initial screenshot.", t);
+                }
+            }, UiExecutor.create());
+        }
         Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
+        return true;
     }
 
     private static String makeFilenameUnique(String filename) {

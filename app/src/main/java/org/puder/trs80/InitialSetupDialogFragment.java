@@ -28,6 +28,7 @@ import android.view.View;
 import com.google.common.base.Optional;
 
 import org.puder.trs80.async.UiExecutor;
+import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
 import org.puder.trs80.io.FileDownloader;
 import org.puder.trs80.localstore.InitialDownloads;
@@ -134,11 +135,12 @@ public class InitialSetupDialogFragment extends DialogFragment {
                         data.get());
                 Log.i(TAG, "Adding ROM success: " + success);
             } else {
-                boolean success = configurationManager.addNewConfiguration(download.model,
+                Optional<Configuration> newConfig = configurationManager.addNewConfiguration(
+                        download.model,
                         download.configurationName,
                         download.destinationFilename,
                         data.get());
-                Log.i(TAG, "Adding non-ROM success: " + success);
+                Log.i(TAG, "Adding configuration success: " + newConfig.isPresent());
             }
         } else {
             Log.e(TAG, StrUtil.form("Could not load data for '%s'.", url));

@@ -218,19 +218,23 @@ public class ConfigurationManager {
      * @param configName the name of this new configuration.
      * @param filename   the filename to use for the entry.
      * @param content    the byte content of the entry.
-     * @return Whether the file was successfully added.
+     * @return If the configuration was successfully added it will be returned.
      */
-    public boolean addNewConfiguration(int model,
-                                       String configName,
-                                       String filename,
-                                       byte[] content) {
+    public Optional<Configuration> addNewConfiguration(int model,
+                                                       String configName,
+                                                       String filename,
+                                                       byte[] content) {
         // Configurations automatically persist.
         Configuration newConfig = newConfiguration();
         newConfig.setName(configName);
         newConfig.setModel(model);
         newConfig.setDiskPath(0, fileManager.getAbsolutePathForFile(filename));
         // TODO: Config disks should go into their own sub-directories to avoid conflict.
-        return fileManager.writeFile(filename, content);
+        if (!fileManager.writeFile(filename, content)) {
+            deleteConfigWithId(newConfig.getId());
+            return Optional.absent();
+        }
+        return Optional.of(newConfig);
     }
 
     /**

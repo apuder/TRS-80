@@ -17,22 +17,64 @@
 package org.retrostore.android.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+
+import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 /**
  * Loads images from a URL into an image view.
  */
 public class ImageLoader {
-    private final Context mCtx;
+    private static final String TAG = "ImageLoader";
+    private final WeakReference<Context> mCtx;
+    private final Executor mExecutor;
 
-    public ImageLoader(Context ctx) {
-        mCtx = ctx;
+    public static ImageLoader get(Context ctx) {
+        return new ImageLoader(ctx, Executors.newCachedThreadPool());
+    }
+
+    public ImageLoader(Context ctx, Executor executor) {
+        mCtx = new WeakReference<>(ctx);
+        mExecutor = executor;
     }
 
     public void loadUrlIntoView(String url, ImageView view) {
-        Glide.with(mCtx).load(url).centerCrop().into(view);
+        Context context = mCtx.get();
+        if (context != null) {
+            Glide.with(context).load(url).centerCrop().into(view);
+        }
+    }
+
+    public ListenableFuture<Bitmap> loadAsBitmapAsync(
+            final String url, final int width, final int height) {
+        final SettableFuture<Bitmap> future = SettableFuture.create();
+        final Context context = mCtx.get();
+        if (context == null) {
+            future.setException(new RuntimeException("Context invalid."));
+            return future;
+        }
+
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.set(Glide.with(context).load(url).asBitmap().into(width, height).get());
+                } catch (InterruptedException | ExecutionException e) {
+                    Log.e(TAG, "Could not load image as bitmap.", e);
+                    future.setException(e);
+                }
+            }
+        });
+        return future;
     }
 }

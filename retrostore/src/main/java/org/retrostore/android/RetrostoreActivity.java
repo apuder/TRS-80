@@ -36,7 +36,6 @@ import org.retrostore.android.view.ImageLoader;
 import org.retrostore.android.view.ViewAdapter;
 import org.retrostore.client.common.proto.App;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -53,13 +52,7 @@ public class RetrostoreActivity extends AppCompatActivity {
     private SwipeRefreshLayout mRefreshLayout;
     private AppInstallListener mAppInstallListener;
 
-    private static List<AppInstallListener> mExternalListeners = new ArrayList<>();
-
-    // TODO: Find a better way to do this.
-    public static void addListener(AppInstallListener listener) {
-        mExternalListeners.add(listener);
-    }
-
+    private static AppInstallListener mExternalListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +66,7 @@ public class RetrostoreActivity extends AppCompatActivity {
         mFetcher = new DataFetcher(RetrostoreClientImpl.get(
                 "n/a", "https://test-dot-trs-80.appspot.com/api/%s", false),
                 Executors.newSingleThreadExecutor());
-        mImageLoader = new ImageLoader(this.getApplicationContext());
+        mImageLoader = ImageLoader.get(this.getApplicationContext());
         setContentView(R.layout.activity_retrostore);
         mRecyclerView = (RecyclerView) findViewById(R.id.appList);
         mRecyclerView.setHasFixedSize(true);
@@ -110,9 +103,16 @@ public class RetrostoreActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Protected so only the RetroStore API can access this. Not to be used directly by clients.
+     */
+    static void setAppInstallListener(AppInstallListener listener) {
+        mExternalListener = listener;
+    }
+
     private void installApp(App app) {
-        for (AppInstallListener listener : mExternalListeners) {
-            listener.onInstallApp(app);
+        if (mExternalListener != null) {
+            mExternalListener.onInstallApp(app);
         }
     }
 
