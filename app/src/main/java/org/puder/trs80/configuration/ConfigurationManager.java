@@ -228,12 +228,20 @@ public class ConfigurationManager {
         Configuration newConfig = newConfiguration();
         newConfig.setName(configName);
         newConfig.setModel(model);
-        newConfig.setDiskPath(0, fileManager.getAbsolutePathForFile(filename));
+
+        FileManager configFileManager;
         // TODO: Config disks should go into their own sub-directories to avoid conflict.
-        if (!fileManager.writeFile(filename, content)) {
+        try {
+            configFileManager = fileManagerCreator.createForAppSubDir(newConfig.getId());
+        } catch (IOException e) {
+            Log.e(TAG, "Could not create configuration sub-dir.");
+            return Optional.absent();
+        }
+        if (!configFileManager.writeFile(filename, content)) {
             deleteConfigWithId(newConfig.getId());
             return Optional.absent();
         }
+        newConfig.setDiskPath(0, configFileManager.getAbsolutePathForFile(filename));
         return Optional.of(newConfig);
     }
 

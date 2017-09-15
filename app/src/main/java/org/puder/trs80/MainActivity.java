@@ -564,7 +564,7 @@ public class MainActivity extends BaseActivity implements
         MediaImage mediaImage = app.getMediaImage(0);
         Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
                 getHardwareModelId(app.getTrs80Params().getModel()), app.getName(),
-                makeFilenameUnique(mediaImage.getFilename()), mediaImage.getData().toByteArray());
+                mediaImage.getFilename(), mediaImage.getData().toByteArray());
         if (!newConfiguration.isPresent()) {
             return false;
         }
@@ -594,10 +594,6 @@ public class MainActivity extends BaseActivity implements
         }
         Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
         return true;
-    }
-
-    private static String makeFilenameUnique(String filename) {
-        return String.format(Locale.US, "%d_%s", SystemClock.elapsedRealtime(), filename);
     }
 
     private static int getHardwareModelId(Trs80Model model) {

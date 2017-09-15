@@ -59,8 +59,8 @@ public class FileManager {
             return createForAppSubDir(null);
         }
 
-        public FileManager createForAppSubDir(int dirName) throws IOException {
-            return createForAppSubDir(Integer.toString(dirName));
+        public FileManager createForAppSubDir(int configId) throws IOException {
+            return createForAppSubDir(Integer.toString(configId));
         }
 
         public FileManager createForAppSubDir(String dirName) throws IOException {
