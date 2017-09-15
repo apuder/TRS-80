@@ -16,8 +16,7 @@
 
 package org.retrostore.android;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +36,6 @@ import org.retrostore.android.view.ViewAdapter;
 import org.retrostore.client.common.proto.App;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executors;
 
 import static java.util.Locale.US;
@@ -57,17 +55,17 @@ public class RetrostoreActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_retrostore);
         mAppInstallListener = new AppInstallListener() {
             @Override
             public void onInstallApp(App app) {
-                onAskForInstallation(app);
+                showDetailsPage(app.getId());
             }
         };
-        mFetcher = new DataFetcher(RetrostoreClientImpl.get(
+        mFetcher = DataFetcher.initialize(RetrostoreClientImpl.get(
                 "n/a", "https://test-dot-trs-80.appspot.com/api/%s", false),
                 Executors.newSingleThreadExecutor());
         mImageLoader = ImageLoader.get(this.getApplicationContext());
-        setContentView(R.layout.activity_retrostore);
         mRecyclerView = (RecyclerView) findViewById(R.id.appList);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -80,11 +78,6 @@ public class RetrostoreActivity extends AppCompatActivity {
                         refreshApps();
                     }
                 });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         refreshApps();
     }
 
@@ -110,36 +103,11 @@ public class RetrostoreActivity extends AppCompatActivity {
         mExternalListener = listener;
     }
 
-    private void installApp(App app) {
-        if (mExternalListener != null) {
-            mExternalListener.onInstallApp(app);
-        }
-    }
-
-    private void onAskForInstallation(final App app) {
-        DialogInterface.OnClickListener dialogClickListener =
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                installApp(app);
-                                break;
-
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                // Nothing to do.
-                                break;
-                        }
-                    }
-                };
-
-        String dialogText = String.format(Locale.getDefault(),
-                getString(R.string.dialog_install), app.getName());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(dialogText)
-                .setPositiveButton(R.string.dialog_yes_install, dialogClickListener)
-                .setNegativeButton(R.string.dialog_no, dialogClickListener)
-                .show();
+    private void showDetailsPage(long appId) {
+        AppDetailsPageActivity.setAppInstallListener(mExternalListener);
+        Intent intent = new Intent(this, AppDetailsPageActivity.class);
+        intent.putExtra(AppDetailsPageActivity.EXTRA_APP_ID, appId);
+        startActivity(intent);
     }
 
     private void refreshApps() {

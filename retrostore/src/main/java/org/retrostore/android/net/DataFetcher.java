@@ -16,6 +16,8 @@
 
 package org.retrostore.android.net;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -23,7 +25,9 @@ import org.retrostore.ApiException;
 import org.retrostore.RetrostoreClient;
 import org.retrostore.client.common.proto.App;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -32,10 +36,25 @@ import java.util.concurrent.Executor;
 public class DataFetcher {
     private final RetrostoreClient mClient;
     private final Executor mRequestExecutor;
+    private final Map<Long, App> mAppCache;
 
-    public DataFetcher(RetrostoreClient client, Executor mExecutor) {
+    private static DataFetcher sInstance;
+
+    public static DataFetcher get() {
+        return Preconditions.checkNotNull(sInstance, "Must initialize() first.");
+    }
+
+    public static DataFetcher initialize(RetrostoreClient client, Executor executor) {
+        if (sInstance == null) {
+            sInstance = new DataFetcher(client, executor);
+        }
+        return sInstance;
+    }
+
+    private DataFetcher(RetrostoreClient client, Executor executor) {
         mClient = client;
-        mRequestExecutor = mExecutor;
+        mRequestExecutor = executor;
+        mAppCache = new HashMap<>();
     }
 
     /**
@@ -48,12 +67,24 @@ public class DataFetcher {
             @Override
             public void run() {
                 try {
-                    future.set(mClient.fetchApps(0, 10));
+                    List<App> apps = mClient.fetchApps(0, 100);
+                    updateCache(apps);
+                    future.set(apps);
                 } catch (ApiException e) {
                     future.setException(e);
                 }
             }
         });
         return future;
+    }
+
+    public Optional<App> getFromCache(long id) {
+        return Optional.fromNullable(mAppCache.get(id));
+    }
+
+    private void updateCache(List<App> apps) {
+        for (App app : apps) {
+            mAppCache.put(app.getId(), app);
+        }
     }
 }
