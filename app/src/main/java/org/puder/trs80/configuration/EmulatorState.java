@@ -101,6 +101,11 @@ public class EmulatorState {
     }
 
     public void deleteSavedState() {
+        fileManager.deleteFile(FILE_STATE);
+        fileManager.deleteFile(FILE_SCREENSHOT);
+    }
+
+    public void deleteAll() {
         fileManager.delete();
     }
 }

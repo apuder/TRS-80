@@ -152,6 +152,17 @@ public class FileManager {
         }
     }
 
+    /**
+     * Deletes a file within the base path of this manager.
+     *
+     * @param filename the name of the file.
+     * @return Whether the file is non-existent after calling this method.
+     */
+    public boolean deleteFile(String filename) {
+        File toDelete = new File(baseDir, filename);
+        return !toDelete.exists() || toDelete.delete();
+    }
+
     /** Deletes this directory and all contents. */
     public void delete() {
         String[] children = baseDir.list();

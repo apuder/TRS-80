@@ -136,7 +136,7 @@ public class ConfigurationManager {
         saveConfigurationIDs();
 
         try {
-            getEmulatorState(id).deleteSavedState();
+            getEmulatorState(id).deleteAll();
         } catch (IOException e) {
             Log.e(TAG, "Could not clear saved state.", e);
             // TODO: Anything we should do at this point?
