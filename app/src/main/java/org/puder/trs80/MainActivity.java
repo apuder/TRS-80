@@ -27,7 +27,6 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -68,10 +67,11 @@ import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
-import org.retrostore.client.common.proto.Trs80Model;
+import org.retrostore.client.common.proto.Trs80Extension.Trs80Model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends BaseActivity implements
@@ -111,8 +111,11 @@ public class MainActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         RetrostoreApi.get().registerAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(App app) {
-                installApp(app);
+            public void onInstallApp(App app, List<MediaImage> mediaImages) {
+                if (installApp(app, mediaImages)) {
+                    String msg = getString(R.string.successfully_installed);
+                    showToast(String.format(Locale.getDefault(), msg, app.getName()));
+                }
             }
         });
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
@@ -560,10 +563,10 @@ public class MainActivity extends BaseActivity implements
         return AlertDialogUtil.showHint(this, id);
     }
 
-    public boolean installApp(App app) {
-        MediaImage mediaImage = app.getMediaImage(0);
+    public boolean installApp(App app, List<MediaImage> mediaImages) {
+        MediaImage mediaImage = mediaImages.get(0);
         Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
-                getHardwareModelId(app.getTrs80Params().getModel()), app.getName(),
+                getHardwareModelId(app.getExtTrs80().getModel()), app.getName(),
                 mediaImage.getFilename(), mediaImage.getData().toByteArray());
         if (!newConfiguration.isPresent()) {
             return false;
@@ -592,8 +595,16 @@ public class MainActivity extends BaseActivity implements
                 }
             }, UiExecutor.create());
         }
-        Toast.makeText(this, "Installed '" + app.getName() + "'.", Toast.LENGTH_LONG).show();
         return true;
+    }
+
+    private void showToast(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private static int getHardwareModelId(Trs80Model model) {

@@ -22,16 +22,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 import org.retrostore.android.net.DataFetcher;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -42,7 +45,6 @@ public class AppDetailsPageActivity extends AppCompatActivity {
     private static final String TAG = "DetailsActivity";
     private static AppInstallListener mExternalListener;
 
-    private AppInstallListener mAppInstallListener;
     private DataFetcher mFetcher;
     private ImageLoader mImageLoader;
 
@@ -51,12 +53,6 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         mImageLoader = ImageLoader.get(getApplicationContext());
-        mAppInstallListener = new AppInstallListener() {
-            @Override
-            public void onInstallApp(App app) {
-                onAskForInstallation(app);
-            }
-        };
 
         Optional<App> appOpt = getAppFromIntent();
         if (!appOpt.isPresent()) {
@@ -68,10 +64,11 @@ public class AppDetailsPageActivity extends AppCompatActivity {
     }
 
     private void fillViews(final App app) {
-        ((TextView)findViewById(R.id.appName)).setText(app.getName());
-        ((TextView)findViewById(R.id.appDescription)).setText(app.getDescription());
-        ((TextView)findViewById(R.id.appAuthor)).setText(app.getAuthor());
-        ((TextView)findViewById(R.id.appVersion)).setText(getFormattedString(R.string.app_version, app.getVersion()));
+        ((TextView) findViewById(R.id.appName)).setText(app.getName());
+        ((TextView) findViewById(R.id.appDescription)).setText(app.getDescription());
+        ((TextView) findViewById(R.id.appAuthor)).setText(app.getAuthor());
+        ((TextView) findViewById(R.id.appVersion)).setText(getFormattedString(R.string
+                .app_version, app.getVersion()));
         if (app.getScreenshotUrlCount() > 0) {
             mImageLoader.loadUrlIntoView(app.getScreenshotUrl(0),
                     (ImageView) findViewById(R.id.appThumbnail));
@@ -87,9 +84,10 @@ public class AppDetailsPageActivity extends AppCompatActivity {
     private String getFormattedString(int id, Object... args) {
         return getResources().getString(id, args);
     }
+
     private Optional<App> getAppFromIntent() {
-        long appId = getIntent().getExtras().getLong(EXTRA_APP_ID, -1);
-        if (appId < 0) {
+        String appId = getIntent().getExtras().getString(EXTRA_APP_ID, null);
+        if (appId == null) {
             Log.w(TAG, "No APP-ID given.");
             return Optional.absent();
         }
@@ -112,10 +110,23 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         mExternalListener = listener;
     }
 
-    private void installApp(App app) {
-        if (mExternalListener != null) {
-            mExternalListener.onInstallApp(app);
+    private void installApp(final App app) {
+        if (mExternalListener == null) {
+            return;
         }
+
+        Futures.addCallback(mFetcher.fetchMediaImages(app.getId()),
+                new FutureCallback<List<MediaImage>>() {
+                    @Override
+                    public void onSuccess(List<MediaImage> result) {
+                        mExternalListener.onInstallApp(app, result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        showMessage(R.string.error_downloading_app);
+                    }
+                });
         finish();
     }
 
@@ -143,6 +154,17 @@ public class AppDetailsPageActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.dialog_yes_install, dialogClickListener)
                 .setNegativeButton(R.string.dialog_no, dialogClickListener)
                 .show();
+    }
+
+    private void showMessage(final int messageId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(AppDetailsPageActivity.this);
+                builder.setMessage(messageId);
+                builder.show();
+            }
+        });
     }
 
 }

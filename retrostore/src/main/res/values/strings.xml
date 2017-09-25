@@ -11,4 +11,5 @@
     <string name="refresh_apps_list">Refresh apps list</string>
 
     <string name="description_title">Description</string>
+    <string name="error_downloading_app">Oops, there was an issue downloading the app.</string>
 </resources>

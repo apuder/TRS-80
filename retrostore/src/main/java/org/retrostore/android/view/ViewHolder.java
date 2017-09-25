@@ -22,14 +22,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.retrostore.android.AppInstallListener;
 import org.retrostore.android.R;
+import org.retrostore.android.RetrostoreActivity.InternalAppInstallListener;
 import org.retrostore.client.common.proto.App;
 
 /**
  * View holder for the items in the main apps list recycler view.
  */
-public class ViewHolder extends RecyclerView.ViewHolder {
+class ViewHolder extends RecyclerView.ViewHolder {
     private final ImageLoader mImageLoader;
     private final ViewGroup mAppEntry;
     private final TextView mAppNameView;
@@ -38,7 +38,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
     private final TextView mVersionView;
     private final ImageView mThumbnailView;
 
-    public ViewHolder(ImageLoader imageLoader, ViewGroup v) {
+    ViewHolder(ImageLoader imageLoader, ViewGroup v) {
         super(v);
         mImageLoader = imageLoader;
         mAppEntry = v;
@@ -49,7 +49,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         mThumbnailView = v.findViewById(R.id.appThumbnail);
     }
 
-    public void setData(final App app, final AppInstallListener installListener) {
+    void setData(final App app, final InternalAppInstallListener installListener) {
         mAppNameView.setText(app.getName());
         mAppDescriptionView.setText(app.getDescription());
         mAuthorView.setText(app.getAuthor());

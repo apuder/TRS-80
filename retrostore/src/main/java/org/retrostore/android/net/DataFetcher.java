@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.retrostore.ApiException;
 import org.retrostore.RetrostoreClient;
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.concurrent.Executor;
 public class DataFetcher {
     private final RetrostoreClient mClient;
     private final Executor mRequestExecutor;
-    private final Map<Long, App> mAppCache;
+    private final Map<String, App> mAppCache;
 
     private static DataFetcher sInstance;
 
@@ -78,7 +79,25 @@ public class DataFetcher {
         return future;
     }
 
-    public Optional<App> getFromCache(long id) {
+    /**
+     * Asynchronously fetch and return all media images associated with the app with the given ID.
+     */
+    public ListenableFuture<List<MediaImage>> fetchMediaImages(final String appId) {
+        final SettableFuture<List<MediaImage>> future = SettableFuture.create();
+        mRequestExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.set(mClient.fetchMediaImages(appId));
+                } catch (ApiException e) {
+                    future.setException(e);
+                }
+            }
+        });
+        return future;
+    }
+
+    public Optional<App> getFromCache(String id) {
         return Optional.fromNullable(mAppCache.get(id));
     }
 

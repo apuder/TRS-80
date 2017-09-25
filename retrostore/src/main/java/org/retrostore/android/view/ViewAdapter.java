@@ -20,8 +20,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import org.retrostore.android.AppInstallListener;
 import org.retrostore.android.R;
+import org.retrostore.android.RetrostoreActivity.InternalAppInstallListener;
 import org.retrostore.client.common.proto.App;
 
 import java.util.List;
@@ -34,10 +34,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ViewAdapter extends RecyclerView.Adapter<ViewHolder> {
     private final ImageLoader mImageLoader;
     private final List<App> mAppList;
-    private final AppInstallListener mInstallListener;
+    private final InternalAppInstallListener mInstallListener;
 
     public ViewAdapter(ImageLoader imageLoader, List<App> appList,
-                       AppInstallListener installListener) {
+                       InternalAppInstallListener installListener) {
         mImageLoader = checkNotNull(imageLoader);
         mAppList = checkNotNull(appList);
         mInstallListener = checkNotNull(installListener);

@@ -17,10 +17,14 @@
 package org.retrostore.android;
 
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
+
+import java.util.List;
 
 /**
  * Classes implementing this interface can be notified about the user intent to install an app.
  */
 public interface AppInstallListener {
-    void onInstallApp(App app);
+    /** Called when an app is to be installed. */
+    void onInstallApp(App app, List<MediaImage> mediaImages);
 }

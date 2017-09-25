@@ -48,7 +48,7 @@ public class RetrostoreActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout mRefreshLayout;
-    private AppInstallListener mAppInstallListener;
+    private InternalAppInstallListener mAppInstallListener;
 
     private static AppInstallListener mExternalListener;
 
@@ -56,14 +56,13 @@ public class RetrostoreActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_retrostore);
-        mAppInstallListener = new AppInstallListener() {
+        mAppInstallListener = new InternalAppInstallListener() {
             @Override
             public void onInstallApp(App app) {
                 showDetailsPage(app.getId());
             }
         };
-        mFetcher = DataFetcher.initialize(RetrostoreClientImpl.get(
-                "n/a", "https://test-dot-trs-80.appspot.com/api/%s", false),
+        mFetcher = DataFetcher.initialize(RetrostoreClientImpl.getDefault("n/a"),
                 Executors.newSingleThreadExecutor());
         mImageLoader = ImageLoader.get(this.getApplicationContext());
         mRecyclerView = (RecyclerView) findViewById(R.id.appList);
@@ -103,7 +102,7 @@ public class RetrostoreActivity extends AppCompatActivity {
         mExternalListener = listener;
     }
 
-    private void showDetailsPage(long appId) {
+    private void showDetailsPage(String appId) {
         AppDetailsPageActivity.setAppInstallListener(mExternalListener);
         Intent intent = new Intent(this, AppDetailsPageActivity.class);
         intent.putExtra(AppDetailsPageActivity.EXTRA_APP_ID, appId);
@@ -161,5 +160,9 @@ public class RetrostoreActivity extends AppCompatActivity {
                 Toast.makeText(RetrostoreActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public interface InternalAppInstallListener {
+        void onInstallApp(App app);
     }
 }

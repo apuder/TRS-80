@@ -200,4 +200,5 @@
     <string name="navigation_drawer_open">Leiste offen</string>
     <string name="navigation_drawer_close">Leiste geschlossen</string>
     <string name="error_msg_localstore_init">Lokaler Speicher konnte nicht initialisert werden</string>
+    <string name="successfully_installed">\'%1$s\' erfolgreich installiert.</string>
 </resources>

@@ -19,6 +19,9 @@ package org.retrostore.android;
 import com.google.common.base.Preconditions;
 
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
+
+import java.util.List;
 
 /**
  * Main API interface for an Android app to interface with the RetroStore Android components.
@@ -35,8 +38,8 @@ public class RetrostoreApi {
     private RetrostoreApi() {
         RetrostoreActivity.setAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(App app) {
-                RetrostoreApi.this.onInstallApp(app);
+            public void onInstallApp(App app, List<MediaImage> mediaImages) {
+                RetrostoreApi.this.onInstallApp(app, mediaImages);
             }
         });
     }
@@ -45,9 +48,9 @@ public class RetrostoreApi {
         mInstallListener = Preconditions.checkNotNull(listener);
     }
 
-    private void onInstallApp(App app) {
+    private void onInstallApp(App app, List<MediaImage> mediaImages) {
         if (mInstallListener != null) {
-            mInstallListener.onInstallApp(app);
+            mInstallListener.onInstallApp(app, mediaImages);
         }
     }
 }

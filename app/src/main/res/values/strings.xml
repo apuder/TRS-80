@@ -243,4 +243,5 @@
     <string name="navigation_drawer_close">Drawer closed</string>
     <string name="navigation_drawer_caption" translatable="false">TRS-80 Emulator</string>
     <string name="error_msg_localstore_init">Cannot initialize local storage</string>
+    <string name="successfully_installed">Successfully installed \'%1$s\'.</string>
 </resources>
