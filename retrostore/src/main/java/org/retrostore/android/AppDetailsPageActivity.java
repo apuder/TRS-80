@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -66,6 +67,8 @@ public class AppDetailsPageActivity extends AppCompatActivity {
     private void fillViews(final App app) {
         ((TextView) findViewById(R.id.appName)).setText(app.getName());
         ((TextView) findViewById(R.id.appDescription)).setText(app.getDescription());
+        ((TextView) findViewById(R.id.appDescription)).setMovementMethod(new
+                ScrollingMovementMethod());
         ((TextView) findViewById(R.id.appAuthor)).setText(app.getAuthor());
         ((TextView) findViewById(R.id.appVersion)).setText(getFormattedString(R.string
                 .app_version, app.getVersion()));

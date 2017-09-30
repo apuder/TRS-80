@@ -82,9 +82,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:layout_marginTop="14dp"
-
+        android:layout_weight="1.0"
         android:fontFamily="sans-serif-condensed-light"
-        android:text="Description goes here..."/>
+        android:scrollbars="vertical"/>
 
     <Button
         android:id="@+id/installButton"
