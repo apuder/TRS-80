@@ -41,7 +41,7 @@ final class ConfigurationBackup implements Configuration {
 
     static Configuration from(Configuration orig) {
         SparseArray<String> diskPaths = new SparseArray<>(4);
-        for (int i = 0; i < diskPaths.size(); ++i) {
+        for (int i = 0; i < 4; ++i) {
             diskPaths.put(i, orig.getDiskPath(i).orNull());
         }
         return new ConfigurationBackup(
