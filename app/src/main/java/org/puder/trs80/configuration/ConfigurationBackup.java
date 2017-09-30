@@ -35,6 +35,7 @@ final class ConfigurationBackup implements Configuration {
     private final KeyboardLayout kbLayoutPortrait;
     private final KeyboardLayout kbLayoutLandscape;
     private final int charColor;
+    private final int charColorRgb;
     private final int screenColor;
     private final boolean soundMuted;
 
@@ -52,6 +53,7 @@ final class ConfigurationBackup implements Configuration {
                 orig.getCassettePosition(),
                 orig.getKeyboardLayoutPortrait().orNull(),
                 orig.getKeyboardLayoutLandscape().orNull(),
+                orig.getCharacterColor(),
                 orig.getCharacterColorAsRGB(),
                 orig.getScreenColorAsRGB(),
                 orig.isSoundMuted());
@@ -59,8 +61,8 @@ final class ConfigurationBackup implements Configuration {
 
     private ConfigurationBackup(int id, String name, int model, String casettePath,
                                 SparseArray<String> diskPaths, float casettePosition,
-                                KeyboardLayout kbLayoutPortrait,
-                                KeyboardLayout kbLayoutLandscape, int charColor, int screenColor,
+                                KeyboardLayout kbLayoutPortrait, KeyboardLayout kbLayoutLandscape,
+                                int charColor, int charColorRgb, int screenColor,
                                 boolean soundMuted) {
         this.id = id;
         this.name = name;
@@ -71,6 +73,7 @@ final class ConfigurationBackup implements Configuration {
         this.kbLayoutPortrait = kbLayoutPortrait;
         this.kbLayoutLandscape = kbLayoutLandscape;
         this.charColor = charColor;
+        this.charColorRgb = charColorRgb;
         this.screenColor = screenColor;
         this.soundMuted = soundMuted;
     }
@@ -162,11 +165,16 @@ final class ConfigurationBackup implements Configuration {
 
     @Override
     public int getCharacterColorAsRGB() {
+        return charColorRgb;
+    }
+
+    @Override
+    public int getCharacterColor() {
         return charColor;
     }
 
     @Override
-    public void setCharacterColorAsRGB(int color) {
+    public void setCharacterColor(int color) {
         throw new IllegalAccessError(CONFIG_BACKUP_IS_IMMUTABLE);
     }
 

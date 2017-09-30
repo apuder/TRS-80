@@ -155,8 +155,7 @@ class ConfigurationImpl implements Configuration {
 
     @Override
     public int getCharacterColorAsRGB() {
-        int c = persistence.getCharacterColor(0);
-        switch (c) {
+        switch (getCharacterColor()) {
             case 0:
                 return Color.GREEN;
             default:
@@ -165,7 +164,12 @@ class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void setCharacterColorAsRGB(int color) {
+    public int getCharacterColor() {
+        return persistence.getCharacterColor(0);
+    }
+
+    @Override
+    public void setCharacterColor(int color) {
         persistence.setCharacterColor(color);
     }
 

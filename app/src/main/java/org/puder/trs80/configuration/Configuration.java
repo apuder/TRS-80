@@ -60,7 +60,9 @@ public interface Configuration {
 
     int getCharacterColorAsRGB();
 
-    void setCharacterColorAsRGB(int color);
+    int getCharacterColor();
+
+    void setCharacterColor(int color);
 
     int getScreenColorAsRGB();
 

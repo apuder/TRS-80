@@ -197,7 +197,7 @@ public class ConfigurationManager {
         toSave.setCassettePosition(configuration.getCassettePosition());
         toSave.setKeyboardLayoutPortrait(configuration.getKeyboardLayoutPortrait().orNull());
         toSave.setKeyboardLayoutLandscape(configuration.getKeyboardLayoutLandscape().orNull());
-        toSave.setCharacterColorAsRGB(configuration.getCharacterColorAsRGB());
+        toSave.setCharacterColor(configuration.getCharacterColor());
         toSave.setScreenColorAsRGB(configuration.getScreenColorAsRGB());
         toSave.setSoundMuted(configuration.isSoundMuted());
     }
