@@ -27,6 +27,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -118,6 +119,7 @@ public class MainActivity extends BaseActivity implements
                 }
             }
         });
+        PreferenceManager.setDefaultValues(this, R.xml.configuration, false);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
                 Context.MODE_PRIVATE);
         setContentView(R.layout.main_activity);

@@ -43,12 +43,14 @@
         android:title="@string/pref_keyboard"
         android:key="conf_keyboard">
         <ListPreference
+            android:defaultValue="0"
             android:entries="@array/conf_keyboard_type"
             android:title="@string/pref_keyboard_portrait_title"
             android:summary="@string/pref_keyboard_portrait_summary"
             android:key="conf_keyboard_portrait"
             android:entryValues="@array/conf_keyboard_type_values" />
         <ListPreference
+            android:defaultValue="0"
             android:entries="@array/conf_keyboard_type"
             android:title="@string/pref_keyboard_landscape_title"
             android:summary="@string/pref_keyboard_landscape_summary"
@@ -60,12 +62,14 @@
         android:title="@string/pref_misc"
         android:key="conf_misc">
         <ListPreference
+            android:defaultValue="0"
             android:entries="@array/conf_character_color"
             android:title="@string/pref_character_color_title"
             android:summary="@string/pref_character_color_summary"
             android:key="conf_character_color"
             android:entryValues="@array/conf_character_color_values" />
         <CheckBoxPreference
+            android:defaultValue="false"
             android:title="@string/pref_mute_sound_title"
             android:summaryOn="@string/pref_mute_sound_summary_on"
             android:summaryOff="@string/pref_mute_sound_summary_off"

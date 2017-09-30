@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.common.base.Optional;
 
@@ -170,7 +172,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         disk4.setSummary(valOpt.or(defaultDisk4Summary));
 
         // Character color
-        setCharacterColorSummary(configPersitence.getCharacterColor(-1));
+        setCharacterColorSummary(configPersitence.getCharacterColor(0));
 
         // Keyboard portrait
         setKeyboardSummary(keyboardPortrait, configPersitence.getKeyboardLayoutPortrait());
