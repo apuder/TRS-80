@@ -82,6 +82,8 @@ public class MainActivity extends BaseActivity implements
 
     // Action Menu
     private static final int MENU_OPTION_DOWNLOAD = 0;
+    private static final int MENU_OPTION_ADD_CONFIGURATION = 1;
+    private static final int MENU_OPTION_HELP = 2;
 
     private RecyclerView configurationListView;
     private ConfigurationListViewAdapter configurationListViewAdapter;
@@ -268,6 +270,16 @@ public class MainActivity extends BaseActivity implements
             downloadMenuItem.setIcon(R.drawable.download_icon);
             MenuItemCompat.setShowAsAction(downloadMenuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         }
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_ADD_CONFIGURATION, Menu.NONE,
+                                this.getString(R.string.menu_add_configuration)).setIcon(
+                                R.drawable.add_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat
+                .setShowAsAction(
+                        menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE,
+                                this.getString(R.string.menu_help)).setIcon(
+                                R.drawable.help_icon), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
         return true;
     }
 
@@ -279,6 +291,12 @@ public class MainActivity extends BaseActivity implements
         switch (item.getItemId()) {
             case MENU_OPTION_DOWNLOAD:
                 downloadROMs();
+                return true;
+            case MENU_OPTION_ADD_CONFIGURATION:
+                addConfiguration();
+                return true;
+            case MENU_OPTION_HELP:
+                showHelp();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -303,10 +321,6 @@ public class MainActivity extends BaseActivity implements
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    public void onAddManualConfigBtnClicked(View view) {
-        addConfiguration();
     }
 
     public void onRetrostoreBtnClicked(View view) {

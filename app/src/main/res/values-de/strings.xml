@@ -53,6 +53,7 @@
                         Web-Seiten heruntergeladen werden?</string>
 
     <string name="menu_add">Hinzufügen</string>
+    <string name="menu_add_configuration">Konfiguration hinzufügen</string>
     <string name="menu_cancel">Abbrechen</string>
     <string name="menu_delete">Löschen</string>
     <string name="menu_done">Fertig</string>
@@ -75,7 +76,7 @@
     <string name="menu_stop">Stopp</string>
     <string name="menu_tutorial">TRS-80 Tutorium</string>
     <string name="path">Pfad</string>
-    <string name="no_configurations">Tippen Sie auf \'+\' um eine neue Konfiguration zu erstellen.</string>
+    <string name="no_configurations">Tippen Sie auf den Einkauf-Button um Apps herunter zu laden.</string>
     <string name="pref_cassette_title">Kasette</string>
     <string name="pref_character_color_summary">Diese Farbe wird für die Ausgabeschrift verwendet</string>
     <string name="pref_character_color_title">Schriftfarbe</string>
@@ -142,7 +143,9 @@
         Bitte senden Sie den Fehler Code und Ihr Android Geräte-Typ an mobile@puder.org.</string>
     <string name="error_no_rom">Kein gültiges ROM gefunden. Setzen Sie ein ROM in den Einstellungen.</string>
     <string name="error_no_disk">Laufwerksdatei nicht gefunden.</string>
-    <string name="help_configurations"><![CDATA[Tippen Sie den Hinzufügen-Button (<img src="add_icon"/>) um eine neue Konfiguration zu erzeugen.
+    <string name="help_configurations"><![CDATA[Tippen Sie den Einkauf-Button (<img src="ic_shopping_cart_black_24dp"/>)
+        um den RetroStore zu besuchen.
+        Die Option "Konfiguration hinzufügen" (<img src="add_icon"/>) erlaubt das manuelle Erzeugen einer Konfiguration.
         Eine neue Konfiguration definiert ein TRS-80 Modell und die Laufwerke für die Emulation.
         Tippen Sie auf eine Konfiguration um den Emulator zu starten. Über den Info-Knopf <img src="info_icon"/>
         gelangen Sie in ein Kontext-Menü. Halten die eine Konfiguration gedrückt um
