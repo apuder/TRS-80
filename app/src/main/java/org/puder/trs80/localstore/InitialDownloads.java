@@ -59,12 +59,14 @@ public class InitialDownloads {
                     (Apparat%20Inc)%5bDSK%5d%5bMaster%5d.zip",
                     "ND80MST.DSK", "newdos80-model1.dsk"),
                     */
+            /*
                 new Download(
                         false,
                         Hardware.MODEL1,
                         "Model I - NEWDOS/80",
                         "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2m1.zip",
                         "ND80MST.DSK", "newdos80-model1.dsk"),
+                        */
             /*
             new Download(false, Hardware.MODEL3, "Model III - LDOS",
                     "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk", "ldos-model3.dsk"),
@@ -79,12 +81,14 @@ public class InitialDownloads {
                     (Apparat%20Inc)%5bDSK%5d.zip",
                     "NEWDOS80.DSK", "newdos80-model3.dsk"),
                      */
+            /*
                 new Download(
                         false,
                         Hardware.MODEL3,
                         "Model III - NEWDOS/80",
                         "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2d.zip",
                         "nd80ira.dsk", "newdos80-model3.dsk"),
+                        */
         };
     }
 
