@@ -188,8 +188,10 @@
                         &nbsp;&nbsp;<img src="keyboard_icon"/>: Tastaturtyp auswählen<p>
                         Das Tutorium zeigt einige TRS-Kommandos.]]></string>
 
+    <string name="tutorial_prereq">Das Tutorium benötigt das Programm \"TRS-80 Tutorial\".
+        Bitte besuchen Sie den RetroStore um dieses Programm zu installieren.</string>
     <string name="tutorial_next">Weiter (%1$d/%2$d)</string>
-    <string name="tutorial_step_1">Zeigt den Inhalt des Floppy-Verzeichnisses an. Bis zu vier
+    <string name="tutorial_step_1">Zeigt den Inhalt der zweiten Floppy an. Bis zu vier
                         Floppies können konfiguriert werden.</string>
     <string name="tutorial_step_2">Startet den BASIC Interpreter.</string>
     <string name="tutorial_step_3">Die BASIC Version von \"Hello World\".</string>

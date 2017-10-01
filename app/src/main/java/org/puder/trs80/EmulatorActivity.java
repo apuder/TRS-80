@@ -87,6 +87,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private static final int   MENU_OPTION_TUTORIAL  = 6;
     private static final int   MENU_OPTION_HELP      = 7;
 
+    private static final String CONFIGURATION_TUTORIAL_NAME = "TRS-80 Tutorial";
+
     private Configuration      currentConfiguration;
     private EmulatorState      emulatorState;
     private Hardware           currentHardware;
@@ -723,6 +725,11 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void showTutorial() {
+        Optional<String> name = currentConfiguration.getName();
+        if (name.isPresent() && !CONFIGURATION_TUTORIAL_NAME.equals(name.get())) {
+            showDialog(R.string.help_title_emulator, -1, R.string.tutorial_prereq);
+            return;
+        }
         new Tutorial(keyboardManager, findViewById(R.id.emulator)).show();
     }
 

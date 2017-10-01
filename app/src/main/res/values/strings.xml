@@ -222,9 +222,11 @@
                         &nbsp;&nbsp;<img src="keyboard_icon"/>: Switch keyboard type<p>
                         Start the tutorial to run some TRS-commands.]]></string>
 
+    <string name="tutorial_prereq">The tutorial requires the \"TRS-80 Tutorial\" image.
+        Please visit the RetroStore to download this image, then run the tutorial.</string>
     <string name="tutorial_next">Next (%1$d/%2$d)</string>
-    <string name="tutorial_step_1_cmd" translatable="false">DIR</string>
-    <string name="tutorial_step_1">Display the directory of the floppy disks. Up to four floppy
+    <string name="tutorial_step_1_cmd" translatable="false">\n_DIR :1</string>
+    <string name="tutorial_step_1">Display the directory of the second floppy disk. Up to four floppy
                          images can be mounted per emulator configuration.</string>
     <string name="tutorial_step_2_cmd" translatable="false">BASIC</string>
     <string name="tutorial_step_2">Enter the BASIC interpreter.</string>
@@ -235,11 +237,11 @@
     <string name="tutorial_step_5_cmd" translatable="false">CSAVE \"FIRST/BAS\"</string>
     <string name="tutorial_step_5">Save the program to the cassette. The
                           cassette needs to be rewound before loading via CLOAD.</string>
-    <string name="tutorial_step_6_cmd" translatable="false">SAVE \"FIRST/BAS\"</string>
+    <string name="tutorial_step_6_cmd" translatable="false">__SAVE \"FIRST/BAS:1\"</string>
     <string name="tutorial_step_6">Save the program to the floppy disk as well.</string>
     <string name="tutorial_step_7_cmd" translatable="false">CMD \"S\"</string>
     <string name="tutorial_step_7">Exit the BASIC interpreter.</string>
-    <string name="tutorial_step_8_cmd" translatable="false">DIR</string>
+    <string name="tutorial_step_8_cmd" translatable="false">DIR :1</string>
     <string name="tutorial_step_8">Display the directory again. Note the file FIRST/BAS.</string>
     <string name="navigation_drawer_open">Drawer open</string>
     <string name="navigation_drawer_close">Drawer closed</string>

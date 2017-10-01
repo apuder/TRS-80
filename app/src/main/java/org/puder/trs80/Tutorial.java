@@ -25,7 +25,9 @@ import org.puder.trs80.keyboard.KeyboardManager;
 
 public class Tutorial implements View.OnClickListener, Runnable {
 
-    final private static int KEY_DELAY = 180;
+    final private static int  KEY_DELAY = 180;
+    final private static int  TUTORIAL_DELAY = 1000;
+    final private static char DELAY_CHAR = '_';
 
     private KeyboardManager  keyboardManager;
     private View             tutorialRoot;
@@ -108,7 +110,7 @@ public class Tutorial implements View.OnClickListener, Runnable {
         String label = TRS80Application.getAppContext().getString(R.string.tutorial_next,
                 nextCommand, steps.length);
         nextButton.setText(label);
-        command.setText(currentStep.command);
+        command.setText(currentStep.command.replaceAll(Character.toString(DELAY_CHAR), ""));
         description.setText(currentStep.description);
         currentCommand = currentStep.command + "\n";
         currentKeyStroke = 0;
@@ -133,7 +135,12 @@ public class Tutorial implements View.OnClickListener, Runnable {
             return;
         }
         char ch = currentCommand.charAt(currentKeyStroke++);
-        keyboardManager.injectKey(ch);
-        tutorialRoot.postDelayed(this, KEY_DELAY);
+        int delay = KEY_DELAY;
+        if (ch == DELAY_CHAR) {
+            delay = TUTORIAL_DELAY;
+        } else {
+            keyboardManager.injectKey(ch);
+        }
+        tutorialRoot.postDelayed(this, delay);
     }
 }

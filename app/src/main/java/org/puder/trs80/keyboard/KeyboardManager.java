@@ -119,6 +119,9 @@ public class KeyboardManager {
         case ' ':
             keyName = "key_SPACE";
             break;
+        case ':':
+            keyName = "key_COLON";
+            break;
         case '"':
             keyName = "key_QUOT";
             break;
