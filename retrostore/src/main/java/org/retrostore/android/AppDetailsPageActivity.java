@@ -96,7 +96,7 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         }
 
         // TODO: Make this work so that we instantiate a new fetcher if it got clean-up.
-        mFetcher = DataFetcher.get();
+        mFetcher = DataFetcher.get().orNull();
         if (mFetcher == null) {
             Log.w(TAG, "No data fetcher available.");
             return Optional.absent();

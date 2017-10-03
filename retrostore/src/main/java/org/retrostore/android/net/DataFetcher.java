@@ -41,8 +41,9 @@ public class DataFetcher {
 
     private static DataFetcher sInstance;
 
-    public static DataFetcher get() {
-        return Preconditions.checkNotNull(sInstance, "Must initialize() first.");
+    public static Optional<DataFetcher> get() {
+        // Might be null if the app got cleaned up but the details activity was resumed.
+        return Optional.fromNullable(sInstance);
     }
 
     public static DataFetcher initialize(RetrostoreClient client, Executor executor) {
