@@ -239,7 +239,7 @@ public class ConfigurationManager {
         }
         for (int i = 0; i < Math.min(4, disks.size()); ++i) {
             ConfigMedia media = disks.get(i);
-            if (media.data.length > 0) {
+            if (media != null && media.data != null && media.data.length > 0) {
                 if (Strings.isNullOrEmpty(media.filename)) {
                     Log.e(TAG, "Media filename is empty. Skipping.");
                     continue;
@@ -254,7 +254,7 @@ public class ConfigurationManager {
             }
         }
 
-        if (cassette.data != null && cassette.data.length > 0) {
+        if (cassette != null && cassette.data != null && cassette.data.length > 0) {
             if (Strings.isNullOrEmpty(cassette.filename)) {
                 Log.e(TAG, "Cassette filename is empty. Skipping.");
             } else {
