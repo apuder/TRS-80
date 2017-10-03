@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -47,19 +46,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.puder.trs80.async.UiExecutor;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
-import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import org.puder.trs80.io.FileManager;
 import org.puder.trs80.localstore.RomManager;
@@ -68,14 +61,9 @@ import org.retrostore.android.AppPackage;
 import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
-import org.retrostore.client.common.proto.App;
-import org.retrostore.client.common.proto.MediaImage;
-import org.retrostore.client.common.proto.Trs80Extension.Trs80Model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
@@ -104,7 +92,7 @@ public class MainActivity extends BaseActivity implements
     private ConfigurationManager configManager;
     private RomManager romManager;
     // Note: This is in the RetroStore package.
-    private ImageLoader imageLoader;
+    private AppInstaller appInstaller;
     private CastMessageSender castMessageSender;
 
 
@@ -115,7 +103,7 @@ public class MainActivity extends BaseActivity implements
         RetrostoreApi.get().registerAppInstallListener(new AppInstallListener() {
             @Override
             public void onInstallApp(AppPackage appPackage) {
-                if (installApp(appPackage)) {
+                if (appInstaller.installApp(appPackage)) {
                     String msg = getString(R.string.successfully_installed);
                     showToast(StrUtil.form(msg, appPackage.appData.getName()));
                 }
@@ -148,7 +136,7 @@ public class MainActivity extends BaseActivity implements
             // TODO: Show an error message before exiting.
             return;
         }
-        imageLoader = ImageLoader.get(getApplicationContext());
+        appInstaller = new AppInstaller(configManager, ImageLoader.get(getApplicationContext()));
         castMessageSender = CastMessageSender.get();
 
         int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
@@ -568,56 +556,7 @@ public class MainActivity extends BaseActivity implements
         return AlertDialogUtil.showHint(this, id);
     }
 
-    public boolean installApp(AppPackage appPackage) {
-        List<ConfigMedia> configMedia = new ArrayList<>();
-        // The first four items will be the media images. The fifth is the cassette.
-        for (int i = 0; i < 4; ++i) {
-            MediaImage mediaImage = appPackage.mediaImages.get(i);
-            if (mediaImage != null) {
-                configMedia.add(new ConfigMedia(mediaImage.getFilename(),
-                        mediaImage.getData().toByteArray()));
-            }
-        }
-        ConfigMedia cassetteMedia = null;
-        MediaImage cassetteImage = appPackage.mediaImages.get(4);
-        if (cassetteImage != null) {
-            cassetteMedia = new ConfigMedia(
-                    cassetteImage.getFilename(), cassetteImage.getData().toByteArray());
-        }
-        App app = appPackage.appData;
-        Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
-                getHardwareModelId(app.getExtTrs80().getModel()), app.getName(),
-                configMedia, cassetteMedia);
-        if (!newConfiguration.isPresent()) {
-            return false;
-        }
 
-        // So that it doesn't show up blank, set the screenshot to the logo of the just downloaded
-        // app. It will later be replaces by actual screenshots.
-        final int configId = newConfiguration.get().getId();
-        String screenshotUrl = app.getScreenshotUrl(0);
-        if (!Strings.isNullOrEmpty(screenshotUrl)) {
-            ListenableFuture<Bitmap> screenshotBitmap =
-                    imageLoader.loadAsBitmapAsync(screenshotUrl, 800, 600);
-            Futures.addCallback(screenshotBitmap, new FutureCallback<Bitmap>() {
-                @Override
-                public void onSuccess(Bitmap result) {
-                    try {
-                        configManager.getEmulatorState(configId).saveScreenshot(result);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Cannot emulator state", e);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e(TAG, "Cannot load initial screenshot.", t);
-                }
-            }, UiExecutor.create());
-        }
-        return true;
-    }
 
     private void showToast(final String message) {
         runOnUiThread(new Runnable() {
@@ -626,22 +565,5 @@ public class MainActivity extends BaseActivity implements
                 Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private static int getHardwareModelId(Trs80Model model) {
-        switch (model) {
-            case MODEL_I:
-                return 1;
-            case MODEL_III:
-                return 3;
-            case MODEL_4:
-                return 4;
-            case MODEL_4P:
-                return 5;
-            default:
-            case UNKNOWN_MODEL:
-            case UNRECOGNIZED:
-                return 0;
-        }
     }
 }
