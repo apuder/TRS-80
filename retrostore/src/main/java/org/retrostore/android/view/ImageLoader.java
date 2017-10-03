@@ -22,6 +22,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -40,7 +41,9 @@ public class ImageLoader {
     private final Executor mExecutor;
 
     public static ImageLoader get(Context ctx) {
-        return new ImageLoader(ctx, Executors.newCachedThreadPool());
+        return new ImageLoader(
+                Preconditions.checkNotNull(ctx, "Context cannot be null"),
+                Executors.newCachedThreadPool());
     }
 
     public ImageLoader(Context ctx, Executor executor) {
