@@ -36,6 +36,8 @@ import org.puder.trs80.io.FileDownloader;
 import org.puder.trs80.localstore.InitialDownloads;
 import org.puder.trs80.localstore.InitialDownloads.Download;
 import org.puder.trs80.localstore.RomManager;
+import org.retrostore.android.RetrostoreApi;
+import org.retrostore.android.view.ImageLoader;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -44,10 +46,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class InitialSetupDialogFragment extends DialogFragment {
     private static final String TAG = "InitlStpFgrmnt";
+    private static final String TUTORIAL_APP_ID = "2420f832-a7aa-11e7-8132-7343fef39a1f";
 
     private DownloadCompletionListener listener;
     private int downloadCounter = 0;
     private final ConfigurationManager configurationManager;
+    private final AppInstaller appInstaller;
     private final FileDownloader fileDownloader;
     private final Executor downloadExecutor;
     private final Executor uiExecutor;
@@ -55,6 +59,9 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     public InitialSetupDialogFragment() {
         configurationManager = checkNotNull(ConfigurationManager.getDefault());
+        appInstaller = new AppInstaller(configurationManager,
+                ImageLoader.get(getContext()),
+                RetrostoreApi.get());
         fileDownloader = new FileDownloader();
         downloadExecutor = Executors.newSingleThreadExecutor();
         uiExecutor = UiExecutor.create();

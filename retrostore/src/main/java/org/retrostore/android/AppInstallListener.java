@@ -16,10 +16,12 @@
 
 package org.retrostore.android;
 
+import org.retrostore.client.common.proto.App;
+
 /**
  * Classes implementing this interface can be notified about the user intent to install an app.
  */
 public interface AppInstallListener {
     /** Called when an app is to be installed. */
-    void onInstallApp(AppPackage appPackage);
+    void onInstallApp(App app);
 }

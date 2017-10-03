@@ -27,15 +27,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 
 import org.retrostore.android.net.DataFetcher;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
-import org.retrostore.client.common.proto.MediaImage;
 
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -113,27 +109,6 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         mExternalListener = listener;
     }
 
-    private void installApp(final App app) {
-        if (mExternalListener == null) {
-            return;
-        }
-
-        Futures.addCallback(mFetcher.fetchMediaImages(app.getId()),
-                new FutureCallback<List<MediaImage>>() {
-                    @Override
-                    public void onSuccess(List<MediaImage> media) {
-                        mExternalListener.onInstallApp(
-                                new AppPackage(app, media));
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        showMessage(R.string.error_downloading_app);
-                    }
-                });
-        finish();
-    }
-
     private void onAskForInstallation(final App app) {
         DialogInterface.OnClickListener dialogClickListener =
                 new DialogInterface.OnClickListener() {
@@ -141,7 +116,7 @@ public class AppDetailsPageActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                installApp(app);
+                                mExternalListener.onInstallApp(app);
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:

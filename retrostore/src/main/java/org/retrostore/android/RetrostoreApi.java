@@ -16,6 +16,8 @@
 
 package org.retrostore.android;
 
+import android.util.Log;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -32,6 +34,7 @@ import java.util.List;
  * Main API interface for an Android app to interface with the RetroStore Android components.
  */
 public class RetrostoreApi {
+    private static final String TAG = "RetrostoreApi";
     private static final RetrostoreApi SINGLETON = new RetrostoreApi();
 
     private final RetrostoreClient mRetrostoreClient;
@@ -45,8 +48,8 @@ public class RetrostoreApi {
         mRetrostoreClient = RetrostoreClientImpl.getDefault("n/a");
         RetrostoreActivity.setAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(AppPackage appPackage) {
-                RetrostoreApi.this.onInstallApp(appPackage);
+            public void onInstallApp(App app) {
+                RetrostoreApi.this.onInstallApp(app);
             }
         });
     }
@@ -61,18 +64,31 @@ public class RetrostoreApi {
     public Optional<AppPackage> downloadApp(String appId) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(appId));
         try {
-            App app = mRetrostoreClient.getApp(appId);
-            List<MediaImage> mediaImages = mRetrostoreClient.fetchMediaImages(appId);
-            return Optional.of(new AppPackage(app, mediaImages));
+            return downloadImages(mRetrostoreClient.getApp(appId));
         } catch (ApiException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Cannot download media images.", e);
         }
         return Optional.absent();
     }
 
-    private void onInstallApp(AppPackage appPackage) {
+    /** Downloads the media images for the given app and returns the whole package. */
+    public Optional<AppPackage> downloadImages(App app) {
+        if (app == null) {
+            return Optional.absent();
+        }
+        try {
+            List<MediaImage> mediaImages = mRetrostoreClient.fetchMediaImages(app.getId());
+            return Optional.of(new AppPackage(app, mediaImages));
+
+        } catch (ApiException e) {
+            Log.e(TAG, "Cannot download media images.", e);
+        }
+        return Optional.absent();
+    }
+
+    private void onInstallApp(App app) {
         if (mInstallListener != null) {
-            mInstallListener.onInstallApp(appPackage);
+            mInstallListener.onInstallApp(app);
         }
     }
 }

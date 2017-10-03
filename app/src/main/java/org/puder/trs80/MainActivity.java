@@ -57,13 +57,15 @@ import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import org.puder.trs80.io.FileManager;
 import org.puder.trs80.localstore.RomManager;
 import org.retrostore.android.AppInstallListener;
-import org.retrostore.android.AppPackage;
 import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
+import org.retrostore.client.common.proto.App;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
@@ -93,6 +95,7 @@ public class MainActivity extends BaseActivity implements
     private RomManager romManager;
     // Note: This is in the RetroStore package.
     private AppInstaller appInstaller;
+    private Executor mInstallExecutor;
     private CastMessageSender castMessageSender;
 
 
@@ -100,13 +103,12 @@ public class MainActivity extends BaseActivity implements
     public void onCreate(Bundle savedInstanceState) {
         // StrictMode.enableDefaults();
         super.onCreate(savedInstanceState);
+
+        mInstallExecutor = Executors.newSingleThreadExecutor();
         RetrostoreApi.get().registerAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(AppPackage appPackage) {
-                if (appInstaller.installApp(appPackage)) {
-                    String msg = getString(R.string.successfully_installed);
-                    showToast(StrUtil.form(msg, appPackage.appData.getName()));
-                }
+            public void onInstallApp(App app) {
+                asyncDownloadAndInstallApp(app);
             }
         });
         PreferenceManager.setDefaultValues(this, R.xml.configuration, false);
@@ -136,7 +138,8 @@ public class MainActivity extends BaseActivity implements
             // TODO: Show an error message before exiting.
             return;
         }
-        appInstaller = new AppInstaller(configManager, ImageLoader.get(getApplicationContext()));
+        appInstaller = new AppInstaller(configManager, ImageLoader.get(getApplicationContext()),
+                RetrostoreApi.get());
         castMessageSender = CastMessageSender.get();
 
         int screenWidthDp = this.getResources().getConfiguration().screenWidthDp;
@@ -557,6 +560,17 @@ public class MainActivity extends BaseActivity implements
     }
 
 
+    private void asyncDownloadAndInstallApp(final App app) {
+        mInstallExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (appInstaller.downloadAndInstallApp(app)) {
+                    String msg = getString(R.string.successfully_installed);
+                    showToast(StrUtil.form(msg, app.getName()));
+                }
+            }
+        });
+    }
 
     private void showToast(final String message) {
         runOnUiThread(new Runnable() {
