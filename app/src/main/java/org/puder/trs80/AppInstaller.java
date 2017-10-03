@@ -16,17 +16,10 @@
 
 package org.puder.trs80;
 
-import android.graphics.Bitmap;
-import android.util.Log;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
-import org.puder.trs80.async.UiExecutor;
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
 import org.retrostore.android.AppPackage;
@@ -36,7 +29,6 @@ import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
 import org.retrostore.client.common.proto.Trs80Extension;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,31 +97,6 @@ public class AppInstaller {
                 configMedia, cassetteMedia);
         if (!newConfiguration.isPresent()) {
             return false;
-        }
-
-        // So that it doesn't show up blank, set the screenshot to the logo of the just downloaded
-        // app. It will later be replaces by actual screenshots.
-        final int configId = newConfiguration.get().getId();
-        String screenshotUrl = app.getScreenshotUrl(0);
-        if (!Strings.isNullOrEmpty(screenshotUrl)) {
-            ListenableFuture<Bitmap> screenshotBitmap =
-                    imageLoader.loadAsBitmapAsync(screenshotUrl, 800, 600);
-            Futures.addCallback(screenshotBitmap, new FutureCallback<Bitmap>() {
-                @Override
-                public void onSuccess(Bitmap result) {
-                    try {
-                        configManager.getEmulatorState(configId).saveScreenshot(result);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Cannot emulator state", e);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e(TAG, "Cannot load initial screenshot.", t);
-                }
-            }, UiExecutor.create());
         }
         return true;
     }
