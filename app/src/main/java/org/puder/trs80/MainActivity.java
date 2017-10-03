@@ -403,7 +403,7 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void deleteConfiguration(final Configuration conf, final int position) {
-        String msg = this.getString(R.string.alert_dialog_confirm_delete, conf.getName());
+        String msg = this.getString(R.string.alert_dialog_confirm_delete, conf.getName().orNull());
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
                 R.drawable.warning_icon, msg);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
