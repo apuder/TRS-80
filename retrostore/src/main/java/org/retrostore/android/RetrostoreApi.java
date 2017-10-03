@@ -16,8 +16,13 @@
 
 package org.retrostore.android;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
+import org.retrostore.ApiException;
+import org.retrostore.RetrostoreClient;
+import org.retrostore.RetrostoreClientImpl;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
 
@@ -29,6 +34,7 @@ import java.util.List;
 public class RetrostoreApi {
     private static final RetrostoreApi SINGLETON = new RetrostoreApi();
 
+    private final RetrostoreClient mRetrostoreClient;
     private AppInstallListener mInstallListener;
 
     public static RetrostoreApi get() {
@@ -36,10 +42,11 @@ public class RetrostoreApi {
     }
 
     private RetrostoreApi() {
+        mRetrostoreClient = RetrostoreClientImpl.getDefault("n/a");
         RetrostoreActivity.setAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(App app, List<MediaImage> mediaImages) {
-                RetrostoreApi.this.onInstallApp(app, mediaImages);
+            public void onInstallApp(AppPackage appPackage) {
+                RetrostoreApi.this.onInstallApp(appPackage);
             }
         });
     }
@@ -48,9 +55,24 @@ public class RetrostoreApi {
         mInstallListener = Preconditions.checkNotNull(listener);
     }
 
-    private void onInstallApp(App app, List<MediaImage> mediaImages) {
+    /**
+     * Will download all aspects of a app package. Do not call this on the main thread.
+     */
+    public Optional<AppPackage> downloadApp(String appId) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(appId));
+        try {
+            App app = mRetrostoreClient.getApp(appId);
+            List<MediaImage> mediaImages = mRetrostoreClient.fetchMediaImages(appId);
+            return Optional.of(new AppPackage(app, mediaImages));
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        return Optional.absent();
+    }
+
+    private void onInstallApp(AppPackage appPackage) {
         if (mInstallListener != null) {
-            mInstallListener.onInstallApp(app, mediaImages);
+            mInstallListener.onInstallApp(appPackage);
         }
     }
 }

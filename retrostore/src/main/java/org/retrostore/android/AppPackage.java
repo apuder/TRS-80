@@ -16,10 +16,22 @@
 
 package org.retrostore.android;
 
+import com.google.common.collect.ImmutableList;
+
+import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.MediaImage;
+
+import java.util.List;
+
 /**
- * Classes implementing this interface can be notified about the user intent to install an app.
+ * Contains app metadata and disk images.
  */
-public interface AppInstallListener {
-    /** Called when an app is to be installed. */
-    void onInstallApp(AppPackage appPackage);
+public class AppPackage {
+    public final App appData;
+    public final List<MediaImage> mediaImages;
+
+    public AppPackage(App appData, List<MediaImage> mediaImages) {
+        this.appData = appData;
+        this.mediaImages = ImmutableList.copyOf(mediaImages);
+    }
 }

@@ -32,7 +32,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26+'
     compile 'com.android.support:cardview-v7:26+'
-    compile 'org.retrostore:retrostore-client:0.1.4'
+    compile 'org.retrostore:retrostore-client:0.1.5'
     compile 'com.google.guava:guava:20.0'
     compile 'com.github.bumptech.glide:glide:3.8.0'
     testCompile 'junit:junit:4.12'

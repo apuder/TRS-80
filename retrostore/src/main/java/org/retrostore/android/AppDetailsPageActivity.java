@@ -121,8 +121,9 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         Futures.addCallback(mFetcher.fetchMediaImages(app.getId()),
                 new FutureCallback<List<MediaImage>>() {
                     @Override
-                    public void onSuccess(List<MediaImage> result) {
-                        mExternalListener.onInstallApp(app, result);
+                    public void onSuccess(List<MediaImage> media) {
+                        mExternalListener.onInstallApp(
+                                new AppPackage(app, media));
                     }
 
                     @Override

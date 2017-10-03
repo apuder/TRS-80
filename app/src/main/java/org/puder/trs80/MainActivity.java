@@ -64,6 +64,7 @@ import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import org.puder.trs80.io.FileManager;
 import org.puder.trs80.localstore.RomManager;
 import org.retrostore.android.AppInstallListener;
+import org.retrostore.android.AppPackage;
 import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
@@ -75,7 +76,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends BaseActivity implements
         InitialSetupDialogFragment.DownloadCompletionListener, ConfigurationItemListener,
@@ -114,10 +114,10 @@ public class MainActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         RetrostoreApi.get().registerAppInstallListener(new AppInstallListener() {
             @Override
-            public void onInstallApp(App app, List<MediaImage> mediaImages) {
-                if (installApp(app, mediaImages)) {
+            public void onInstallApp(AppPackage appPackage) {
+                if (installApp(appPackage)) {
                     String msg = getString(R.string.successfully_installed);
-                    showToast(String.format(Locale.getDefault(), msg, app.getName()));
+                    showToast(StrUtil.form(msg, appPackage.appData.getName()));
                 }
             }
         });
@@ -568,22 +568,23 @@ public class MainActivity extends BaseActivity implements
         return AlertDialogUtil.showHint(this, id);
     }
 
-    public boolean installApp(App app, List<MediaImage> mediaImages) {
+    public boolean installApp(AppPackage appPackage) {
         List<ConfigMedia> configMedia = new ArrayList<>();
         // The first four items will be the media images. The fifth is the cassette.
         for (int i = 0; i < 4; ++i) {
-            MediaImage mediaImage = mediaImages.get(i);
+            MediaImage mediaImage = appPackage.mediaImages.get(i);
             if (mediaImage != null) {
                 configMedia.add(new ConfigMedia(mediaImage.getFilename(),
                         mediaImage.getData().toByteArray()));
             }
         }
         ConfigMedia cassetteMedia = null;
-        MediaImage cassetteImage = mediaImages.get(4);
+        MediaImage cassetteImage = appPackage.mediaImages.get(4);
         if (cassetteImage != null) {
             cassetteMedia = new ConfigMedia(
                     cassetteImage.getFilename(), cassetteImage.getData().toByteArray());
         }
+        App app = appPackage.appData;
         Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
                 getHardwareModelId(app.getExtTrs80().getModel()), app.getName(),
                 configMedia, cassetteMedia);
