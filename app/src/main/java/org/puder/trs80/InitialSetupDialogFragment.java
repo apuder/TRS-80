@@ -51,7 +51,6 @@ public class InitialSetupDialogFragment extends DialogFragment {
     private DownloadCompletionListener listener;
     private int downloadCounter = 0;
     private final ConfigurationManager configurationManager;
-    private final AppInstaller appInstaller;
     private final FileDownloader fileDownloader;
     private final Executor downloadExecutor;
     private final Executor uiExecutor;
@@ -59,9 +58,6 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     public InitialSetupDialogFragment() {
         configurationManager = checkNotNull(ConfigurationManager.getDefault());
-        appInstaller = new AppInstaller(configurationManager,
-                ImageLoader.get(getContext()),
-                RetrostoreApi.get());
         fileDownloader = new FileDownloader();
         downloadExecutor = Executors.newSingleThreadExecutor();
         uiExecutor = UiExecutor.create();
@@ -103,6 +99,18 @@ public class InitialSetupDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         setCancelable(false);
         setRetainInstance(true);
+
+        final AppInstaller appInstaller = new AppInstaller(configurationManager,
+                ImageLoader.get(getActivity()),
+                RetrostoreApi.get());
+
+        // Download and install the tutorial.
+        downloadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                appInstaller.downloadAndInstallApp(TUTORIAL_APP_ID);;
+            }
+        });
 
         // Initialize the downloads of all initial items.
         final Download[] downloads = InitialDownloads.get();
