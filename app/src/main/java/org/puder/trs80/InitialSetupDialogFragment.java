@@ -26,10 +26,12 @@ import android.util.Log;
 import android.view.View;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import org.puder.trs80.async.UiExecutor;
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
+import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia;
 import org.puder.trs80.io.FileDownloader;
 import org.puder.trs80.localstore.InitialDownloads;
 import org.puder.trs80.localstore.InitialDownloads.Download;
@@ -128,6 +130,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
         Optional<byte[]> data = fileDownloader.download(url, download.fileInZip);
         if (data.isPresent()) {
+            ConfigMedia configMedia = new ConfigMedia(download.destinationFilename, data.get());
             // Add a new ROM or entry.
             if (download.isROM) {
                 boolean success = romManager.addRom(download.model,
@@ -138,8 +141,8 @@ public class InitialSetupDialogFragment extends DialogFragment {
                 Optional<Configuration> newConfig = configurationManager.addNewConfiguration(
                         download.model,
                         download.configurationName,
-                        download.destinationFilename,
-                        data.get());
+                        Lists.newArrayList(configMedia),
+                        null /* No cassette */);
                 Log.i(TAG, "Adding configuration success: " + newConfig.isPresent());
             }
         } else {

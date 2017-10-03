@@ -109,7 +109,7 @@ final class ConfigurationBackup implements Configuration {
     }
 
     @Override
-    public void setCasettePath(String path) {
+    public void setCassettePath(String path) {
         throw new IllegalAccessError(CONFIG_BACKUP_IS_IMMUTABLE);
     }
 

@@ -36,7 +36,7 @@ public interface Configuration {
 
     Optional<String> getCassettePath();
 
-    void setCasettePath(String path);
+    void setCassettePath(String path);
 
     Optional<String> getDiskPath(int disk);
 

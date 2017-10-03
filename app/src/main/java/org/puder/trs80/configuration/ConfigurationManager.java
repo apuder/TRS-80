@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import org.puder.trs80.Hardware;
 import org.puder.trs80.io.FileManager;
@@ -192,7 +193,7 @@ public class ConfigurationManager {
         Configuration toSave = ConfigurationImpl.fromId(configuration.getId(), context);
         toSave.setName(configuration.getName().orNull());
         toSave.setModel(configuration.getModel());
-        toSave.setCasettePath(configuration.getCassettePath().orNull());
+        toSave.setCassettePath(configuration.getCassettePath().orNull());
         toSave.setDiskPaths(configuration.getDiskPaths());
         toSave.setCassettePosition(configuration.getCassettePosition());
         toSave.setKeyboardLayoutPortrait(configuration.getKeyboardLayoutPortrait().orNull());
@@ -216,32 +217,57 @@ public class ConfigurationManager {
      *
      * @param model      defines which model this entry is for. See {@link Hardware}.
      * @param configName the name of this new configuration.
-     * @param filename   the filename to use for the entry.
-     * @param content    the byte content of the entry.
+     * @param disks      the disk images for this configuration.
+     * @param cassette   the cassete image, or null, for this configuration.
      * @return If the configuration was successfully added it will be returned.
      */
     public Optional<Configuration> addNewConfiguration(int model,
                                                        String configName,
-                                                       String filename,
-                                                       byte[] content) {
+                                                       List<ConfigMedia> disks,
+                                                       ConfigMedia cassette) {
         // Configurations automatically persist.
         Configuration newConfig = newConfiguration();
         newConfig.setName(configName);
         newConfig.setModel(model);
 
         FileManager configFileManager;
-        // TODO: Config disks should go into their own sub-directories to avoid conflict.
         try {
             configFileManager = fileManagerCreator.createForAppSubDir(newConfig.getId());
         } catch (IOException e) {
             Log.e(TAG, "Could not create configuration sub-dir.");
             return Optional.absent();
         }
-        if (!configFileManager.writeFile(filename, content)) {
-            deleteConfigWithId(newConfig.getId());
-            return Optional.absent();
+        for (int i = 0; i < 4; ++i) {
+            ConfigMedia media = disks.get(i);
+            if (media.data.length > 0) {
+                if (Strings.isNullOrEmpty(media.filename)) {
+                    Log.e(TAG, "Media filename is empty. Skipping.");
+                    continue;
+                }
+
+                // If any disks fails writing, delete the whole config.
+                if (!configFileManager.writeFile(media.filename, media.data)) {
+                    deleteConfigWithId(newConfig.getId());
+                    return Optional.absent();
+                }
+                newConfig.setDiskPath(i, configFileManager.getAbsolutePathForFile(media.filename));
+            }
         }
-        newConfig.setDiskPath(0, configFileManager.getAbsolutePathForFile(filename));
+
+        if (cassette.data.length > 0) {
+            if (Strings.isNullOrEmpty(cassette.filename)) {
+                Log.e(TAG, "Cassette filename is empty. Skipping.");
+            } else {
+                // If cassette fails writing, delete the whole config.
+                if (!configFileManager.writeFile(cassette.filename, cassette.data)) {
+                    deleteConfigWithId(newConfig.getId());
+                    return Optional.absent();
+                }
+                newConfig.setCassettePath(configFileManager.getAbsolutePathForFile(
+                        cassette.filename));
+            }
+        }
+
         return Optional.of(newConfig);
     }
 
@@ -284,6 +310,16 @@ public class ConfigurationManager {
                 idsStr += Integer.toString(id);
             }
             prefs.edit().putString(KEY_CONFIGURATIONS, idsStr).apply();
+        }
+    }
+
+    public static class ConfigMedia {
+        public final String filename;
+        public final byte[] data;
+
+        public ConfigMedia(String filename, byte[] data) {
+            this.filename = filename;
+            this.data = data;
         }
     }
 }

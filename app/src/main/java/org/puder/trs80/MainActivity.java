@@ -59,6 +59,7 @@ import org.puder.trs80.async.UiExecutor;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
+import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia;
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback;
 import org.puder.trs80.io.FileManager;
 import org.puder.trs80.localstore.RomManager;
@@ -72,6 +73,7 @@ import org.retrostore.client.common.proto.Trs80Extension.Trs80Model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -423,7 +425,8 @@ public class MainActivity extends BaseActivity implements
     }
 
     private void stopEmulator(final Configuration conf, final int position) {
-        String msg = this.getString(R.string.alert_dialog_confirm_stop_emu, conf.getName().orNull());
+        String msg = this.getString(R.string.alert_dialog_confirm_stop_emu, conf.getName().orNull
+                ());
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
                 R.drawable.warning_icon, msg);
         builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
@@ -566,10 +569,24 @@ public class MainActivity extends BaseActivity implements
     }
 
     public boolean installApp(App app, List<MediaImage> mediaImages) {
-        MediaImage mediaImage = mediaImages.get(0);
+        List<ConfigMedia> configMedia = new ArrayList<>();
+        // The first four items will be the media images. The fifth is the cassette.
+        for (int i = 0; i < 4; ++i) {
+            MediaImage mediaImage = mediaImages.get(i);
+            if (mediaImage != null) {
+                configMedia.add(new ConfigMedia(mediaImage.getFilename(),
+                        mediaImage.getData().toByteArray()));
+            }
+        }
+        ConfigMedia cassetteMedia = null;
+        MediaImage cassetteImage = mediaImages.get(4);
+        if (cassetteImage != null) {
+            cassetteMedia = new ConfigMedia(
+                    cassetteImage.getFilename(), cassetteImage.getData().toByteArray());
+        }
         Optional<Configuration> newConfiguration = configManager.addNewConfiguration(
                 getHardwareModelId(app.getExtTrs80().getModel()), app.getName(),
-                mediaImage.getFilename(), mediaImage.getData().toByteArray());
+                configMedia, cassetteMedia);
         if (!newConfiguration.isPresent()) {
             return false;
         }
@@ -587,7 +604,8 @@ public class MainActivity extends BaseActivity implements
                     try {
                         configManager.getEmulatorState(configId).saveScreenshot(result);
                     } catch (IOException e) {
-                        e.printStackTrace();Log.e(TAG, "Cannot emulator state", e);
+                        e.printStackTrace();
+                        Log.e(TAG, "Cannot emulator state", e);
                     }
                 }
 

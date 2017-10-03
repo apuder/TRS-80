@@ -93,7 +93,7 @@ class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void setCasettePath(String path) {
+    public void setCassettePath(String path) {
         persistence.setCasettePath(path);
     }
 
