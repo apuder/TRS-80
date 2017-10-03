@@ -237,7 +237,7 @@ public class ConfigurationManager {
             Log.e(TAG, "Could not create configuration sub-dir.");
             return Optional.absent();
         }
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < Math.min(4, disks.size()); ++i) {
             ConfigMedia media = disks.get(i);
             if (media.data.length > 0) {
                 if (Strings.isNullOrEmpty(media.filename)) {
