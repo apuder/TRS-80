@@ -104,24 +104,27 @@ public class InitialSetupDialogFragment extends DialogFragment {
                 ImageLoader.get(getActivity()),
                 RetrostoreApi.get());
 
-        // Download and install the tutorial.
-        downloadExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                appInstaller.downloadAndInstallApp(TUTORIAL_APP_ID);;
-            }
-        });
-
         // Initialize the downloads of all initial items.
         final Download[] downloads = InitialDownloads.get();
+        final int totalDownloads = downloads.length + 1;
         for (final Download download : downloads) {
             downloadExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    download(download, downloads.length);
+                    onDownloadProgress(++downloadCounter, totalDownloads);
+                    download(download);
                 }
             });
         }
+
+        // Download and install the tutorial.
+        downloadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                onDownloadProgress(++downloadCounter, totalDownloads);
+                appInstaller.downloadAndInstallApp(TUTORIAL_APP_ID);;
+            }
+        });
 
         // Since the download executor is a single threaded one, we add another tasks that will
         // let us know when we're done.
@@ -139,8 +142,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
     }
 
     /** Downloads the given item. */
-    private void download(Download download, int total) {
-        onDownloadProgress(++downloadCounter, total);
+    private void download(Download download) {
         String url = download.url;
 
         Optional<byte[]> data = fileDownloader.download(url, download.fileInZip);
