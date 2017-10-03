@@ -254,7 +254,7 @@ public class ConfigurationManager {
             }
         }
 
-        if (cassette.data.length > 0) {
+        if (cassette.data != null && cassette.data.length > 0) {
             if (Strings.isNullOrEmpty(cassette.filename)) {
                 Log.e(TAG, "Cassette filename is empty. Skipping.");
             } else {
