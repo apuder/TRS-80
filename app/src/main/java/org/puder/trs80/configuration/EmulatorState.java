@@ -65,8 +65,7 @@ public class EmulatorState {
     }
 
     public boolean hasState() {
-        // By default, a ".nomedia" file should be present.
-        return fileManager.fileCount() > 1;
+        return fileManager.hasFile(FILE_STATE);
     }
 
     public void saveScreenshot(Bitmap screenshot) {

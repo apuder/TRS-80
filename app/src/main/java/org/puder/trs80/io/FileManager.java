@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * File I/O functionality for the app.
@@ -181,5 +183,13 @@ public class FileManager {
      */
     public int fileCount() {
         return baseDir.exists() ? baseDir.list().length : 0;
+    }
+
+    public boolean hasFile(String fn) {
+        if (!baseDir.exists()) {
+            return false;
+        }
+        List list = Arrays.asList(baseDir.list());
+        return list.contains(fn);
     }
 }
