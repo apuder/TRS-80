@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Retrostore</string>
+    <string name="app_name" translatable="false">Retrostore</string>
     <string name="dialog_yes_install">Yes, Install</string>
     <string name="dialog_no">No</string>
     <string name="dialog_install">Do you want to install "%1$s" now?</string>

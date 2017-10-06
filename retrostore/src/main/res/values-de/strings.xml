@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">RetroStore</string>
     <string name="dialog_yes_install">Ja, installiere</string>
     <string name="dialog_no">Nein</string>
     <string name="dialog_install">Wollen Sie "%1$s" jetzt installieren?</string>
