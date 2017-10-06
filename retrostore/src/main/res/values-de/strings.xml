@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">Retrostore</string>
+    <string name="app_name">RetroStore</string>
     <string name="dialog_yes_install">Ja, installiere</string>
     <string name="dialog_no">Nein</string>
     <string name="dialog_install">Wollen Sie "%1$s" jetzt installieren?</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_install">Installieren</string>
     <string name="action_update">Aktualisieren</string>
-    <string name="action_uninstall">De-Installieren</string>
+    <string name="action_uninstall">Deinstallieren</string>
     <string name="app_version">Version %1$s</string>
     <string name="refresh_apps_list">App Liste aktualisieren</string>
 
