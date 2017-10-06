@@ -297,7 +297,8 @@ public class ConfigurationManager {
 
         int incrementNextId() {
             int nextId = prefs.getInt(KEY_NEXT_ID, 0);
-            prefs.edit().putInt(KEY_NEXT_ID, nextId + 1).apply();
+            nextId++;
+            prefs.edit().putInt(KEY_NEXT_ID, nextId).apply();
             return nextId;
         }
 
