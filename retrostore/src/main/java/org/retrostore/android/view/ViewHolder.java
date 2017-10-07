@@ -42,11 +42,11 @@ class ViewHolder extends RecyclerView.ViewHolder {
         super(v);
         mImageLoader = imageLoader;
         mAppEntry = v;
-        mAppNameView = v.findViewById(R.id.appName);
-        mAppDescriptionView = v.findViewById(R.id.appDescription);
-        mAuthorView = v.findViewById(R.id.appAuthor);
-        mVersionView = v.findViewById(R.id.appVersion);
-        mThumbnailView = v.findViewById(R.id.appThumbnail);
+        mAppNameView = (TextView) v.findViewById(R.id.appName);
+        mAppDescriptionView = (TextView) v.findViewById(R.id.appDescription);
+        mAuthorView = (TextView) v.findViewById(R.id.appAuthor);
+        mVersionView = (TextView) v.findViewById(R.id.appVersion);
+        mThumbnailView = (ImageView) v.findViewById(R.id.appThumbnail);
     }
 
     void setData(final App app, final InternalAppInstallListener installListener) {

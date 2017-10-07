@@ -88,16 +88,16 @@ public class ConfigurationListViewAdapter extends
                 return;
             }
             draggable = true;
-            nameFront = itemView.findViewById(R.id.configuration_name_front);
-            nameBack = itemView.findViewById(R.id.configuration_name_back);
-            model = itemView.findViewById(R.id.configuration_model);
-            disks = itemView.findViewById(R.id.configuration_disks);
-            cassette = itemView.findViewById(R.id.configuration_cassette);
-            sound = itemView.findViewById(R.id.configuration_sound);
-            keyboardPortrait = itemView.findViewById(R.id.configuration_keyboard_portrait);
-            keyboardLandscape = itemView.findViewById(R.id.configuration_keyboard_landscape);
-            screenshot = itemView.findViewById(R.id.configuration_screenshot);
-            viewFlipper = itemView.findViewById(R.id.configuration_view_flipper);
+            nameFront = (TextView) itemView.findViewById(R.id.configuration_name_front);
+            nameBack = (TextView) itemView.findViewById(R.id.configuration_name_back);
+            model = (TextView) itemView.findViewById(R.id.configuration_model);
+            disks = (TextView) itemView.findViewById(R.id.configuration_disks);
+            cassette = (TextView) itemView.findViewById(R.id.configuration_cassette);
+            sound = (TextView) itemView.findViewById(R.id.configuration_sound);
+            keyboardPortrait = (TextView) itemView.findViewById(R.id.configuration_keyboard_portrait);
+            keyboardLandscape = (TextView) itemView.findViewById(R.id.configuration_keyboard_landscape);
+            screenshot = (ScreenshotView) itemView.findViewById(R.id.configuration_screenshot);
+            viewFlipper = (ViewFlipper) itemView.findViewById(R.id.configuration_view_flipper);
             viewFlipper.setDisplayedChild(0);
             itemView.setOnClickListener(this);
             itemView.findViewById(R.id.configuration_info).setOnClickListener(this);
