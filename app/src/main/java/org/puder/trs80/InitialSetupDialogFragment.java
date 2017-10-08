@@ -39,6 +39,7 @@ import org.puder.trs80.localstore.RomManager;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
 
+import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -50,14 +51,12 @@ public class InitialSetupDialogFragment extends DialogFragment {
 
     private DownloadCompletionListener listener;
     private int downloadCounter = 0;
-    private final ConfigurationManager configurationManager;
     private final FileDownloader fileDownloader;
     private final Executor downloadExecutor;
     private final Executor uiExecutor;
     private final RomManager romManager;
 
     public InitialSetupDialogFragment() {
-        configurationManager = checkNotNull(ConfigurationManager.getDefault());
         fileDownloader = new FileDownloader();
         downloadExecutor = Executors.newSingleThreadExecutor();
         uiExecutor = UiExecutor.create();
@@ -100,6 +99,14 @@ public class InitialSetupDialogFragment extends DialogFragment {
         setCancelable(false);
         setRetainInstance(true);
 
+        final ConfigurationManager configurationManager;
+        try {
+            configurationManager = checkNotNull(ConfigurationManager.get(getContext()));
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot create ConfigurationManager: " + e.getMessage());
+            return;
+        }
+
         final AppInstaller appInstaller = new AppInstaller(configurationManager,
                 ImageLoader.get(getActivity()),
                 RetrostoreApi.get());
@@ -112,7 +119,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
                 @Override
                 public void run() {
                     onDownloadProgress(++downloadCounter, totalDownloads);
-                    download(download);
+                    download(download, configurationManager);
                 }
             });
         }
@@ -142,7 +149,7 @@ public class InitialSetupDialogFragment extends DialogFragment {
     }
 
     /** Downloads the given item. */
-    private void download(Download download) {
+    private void download(Download download, ConfigurationManager configurationManager) {
         String url = download.url;
 
         Optional<byte[]> data = fileDownloader.download(url, download.fileInZip);

@@ -126,12 +126,9 @@ public class MainActivity extends BaseActivity implements
         drawer.setDrawerListener(toggle);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         FileManager.Creator fileManagerCreator = FileManager.Creator.get(getResources());
-
         try {
-            configManager = ConfigurationManager.initDefault(
-                    fileManagerCreator, getApplicationContext());
+            configManager = ConfigurationManager.get(getApplicationContext());
             romManager = RomManager.init(fileManagerCreator);
         } catch (IOException e) {
             Log.e(TAG, "Cannot initialize RomManager / ConfigurationManager.", e);

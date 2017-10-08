@@ -51,6 +51,18 @@ public class ConfigurationManager {
     private final Context context;
     private final ConfigurationPersistence persistence;
 
+    /**
+     * @return The singleton {@link ConfigurationManager}. It is important that there is only a
+     * single instance in the app since the state needs to be shared.
+     */
+    public static ConfigurationManager get(Context context) throws IOException {
+        if (singleton != null) {
+            return singleton;
+        }
+
+        FileManager.Creator fileManagerCreator = FileManager.Creator.get(context.getResources());
+        return initDefault(fileManagerCreator, context);
+    }
 
     /**
      * Initialize the default instance of the manager. This should be done exactly once.
@@ -59,8 +71,8 @@ public class ConfigurationManager {
      * @throws IOException if the manager could not be initialized, or already had been
      *                     initialized.
      */
-    public static ConfigurationManager initDefault(FileManager.Creator fileManagerCreator,
-                                                   Context context) throws IOException {
+    private static ConfigurationManager initDefault(FileManager.Creator fileManagerCreator,
+                                                    Context context) throws IOException {
         if (singleton != null) {
             Log.i(TAG, "ConfigurationManager singleton already initialized.");
             return singleton;
@@ -88,14 +100,6 @@ public class ConfigurationManager {
             configurations.add(ConfigurationImpl.fromId(id, context));
         }
         return configurations;
-    }
-
-
-    /**
-     * @return The singleton {@link ConfigurationManager}. You must call initDefault first.
-     */
-    public static ConfigurationManager getDefault() {
-        return Preconditions.checkNotNull(singleton, "Must call initDefault() first.");
     }
 
     private ConfigurationManager(FileManager fileManager,

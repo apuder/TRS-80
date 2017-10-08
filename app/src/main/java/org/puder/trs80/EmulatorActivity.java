@@ -179,17 +179,18 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private void init(Bundle savedInstanceState, int id) {
         try {
             emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get(getResources()));
+            ConfigurationManager configManager = ConfigurationManager.get(getApplicationContext());
+            Optional<Configuration> configOpt = configManager.getConfigById(id);
+            if (!configOpt.isPresent()) {
+                Log.e(TAG, "Configuration not found.");
+                return;
+            }
+            currentConfiguration = configOpt.get();
         } catch (IOException e) {
             Log.e(TAG, "Cannot create emulator state.", e);
             return;
         }
         isCasting = CastMessageSender.get().isReadyToSend();
-        ConfigurationManager configManager = ConfigurationManager.getDefault();
-        Optional<Configuration> configOpt = configManager.getConfigById(id);
-        if (!configOpt.isPresent()) {
-            return;
-        }
-        currentConfiguration = configOpt.get();
         currentHardware = new Hardware(currentConfiguration);
 
         clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
