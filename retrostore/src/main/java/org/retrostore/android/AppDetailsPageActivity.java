@@ -18,6 +18,7 @@ package org.retrostore.android;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -85,9 +86,19 @@ public class AppDetailsPageActivity extends AppCompatActivity {
     }
 
     private Optional<App> getAppFromIntent() {
-        String appId = getIntent().getExtras().getString(EXTRA_APP_ID, null);
+        Intent intent = getIntent();
+        if (intent == null) {
+            Log.i(TAG, "No intent.");
+            return Optional.absent();
+        }
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            Log.i(TAG, "No extras.");
+            return Optional.absent();
+        }
+        String appId = extras.getString(EXTRA_APP_ID, null);
         if (appId == null) {
-            Log.w(TAG, "No APP-ID given.");
+            Log.w(TAG, "No 'appId' given.");
             return Optional.absent();
         }
 
