@@ -131,7 +131,6 @@ public class RetrostoreActivity extends AppCompatActivity {
      * Apps list received. Display in list.
      */
     private void onAppsReceived(final List<App> apps) {
-        showToast(String.format(US, "Got %d apps, yay.", apps.size()));
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
