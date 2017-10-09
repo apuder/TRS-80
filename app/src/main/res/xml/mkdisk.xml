@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/pref_mkdisk_general">
+
+        <EditTextPreference
+            android:inputType="text|textUri"
+            android:key="mkdisk_name"
+            android:summary="@string/pref_mkdisk_name_summary"
+            android:title="@string/pref_mkdisk_name_title" />
+    </PreferenceCategory>
+    <ListPreference
+        android:defaultValue="@string/mkdisk_jv1"
+        android:entries="@array/mkdisk_format"
+        android:entryValues="@array/mkdisk_format"
+        android:key="mkdisk_format"
+        android:title="@string/pref_mkdisk_format_title"
+        android:summary="@string/pref_mkdisk_format_summary"/>
+    <PreferenceCategory android:title="@string/pref_mkdisk_dmk_parameters">
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/mkdisk_sided"
+        android:entryValues="@array/mkdisk_sided"
+        android:key="mkdisk_sided"
+        android:title="@string/pref_mkdisk_sided_title"
+        android:summary="@string/pref_mkdisk_sided_summary"/>
+    <ListPreference
+        android:defaultValue="@string/mkdisk_single"
+        android:entries="@array/mkdisk_density"
+        android:entryValues="@array/mkdisk_density"
+        android:key="mkdisk_density"
+        android:title="@string/pref_mkdisk_density_title"
+        android:summary="@string/pref_mkdisk_density_summary"/>
+    <ListPreference
+        android:defaultValue="@string/mkdisk_5_inch"
+        android:entries="@array/mkdisk_size"
+        android:entryValues="@array/mkdisk_size"
+        android:key="mkdisk_size"
+        android:title="@string/pref_mkdisk_size_title"
+        android:summary="@string/pref_mkdisk_size_summary" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="mkdisk_ignore_density"
+        android:title="@string/pref_mkdisk_ignore_density_title" />
+    </PreferenceCategory>
+</PreferenceScreen>

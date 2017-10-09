@@ -206,4 +206,26 @@
     <string name="navigation_drawer_close">Leiste geschlossen</string>
     <string name="error_msg_localstore_init">Lokaler Speicher konnte nicht initialisert werden</string>
     <string name="successfully_installed">\'%1$s\' erfolgreich installiert.</string>
+    <string name="disk_image_created">Created disk image</string>
+    <string name="mkdisk_5_inch">5 inch</string>
+    <string name="mkdisk_8_inch">8 inch</string>
+    <string name="mkdisk_bad_path">Illegal file name: </string>
+    <string name="mkdisk_create_error">Error creating disk image</string>
+    <string name="mkdisk_double">Double</string>
+    <string name="mkdisk_single">Single</string>
+    <string name="pref_mkdisk_general">General</string>
+    <string name="pref_mkdisk_name_summary">Name of the disk image file</string>
+    <string name="pref_mkdisk_name_title">Name</string>
+    <string name="pref_mkdisk_format_title">Disk format</string>
+    <string name="pref_mkdisk_format_summary">The disk format to use (JV1, JV3 or DMK)</string>
+    <string name="pref_mkdisk_dmk_parameters">DMK Parameters</string>
+    <string name="pref_mkdisk_sided_title">Number of sides</string>
+    <string name="pref_mkdisk_sided_summary">Single or double sided</string>
+    <string name="pref_mkdisk_density_title">Density</string>
+    <string name="pref_mkdisk_density_summary">Single or double density</string>
+    <string name="pref_mkdisk_size_title">Size</string>
+    <string name="pref_mkdisk_size_summary">5 or 8 inch disk</string>
+    <string name="pref_mkdisk_ignore_density_title">Ignore density flag</string>
+    <string name="mkdisk_file_exists_error">A disk image already exists with that file name</string>
+    <string name="menu_create">Create</string>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/cancel_media"
+        android:icon="@drawable/cancel_icon"
+        android:orderInCategory="50"
+        android:title="@string/menu_cancel"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/create_media"
+        android:icon="@drawable/file_icon_black"
+        android:orderInCategory="100"
+        android:title="@string/menu_create"
+        app:showAsAction="always" />
+</menu>

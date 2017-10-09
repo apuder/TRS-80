@@ -38,6 +38,8 @@
         <activity android:name=".EmulatorActivity"
             android:theme="@style/AppThemeDark"/>
         <activity android:name=".browser.FileBrowserActivity" />
+        <activity android:name=".CreateDiskActivity"
+            android:configChanges="orientation|screenSize"/>
         <activity android:name="org.retrostore.android.RetrostoreActivity"
                   android:label="@string/retrostore_activity_name"/>
         <meta-data

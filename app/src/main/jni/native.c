@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include "trs.h"
 #include "trs_disk.h"
+#include "trs_mkdisk.h"
 #include "trs_cassette.h"
 #include "trs_iodefs.h"
 #include "trs_uart.h"
@@ -335,6 +336,28 @@ jfloat Java_org_puder_trs80_XTRS_getCassettePosition(JNIEnv* e, jclass clazz) {
 JNIEXPORT jboolean JNICALL
 Java_org_puder_trs80_XTRS_isExpandedMode(JNIEnv *env, jclass type) {
     return is_expanded_mode() ? JNI_TRUE : JNI_FALSE;
+}
+
+jboolean Java_org_puder_trs80_XTRS_createBlankJV1(JNIEnv* env, jclass cls, jstring fileName) {
+    const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    int rc = trs_create_blank_jv1(fn);
+    (*env)->ReleaseStringUTFChars(env, fileName, fn);
+    return (rc == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
+jboolean Java_org_puder_trs80_XTRS_createBlankJV3(JNIEnv* env, jclass cls, jstring fileName) {
+    const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    int rc = trs_create_blank_jv3(fn);
+    (*env)->ReleaseStringUTFChars(env, fileName, fn);
+    return (rc == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
+jboolean Java_org_puder_trs80_XTRS_createBlankDMK(JNIEnv* env, jclass cls, jstring fileName,
+    jint sides, jint density, jint eight, jint ignden) {
+    const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
+    int rc = trs_create_blank_dmk(fn, sides, density, eight, ignden);
+    (*env)->ReleaseStringUTFChars(env, fileName, fn);
+    return (rc == 0) ? JNI_TRUE : JNI_FALSE;
 }
 
 void xlog(const char* msg) {

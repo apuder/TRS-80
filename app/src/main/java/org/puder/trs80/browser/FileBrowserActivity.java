@@ -16,11 +16,13 @@
 
 package org.puder.trs80.browser;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +34,7 @@ import android.widget.TextView;
 
 import org.puder.trs80.AlertDialogUtil;
 import org.puder.trs80.BaseActivity;
+import org.puder.trs80.CreateDiskActivity;
 import org.puder.trs80.R;
 
 import java.io.File;
@@ -43,6 +46,9 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
 
     // Action Menu
     private static final int       MENU_OPTION_EJECT  = 0;
+    private static final int       MENU_OPTION_ADD    = 1;
+
+    private static final int       MKDISK_REQUEST     = 0;
 
     private List<String>           items              = new ArrayList<String>();
     private String                 pathPrefix;
@@ -62,7 +68,14 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         ListView listView = (ListView) this.findViewById(R.id.file_list);
         listView.setAdapter(fileListAdapter);
         listView.setOnItemClickListener(this);
-        getFiles(Environment.getExternalStorageDirectory().getPath());
+
+        Intent intent = getIntent();
+        String startingDir = intent.getStringExtra("DIR");
+        if (startingDir == null) {
+            getFiles(Environment.getExternalStorageDirectory().getPath());
+        } else {
+            getFiles(startingDir);
+        }
     }
 
     @Override
@@ -70,6 +83,10 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         MenuItemCompat.setShowAsAction(
                 menu.add(Menu.NONE, MENU_OPTION_EJECT, Menu.NONE,
                         this.getString(R.string.menu_eject)).setIcon(R.drawable.eject_icon),
+                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        MenuItemCompat.setShowAsAction(
+                menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
+                        this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon),
                 MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
@@ -83,6 +100,9 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
             return true;
         case MENU_OPTION_EJECT:
             eject();
+            return true;
+        case MENU_OPTION_ADD:
+            createDisk();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -134,6 +154,26 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
 
                 });
         AlertDialogUtil.showDialog(this, builder);
+    }
+
+    private void createDisk() {
+        Intent intent = new Intent(this, CreateDiskActivity.class);
+        intent.putExtra("DIR", currentPath);
+        startActivityForResult(intent, MKDISK_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MKDISK_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                View root = findViewById(android.R.id.content);
+                Snackbar.make(root, getString(R.string.disk_image_created) + data.getStringExtra("PATH"),
+                        Snackbar.LENGTH_SHORT).show();
+                getFiles(currentPath);
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private void getFiles(String path) {
