@@ -28,9 +28,13 @@ import android.util.Log;
 import com.google.common.base.Optional;
 
 import org.puder.trs80.browser.FileBrowserActivity;
+import org.puder.trs80.configuration.ConfigurationManager;
 import org.puder.trs80.configuration.ConfigurationPersistence;
 import org.puder.trs80.configuration.ConfigurationPersistence.PreferenceFinder;
 import org.puder.trs80.configuration.ConfigurationPersistence.PreferenceProvider;
+
+import java.io.File;
+import java.io.IOException;
 
 public class EditConfigurationFragment extends PreferenceFragment implements
         OnPreferenceChangeListener {
@@ -65,7 +69,7 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         configurationWasEdited = false;
         handler = new Handler();
         Intent i = getActivity().getIntent();
-        Optional<Integer> configId = ActivityHelper.getIntExtra(i, "CONFIG_ID");
+        final Optional<Integer> configId = ActivityHelper.getIntExtra(i, "CONFIG_ID");
         if (!configId.isPresent()) {
             Log.w(TAG, "Cannot get CONFIG_ID. Finishing activity.");
             getActivity().finish();
@@ -87,13 +91,34 @@ public class EditConfigurationFragment extends PreferenceFragment implements
             public boolean onPreferenceClick(Preference pref) {
                 String key = pref.getKey();
                 int requestCode;
+                Optional<String> dir;
+                Intent intent = new Intent(getActivity(), FileBrowserActivity.class);
+
                 if (key.equals("conf_cassette")) {
                     requestCode = 0;
+                    dir = configPersitence.getCasettePath();
                 } else {
                     requestCode = Integer.parseInt(key.substring(key.length() - 1));
+                    dir = configPersitence.getDiskPath(requestCode - 1);
                 }
-                Intent intent = new Intent(getActivity(), FileBrowserActivity.class);
+
+                if (dir.isPresent()) {
+                    dir = Optional.of(new File(dir.get()).getParent());
+                } else {
+                    try {
+                        ConfigurationManager configManager = ConfigurationManager.get(getActivity());
+                        dir = Optional.of(configManager.getEmulatorState(configId.get()).getBasePath());
+                    } catch (IOException e) {
+                        Log.w(TAG, "Could not get ConfigurationManager. Finishing activity.", e);
+                        getActivity().finish();
+                    }
+                }
+
+                if (dir.isPresent()) {
+                    intent.putExtra("DIR", dir.get());
+                }
                 startActivityForResult(intent, requestCode);
+
                 return true;
             }
         };

@@ -9,6 +9,7 @@ LOCAL_SRC_FILES := native.c \
 	trs_chars.c \
 	trs_printer.c \
 	trs_disk.c \
+	trs_mkdisk.c \
 	trs_rom1.c \
 	trs_imp_exp.c \
 	error.c \

@@ -56,6 +56,10 @@ public class EmulatorState {
         return fileManager.getAbsolutePathForFile(FILE_CASSETTE);
     }
 
+    public String getBasePath() {
+        return fileManager.getAbsolutePathForFile("");
+    }
+
     public void saveState() {
         XTRS.saveState(getStateFileName());
     }

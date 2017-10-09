@@ -120,6 +120,13 @@ public class XTRS {
 
     public static native float getCassettePosition();
 
+    public static native boolean createBlankJV1(String filename);
+
+    public static native boolean createBlankJV3(String filename);
+
+    public static native boolean createBlankDMK(String filename, int sides,
+                                                int density, int eight, int ignden);
+
     public static void setEmulatorActivity(EmulatorActivity activity) {
         emulator = activity;
     }

@@ -133,11 +133,38 @@
     <string name="menu_tutorial">TRS-80 Tutorial</string>
     <string name="rewinding_cassette">Rewinding cassette&#8230;</string>
 
+    <!-- CreateDiskActivity -->
+    <string name="menu_create">Create</string>
+    <string name="mkdisk_jv1" translatable="false">JV1</string>
+    <string name="mkdisk_jv3" translatable="false">JV3</string>
+    <string name="mkdisk_dmk" translatable="false">DMK</string>
+    <string name="mkdisk_single">Single</string>
+    <string name="mkdisk_double">Double</string>
+    <string name="mkdisk_5_inch">5 inch</string>
+    <string name="mkdisk_8_inch">8 inch</string>
+    <string name="mkdisk_create_error">Error creating disk image</string>
+    <string name="mkdisk_bad_path">Illegal file name: </string>
+    <string name="pref_mkdisk_general">General</string>
+    <string name="pref_mkdisk_name_summary">Name of the disk image file</string>
+    <string name="pref_mkdisk_name_title">Name</string>
+    <string name="pref_mkdisk_format_title">Disk format</string>
+    <string name="pref_mkdisk_format_summary">The disk format to use (JV1, JV3 or DMK)</string>
+    <string name="pref_mkdisk_dmk_parameters">DMK Parameters</string>
+    <string name="pref_mkdisk_sided_title">Number of sides</string>
+    <string name="pref_mkdisk_sided_summary">Single or double sided</string>
+    <string name="pref_mkdisk_density_title">Density</string>
+    <string name="pref_mkdisk_density_summary">Single or double density</string>
+    <string name="pref_mkdisk_size_title">Size</string>
+    <string name="pref_mkdisk_size_summary">5 or 8 inch disk</string>
+    <string name="pref_mkdisk_ignore_density_title">Ignore density flag</string>
+
+
     <!-- FileBrowserActivity -->
     <string name="menu_cancel">Cancel</string>
     <string name="menu_eject">Eject</string>
     <string name="path">Path</string>
     <string name="alert_dialog_confirm_eject">Do you want to eject the currently mounted file?</string>
+    <string name="disk_image_created">Created disk image </string>
 
     <string name="error_model_not_supported">Only Model I and Model III are supported at this time.</string>
     <string name="error_no_rom">No valid ROM found. Please use Settings to set ROM.</string>
@@ -248,4 +275,5 @@
     <string name="navigation_drawer_caption" translatable="false">TRS-80 Emulator</string>
     <string name="error_msg_localstore_init">Cannot initialize local storage</string>
     <string name="successfully_installed">Successfully installed \'%1$s\'.</string>
+    <string name="mkdisk_file_exists_error">A disk image already exists with that file name</string>
 </resources>

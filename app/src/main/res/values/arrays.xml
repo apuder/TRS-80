@@ -30,4 +30,21 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+    <string-array name="mkdisk_format">
+        <item>@string/mkdisk_jv1</item>
+        <item>@string/mkdisk_jv3</item>
+        <item>@string/mkdisk_dmk</item>
+    </string-array>
+    <string-array name="mkdisk_sided">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="mkdisk_density">
+        <item>@string/mkdisk_single</item>
+        <item>@string/mkdisk_double</item>
+    </string-array>
+    <string-array name="mkdisk_size">
+        <item>@string/mkdisk_5_inch</item>
+        <item>@string/mkdisk_8_inch</item>
+    </string-array>
 </resources>
