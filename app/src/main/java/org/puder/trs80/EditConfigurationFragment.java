@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
+import android.util.Log;
 
 import com.google.common.base.Optional;
 
@@ -33,6 +34,7 @@ import org.puder.trs80.configuration.ConfigurationPersistence.PreferenceProvider
 
 public class EditConfigurationFragment extends PreferenceFragment implements
         OnPreferenceChangeListener {
+    private static final String TAG = "EditConfFragment";
 
     private Handler           handler;
 
@@ -63,9 +65,14 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         configurationWasEdited = false;
         handler = new Handler();
         Intent i = getActivity().getIntent();
-        int configId = i.getExtras().getInt("CONFIG_ID");
+        Optional<Integer> configId = ActivityHelper.getIntExtra(i, "CONFIG_ID");
+        if (!configId.isPresent()) {
+            Log.w(TAG, "Cannot get CONFIG_ID. Finishing activity.");
+            getActivity().finish();
+            return;
+        }
         configPersitence = ConfigurationPersistence.forIdAndManager(
-                configId, getPreferenceManager());
+                configId.get(), getPreferenceManager());
         prefFinder = configPersitence.forPreferenceProvider(new PreferenceProvider() {
             @Override
             public Preference findPreference(String name) {
