@@ -145,7 +145,7 @@ extern
 #else
 static
 #endif
-unsigned char trs_screen[2048];
+unsigned char* trs_screen;
 static unsigned char trs_gui_screen[2048];
 static unsigned char trs_gui_screen_invert[2048];
 static int top_margin = 0;
@@ -2104,9 +2104,6 @@ void trs_screen_expanded(int flag)
     trs_screen_refresh();
 #endif
   }
-#ifdef ANDROID
-  trigger_screen_update(TRUE);
-#endif
 }
 
 #ifdef ANDROID
@@ -2556,7 +2553,6 @@ void trs_screen_write_char(int position, int char_index)
 {
 #ifdef ANDROID
   trs_screen[position] = char_index;
-  trigger_screen_update(FALSE);
 #else
   int row,col,destx,desty;
   int plane;
@@ -2805,9 +2801,7 @@ void trs_screen_scroll()
   for (i = row_chars; i < screen_chars; i++)
     trs_screen[i-row_chars] = trs_screen[i];
 
-#ifdef ANDROID
-  trigger_screen_update(FALSE);
-#else
+#ifndef ANDROID
   if (grafyx_enable) {
     if (grafyx_overlay) {
       trs_screen_refresh();
@@ -3465,9 +3459,6 @@ void trs_main_load(FILE *file)
   trs_load_int(file,&col_chars,1);
   trs_load_int(file,&row_chars,1);
   trs_load_int(file,&currentmode,1);
-#ifdef ANDROID
-  trigger_screen_update(TRUE);
-#endif
   trs_load_int(file,&text80x24,1);
   trs_load_int(file,&screen640x240,1);
   trs_load_int(file,&trs_charset,1);

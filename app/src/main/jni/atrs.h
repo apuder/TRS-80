@@ -4,7 +4,8 @@
 
 #include "z80.h"
 
-extern unsigned char trs_screen[2048];
+// Will be set by native.c to a direct buffer.
+extern unsigned char* trs_screen;
 
 char* get_disk_path(int disk);
 

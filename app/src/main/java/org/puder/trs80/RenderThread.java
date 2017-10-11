@@ -20,62 +20,63 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.cast.RemoteDisplayChannel;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class RenderThread extends Thread {
+class RenderThread extends Thread {
+    private final int TARGET_FPS = 60;
 
-    private boolean          isCasting;
-    private int              model;
-    private Bitmap[]         font;
+    private final FpsLimiter fpsLimiter;
 
-    private int              trsScreenCols;
-    private int              trsScreenRows;
-    private int              trsCharWidth;
-    private int              trsCharHeight;
+    private boolean isCasting;
+    private int model;
+    private Bitmap[] font;
 
-    private int              dirtyRectTop;
-    private int              dirtyRectLeft;
-    private int              dirtyRectBottom;
-    private int              dirtyRectRight;
-    final private Rect       clipRect;
-    final private Rect       adjustedClipRect;
+    private int trsScreenCols;
+    private int trsScreenRows;
+    private int trsCharWidth;
+    private int trsCharHeight;
 
-    private volatile boolean run         = true;
-    private volatile boolean isRendering = true;
-    private SurfaceHolder    surfaceHolder;
-    private byte[]           screenBuffer;
-    private short[]          lastScreenBuffer;
+    private int dirtyRectTop;
+    private int dirtyRectLeft;
+    private int dirtyRectBottom;
+    private int dirtyRectRight;
+    private final Rect clipRect;
+    private final Rect adjustedClipRect;
 
-    private StringBuilder    screenCharBuffer;
+    private volatile boolean run;
+    private SurfaceHolder surfaceHolder;
+    private ByteBuffer screenBuffer;
+    private short[] lastScreenBuffer;
 
-    public RenderThread(boolean isCasting) {
-        this.isCasting = isCasting;
+    private StringBuilder screenCharBuffer;
+
+    RenderThread(boolean casting) {
+        isCasting = casting;
+        run = true;
         surfaceHolder = null;
         screenBuffer = XTRS.getScreenBuffer();
         lastScreenBuffer = new short[0];
         clipRect = new Rect();
         adjustedClipRect = new Rect();
+        fpsLimiter = new FpsLimiter(TARGET_FPS);
     }
 
-    public synchronized void setSurfaceHolder(SurfaceHolder holder) {
+    synchronized void setSurfaceHolder(SurfaceHolder holder) {
         surfaceHolder = holder;
-        forceScreenUpdate();
     }
 
-    public void setRunning(boolean run) {
+    void setRunning(boolean run) {
         this.run = run;
     }
 
-    public boolean isRendering() {
-        return this.isRendering;
-    }
-
-    public synchronized void setHardwareSpecs(Hardware hardware) {
+    synchronized void setHardwareSpecs(Hardware hardware) {
         model = hardware.getModel();
         font = hardware.getFont();
         trsScreenCols = hardware.getScreenConfiguration().trsScreenCols;
@@ -90,44 +91,25 @@ public class RenderThread extends Thread {
     @Override
     public synchronized void run() {
         while (run) {
-            isRendering = false;
             try {
-                this.wait();
+                fpsLimiter.onFrame();
             } catch (InterruptedException e) {
-                return;
+                break;
             }
-            isRendering = true;
 
             boolean expandedMode = XTRS.isExpandedMode();
             int d = expandedMode ? 2 : 1;
             computeDirtyRect(d);
-            if (dirtyRectBottom == -1) {
-                // Nothing to update
-                continue;
-            }
 
             if (isCasting) {
                 renderScreenToCast(RemoteCastScreen.get(), expandedMode);
                 continue;
             }
+
             if (surfaceHolder != null) {
-                /*
-                 * The Android documentation does not mention that lockCanvas()
-                 * may adjust the clip rect due to double buffering. Since the
-                 * dirty rect might differ from the one that was computed in
-                 * computeDirtyRect() we simply invalidate the whole TRS screen
-                 * when this happens.
-                 */
-                Canvas canvas = surfaceHolder.lockCanvas(adjustedClipRect);
+                Canvas canvas = surfaceHolder.lockCanvas();
                 if (canvas == null) {
                     continue;
-                }
-                if (adjustedClipRect.left != clipRect.left || adjustedClipRect.top != clipRect.top
-                        || adjustedClipRect.right != clipRect.right
-                        || adjustedClipRect.bottom != clipRect.bottom) {
-                    dirtyRectLeft = dirtyRectTop = 0;
-                    dirtyRectRight = trsScreenCols / d - 1;
-                    dirtyRectBottom = trsScreenRows - 1;
                 }
                 renderScreenToCanvas(canvas, expandedMode);
                 surfaceHolder.unlockCanvasAndPost(canvas);
@@ -141,10 +123,10 @@ public class RenderThread extends Thread {
         }
         int d = expandedMode ? 2 : 1;
 
-        for (int row = dirtyRectTop; row <= dirtyRectBottom; row++) {
-            for (int col = dirtyRectLeft; col <= dirtyRectRight; col++) {
+        for (int row = 0; row <= trsScreenRows; row++) {
+            for (int col = 0; col <= trsScreenCols; col++) {
                 int i = row * trsScreenCols + col * d;
-                int ch = screenBuffer[i] & 0xff;
+                int ch = screenBuffer.get(i) & 0xff;
                 // Emulate Radio Shack lowercase mod (for Model 1)
                 if (this.model == Hardware.MODEL1 && ch < 0x20) {
                     ch += 0x40;
@@ -154,7 +136,6 @@ public class RenderThread extends Thread {
                 canvas.drawBitmap(font[ch], startx, starty, null);
             }
         }
-
     }
 
     private void renderScreenToCast(RemoteDisplayChannel remoteDisplay, boolean expandedMode) {
@@ -171,7 +152,7 @@ public class RenderThread extends Thread {
                 continue;
             }
             for (int col = 0; col < trsScreenCols / d; col++) {
-                int ch = screenBuffer[i] & 0xff;
+                int ch = screenBuffer.get(i) & 0xff;
                 // Emulate Radio Shack lowercase mod (for Model 1)
                 if (this.model == Hardware.MODEL1 && ch < 0x20) {
                     ch += 0x40;
@@ -191,7 +172,7 @@ public class RenderThread extends Thread {
         int i = 0;
         for (int row = 0; row < trsScreenRows; row++) {
             for (int col = 0; col < trsScreenCols / d; col++) {
-                if (lastScreenBuffer[i] != screenBuffer[i]) {
+                if (lastScreenBuffer[i] != screenBuffer.get(i)) {
                     if (dirtyRectTop > row) {
                         dirtyRectTop = row;
                     }
@@ -204,7 +185,7 @@ public class RenderThread extends Thread {
                     if (dirtyRectRight < col) {
                         dirtyRectRight = col;
                     }
-                    lastScreenBuffer[i] = screenBuffer[i];
+                    lastScreenBuffer[i] = screenBuffer.get(i);
                 }
                 i += d;
             }
@@ -218,18 +199,10 @@ public class RenderThread extends Thread {
         clipRect.bottom = adjustedClipRect.bottom = trsCharHeight * (dirtyRectBottom + 1);
     }
 
-    public synchronized void triggerScreenUpdate() {
-        this.notify();
-    }
-
-    public synchronized void forceScreenUpdate() {
-        Arrays.fill(lastScreenBuffer, Short.MAX_VALUE);
-        this.notify();
-    }
-
-    public synchronized Bitmap takeScreenshot(Hardware hardware) {
-        Bitmap screenshot = Bitmap.createBitmap(hardware.getScreenWidth(), hardware.getScreenHeight(),
-                Config.RGB_565);
+    Bitmap takeScreenshot(Hardware hardware) {
+        Bitmap screenshot =
+                Bitmap.createBitmap(hardware.getScreenWidth(),
+                        hardware.getScreenHeight(), Config.RGB_565);
         boolean expandedMode = XTRS.isExpandedMode();
         int d = expandedMode ? 2 : 1;
         dirtyRectLeft = dirtyRectTop = 0;
@@ -238,5 +211,30 @@ public class RenderThread extends Thread {
         Canvas c = new Canvas(screenshot);
         renderScreenToCanvas(c, expandedMode);
         return screenshot;
+    }
+
+    /**
+     * Encapsulated logic to limit the frame rate to the given FPS.
+     */
+    private static final class FpsLimiter {
+        private final long frameTimeMillis;
+        private long lastFrameTime;
+
+        /**
+         * @param fps the frames-per-second to limit to.
+         */
+        FpsLimiter(long fps) {
+            frameTimeMillis = (long) Math.floor(1000.0 / fps);
+        }
+
+        /**
+         * Call this once per frame-loop. It will wait if necessary to ensure the set max FPS rate.
+         */
+        void onFrame() throws InterruptedException {
+            long now = System.currentTimeMillis();
+            long waitFor = Math.max(0, lastFrameTime + frameTimeMillis - now);
+            Thread.sleep(waitFor);
+            lastFrameTime = now;
+        }
     }
 }

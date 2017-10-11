@@ -281,8 +281,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onRestart() {
-        super.onRestart();
+    public void onResume() {
+        super.onResume();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -293,8 +293,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -308,9 +308,13 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             taskSetup.cancel(true);
             taskSetup = null;
         }
+        Log.d(TAG, "Stopping CPU thread...");
         stopCPUThread();
+        Log.d(TAG, "Taking screenshot...");
         takeScreenshot();
+        Log.d(TAG, "Stopping render thread...");
         stopRenderThread();
+        Log.d(TAG, "Done.");
         XTRS.setEmulatorActivity(null);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -487,12 +491,10 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         renderThread.setPriority(Thread.MAX_PRIORITY);
         renderThread.setHardwareSpecs(currentHardware);
         renderThread.setSurfaceHolder(surfaceHolder);
-        XTRS.setRenderer(renderThread);
     }
 
     private void stopRenderThread() {
         boolean retry = true;
-        XTRS.setRenderer(null);
         if (renderThread != null && renderThread.isAlive()) {
             renderThread.setRunning(false);
             renderThread.interrupt();

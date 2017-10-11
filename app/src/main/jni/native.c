@@ -19,8 +19,6 @@
 
 #define NO_ERROR 0
 #define ERR_GET_JVM -1
-#define ERR_GET_METHOD_IS_RENDERING -2
-#define ERR_GET_METHOD_UPDATE_SCREEN -3
 #define ERR_GET_METHOD_XLOG -5
 #define ERR_GET_METHOD_NOT_IMPLEMENTED -10
 
@@ -28,14 +26,8 @@ int isRunning = 0;
 
 static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
-static jmethodID rendererIsReadyMethodId;
-static jmethodID updateScreenMethodId;
 static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
-
-static jbyteArray screenArray = NULL;
-static jbyte* screenBuffer;
-static jboolean screenBufferIsCopy;
 
 static jmp_buf ex_buf;
 
@@ -44,9 +36,11 @@ static int reset_required = 0;
 // Defined in trs_memory.c
 extern Uchar memory[];
 
-unsigned char trs_screen[2048];
-static int screenUpdateRequired = 0;
-static int isForcedScreenUpdateRequired = 0;
+// Note: Further down, upon initialization, we set this pointer to a direct
+//       buffer address that we share with the Java-side. This way, all writes
+//       by the emulator inot this address space will be immediately visible
+//       on the java side by the render thread.
+unsigned char* trs_screen;
 
 
 extern char *program_name;
@@ -216,25 +210,6 @@ static void init_xtrs(JNIEnv* env, jint model, jstring romFile, Ushort entryAddr
     clear_paste_string();
 }
 
-void trigger_screen_update(int force_update) {
-    screenUpdateRequired = 1;
-    JNIEnv *env = getEnv();
-    jboolean isReady = (*env)->CallStaticBooleanMethod(env, clazzXTRS,
-            rendererIsReadyMethodId);
-    if (!isReady) {
-        isForcedScreenUpdateRequired = force_update;
-        return;
-    }
-    memcpy(screenBuffer, trs_screen, 0x3fff - 0x3c00 + 1);
-    if (screenBufferIsCopy) {
-        (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_COMMIT);
-    }
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, updateScreenMethodId,
-                                 force_update ? JNI_TRUE : JNI_FALSE);
-    screenUpdateRequired = 0;
-    isForcedScreenUpdateRequired = 0;
-}
-
 JNIEXPORT jint JNICALL
 Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
     int status = (*env)->GetJavaVM(env, &jvm);
@@ -244,18 +219,6 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
 
     if (clazzXTRS == NULL) {
         clazzXTRS = (*env)->NewGlobalRef(env, cls);
-    }
-
-    rendererIsReadyMethodId = (*env)->GetStaticMethodID(env, cls, "rendererIsReady",
-            "()Z");
-    if (rendererIsReadyMethodId == 0) {
-        return ERR_GET_METHOD_IS_RENDERING;
-    }
-
-    updateScreenMethodId = (*env)->GetStaticMethodID(env, cls, "updateScreen",
-            "(Z)V");
-    if (updateScreenMethodId == 0) {
-        return ERR_GET_METHOD_UPDATE_SCREEN;
     }
 
     xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
@@ -272,7 +235,6 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
 
     jfieldID xtrsModelID = (*env)->GetStaticFieldID(env, cls, "xtrsModel", "I");
     jfieldID xtrsRomFileID = (*env)->GetStaticFieldID(env, cls, "xtrsRomFile", "Ljava/lang/String;");
-    jfieldID xtrsScreenBufferID = (*env)->GetStaticFieldID(env, cls, "xtrsScreenBuffer", "[B");
     jfieldID xtrsEntryAddrID = (*env)->GetStaticFieldID(env, cls, "xtrsEntryAddr", "I");
     jfieldID xtrsCassetteID = (*env)->GetStaticFieldID(env, cls, "xtrsCassette", "Ljava/lang/String;");
     jfieldID xtrsDisk0ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk0", "Ljava/lang/String;");
@@ -281,20 +243,18 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
     jfieldID xtrsDisk3ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk3", "Ljava/lang/String;");
     jint xtrsModel = (*env)->GetStaticIntField(env, cls, xtrsModelID);
     jstring xtrsRomFile = (*env)->GetStaticObjectField(env, cls, xtrsRomFileID);
-    jbyteArray xtrsScreenBuffer = (*env)->GetStaticObjectField(env, cls, xtrsScreenBufferID);
+
+    // Get the direct buffer for writing screen updates into.
+    jfieldID xtrsScreenBufferID = (*env)->GetStaticFieldID(env, cls, "xtrsScreenBuffer", "Ljava/nio/ByteBuffer;");
+    jobject screenBufferObject = (*env)->GetStaticObjectField(env, cls, xtrsScreenBufferID);
+    trs_screen = (*env)->GetDirectBufferAddress(env, screenBufferObject);
+
     jint xtrsEntryAddr = (*env)->GetStaticIntField(env, cls, xtrsEntryAddrID);
     jstring xtrsCassette = (*env)->GetStaticObjectField(env, cls, xtrsCassetteID);
     jstring xtrsDisk0 = (*env)->GetStaticObjectField(env, cls, xtrsDisk0ID);
     jstring xtrsDisk1 = (*env)->GetStaticObjectField(env, cls, xtrsDisk1ID);
     jstring xtrsDisk2 = (*env)->GetStaticObjectField(env, cls, xtrsDisk2ID);
     jstring xtrsDisk3 = (*env)->GetStaticObjectField(env, cls, xtrsDisk3ID);
-
-    if (screenArray != NULL) {
-        (*env)->ReleaseByteArrayElements(env, screenArray, screenBuffer, JNI_ABORT);
-        (*env)->DeleteGlobalRef(env, screenArray);
-    }
-    screenArray = (*env)->NewGlobalRef(env, xtrsScreenBuffer);
-    screenBuffer = (*env)->GetByteArrayElements(env, screenArray, &screenBufferIsCopy);
 
     init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsCassette, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
@@ -331,13 +291,9 @@ void Java_org_puder_trs80_XTRS_paste(JNIEnv* env, jclass cls, jstring clipboard)
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
     clear_paste_string();
     if (!setjmp(ex_buf)) {
-        screenUpdateRequired = 1;
         reset_required = 0;
         while (isRunning) {
             z80_run(0);
-            if (screenUpdateRequired) {
-                trigger_screen_update(isForcedScreenUpdateRequired);
-            }
             if (reset_required) {
                 reset_required = 0;
                 clear_paste_string();

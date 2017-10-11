@@ -17,8 +17,12 @@
 package org.puder.trs80;
 
 
+import android.util.Log;
+
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.EmulatorState;
+
+import java.nio.ByteBuffer;
 
 /**
  * Class XTRS acts as a gateway to the native layer. The native methods declared
@@ -28,11 +32,14 @@ import org.puder.trs80.configuration.EmulatorState;
  * 
  */
 public class XTRS {
+    private static final String TAG = "XTRS";
 
     static {
         final int screenBufferSize = 0x3fff - 0x3c00 + 1;
-        xtrsScreenBuffer = new byte[screenBufferSize];
+        xtrsScreenBuffer = ByteBuffer.allocateDirect(2048);
+        Log.d(TAG, "Loading native library ...");
         System.loadLibrary("xtrs");
+        Log.d(TAG, "Native library successfully loaded.");
     }
 
     /*
@@ -44,7 +51,7 @@ public class XTRS {
     @SuppressWarnings("unused")
     private static String          xtrsRomFile;
     @SuppressWarnings("unused")
-    private static byte[]          xtrsScreenBuffer;
+    private static ByteBuffer      xtrsScreenBuffer;
     @SuppressWarnings("unused")
     private static int             xtrsEntryAddr;
     @SuppressWarnings("unused")
@@ -57,8 +64,6 @@ public class XTRS {
     private static String          xtrsDisk2;
     @SuppressWarnings("unused")
     private static String          xtrsDisk3;
-
-    private static RenderThread renderer = null;
 
     private static EmulatorActivity emulator = null;
 
@@ -115,26 +120,8 @@ public class XTRS {
 
     public static native float getCassettePosition();
 
-    public static void setRenderer(RenderThread r) {
-        renderer = r;
-    }
-
     public static void setEmulatorActivity(EmulatorActivity activity) {
         emulator = activity;
-    }
-
-    public static boolean rendererIsReady() {
-        return (renderer != null) && !renderer.isRendering();
-    }
-
-    public static void updateScreen(boolean forceUpdate) {
-        if (renderer != null) {
-            if (forceUpdate) {
-                renderer.forceScreenUpdate();
-            } else {
-                renderer.triggerScreenUpdate();
-            }
-        }
     }
 
     public static void xlog(String msg) {
@@ -147,7 +134,7 @@ public class XTRS {
         emulator.notImplemented(msg);
     }
 
-    public static byte[] getScreenBuffer() {
+    public static ByteBuffer getScreenBuffer() {
         return xtrsScreenBuffer;
     }
 }
