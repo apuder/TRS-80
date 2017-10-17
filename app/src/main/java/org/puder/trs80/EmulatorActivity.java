@@ -310,8 +310,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         }
         Log.d(TAG, "Stopping CPU thread...");
         stopCPUThread();
-        Log.d(TAG, "Taking screenshot...");
-        takeScreenshot();
         Log.d(TAG, "Stopping render thread...");
         stopRenderThread();
         Log.d(TAG, "Done.");
@@ -505,6 +503,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                 } catch (InterruptedException e) {
                 }
             }
+            takeScreenshot();
         }
         renderThread = null;
     }
