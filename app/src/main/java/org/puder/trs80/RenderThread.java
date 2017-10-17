@@ -89,7 +89,7 @@ class RenderThread extends Thread {
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
         while (run) {
             try {
                 fpsLimiter.onFrame();
@@ -122,9 +122,8 @@ class RenderThread extends Thread {
             canvas.scale(2, 1);
         }
         int d = expandedMode ? 2 : 1;
-
-        for (int row = 0; row <= trsScreenRows; row++) {
-            for (int col = 0; col <= trsScreenCols; col++) {
+        for (int row = 0; row < trsScreenRows; row++) {
+            for (int col = 0; col < trsScreenCols; col++) {
                 int i = row * trsScreenCols + col * d;
                 int ch = screenBuffer.get(i) & 0xff;
                 // Emulate Radio Shack lowercase mod (for Model 1)

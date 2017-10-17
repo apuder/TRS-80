@@ -281,8 +281,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onRestart() {
+        super.onRestart();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -293,8 +293,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         if (TRS80Application.hasCrashed()) {
             return;
         }
@@ -907,6 +907,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         surfaceHolder = holder;
         if (renderThread != null) {
             renderThread.setSurfaceHolder(holder);
+        } else {
+            stopRenderThread();
         }
     }
 }
