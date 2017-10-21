@@ -35,7 +35,7 @@
         <item>@string/mkdisk_jv3</item>
         <item>@string/mkdisk_dmk</item>
     </string-array>
-    <string-array name="mkdisk_sided">
+    <string-array name="mkdisk_sided" translatable="false">
         <item>1</item>
         <item>2</item>
     </string-array>
