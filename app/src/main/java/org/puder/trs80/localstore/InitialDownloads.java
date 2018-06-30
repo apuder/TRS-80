@@ -27,7 +27,7 @@ public class InitialDownloads {
     public static Download[] get() {
         return new Download[]{
                 new Download(true, Hardware.MODEL1, null,
-                        "http://www.classic-computers.org.nz/system-80/s80-roms.zip",
+                        "https://www.classic-computers.org.nz/system-80/s80-roms.zip",
                         "trs80model1.rom", "model1.rom"),
             /*
             // Defunct download
