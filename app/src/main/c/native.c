@@ -325,7 +325,8 @@ void Java_org_puder_trs80_XTRS_setSoundMuted(JNIEnv* e, jclass clazz, jboolean m
     sdl_audio_muted = muted;
 }
 
-void Java_org_puder_trs80_XTRS_setRunning(JNIEnv* e, jclass clazz, jboolean run) {
+JNIEXPORT void JNICALL
+Java_org_puder_trs80_XTRS_setRunning(JNIEnv *env, jclass type, jboolean run) {
     isRunning = run;
 }
 

@@ -40,7 +40,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-#include <SDL/SDL.h>
+#include "SDL/SDL.h"
 
 /*#define IDEBUG 1*/
 /*#define IDEBUG2 1*/

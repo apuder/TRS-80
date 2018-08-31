@@ -17,9 +17,9 @@
 #ifndef SDL_H_
 #define SDL_H_
 
-#include <SDL/SDL_timer.h>
-#include <SDL/SDL_video.h>
-#include <SDL/SDL_events.h>
+#include "SDL_timer.h"
+#include "SDL_video.h"
+#include "SDL_events.h"
 
 
 #define SDL_HAT_CENTERED   0x00

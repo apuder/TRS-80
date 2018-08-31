@@ -12,20 +12,22 @@ apply plugin: 'io.fabric'
 repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
 
+android {
+    compileSdkVersion 27
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdkVersion 15
-        targetSdkVersion 25
-
-        ndk {
-            moduleName "xtrs"
+        targetSdkVersion 27
+        versionCode 40
+        versionName "0.40"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11 -frtti -fexceptions"
+            }
         }
     }
-
     buildTypes {
         debug {
             resValue "bool", "debug", "true"
@@ -36,13 +38,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-
     externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/Android.mk'
+        cmake {
+            path "CMakeLists.txt"
         }
     }
-
     splits {
         abi {
             enable true
@@ -50,45 +50,41 @@ android {
             include 'armeabi'
         }
     }
-
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'NOTICE'
-        exclude 'META-INF/ASL2.0'
-    }
-
-    dependencies {
-        repositories {
-            maven { url 'https://maven.haberling.net' }
-            mavenCentral()
-        }
-        //compile project (':tools:tpk')
-        compile 'com.google.guava:guava:20.0'
-        compile 'com.android.support:design:25.3.1'
-        compile 'com.android.support:appcompat-v7:25.3.1'
-        compile 'com.android.support:mediarouter-v7:25.3.1'
-        compile 'com.android.support:recyclerview-v7:25.3.1'
-        compile 'com.google.android.gms:play-services-cast:11.0.4'
-        compile 'commons-io:commons-io:2.4'
-        compile 'org.simpleframework:simple-http:6.+'
-        compile 'org.greenrobot:eventbus:3.0.0'
-        compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
-            transitive = true;
-        }
-        compile('com.crashlytics.sdk.android:crashlytics-ndk:1.1.6@aar') {
-            transitive = true;
-        }
-    }
 }
+
+dependencies {
+    repositories {
+        maven { url 'https://maven.haberling.net' }
+        mavenCentral()
+    }
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.guava:guava:20.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:mediarouter-v7:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.google.android.gms:play-services-cast:11.0.4'
+    implementation 'commons-io:commons-io:2.4'
+    implementation 'org.simpleframework:simple-http:6.+'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation project(':retrostore')
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true
+    }
+    implementation('com.crashlytics.sdk.android:crashlytics-ndk:1.1.6@aar') {
+        transitive = true
+    }
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
 crashlytics {
     enableNdk true
     androidNdkOut 'src/main/obj'
     androidNdkLibsOut 'src/main/libs'
 }
 
-dependencies {
-    compile project(':retrostore')
-}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <pthread.h>
 #include <errno.h>
 #include <android/log.h>
