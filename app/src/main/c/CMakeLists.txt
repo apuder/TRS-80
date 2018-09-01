@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-include_directories(. SDL)
+include_directories(. SDL retrostore/include)
 add_library( # Sets the name of the library.
              xtrs
 
@@ -41,7 +41,16 @@ add_library( # Sets the name of the library.
              z80.c
              trs_cassette.c
              trs_memory.c
-             SDL/SDL.c)
+             SDL/SDL.c
+             retrostore/ApiProtos.pb.c
+             retrostore/backend.c
+             retrostore/cJSON.c
+             retrostore/esp_mock.c
+             retrostore/pb_common.cpp
+             retrostore/pb_decode.cpp
+             retrostore/retrostore.c
+             retrostore/utils.c
+             )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

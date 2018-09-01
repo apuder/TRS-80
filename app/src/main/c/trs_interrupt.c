@@ -51,7 +51,7 @@
 #define M3_UART_ERR_BIT 0x40
 #define M3_UART_RCV_BIT 0x20
 #define M3_UART_SND_BIT 0x10
-#define M3_IOBUS_BIT    0x80 /* not emulated */
+#define M3_IOBUS_BIT    0x08 /* not emulated */
 #define M3_TIMER_BIT    0x04
 #define M3_CASSFALL_BIT 0x02
 #define M3_CASSRISE_BIT 0x01
@@ -302,6 +302,18 @@ trs_reset_button_interrupt(int state)
     z80_state.nmi = (nmi_latch & nmi_mask) != 0;
   }
   if (!z80_state.nmi) z80_state.nmi_seen = 0;
+}
+
+void
+trs_iobus_interrupt(int state)
+{
+  //TODO what to do for Model 1?
+  if (state) {
+    interrupt_latch |= M3_IOBUS_BIT;
+  } else {
+    interrupt_latch &= ~M3_IOBUS_BIT;
+  }
+  z80_state.irq = (interrupt_latch & interrupt_mask) != 0;
 }
 
 unsigned char

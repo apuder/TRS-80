@@ -191,6 +191,7 @@ extern void trs_disk_motoroff_interrupt(int state);
 extern void trs_uart_err_interrupt(int state);
 extern void trs_uart_rcv_interrupt(int state);
 extern void trs_uart_snd_interrupt(int state);
+extern void trs_iobus_interrupt(int state);
 extern void trs_timer_interrupt(int state);
 extern void trs_timer_init(void);
 extern void trs_timer_off(void);

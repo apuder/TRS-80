@@ -55,6 +55,7 @@
 #include "trs_hard.h"
 #include "trs_state_save.h"
 #include "trs_uart.h"
+#include "retrostore.h"
 
 static int modesel = 0;     /* Model I */
 static int modeimage = 0x8; /* Model III/4/4p */
@@ -140,6 +141,11 @@ void z80_out(int port, int value)
   } else {
     /* Next, Models III/4/4P only */
     switch (port) {
+    case RS_PORT:
+      if (rs_z80_out(value) == RS_STATE_SEND) {
+        trs_iobus_interrupt(1);
+      }
+      break;
     case 0x79: /* Orchestra-90 left channel */
       trs_orch90_out(1, value);
       break;
@@ -386,6 +392,9 @@ int z80_in(int port)
   } else {
     /* Models III/4/4P only */
     switch (port) {
+    case RS_PORT:
+      trs_iobus_interrupt(0);
+      return rs_z80_in();
     case 0x82:
       if (trs_model >= 3) {
 	return grafyx_read_data();
