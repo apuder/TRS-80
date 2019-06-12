@@ -4,9 +4,6 @@ apply plugin: 'jsonschema2pojo'
 
 mainClassName = 'org.puder.trs80.tpk.Main'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
 repositories {
     jcenter()
 }
