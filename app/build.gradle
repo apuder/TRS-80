@@ -14,11 +14,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdkVersion 15
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 41
         versionName "0.41"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
