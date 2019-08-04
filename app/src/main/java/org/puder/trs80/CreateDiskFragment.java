@@ -23,9 +23,11 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import static org.puder.trs80.CreateDiskActivity.MKDISK_DENSITY;
 import static org.puder.trs80.CreateDiskActivity.MKDISK_FORMAT;

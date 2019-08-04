@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
+    android:padding="18dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="18dp">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,53 +20,52 @@
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:layout_margin="8dp"
-            android:src="@drawable/ic_refresh_black_24dp" />
+            app:srcCompat="@drawable/ic_refresh_black_24dp"/>
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp">
 
             <TextView
                 android:id="@+id/appName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-thin"
                 android:text="App Title"
-                android:textSize="20sp"
                 android:textStyle="bold"
-                app:fontFamily="sans-serif-thin"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="20sp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/appVersion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed-light"
                 android:text="Version 0.1a"
                 android:textSize="14sp"
-                app:fontFamily="sans-serif-condensed-light"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appName"
                 app:layout_constraintVertical_bias="0.0"
-                tools:layout_editor_absoluteX="0dp" />
+                tools:layout_editor_absoluteX="0dp"/>
 
             <TextView
                 android:id="@+id/appAuthor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-condensed-light"
                 android:text="John Doe"
                 android:textSize="14sp"
-                app:fontFamily="sans-serif-condensed-light"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appVersion"
                 app:layout_constraintVertical_bias="0.714"
-                tools:layout_editor_absoluteX="0dp" />
+                tools:layout_editor_absoluteX="0dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
@@ -73,26 +73,26 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/description_title"
+        android:fontFamily="sans-serif-condensed-light"
         android:textSize="22dp"
-        app:fontFamily="sans-serif-condensed-light" />
+        android:text="@string/description_title"/>
 
     <TextView
         android:id="@+id/appDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
         android:layout_marginBottom="6dp"
+        android:layout_marginTop="14dp"
         android:layout_weight="1.0"
-        android:scrollbars="vertical"
-        app:fontFamily="sans-serif-condensed-light" />
+        android:fontFamily="sans-serif-condensed-light"
+        android:scrollbars="vertical"/>
 
     <Button
         android:id="@+id/installButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/action_install"
         android:textStyle="bold"
-        app:fontFamily="sans-serif-condensed-light" />
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="@string/action_install"/>
 
 </LinearLayout>

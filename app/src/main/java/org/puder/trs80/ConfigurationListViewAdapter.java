@@ -19,7 +19,6 @@ package org.puder.trs80;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -41,7 +42,7 @@ import org.puder.trs80.drag.ItemTouchHelperAdapter;
 
 import java.io.IOException;
 
-import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 public class ConfigurationListViewAdapter extends
         RecyclerView.Adapter<ConfigurationListViewAdapter.Holder> implements ItemTouchHelperAdapter {

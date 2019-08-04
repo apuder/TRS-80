@@ -1,2 +1,2 @@
 include ':app', ':retrostore'
-include ':tools:tpk'
+// include ':tools:tpk'

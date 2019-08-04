@@ -22,8 +22,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +29,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.core.view.MenuItemCompat;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.puder.trs80.AlertDialogUtil;
 import org.puder.trs80.BaseActivity;

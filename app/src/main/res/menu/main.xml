@@ -3,8 +3,8 @@
 
     <item
         android:id="@+id/action_cast_trs80"
-        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-        app:actionViewClass="android.support.v7.app.MediaRouteButton"
+        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
+        app:actionViewClass="androidx.mediarouter.app.MediaRouteButton"
         app:showAsAction="always"
         android:title="@string/start_casting"/>
 

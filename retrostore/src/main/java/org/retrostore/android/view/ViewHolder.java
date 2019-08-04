@@ -16,11 +16,12 @@
 
 package org.retrostore.android.view;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.retrostore.android.R;
 import org.retrostore.android.RetrostoreActivity.InternalAppInstallListener;

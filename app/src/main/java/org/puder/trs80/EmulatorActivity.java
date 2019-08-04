@@ -32,8 +32,6 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -50,7 +48,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.view.MenuItemCompat;
+
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Optional;
 
 import org.greenrobot.eventbus.EventBus;

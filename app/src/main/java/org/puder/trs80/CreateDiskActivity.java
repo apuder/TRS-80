@@ -21,14 +21,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.appcompat.app.ActionBar;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.File;
-import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class CreateDiskActivity extends BaseActivity

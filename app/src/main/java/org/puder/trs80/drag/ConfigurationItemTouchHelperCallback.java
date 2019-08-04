@@ -17,9 +17,10 @@
 package org.puder.trs80.drag;
 
 import android.graphics.Canvas;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.puder.trs80.ConfigurationListViewAdapter;
 
@@ -66,7 +67,7 @@ public class ConfigurationItemTouchHelperCallback extends ItemTouchHelper.Callba
 
     @Override
     public RecyclerView.ViewHolder chooseDropTarget(RecyclerView.ViewHolder selected,
-            List<RecyclerView.ViewHolder> dropTargets, int curX, int curY) {
+                                                    List<RecyclerView.ViewHolder> dropTargets, int curX, int curY) {
         RecyclerView.ViewHolder winner = super.chooseDropTarget(selected, dropTargets, curX, curY);
         if (winner == null && dropTargets.size() == 1) {
             winner = dropTargets.get(0);

@@ -17,13 +17,13 @@
 package org.puder.trs80;
 
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class EditConfigurationActivity extends BaseActivity {
+import androidx.core.view.MenuItemCompat;
 
+public class EditConfigurationActivity extends BaseActivity {
     // Action Menu
     private static final int   MENU_OPTION_CANCEL      = 0;
     private static final int   MENU_OPTION_HELP        = 1;

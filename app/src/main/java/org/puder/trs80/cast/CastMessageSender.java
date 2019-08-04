@@ -20,14 +20,13 @@ import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import android.content.BroadcastReceiver.PendingResult;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.media.MediaRouteSelector;
-import android.support.v7.media.MediaRouter;
-import android.support.v7.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.mediarouter.media.MediaRouteSelector;
+import androidx.mediarouter.media.MediaRouter;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
@@ -47,8 +46,8 @@ public class CastMessageSender {
 
     private static final String           TAG                 = "CastMessageSender";
     private static final String           CAST_CHANNEL_NAME   = "urn:x-cast:org.puder.trs80";
-    private MediaRouteSelector            routeSelector;
-    private MediaRouter                   mediaRouter;
+    private MediaRouteSelector routeSelector;
+    private MediaRouter mediaRouter;
     private final MediaRouterCallbackImpl mediaRouterCallback = new MediaRouterCallbackImpl();
     private CastDevice                    selectedDevice;
     private Lock                          apiClientLock = new ReentrantLock();
@@ -165,7 +164,7 @@ public class CastMessageSender {
      */
     private class MediaRouterCallbackImpl extends MediaRouter.Callback {
         @Override
-        public void onRouteSelected(MediaRouter router, RouteInfo route) {
+        public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
             Log.d(TAG, "Route selected");
             selectedDevice = CastDevice.getFromBundle(route.getExtras());
 
@@ -187,7 +186,7 @@ public class CastMessageSender {
         }
 
         @Override
-        public void onRouteUnselected(MediaRouter router, RouteInfo route) {
+        public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
             Log.d(TAG, "Route unselected");
             teardown();
             selectedDevice = null;

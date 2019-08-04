@@ -18,13 +18,14 @@ package org.retrostore.android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -37,8 +38,6 @@ import org.retrostore.client.common.proto.App;
 
 import java.util.List;
 import java.util.concurrent.Executors;
-
-import static java.util.Locale.US;
 
 public class RetrostoreActivity extends AppCompatActivity {
     private DataFetcher mFetcher;
