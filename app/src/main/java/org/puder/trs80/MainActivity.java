@@ -522,7 +522,7 @@ public class MainActivity extends BaseActivity implements
 
     private void showCommunity() {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string
-                .google_plus_url)));
+                .community_url)));
         startActivity(browserIntent);
     }
 

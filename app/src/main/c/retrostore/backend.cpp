@@ -21,11 +21,15 @@ static app_title_t apps[SIZE_APP_PAGE];
 static int current_page = 0;
 static int num_apps  = 0;
 
-static const char* query = "";
+static char* query = NULL;
 
 void set_query(const char* query_)
 {
-  query = query_;
+  if (query != NULL) {
+    free(query);
+  }
+  query = (char*) malloc(strlen(query_) + 1);
+  memcpy(query, query_, strlen(query_) + 1);
   current_page = 0;
   num_apps = 0;
 }
@@ -109,8 +113,10 @@ static bool pb_app_title_callback(pb_istream_t* stream, const pb_field_t* field,
 
   app_title_t* app_title = &apps[num_apps];
 
-  snprintf(app_title->title, sizeof(((app_title_t*) 0)->title), "%s (%s)",
-           app.name, app.author);
+  if (snprintf(app_title->title, sizeof(((app_title_t*) 0)->title), "%s (%s)",
+               app.name, app.author) < 0) {
+    app_title->title[0] = '\0';
+  }
   strcpy(app_title->id, app.id);
 
 #if 0
@@ -138,16 +144,16 @@ bool pb_list_apps_callback()
 
 static bool list_apps(const int page)
 {
-  static const char* types[] = {"COMMAND"};
+  static const char* types[] = {"COMMAND", "BASIC"};
   
   cJSON* params = cJSON_CreateObject();
   cJSON_AddNumberToObject(params, "start", page * SIZE_APP_PAGE);
   cJSON_AddNumberToObject(params, "num", SIZE_APP_PAGE);
-  cJSON* mediaTypes = cJSON_CreateStringArray(types, 1);
+  cJSON* mediaTypes = cJSON_CreateStringArray(types, 2);
   cJSON* trs80 = cJSON_CreateObject();
   cJSON_AddItemToObject(trs80, "mediaTypes", mediaTypes);
   cJSON_AddItemToObject(params, "trs80", trs80);
-  if (query[0] != '\0') {
+  if (query != NULL) {
     cJSON_AddStringToObject(params, "query", query);
   }
 
@@ -169,9 +175,11 @@ static bool pb_app_details_callback(pb_istream_t* stream,
     return false;
   }
 
-  snprintf(app_details, sizeof(app_details), "%s\nAuthor: %s\n"
-           "Year: %d\n\n%s", app.name,app.author, app.release_year,
-           app.description);
+  if (snprintf(app_details, sizeof(app_details), "%s\nAuthor: %s\n"
+               "Year: %d\n\n%s", app.name,app.author, app.release_year,
+               app.description) < 0) {
+    app_details[0] = '\0';
+  }
 
   return true;
 }
@@ -192,20 +200,22 @@ static bool get_app(const char* app_id)
   return server_http("/api/getApp", params, pb_get_app_callback);
 }
 
-static pb_byte_t* cmd_bytes = NULL;
-static size_t cmd_size;
+static pb_byte_t* app_bytes = NULL;
+static size_t app_size;
+static int app_type = 0;
 
 static bool pb_data_callback(pb_istream_t* stream, const pb_field_t* field,
                              void** arg)
 {
-  if (cmd_bytes != NULL) {
-    free(cmd_bytes);
+    if (app_bytes != NULL) {
+    free(app_bytes);
   }
-  cmd_size = stream->bytes_left;
+  app_size = stream->bytes_left;
   MediaImage* image = (MediaImage*) *arg;
-  cmd_bytes = image->type == 3 /* CMD */ ?
-    (pb_byte_t*) malloc(cmd_size) : NULL;
-  return pb_read(stream, cmd_bytes, cmd_size);
+  app_type = image->type;
+  app_bytes = (app_type == MediaType_COMMAND) || (app_type == MediaType_BASIC) ?
+    (pb_byte_t*) malloc(app_size) : NULL;
+  return pb_read(stream, app_bytes, app_size);
 }
 
 static bool pb_media_images_callback(pb_istream_t* stream,
@@ -278,7 +288,7 @@ char* get_app_details(int idx)
   return app_details;
 }
 
-bool get_app_cmd(int idx, unsigned char** buf, int* size)
+bool get_app_code(int idx, int* type, unsigned char** buf, int* size)
 {
   *buf = NULL;
   app_title_t* app = get_app_from_cache(idx);
@@ -289,7 +299,14 @@ bool get_app_cmd(int idx, unsigned char** buf, int* size)
     return false;
   }
 
-  *buf = cmd_bytes;
-  *size = cmd_size;
+  *type = app_type;
+  *buf = app_bytes;
+  *size = app_size;
   return true;
+}  
+
+void get_last_app_code(unsigned char** buf, int* size)
+{
+  *buf = app_bytes;
+  *size = app_size;
 }  

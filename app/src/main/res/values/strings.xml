@@ -6,7 +6,7 @@
     <string name="chromecast_app_id" translatable="false">E0F0F42C</string>
     <string name="start_casting">Start Casting</string>
 
-    <string name="google_plus_url" translatable="false">https://plus.google.com/communities/110959098806298034548</string>
+    <string name="community_url" translatable="false">https://retrostore.org/community</string>
 
     <string name="share_title">Share with…</string>
     <string name="share_subject">TRS-80 Emulator for Android</string>

@@ -2,6 +2,7 @@
 /build
 /app/.externalNativeBuild
 /app/build
+/app/release
 /app/src/main/libs
 /app/src/main/obj
 /app/app-release.apk
@@ -16,6 +17,7 @@
 .gradle
 .signing/
 .idea/libraries/
+.idea/caches/
 .idea/inspectionProfiles/
 .idea/workspace.xml
 .idea/tasks.xml
