@@ -8,6 +8,7 @@
     <application
         android:name=".TRS80Application"
         android:allowBackup="false"
+        android:requestLegacyExternalStorage="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -18,7 +19,8 @@
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/app_name"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -40,9 +42,6 @@
             android:configChanges="orientation|screenSize"/>
         <activity android:name="org.retrostore.android.RetrostoreActivity"
                   android:label="@string/retrostore_activity_name"/>
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="aa3839f3c9b409dc8b9e60797ad78a242d42fdf3" />
     </application>
 
 </manifest>

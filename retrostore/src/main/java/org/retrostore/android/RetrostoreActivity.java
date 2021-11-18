@@ -27,8 +27,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.retrostore.RetrostoreClientImpl;
 import org.retrostore.android.net.DataFetcher;
@@ -37,6 +39,7 @@ import org.retrostore.android.view.ViewAdapter;
 import org.retrostore.client.common.proto.App;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class RetrostoreActivity extends AppCompatActivity {
@@ -48,6 +51,7 @@ public class RetrostoreActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout mRefreshLayout;
     private InternalAppInstallListener mAppInstallListener;
+    private ExecutorService mNetworkExecutor;
 
     private static AppInstallListener mExternalListener;
 
@@ -76,6 +80,7 @@ public class RetrostoreActivity extends AppCompatActivity {
                         refreshApps();
                     }
                 });
+        mNetworkExecutor = Executors.newSingleThreadExecutor();
         refreshApps();
     }
 
@@ -123,7 +128,7 @@ public class RetrostoreActivity extends AppCompatActivity {
                 showToast("Something went wrong during the request: " + t.getMessage());
                 setRefreshingStatus(false);
             }
-        });
+        }, mNetworkExecutor);
     }
 
     /**

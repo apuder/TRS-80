@@ -1,6 +1,7 @@
 /bin
 /build
 /app/.externalNativeBuild
+/app/.cxx
 /app/build
 /app/release
 /app/src/main/libs

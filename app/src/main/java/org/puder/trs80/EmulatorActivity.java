@@ -50,7 +50,6 @@ import android.widget.TextView;
 
 import androidx.core.view.MenuItemCompat;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Optional;
 
@@ -871,12 +870,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
     public void notImplemented(String msg) {
         TRS80Application.setCrashedFlag(true);
-        Crashlytics.setString("NOT_IMPLEMENTED", msg);
-        Crashlytics.setInt("MODEL", currentConfiguration.getModel());
-        Crashlytics.setString("NAME", currentConfiguration.getName().or("-"));
-        Optional<String> path = currentConfiguration.getDiskPath(0);
-        Crashlytics.setString("DISK_0", path.or("-"));
-        throw new RuntimeException();
+        throw new RuntimeException(msg);
     }
 
     public int getKeyWidth() {

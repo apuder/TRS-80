@@ -19,19 +19,14 @@ package org.puder.trs80;
 import android.app.Application;
 import android.content.Context;
 
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.ndk.CrashlyticsNdk;
 
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
-
-import io.fabric.sdk.android.Fabric;
 
 public class TRS80Application extends Application {
 
     private static Context         context;
     private static boolean         hasCrashed = false;
-
 
     @Override
     public void onCreate() {
@@ -40,10 +35,6 @@ public class TRS80Application extends Application {
         String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
         CastMessageSender.initSingleton(chromcastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
-        boolean debug = getApplicationContext().getResources().getBoolean(R.bool.debug);
-        if (!debug) {
-            Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
-        }
     }
 
     public static Context getAppContext() {

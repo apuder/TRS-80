@@ -1,12 +1,15 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+}
+
 android {
-    compileSdkVersion 28
+    compileSdk 29
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 28
-        versionCode 1
-        versionName "0.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdk 15
+        targetSdk 29
+        versionCode 2
+        versionName "0.1.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -18,18 +21,18 @@ android {
 
 dependencies {
     repositories {
-        maven { url 'https://maven.haberling.net' }
+        google()
         mavenCentral()
-        jcenter()
+        maven { url 'https://maven.haberling.net' }
     }
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support:appcompat-v7:29.0.0'
+    implementation 'com.android.support:recyclerview-v7:29.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    implementation 'com.android.support:design:29.0.0'
+    implementation 'com.android.support:cardview-v7:29.0.0'
     api 'org.retrostore:retrostore-client:0.1.5'
-    implementation 'com.google.guava:guava:20.0'
+    implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.github.bumptech.glide:glide:3.8.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
