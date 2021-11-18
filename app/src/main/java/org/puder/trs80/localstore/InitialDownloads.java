@@ -27,8 +27,8 @@ public class InitialDownloads {
     public static Download[] get() {
         return new Download[]{
                 new Download(true, Hardware.MODEL1, null,
-                        "https://www.classic-computers.org.nz/system-80/s80-roms.zip",
-                        "s80-roms/trs80model1_v1.3.rom", "model1.rom"),
+                        "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model1-level2.rom",
+                        null, "model1.rom"),
             /*
             // Defunct download
             new Download(
@@ -43,7 +43,7 @@ public class InitialDownloads {
                         true,
                         Hardware.MODEL3,
                         null,
-                        "https://github.com/lkesteloot/trs80/blob/v2.3.0/packages/trs80-emulator/roms/model3.rom?raw=true",
+                        "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model3.rom",
                         null, "model3.rom"),
             /*
             new Download(false, Hardware.MODEL1, "Model I - LDOS",
