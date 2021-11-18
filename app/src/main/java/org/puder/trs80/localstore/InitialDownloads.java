@@ -43,7 +43,7 @@ public class InitialDownloads {
                         true,
                         Hardware.MODEL3,
                         null,
-                        "https://github.com/lkesteloot/trs80/raw/master/packages/trs80-emulator/roms/model3.rom",
+                        "https://github.com/lkesteloot/trs80/blob/v2.3.0/packages/trs80-emulator/roms/model3.rom?raw=true",
                         null, "model3.rom"),
             /*
             new Download(false, Hardware.MODEL1, "Model I - LDOS",
