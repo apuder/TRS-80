@@ -26,6 +26,7 @@ import com.google.common.io.ByteStreams;
 
 import org.puder.trs80.R;
 import org.puder.trs80.StrUtil;
+import org.puder.trs80.TRS80Application;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,7 +67,7 @@ public class FileManager {
         }
 
         public FileManager createForAppSubDir(String dirName) throws IOException {
-            File sdcard = Environment.getExternalStorageDirectory();
+            File sdcard = TRS80Application.getAppContext().getExternalFilesDir(null);
             File localStoreDir = new File(sdcard, appBaseDir);
             if (dirName != null) {
                 localStoreDir = new File(localStoreDir, dirName);

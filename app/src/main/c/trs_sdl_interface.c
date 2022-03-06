@@ -59,6 +59,7 @@
 #include <sys/time.h>
 #include <sys/file.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>

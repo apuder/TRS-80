@@ -8,9 +8,9 @@ android {
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 16
-        targetSdk 29
-        versionCode 43
-        versionName "0.43"
+        targetSdk 30
+        versionCode 45
+        versionName "0.45"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
