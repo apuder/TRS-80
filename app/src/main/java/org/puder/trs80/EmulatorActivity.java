@@ -57,6 +57,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.puder.trs80.cast.CastMessageSender;
 import org.puder.trs80.cast.RemoteCastScreen;
 import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.ConfigurationDummy;
 import org.puder.trs80.configuration.ConfigurationManager;
 import org.puder.trs80.configuration.EmulatorState;
 import org.puder.trs80.configuration.KeyboardLayout;
@@ -107,7 +108,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private GameController     gameController;
     private int                rotation;
     private ClipboardManager   clipboardManager;
-    private AsyncTask          taskSetup;
+    private static AsyncTask          taskSetup;
     private Rect               windowRect;
     private boolean            isCasting;
     private SurfaceHolder      surfaceHolder;
@@ -122,18 +123,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         TRS80Application.setCrashedFlag(false);
 
         Intent intent = getIntent();
-        int id = intent.getIntExtra(EXTRA_CONFIGURATION_ID, -1);
-
-        if (id == -1) {
-            /*
-             * We got killed by Android and then re-launched. The only thing we
-             * can do is exit.
-             */
-            TRS80Application.setCrashedFlag(true);
-            finish();
-            return;
-        }
-
+        int id = 0;
         init(savedInstanceState, id);
 
         /*
@@ -147,14 +137,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         setContentView(R.layout.emulator_measure);
         final View root = findViewById(R.id.emulator_measure);
         root.getViewTreeObserver().addOnGlobalLayoutListener(this);
-
-        AlertDialogUtil.showHint(this, R.string.hint_emulator, R.string.menu_tutorial,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        showTutorial();
-                    }
-                });
     }
 
     @Override
@@ -177,19 +159,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     }
 
     private void init(Bundle savedInstanceState, int id) {
-        try {
-            emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get(getResources()));
-            ConfigurationManager configManager = ConfigurationManager.get(getApplicationContext());
-            Optional<Configuration> configOpt = configManager.getConfigById(id);
-            if (!configOpt.isPresent()) {
-                Log.e(TAG, "Configuration not found.");
-                return;
-            }
-            currentConfiguration = configOpt.get();
-        } catch (IOException e) {
-            Log.e(TAG, "Cannot create emulator state.", e);
-            return;
-        }
+        currentConfiguration = new ConfigurationDummy();
         isCasting = CastMessageSender.get().isReadyToSend();
         currentHardware = new Hardware(currentConfiguration);
 
@@ -223,7 +193,7 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
                 return;
             }
             RemoteCastScreen.get().sendConfiguration(currentConfiguration);
-            emulatorState.loadState();
+            //emulatorState.loadState();
         }
     }
 

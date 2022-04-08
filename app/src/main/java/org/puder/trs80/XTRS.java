@@ -68,31 +68,6 @@ public class XTRS {
     private static EmulatorActivity emulator = null;
 
     public static int init(Configuration configuration, EmulatorState emulatorState) {
-        xtrsModel = configuration.getModel();
-        xtrsCassette = configuration.getCassettePath().or(emulatorState.getDefaultCassettePath());
-        xtrsDisk0 = configuration.getDiskPath(0).orNull();
-        xtrsDisk1 = configuration.getDiskPath(1).orNull();
-        xtrsDisk2 = configuration.getDiskPath(2).orNull();
-        xtrsDisk3 = configuration.getDiskPath(3).orNull();
-
-        switch (xtrsModel) {
-            case Hardware.MODEL1:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
-                break;
-            case Hardware.MODEL3:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
-                break;
-            case Hardware.MODEL4:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
-                break;
-            case Hardware.MODEL4P:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
-                break;
-            default:
-                //TODO return -1?
-                break;
-        }
-
         return initNative();
     }
 

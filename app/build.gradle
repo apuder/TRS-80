@@ -6,7 +6,7 @@ android {
     compileSdk 29
     ndkVersion '23.1.7779620'
     defaultConfig {
-        applicationId "org.puder.trs80"
+        applicationId "org.rfm"
         minSdk 16
         targetSdk 30
         versionCode 45

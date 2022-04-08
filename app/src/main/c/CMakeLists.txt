@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-include_directories(. SDL retrostore/include trs-io/include tcpip/include)
+include_directories(. SDL retrostore/include trs-io/include tcpip/include rfm)
 add_library( # Sets the name of the library.
              xtrs
 
@@ -58,6 +58,16 @@ add_library( # Sets the name of the library.
              retrostore/boot.c
              retrostore/utils.cpp
              tcpip/tcpip.cpp
+             rfm/fornext.c
+             rfm/func.c
+             rfm/key.c
+             rfm/peekpoke.c
+             rfm/run.c
+             rfm/trs_io.c
+             rfm/trs_scrn.c
+             rfm/trs_str.c
+             rfm/rfm.c
+             rfm/lincon.c
         )
 
 # Searches for a specified prebuilt library and stores the path as a

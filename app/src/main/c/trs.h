@@ -120,6 +120,7 @@ extern void trs_screen_var_reset(void);
 extern void trs_disk_led(int drive, int on_off);
 extern void trs_hard_led(int drive, int on_off);
 
+#define trs_reset xtrs_reset
 extern void trs_reset(int poweron);
 extern void trs_exit(void);
 

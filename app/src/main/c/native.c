@@ -234,30 +234,12 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
         return ERR_GET_METHOD_NOT_IMPLEMENTED;
     }
 
-    jfieldID xtrsModelID = (*env)->GetStaticFieldID(env, cls, "xtrsModel", "I");
-    jfieldID xtrsRomFileID = (*env)->GetStaticFieldID(env, cls, "xtrsRomFile", "Ljava/lang/String;");
-    jfieldID xtrsEntryAddrID = (*env)->GetStaticFieldID(env, cls, "xtrsEntryAddr", "I");
-    jfieldID xtrsCassetteID = (*env)->GetStaticFieldID(env, cls, "xtrsCassette", "Ljava/lang/String;");
-    jfieldID xtrsDisk0ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk0", "Ljava/lang/String;");
-    jfieldID xtrsDisk1ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk1", "Ljava/lang/String;");
-    jfieldID xtrsDisk2ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk2", "Ljava/lang/String;");
-    jfieldID xtrsDisk3ID = (*env)->GetStaticFieldID(env, cls, "xtrsDisk3", "Ljava/lang/String;");
-    jint xtrsModel = (*env)->GetStaticIntField(env, cls, xtrsModelID);
-    jstring xtrsRomFile = (*env)->GetStaticObjectField(env, cls, xtrsRomFileID);
 
     // Get the direct buffer for writing screen updates into.
     jfieldID xtrsScreenBufferID = (*env)->GetStaticFieldID(env, cls, "xtrsScreenBuffer", "Ljava/nio/ByteBuffer;");
     jobject screenBufferObject = (*env)->GetStaticObjectField(env, cls, xtrsScreenBufferID);
     trs_screen = (*env)->GetDirectBufferAddress(env, screenBufferObject);
 
-    jint xtrsEntryAddr = (*env)->GetStaticIntField(env, cls, xtrsEntryAddrID);
-    jstring xtrsCassette = (*env)->GetStaticObjectField(env, cls, xtrsCassetteID);
-    jstring xtrsDisk0 = (*env)->GetStaticObjectField(env, cls, xtrsDisk0ID);
-    jstring xtrsDisk1 = (*env)->GetStaticObjectField(env, cls, xtrsDisk1ID);
-    jstring xtrsDisk2 = (*env)->GetStaticObjectField(env, cls, xtrsDisk2ID);
-    jstring xtrsDisk3 = (*env)->GetStaticObjectField(env, cls, xtrsDisk3ID);
-
-    init_xtrs(env, xtrsModel, xtrsRomFile, xtrsEntryAddr, xtrsCassette, xtrsDisk0, xtrsDisk1, xtrsDisk2, xtrsDisk3);
     return NO_ERROR;
 }
 
@@ -274,9 +256,9 @@ void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileNa
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 
-extern void add_key_event(Uint16 event, Uint16 sym, Uint16 key);
+extern void add_key_event_basic(Uint16 event, Uint16 sym, Uint16 key);
 void Java_org_puder_trs80_XTRS_addKeyEvent(JNIEnv* env, jclass cls, jint event, jint sym, jint key) {
-    add_key_event(event, sym, key);
+    add_key_event_basic(event, sym, key);
 }
 
 void Java_org_puder_trs80_XTRS_paste(JNIEnv* env, jclass cls, jstring clipboard) {
@@ -289,23 +271,12 @@ void Java_org_puder_trs80_XTRS_paste(JNIEnv* env, jclass cls, jstring clipboard)
     trs_paste_started();
 }
 
+int run_rfm();
+
 void Java_org_puder_trs80_XTRS_run(JNIEnv* env, jclass clazz) {
-    clear_paste_string();
-    if (!setjmp(ex_buf)) {
-        reset_required = 0;
-        while (isRunning) {
-            z80_run(0);
-            if (reset_required) {
-                reset_required = 0;
-                clear_paste_string();
-                trs_timer_init();
-                trs_reset(0);
-            }
-        }
-    } else {
-        // Got not implemented exception
+    while (isRunning) {
+        run_rfm();
     }
-    OpenSLWrap_Shutdown();
 }
 
 void Java_org_puder_trs80_XTRS_reset(JNIEnv* env, jclass cls) {
