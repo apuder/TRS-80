@@ -60,6 +60,18 @@ void trs_state_save(char *filename)
   }
 }
 
+void trs_xray_save(char* filename)
+{
+  FILE *file;
+
+  file = fopen(filename, "wb");
+  if (file) {
+    trs_xray_z80_save(file);
+    trs_xray_mem_save(file);
+    fclose(file);
+  }
+}
+
 void trs_state_load(char *filename)
 {
   FILE *file;

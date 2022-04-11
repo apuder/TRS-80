@@ -23,6 +23,7 @@
 */
 
 void trs_state_save(char *filename);
+void trs_xray_save(char* filename);
 void trs_state_load(char *filename);
 void trs_save_uchar(FILE *file, unsigned char *buffer, int count);
 void trs_load_uchar(FILE *file, unsigned char *buffer, int count);
@@ -48,9 +49,11 @@ void trs_hard_save(FILE *file);
 void trs_interrupt_save(FILE *file);
 void trs_io_save(FILE *file);
 void trs_mem_save(FILE *file);
+void trs_xray_mem_save(FILE *file);
 void trs_keyboard_save(FILE *file);
 void trs_uart_save(FILE *file);
 void trs_z80_save(FILE *file);
+void trs_xray_z80_save(FILE *file);
 void trs_imp_exp_save(FILE *file);
 
 void trs_main_load(FILE *file);

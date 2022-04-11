@@ -262,9 +262,12 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
 }
 
 void Java_org_puder_trs80_XTRS_saveState(JNIEnv* env, jclass cls, jstring fileName) {
+    char buf[100];
     const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
     trs_cassette_reset();
     trs_state_save(fn);
+    snprintf(buf, sizeof(buf),"%s-xray", fn);
+    trs_xray_save(buf);
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 

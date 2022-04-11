@@ -586,6 +586,12 @@ void trs_mem_save(FILE *file)
   trs_save_int(file, &romin, 1);
 }
 
+void trs_xray_mem_save(FILE *file)
+{
+	trs_save_uchar(file, memory + 0x3c00, 1024);
+	trs_save_uchar(file, memory + 32 * 1024, 32 * 1024);
+}
+
 void trs_mem_load(FILE *file)
 {
   trs_load_uchar(file, memory, 0x20001);
