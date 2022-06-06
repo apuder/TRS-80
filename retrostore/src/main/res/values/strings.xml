@@ -12,4 +12,5 @@
 
     <string name="description_title">Description</string>
     <string name="error_downloading_app">Oops, there was an issue downloading the app.</string>
+    <string name="application_thumbnail">Application Thumbnail</string>
 </resources>

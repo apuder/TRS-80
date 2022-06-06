@@ -16,7 +16,8 @@
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:layout_margin="8dp"
-            android:src="@drawable/ic_refresh_black_24dp" />
+            android:contentDescription="@string/application_thumbnail"
+            app:srcCompat="@drawable/ic_refresh_black_24dp" />
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,26 +30,24 @@
                 android:id="@+id/appName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:text="App Title"
                 android:textSize="20sp"
                 app:fontFamily="sans-serif-thin"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/appDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:lines="2"
                 android:text="Description goes here ..."
                 android:textSize="14sp"
                 app:fontFamily="sans-serif-condensed"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appName" />
 
             <TextView
@@ -68,14 +67,13 @@
                 android:id="@+id/appAuthor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="8dp"
                 android:text="John Doe"
                 android:textSize="14sp"
                 app:fontFamily="sans-serif-condensed-light"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/appDescription"
                 app:layout_constraintVertical_bias="0.545" />
 
