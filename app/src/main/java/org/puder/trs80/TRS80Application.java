@@ -32,8 +32,8 @@ public class TRS80Application extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        String chromcastAppId = this.getResources().getString(R.string.chromecast_app_id);
-        CastMessageSender.initSingleton(chromcastAppId, context);
+        String chromecastAppId = this.getResources().getString(R.string.chromecast_app_id);
+        CastMessageSender.initSingleton(chromecastAppId, context);
         RemoteCastScreen.initSingleton(CastMessageSender.get());
     }
 
