@@ -1,6 +1,7 @@
 
 TRS-80 Emulator for Android
 ===========================
+![workflow status](https://github.com/apuder/TRS-80/actions/workflows/build-with-gradle.yml/badge.svg)
 
 This is the first version of a [TRS-80 Emulator for Android][TRS-80 Emulator for Android].
 It is based on [sdltrs][sdltrs] that is itself derived from the popular [xtrs][xtrs]
