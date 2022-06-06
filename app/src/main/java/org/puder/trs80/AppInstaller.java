@@ -28,6 +28,7 @@ import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
 import org.retrostore.client.common.proto.Trs80Extension;
+import org.retrostore.client.common.proto.Trs80Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +102,7 @@ public class AppInstaller {
         return true;
     }
 
-    private static int getHardwareModelId(Trs80Extension.Trs80Model model) {
+    private static int getHardwareModelId(Trs80Model model) {
         switch (model) {
             case MODEL_I:
                 return 1;

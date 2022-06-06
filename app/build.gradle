@@ -51,6 +51,8 @@ dependencies {
     }
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:cardview-v7:29.0.0'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.android.support:support-v4:29.0.0'
     implementation 'com.android.support:design:29.0.0'

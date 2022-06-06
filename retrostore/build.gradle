@@ -7,8 +7,6 @@ android {
     defaultConfig {
         minSdk 15
         targetSdk 29
-        versionCode 2
-        versionName "0.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -31,7 +29,8 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.android.support:design:29.0.0'
     implementation 'com.android.support:cardview-v7:29.0.0'
-    api 'org.retrostore:retrostore-client:0.1.5'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    api 'org.retrostore:retrostore-client:0.1.8'
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.github.bumptech.glide:glide:3.8.0'
     testImplementation 'junit:junit:4.13.2'
