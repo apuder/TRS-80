@@ -4,6 +4,9 @@ option java_package = "org.puder.trs80.proto";
 option java_outer_classname = "NativeState";
 option java_multiple_files = true;
 
+// This option is just for C++.
+option optimize_for = LITE_RUNTIME;
+
 // The TRS-80 model types.
 enum Trs80Model {
   UNKNOWN_MODEL = 0;

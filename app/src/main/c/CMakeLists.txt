@@ -3,14 +3,16 @@
 
 # Sets the minimum version of CMake required to build the native library.
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.6.0)
+
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-include_directories(. SDL retrostore/include trs-io/include tcpip/include)
+
+include_directories(. SDL retrostore/include trs-io/include tcpip/include proto)
 add_library( # Sets the name of the library.
              xtrs
 
@@ -58,6 +60,38 @@ add_library( # Sets the name of the library.
              retrostore/boot.c
              retrostore/utils.cpp
              tcpip/tcpip.cpp
+             google/protobuf/any_lite.cc
+             google/protobuf/arena.cc
+             google/protobuf/arenastring.cc
+             google/protobuf/arenaz_sampler.cc
+             google/protobuf/extension_set.cc
+             google/protobuf/generated_enum_util.cc
+             google/protobuf/generated_message_tctable_lite.cc
+             google/protobuf/generated_message_util.cc
+             google/protobuf/implicit_weak_message.cc
+             google/protobuf/inlined_string_field.cc
+             google/protobuf/io/coded_stream.cc
+             google/protobuf/io/io_win32.cc
+             google/protobuf/io/strtod.cc
+             google/protobuf/io/zero_copy_stream.cc
+             google/protobuf/io/zero_copy_stream_impl.cc
+             google/protobuf/io/zero_copy_stream_impl_lite.cc
+             google/protobuf/map.cc
+             google/protobuf/message_lite.cc
+             google/protobuf/parse_context.cc
+             google/protobuf/repeated_field.cc
+             google/protobuf/repeated_ptr_field.cc
+             google/protobuf/stubs/bytestream.cc
+             google/protobuf/stubs/common.cc
+             google/protobuf/stubs/int128.cc
+             google/protobuf/stubs/status.cc
+             google/protobuf/stubs/statusor.cc
+             google/protobuf/stubs/stringpiece.cc
+             google/protobuf/stubs/stringprintf.cc
+             google/protobuf/stubs/structurally_valid.cc
+             google/protobuf/stubs/strutil.cc
+             google/protobuf/stubs/time.cc
+             google/protobuf/wire_format_lite.cc
         )
 
 # Searches for a specified prebuilt library and stores the path as a

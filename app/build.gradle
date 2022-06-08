@@ -51,7 +51,9 @@ task syncGeneratedativeProtoFilesRelease(type: Sync) {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.0.0"
+        // Note: Version must be compatible with the version in src/c/google/protobuf.
+        //       Check stubs/common.h for GOOGLE_PROTOBUF_VERSION.
+        artifact = "com.google.protobuf:protoc:3.21.1"
     }
     plugins {
         javalite {
@@ -80,7 +82,7 @@ protobuf {
 
 android {
     compileSdk 29
-    ndkVersion '23.1.7779620'
+    ndkVersion '24.0.8215888'
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 16
@@ -90,7 +92,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11 -frtti -fexceptions"
+                cppFlags "-std=c++11", "-frtti", "-fexceptions"
             }
         }
     }
@@ -119,16 +121,9 @@ android {
     }
 }
 
-//// Android
-//tasks.named("preBuild") { finalizedBy("syncGeneratedativeProtoFilesDebug") }
-//tasks.named("preBuild") { finalizedBy("syncGeneratedativeProtoFilesRelease") }
-//
-//tasks.named("build") { finalizedBy("syncGeneratedativeProtoFilesDebug") }
-//tasks.named("build") { finalizedBy("syncGeneratedativeProtoFilesRelease") }
-
-
 clean {
     // Generates protocol buffer files end up in here.
     delete "$projectDir/src/debug"
     delete "$projectDir/src/release"
+    delete "$projectDir/src/main/c/proto"
 }
