@@ -63,7 +63,6 @@ PROTOBUF_CONSTEXPR NativeSystemState::NativeSystemState(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.memoryregions_)*/{}
   , /*decltype(_impl_.registers_)*/nullptr
-  , /*decltype(_impl_.model_)*/0
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NativeSystemStateDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NativeSystemStateDefaultTypeInternal()
@@ -76,69 +75,6 @@ struct NativeSystemStateDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NativeSystemStateDefaultTypeInternal _NativeSystemState_default_instance_;
 }  // namespace trs_protos
 namespace trs_protos {
-bool Trs80Model_IsValid(int value) {
-  switch (value) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-      return true;
-    default:
-      return false;
-  }
-}
-
-static ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<std::string> Trs80Model_strings[5] = {};
-
-static const char Trs80Model_names[] =
-  "MODEL_4"
-  "MODEL_4P"
-  "MODEL_I"
-  "MODEL_III"
-  "UNKNOWN_MODEL";
-
-static const ::PROTOBUF_NAMESPACE_ID::internal::EnumEntry Trs80Model_entries[] = {
-  { {Trs80Model_names + 0, 7}, 3 },
-  { {Trs80Model_names + 7, 8}, 4 },
-  { {Trs80Model_names + 15, 7}, 1 },
-  { {Trs80Model_names + 22, 9}, 2 },
-  { {Trs80Model_names + 31, 13}, 0 },
-};
-
-static const int Trs80Model_entries_by_number[] = {
-  4, // 0 -> UNKNOWN_MODEL
-  2, // 1 -> MODEL_I
-  3, // 2 -> MODEL_III
-  0, // 3 -> MODEL_4
-  1, // 4 -> MODEL_4P
-};
-
-const std::string& Trs80Model_Name(
-    Trs80Model value) {
-  static const bool dummy =
-      ::PROTOBUF_NAMESPACE_ID::internal::InitializeEnumStrings(
-          Trs80Model_entries,
-          Trs80Model_entries_by_number,
-          5, Trs80Model_strings);
-  (void) dummy;
-  int idx = ::PROTOBUF_NAMESPACE_ID::internal::LookUpEnumName(
-      Trs80Model_entries,
-      Trs80Model_entries_by_number,
-      5, value);
-  return idx == -1 ? ::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString() :
-                     Trs80Model_strings[idx].get();
-}
-bool Trs80Model_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, Trs80Model* value) {
-  int int_value;
-  bool success = ::PROTOBUF_NAMESPACE_ID::internal::LookUpEnumValue(
-      Trs80Model_entries, 5, name, &int_value);
-  if (success) {
-    *value = static_cast<Trs80Model>(int_value);
-  }
-  return success;
-}
 
 // ===================================================================
 
@@ -915,14 +851,12 @@ NativeSystemState::NativeSystemState(const NativeSystemState& from)
   new (&_impl_) Impl_{
       decltype(_impl_.memoryregions_){from._impl_.memoryregions_}
     , decltype(_impl_.registers_){nullptr}
-    , decltype(_impl_.model_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<std::string>(from._internal_metadata_);
   if (from._internal_has_registers()) {
     _this->_impl_.registers_ = new ::trs_protos::NativeSystemState_Registers(*from._impl_.registers_);
   }
-  _this->_impl_.model_ = from._impl_.model_;
   // @@protoc_insertion_point(copy_constructor:trs_protos.NativeSystemState)
 }
 
@@ -933,7 +867,6 @@ inline void NativeSystemState::SharedCtor(
   new (&_impl_) Impl_{
       decltype(_impl_.memoryregions_){arena}
     , decltype(_impl_.registers_){nullptr}
-    , decltype(_impl_.model_){0}
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -968,7 +901,6 @@ void NativeSystemState::Clear() {
     delete _impl_.registers_;
   }
   _impl_.registers_ = nullptr;
-  _impl_.model_ = 0;
   _internal_metadata_.Clear<std::string>();
 }
 
@@ -978,15 +910,6 @@ const char* NativeSystemState::_InternalParse(const char* ptr, ::_pbi::ParseCont
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .trs_protos.Trs80Model model = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-          _internal_set_model(static_cast<::trs_protos::Trs80Model>(val));
-        } else
-          goto handle_unusual;
-        continue;
       // .trs_protos.NativeSystemState.Registers registers = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
@@ -1037,13 +960,6 @@ uint8_t* NativeSystemState::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .trs_protos.Trs80Model model = 1;
-  if (this->_internal_model() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteEnumToArray(
-      1, this->_internal_model(), target);
-  }
-
   // .trs_protos.NativeSystemState.Registers registers = 2;
   if (this->_internal_has_registers()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1089,12 +1005,6 @@ size_t NativeSystemState::ByteSizeLong() const {
         *_impl_.registers_);
   }
 
-  // .trs_protos.Trs80Model model = 1;
-  if (this->_internal_model() != 0) {
-    total_size += 1 +
-      ::_pbi::WireFormatLite::EnumSize(this->_internal_model());
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     total_size += _internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).size();
   }
@@ -1121,9 +1031,6 @@ void NativeSystemState::MergeFrom(const NativeSystemState& from) {
     _this->_internal_mutable_registers()->::trs_protos::NativeSystemState_Registers::MergeFrom(
         from._internal_registers());
   }
-  if (from._internal_model() != 0) {
-    _this->_internal_set_model(from._internal_model());
-  }
   _this->_internal_metadata_.MergeFrom<std::string>(from._internal_metadata_);
 }
 
@@ -1142,12 +1049,7 @@ void NativeSystemState::InternalSwap(NativeSystemState* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.memoryregions_.InternalSwap(&other->_impl_.memoryregions_);
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NativeSystemState, _impl_.model_)
-      + sizeof(NativeSystemState::_impl_.model_)
-      - PROTOBUF_FIELD_OFFSET(NativeSystemState, _impl_.registers_)>(
-          reinterpret_cast<char*>(&_impl_.registers_),
-          reinterpret_cast<char*>(&other->_impl_.registers_));
+  swap(_impl_.registers_, other->_impl_.registers_);
 }
 
 std::string NativeSystemState::GetTypeName() const {

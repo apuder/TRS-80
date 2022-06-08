@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.puder.trs80.Hardware;
 import org.puder.trs80.XTRS;
 import org.puder.trs80.io.FileManager;
 import org.puder.trs80.proto.NativeSystemState;
@@ -79,7 +80,7 @@ public class EmulatorState {
     }
 
     @SuppressLint("CheckResult")
-    public Optional<SystemState> getSystemState() {
+    public Optional<SystemState> getSystemState(int model) {
         if (!fileManager.hasFile(FILE_XRAY_STATE)) {
             return Optional.absent();
         }
@@ -101,24 +102,22 @@ public class EmulatorState {
 
         SystemState.Builder rsState = SystemState.newBuilder();
 
-        // Set model number.
-        switch (nativeState.getModel()) {
-            case MODEL_I:
+        // Set model number, which we don't get from the native info.
+        switch (model) {
+            case Hardware.MODEL1:
                 rsState.setModel(Trs80Model.MODEL_I);
-            case MODEL_III:
+                break;
+            case Hardware.MODEL3:
                 rsState.setModel(Trs80Model.MODEL_III);
                 break;
-            case MODEL_4:
+            case Hardware.MODEL4:
                 rsState.setModel(Trs80Model.MODEL_4);
                 break;
-            case MODEL_4P:
+            case Hardware.MODEL4P:
                 rsState.setModel(Trs80Model.MODEL_4P);
                 break;
-            case UNKNOWN_MODEL:
+            default:
                 rsState.setModel(Trs80Model.UNKNOWN_MODEL);
-                break;
-            case UNRECOGNIZED:
-                rsState.setModel(Trs80Model.UNRECOGNIZED);
                 break;
         }
 

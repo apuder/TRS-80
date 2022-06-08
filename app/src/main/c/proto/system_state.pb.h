@@ -28,7 +28,6 @@
 #include <google/protobuf/message_lite.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
-#include <google/protobuf/generated_enum_util.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_system_5fstate_2eproto
@@ -60,30 +59,6 @@ template<> ::trs_protos::NativeSystemState_Registers* Arena::CreateMaybeMessage<
 PROTOBUF_NAMESPACE_CLOSE
 namespace trs_protos {
 
-enum Trs80Model : int {
-  UNKNOWN_MODEL = 0,
-  MODEL_I = 1,
-  MODEL_III = 2,
-  MODEL_4 = 3,
-  MODEL_4P = 4,
-  Trs80Model_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
-  Trs80Model_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
-};
-bool Trs80Model_IsValid(int value);
-constexpr Trs80Model Trs80Model_MIN = UNKNOWN_MODEL;
-constexpr Trs80Model Trs80Model_MAX = MODEL_4P;
-constexpr int Trs80Model_ARRAYSIZE = Trs80Model_MAX + 1;
-
-const std::string& Trs80Model_Name(Trs80Model value);
-template<typename T>
-inline const std::string& Trs80Model_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, Trs80Model>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function Trs80Model_Name.");
-  return Trs80Model_Name(static_cast<Trs80Model>(enum_t_value));
-}
-bool Trs80Model_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, Trs80Model* value);
 // ===================================================================
 
 class NativeSystemState_Registers final :
@@ -624,7 +599,6 @@ class NativeSystemState final :
   enum : int {
     kMemoryRegionsFieldNumber = 3,
     kRegistersFieldNumber = 2,
-    kModelFieldNumber = 1,
   };
   // repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
   int memoryregions_size() const;
@@ -662,15 +636,6 @@ class NativeSystemState final :
       ::trs_protos::NativeSystemState_Registers* registers);
   ::trs_protos::NativeSystemState_Registers* unsafe_arena_release_registers();
 
-  // .trs_protos.Trs80Model model = 1;
-  void clear_model();
-  ::trs_protos::Trs80Model model() const;
-  void set_model(::trs_protos::Trs80Model value);
-  private:
-  ::trs_protos::Trs80Model _internal_model() const;
-  void _internal_set_model(::trs_protos::Trs80Model value);
-  public:
-
   // @@protoc_insertion_point(class_scope:trs_protos.NativeSystemState)
  private:
   class _Internal;
@@ -681,7 +646,6 @@ class NativeSystemState final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion > memoryregions_;
     ::trs_protos::NativeSystemState_Registers* registers_;
-    int model_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1076,26 +1040,6 @@ inline void NativeSystemState_MemoryRegion::set_allocated_data(std::string* data
 
 // NativeSystemState
 
-// .trs_protos.Trs80Model model = 1;
-inline void NativeSystemState::clear_model() {
-  _impl_.model_ = 0;
-}
-inline ::trs_protos::Trs80Model NativeSystemState::_internal_model() const {
-  return static_cast< ::trs_protos::Trs80Model >(_impl_.model_);
-}
-inline ::trs_protos::Trs80Model NativeSystemState::model() const {
-  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.model)
-  return _internal_model();
-}
-inline void NativeSystemState::_internal_set_model(::trs_protos::Trs80Model value) {
-  
-  _impl_.model_ = value;
-}
-inline void NativeSystemState::set_model(::trs_protos::Trs80Model value) {
-  _internal_set_model(value);
-  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.model)
-}
-
 // .trs_protos.NativeSystemState.Registers registers = 2;
 inline bool NativeSystemState::_internal_has_registers() const {
   return this != internal_default_instance() && _impl_.registers_ != nullptr;
@@ -1237,12 +1181,6 @@ NativeSystemState::memoryregions() const {
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace trs_protos
-
-PROTOBUF_NAMESPACE_OPEN
-
-template <> struct is_proto_enum< ::trs_protos::Trs80Model> : ::std::true_type {};
-
-PROTOBUF_NAMESPACE_CLOSE
 
 // @@protoc_insertion_point(global_scope)
 

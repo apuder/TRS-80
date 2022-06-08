@@ -495,7 +495,7 @@ public class MainActivity extends BaseActivity implements
     private void shareEmulatorState(Configuration conf, int position) {
         Optional<SystemState> stateOpt = null;
         try {
-            stateOpt = configManager.getEmulatorState(conf.getId()).getSystemState();
+            stateOpt = configManager.getEmulatorState(conf.getId()).getSystemState(conf.getModel());
             if (!stateOpt.isPresent()) {
                 Log.e(TAG, "Cannot get xray system state.");
                 showToast("Cannot get xray system state");

@@ -9,14 +9,6 @@ option optimize_for = LITE_RUNTIME;
 
 package trs_protos;
 
-// The TRS-80 model types.
-enum Trs80Model {
-  UNKNOWN_MODEL = 0;
-  MODEL_I = 1;
-  MODEL_III = 2;
-  MODEL_4 = 3;
-  MODEL_4P = 4;
-}
 
 // The state of a TRS system, including registers and memory.
 message NativeSystemState {
@@ -44,7 +36,6 @@ message NativeSystemState {
     bytes data = 2;
   }
 
-  Trs80Model model = 1;
   Registers registers = 2;
   repeated MemoryRegion memoryRegions = 3;
 }
