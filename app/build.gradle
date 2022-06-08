@@ -1,5 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
+    }
+}
+
 plugins {
     id 'com.android.application'
+    id 'com.google.protobuf' version '0.8.18'
 }
 
 android {
@@ -68,4 +78,41 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.0.0"
+    }
+    plugins {
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+    }
+    // This will generate the protobuf files into the regular source tree.
+    // I wasn't able to keep them separate (e.g. in project/gen) and then
+    // have IntelliJ still play nicely. Would love to revisit this, if
+    // anybody is reading this and has an idea. But for now, this works
+    // pretty nicely.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+                cpp {}
+            }
+            task.plugins {
+                javalite {
+                    outputSubDir = "java"
+                }
+            }
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src"
+}
+
+clean {
+    // Generates protocol buffer files end up in here.
+    delete "$projectDir/src/debug"
+    delete "$projectDir/src/release"
 }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option java_package = "org.puder.trs80.proto";
+option java_outer_classname = "NativeState";
+option java_multiple_files = true;
+
+// The TRS-80 model types.
+enum Trs80Model {
+  UNKNOWN_MODEL = 0;
+  MODEL_I = 1;
+  MODEL_III = 2;
+  MODEL_4 = 3;
+  MODEL_4P = 4;
+}
+
+// The state of a TRS system, including registers and memory.
+message NativeSystemState {
+  message Registers {
+    int32 ix = 1;
+    int32 iy = 2;
+    int32 pc = 3;
+    int32 sp = 4;
+    int32 af = 5;
+    int32 bc = 6;
+    int32 de = 7;
+    int32 hl = 8;
+    int32 af_prime = 9;
+    int32 bc_prime = 10;
+    int32 de_prime = 11;
+    int32 hl_prime = 12;
+    int32 i = 13;
+    int32 r_1 = 14;
+    int32 r_2 = 15;
+  }
+
+  // Single memory region.
+  message MemoryRegion {
+    int32 start = 1;
+    bytes data = 2;
+  }
+
+  Trs80Model model = 1;
+  Registers registers = 2;
+  repeated MemoryRegion memoryRegions = 3;
+}
