@@ -30,4 +30,6 @@ public interface ConfigurationItemListener {
 
     void onConfigurationRun(Configuration configuration, int position);
 
+    void onConfigurationShare(Configuration configuration, int position);
+
 }

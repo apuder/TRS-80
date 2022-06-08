@@ -79,7 +79,7 @@ public class EmulatorState {
     }
 
     @SuppressLint("CheckResult")
-    public Optional<SystemState> loadSystemState() {
+    public Optional<SystemState> getSystemState() {
         if (!fileManager.hasFile(FILE_XRAY_STATE)) {
             return Optional.absent();
         }
@@ -192,6 +192,7 @@ public class EmulatorState {
 
     public void deleteSavedState() {
         fileManager.deleteFile(FILE_STATE);
+        fileManager.deleteFile(FILE_XRAY_STATE);
         fileManager.deleteFile(FILE_SCREENSHOT);
     }
 

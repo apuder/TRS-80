@@ -173,6 +173,13 @@
                 android:layout_below="@+id/configuration_details">
 
                 <ImageView
+                    android:id="@+id/configuration_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/configuration_button_padding"
+                    android:src="@drawable/share_icon"/>
+
+                <ImageView
                     android:id="@+id/configuration_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

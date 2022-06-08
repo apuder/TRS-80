@@ -62,6 +62,7 @@ import org.retrostore.android.RetrostoreActivity;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.SystemState;
 
 import java.io.File;
 import java.io.IOException;
@@ -347,6 +348,11 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
+    public void onConfigurationShare(Configuration configuration, int position) {
+        shareEmulatorState(configuration, position);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_EDIT_CONFIG) {
@@ -484,6 +490,36 @@ public class MainActivity extends BaseActivity implements
         Intent intent = new Intent(this, EmulatorActivity.class);
         intent.putExtra(EmulatorActivity.EXTRA_CONFIGURATION_ID, conf.getId());
         startActivity(intent);
+    }
+
+    private void shareEmulatorState(Configuration conf, int position) {
+        Optional<SystemState> stateOpt = null;
+        try {
+            stateOpt = configManager.getEmulatorState(conf.getId()).getSystemState();
+            if (!stateOpt.isPresent()) {
+                Log.e(TAG, "Cannot get xray system state.");
+                showToast("Cannot get xray system state");
+                return;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot get emulator state.", e);
+            showToast("Cannot get emulator state");
+            return;
+        }
+        final SystemState state = stateOpt.get();
+
+        mInstallExecutor.execute(() -> {
+            Optional<Long> tokenOpt = RetrostoreApi.get().uploadSystemState(state);
+            if (!tokenOpt.isPresent()) {
+                Log.e(TAG, "Failed uploading state to RetroStore");
+                // TODO: I18N.
+                showToast("Failed uploading state to RetroStore");
+                return;
+            }
+            showToast(StrUtil.form("System state uploaded. TOKEN: %d", tokenOpt.get()));
+        });
+
+
     }
 
     private boolean checkIfFileExists(String path, boolean allowNull, int errMsg) {

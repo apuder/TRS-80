@@ -79,6 +79,7 @@ public class ConfigurationListViewAdapter extends
         ScreenshotView screenshot;
         ViewFlipper viewFlipper;
         View stopButton;
+        View shareButton;
 
 
         Holder(View itemView) {
@@ -106,8 +107,10 @@ public class ConfigurationListViewAdapter extends
             itemView.findViewById(R.id.configuration_edit).setOnClickListener(this);
             itemView.findViewById(R.id.configuration_delete).setOnClickListener(this);
             itemView.findViewById(R.id.configuration_run).setOnClickListener(this);
+            itemView.findViewById(R.id.configuration_share).setOnClickListener(this);
             stopButton = itemView.findViewById(R.id.configuration_stop);
             stopButton.setOnClickListener(this);
+            shareButton = itemView.findViewById(R.id.configuration_share);
         }
 
         @Override
@@ -136,6 +139,9 @@ public class ConfigurationListViewAdapter extends
                     break;
                 case R.id.configuration_run:
                     listener.onConfigurationRun(configuration, position);
+                    break;
+                case R.id.configuration_share:
+                    listener.onConfigurationShare(configuration, position);
                     break;
                 default:
                     if (listener.showHint()) {
@@ -185,6 +191,7 @@ public class ConfigurationListViewAdapter extends
         }
 
         holder.stopButton.setVisibility(emulatorState.hasState() ? View.VISIBLE : View.GONE);
+        holder.shareButton.setVisibility(emulatorState.hasXrayState() ? View.VISIBLE : View.GONE);
 
         // ConfigurationOld
         holder.configuration = conf;
