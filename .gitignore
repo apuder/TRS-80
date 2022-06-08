@@ -35,3 +35,7 @@
 local.properties
 *.swp
 local_db.bin
+
+
+app/src/release
+app/src/debug
