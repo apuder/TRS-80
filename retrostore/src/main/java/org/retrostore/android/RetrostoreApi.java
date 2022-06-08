@@ -27,6 +27,7 @@ import org.retrostore.RetrostoreClient;
 import org.retrostore.RetrostoreClientImpl;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
+import org.retrostore.client.common.proto.SystemState;
 
 import java.util.List;
 
@@ -84,6 +85,26 @@ public class RetrostoreApi {
             Log.e(TAG, "Cannot download media images.", e);
         }
         return Optional.absent();
+    }
+
+    /** Uploads a system state ephemerally to the RetroStore. */
+    public Optional<Long> uploadSystemState(SystemState state) {
+        try {
+            return Optional.of(mRetrostoreClient.uploadState(state));
+        } catch (ApiException e) {
+            Log.e(TAG, "Cannot upload system state.", e);
+            return Optional.absent();
+        }
+    }
+
+    /** Downloads an ephemeral system state from the RetroStore. */
+    public Optional<SystemState> downloadSystemState(long token) {
+        try {
+            return Optional.of(mRetrostoreClient.downloadState(token));
+        } catch (ApiException e) {
+            Log.e(TAG, "Cannot download system state.", e);
+            return Optional.absent();
+        }
     }
 
     private void onInstallApp(App app) {
