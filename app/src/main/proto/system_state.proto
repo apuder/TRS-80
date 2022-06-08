@@ -7,6 +7,8 @@ option java_multiple_files = true;
 // This option is just for C++.
 option optimize_for = LITE_RUNTIME;
 
+package trs_protos;
+
 // The TRS-80 model types.
 enum Trs80Model {
   UNKNOWN_MODEL = 0;

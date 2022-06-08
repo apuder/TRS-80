@@ -36,6 +36,7 @@ add_library( # Sets the name of the library.
              trs_interrupt.c
              trs_uart.c
              trs_state_save.c
+             trs_xray_state_save.cpp
              main.c
              trs_io.c
              trs_sdl_interface.c
@@ -92,6 +93,7 @@ add_library( # Sets the name of the library.
              google/protobuf/stubs/strutil.cc
              google/protobuf/stubs/time.cc
              google/protobuf/wire_format_lite.cc
+             proto/system_state.pb.cc
         )
 
 # Searches for a specified prebuilt library and stores the path as a

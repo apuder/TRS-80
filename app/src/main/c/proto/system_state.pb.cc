@@ -17,6 +17,7 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
 namespace _pbi = _pb::internal;
 
+namespace trs_protos {
 PROTOBUF_CONSTEXPR NativeSystemState_Registers::NativeSystemState_Registers(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.ix_)*/0
@@ -73,6 +74,8 @@ struct NativeSystemStateDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NativeSystemStateDefaultTypeInternal _NativeSystemState_default_instance_;
+}  // namespace trs_protos
+namespace trs_protos {
 bool Trs80Model_IsValid(int value) {
   switch (value) {
     case 0:
@@ -147,7 +150,7 @@ NativeSystemState_Registers::NativeSystemState_Registers(::PROTOBUF_NAMESPACE_ID
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:NativeSystemState.Registers)
+  // @@protoc_insertion_point(arena_constructor:trs_protos.NativeSystemState.Registers)
 }
 NativeSystemState_Registers::NativeSystemState_Registers(const NativeSystemState_Registers& from)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite() {
@@ -174,7 +177,7 @@ NativeSystemState_Registers::NativeSystemState_Registers(const NativeSystemState
   ::memcpy(&_impl_.ix_, &from._impl_.ix_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.r_2_) -
     reinterpret_cast<char*>(&_impl_.ix_)) + sizeof(_impl_.r_2_));
-  // @@protoc_insertion_point(copy_constructor:NativeSystemState.Registers)
+  // @@protoc_insertion_point(copy_constructor:trs_protos.NativeSystemState.Registers)
 }
 
 inline void NativeSystemState_Registers::SharedCtor(
@@ -202,7 +205,7 @@ inline void NativeSystemState_Registers::SharedCtor(
 }
 
 NativeSystemState_Registers::~NativeSystemState_Registers() {
-  // @@protoc_insertion_point(destructor:NativeSystemState.Registers)
+  // @@protoc_insertion_point(destructor:trs_protos.NativeSystemState.Registers)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<std::string>()) {
   (void)arena;
     return;
@@ -219,7 +222,7 @@ void NativeSystemState_Registers::SetCachedSize(int size) const {
 }
 
 void NativeSystemState_Registers::Clear() {
-// @@protoc_insertion_point(message_clear_start:NativeSystemState.Registers)
+// @@protoc_insertion_point(message_clear_start:trs_protos.NativeSystemState.Registers)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -381,7 +384,7 @@ failure:
 
 uint8_t* NativeSystemState_Registers::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NativeSystemState.Registers)
+  // @@protoc_insertion_point(serialize_to_array_start:trs_protos.NativeSystemState.Registers)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -479,12 +482,12 @@ uint8_t* NativeSystemState_Registers::_InternalSerialize(
     target = stream->WriteRaw(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).data(),
         static_cast<int>(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).size()), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:NativeSystemState.Registers)
+  // @@protoc_insertion_point(serialize_to_array_end:trs_protos.NativeSystemState.Registers)
   return target;
 }
 
 size_t NativeSystemState_Registers::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NativeSystemState.Registers)
+// @@protoc_insertion_point(message_byte_size_start:trs_protos.NativeSystemState.Registers)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -582,7 +585,7 @@ void NativeSystemState_Registers::CheckTypeAndMergeFrom(
 
 void NativeSystemState_Registers::MergeFrom(const NativeSystemState_Registers& from) {
   NativeSystemState_Registers* const _this = this;
-  // @@protoc_insertion_point(class_specific_merge_from_start:NativeSystemState.Registers)
+  // @@protoc_insertion_point(class_specific_merge_from_start:trs_protos.NativeSystemState.Registers)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -636,7 +639,7 @@ void NativeSystemState_Registers::MergeFrom(const NativeSystemState_Registers& f
 }
 
 void NativeSystemState_Registers::CopyFrom(const NativeSystemState_Registers& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NativeSystemState.Registers)
+// @@protoc_insertion_point(class_specific_copy_from_start:trs_protos.NativeSystemState.Registers)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -658,7 +661,7 @@ void NativeSystemState_Registers::InternalSwap(NativeSystemState_Registers* othe
 }
 
 std::string NativeSystemState_Registers::GetTypeName() const {
-  return "NativeSystemState.Registers";
+  return "trs_protos.NativeSystemState.Registers";
 }
 
 
@@ -672,7 +675,7 @@ NativeSystemState_MemoryRegion::NativeSystemState_MemoryRegion(::PROTOBUF_NAMESP
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(arena_constructor:trs_protos.NativeSystemState.MemoryRegion)
 }
 NativeSystemState_MemoryRegion::NativeSystemState_MemoryRegion(const NativeSystemState_MemoryRegion& from)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite() {
@@ -692,7 +695,7 @@ NativeSystemState_MemoryRegion::NativeSystemState_MemoryRegion(const NativeSyste
       _this->GetArenaForAllocation());
   }
   _this->_impl_.start_ = from._impl_.start_;
-  // @@protoc_insertion_point(copy_constructor:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(copy_constructor:trs_protos.NativeSystemState.MemoryRegion)
 }
 
 inline void NativeSystemState_MemoryRegion::SharedCtor(
@@ -711,7 +714,7 @@ inline void NativeSystemState_MemoryRegion::SharedCtor(
 }
 
 NativeSystemState_MemoryRegion::~NativeSystemState_MemoryRegion() {
-  // @@protoc_insertion_point(destructor:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(destructor:trs_protos.NativeSystemState.MemoryRegion)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<std::string>()) {
   (void)arena;
     return;
@@ -729,7 +732,7 @@ void NativeSystemState_MemoryRegion::SetCachedSize(int size) const {
 }
 
 void NativeSystemState_MemoryRegion::Clear() {
-// @@protoc_insertion_point(message_clear_start:NativeSystemState.MemoryRegion)
+// @@protoc_insertion_point(message_clear_start:trs_protos.NativeSystemState.MemoryRegion)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -787,7 +790,7 @@ failure:
 
 uint8_t* NativeSystemState_MemoryRegion::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(serialize_to_array_start:trs_protos.NativeSystemState.MemoryRegion)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -807,12 +810,12 @@ uint8_t* NativeSystemState_MemoryRegion::_InternalSerialize(
     target = stream->WriteRaw(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).data(),
         static_cast<int>(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).size()), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(serialize_to_array_end:trs_protos.NativeSystemState.MemoryRegion)
   return target;
 }
 
 size_t NativeSystemState_MemoryRegion::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NativeSystemState.MemoryRegion)
+// @@protoc_insertion_point(message_byte_size_start:trs_protos.NativeSystemState.MemoryRegion)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -847,7 +850,7 @@ void NativeSystemState_MemoryRegion::CheckTypeAndMergeFrom(
 
 void NativeSystemState_MemoryRegion::MergeFrom(const NativeSystemState_MemoryRegion& from) {
   NativeSystemState_MemoryRegion* const _this = this;
-  // @@protoc_insertion_point(class_specific_merge_from_start:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(class_specific_merge_from_start:trs_protos.NativeSystemState.MemoryRegion)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -862,7 +865,7 @@ void NativeSystemState_MemoryRegion::MergeFrom(const NativeSystemState_MemoryReg
 }
 
 void NativeSystemState_MemoryRegion::CopyFrom(const NativeSystemState_MemoryRegion& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NativeSystemState.MemoryRegion)
+// @@protoc_insertion_point(class_specific_copy_from_start:trs_protos.NativeSystemState.MemoryRegion)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -885,7 +888,7 @@ void NativeSystemState_MemoryRegion::InternalSwap(NativeSystemState_MemoryRegion
 }
 
 std::string NativeSystemState_MemoryRegion::GetTypeName() const {
-  return "NativeSystemState.MemoryRegion";
+  return "trs_protos.NativeSystemState.MemoryRegion";
 }
 
 
@@ -893,10 +896,10 @@ std::string NativeSystemState_MemoryRegion::GetTypeName() const {
 
 class NativeSystemState::_Internal {
  public:
-  static const ::NativeSystemState_Registers& registers(const NativeSystemState* msg);
+  static const ::trs_protos::NativeSystemState_Registers& registers(const NativeSystemState* msg);
 };
 
-const ::NativeSystemState_Registers&
+const ::trs_protos::NativeSystemState_Registers&
 NativeSystemState::_Internal::registers(const NativeSystemState* msg) {
   return *msg->_impl_.registers_;
 }
@@ -904,7 +907,7 @@ NativeSystemState::NativeSystemState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:NativeSystemState)
+  // @@protoc_insertion_point(arena_constructor:trs_protos.NativeSystemState)
 }
 NativeSystemState::NativeSystemState(const NativeSystemState& from)
   : ::PROTOBUF_NAMESPACE_ID::MessageLite() {
@@ -917,10 +920,10 @@ NativeSystemState::NativeSystemState(const NativeSystemState& from)
 
   _internal_metadata_.MergeFrom<std::string>(from._internal_metadata_);
   if (from._internal_has_registers()) {
-    _this->_impl_.registers_ = new ::NativeSystemState_Registers(*from._impl_.registers_);
+    _this->_impl_.registers_ = new ::trs_protos::NativeSystemState_Registers(*from._impl_.registers_);
   }
   _this->_impl_.model_ = from._impl_.model_;
-  // @@protoc_insertion_point(copy_constructor:NativeSystemState)
+  // @@protoc_insertion_point(copy_constructor:trs_protos.NativeSystemState)
 }
 
 inline void NativeSystemState::SharedCtor(
@@ -936,7 +939,7 @@ inline void NativeSystemState::SharedCtor(
 }
 
 NativeSystemState::~NativeSystemState() {
-  // @@protoc_insertion_point(destructor:NativeSystemState)
+  // @@protoc_insertion_point(destructor:trs_protos.NativeSystemState)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<std::string>()) {
   (void)arena;
     return;
@@ -955,7 +958,7 @@ void NativeSystemState::SetCachedSize(int size) const {
 }
 
 void NativeSystemState::Clear() {
-// @@protoc_insertion_point(message_clear_start:NativeSystemState)
+// @@protoc_insertion_point(message_clear_start:trs_protos.NativeSystemState)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -975,16 +978,16 @@ const char* NativeSystemState::_InternalParse(const char* ptr, ::_pbi::ParseCont
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .Trs80Model model = 1;
+      // .trs_protos.Trs80Model model = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
           uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-          _internal_set_model(static_cast<::Trs80Model>(val));
+          _internal_set_model(static_cast<::trs_protos::Trs80Model>(val));
         } else
           goto handle_unusual;
         continue;
-      // .NativeSystemState.Registers registers = 2;
+      // .trs_protos.NativeSystemState.Registers registers = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_registers(), ptr);
@@ -992,7 +995,7 @@ const char* NativeSystemState::_InternalParse(const char* ptr, ::_pbi::ParseCont
         } else
           goto handle_unusual;
         continue;
-      // repeated .NativeSystemState.MemoryRegion memoryRegions = 3;
+      // repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
@@ -1030,25 +1033,25 @@ failure:
 
 uint8_t* NativeSystemState::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:NativeSystemState)
+  // @@protoc_insertion_point(serialize_to_array_start:trs_protos.NativeSystemState)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .Trs80Model model = 1;
+  // .trs_protos.Trs80Model model = 1;
   if (this->_internal_model() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
       1, this->_internal_model(), target);
   }
 
-  // .NativeSystemState.Registers registers = 2;
+  // .trs_protos.NativeSystemState.Registers registers = 2;
   if (this->_internal_has_registers()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(2, _Internal::registers(this),
         _Internal::registers(this).GetCachedSize(), target, stream);
   }
 
-  // repeated .NativeSystemState.MemoryRegion memoryRegions = 3;
+  // repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_memoryregions_size()); i < n; i++) {
     const auto& repfield = this->_internal_memoryregions(i);
@@ -1060,33 +1063,33 @@ uint8_t* NativeSystemState::_InternalSerialize(
     target = stream->WriteRaw(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).data(),
         static_cast<int>(_internal_metadata_.unknown_fields<std::string>(::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString).size()), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:NativeSystemState)
+  // @@protoc_insertion_point(serialize_to_array_end:trs_protos.NativeSystemState)
   return target;
 }
 
 size_t NativeSystemState::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:NativeSystemState)
+// @@protoc_insertion_point(message_byte_size_start:trs_protos.NativeSystemState)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .NativeSystemState.MemoryRegion memoryRegions = 3;
+  // repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
   total_size += 1UL * this->_internal_memoryregions_size();
   for (const auto& msg : this->_impl_.memoryregions_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // .NativeSystemState.Registers registers = 2;
+  // .trs_protos.NativeSystemState.Registers registers = 2;
   if (this->_internal_has_registers()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.registers_);
   }
 
-  // .Trs80Model model = 1;
+  // .trs_protos.Trs80Model model = 1;
   if (this->_internal_model() != 0) {
     total_size += 1 +
       ::_pbi::WireFormatLite::EnumSize(this->_internal_model());
@@ -1108,14 +1111,14 @@ void NativeSystemState::CheckTypeAndMergeFrom(
 
 void NativeSystemState::MergeFrom(const NativeSystemState& from) {
   NativeSystemState* const _this = this;
-  // @@protoc_insertion_point(class_specific_merge_from_start:NativeSystemState)
+  // @@protoc_insertion_point(class_specific_merge_from_start:trs_protos.NativeSystemState)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   _this->_impl_.memoryregions_.MergeFrom(from._impl_.memoryregions_);
   if (from._internal_has_registers()) {
-    _this->_internal_mutable_registers()->::NativeSystemState_Registers::MergeFrom(
+    _this->_internal_mutable_registers()->::trs_protos::NativeSystemState_Registers::MergeFrom(
         from._internal_registers());
   }
   if (from._internal_model() != 0) {
@@ -1125,7 +1128,7 @@ void NativeSystemState::MergeFrom(const NativeSystemState& from) {
 }
 
 void NativeSystemState::CopyFrom(const NativeSystemState& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:NativeSystemState)
+// @@protoc_insertion_point(class_specific_copy_from_start:trs_protos.NativeSystemState)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -1148,23 +1151,24 @@ void NativeSystemState::InternalSwap(NativeSystemState* other) {
 }
 
 std::string NativeSystemState::GetTypeName() const {
-  return "NativeSystemState";
+  return "trs_protos.NativeSystemState";
 }
 
 
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace trs_protos
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::NativeSystemState_Registers*
-Arena::CreateMaybeMessage< ::NativeSystemState_Registers >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::NativeSystemState_Registers >(arena);
+template<> PROTOBUF_NOINLINE ::trs_protos::NativeSystemState_Registers*
+Arena::CreateMaybeMessage< ::trs_protos::NativeSystemState_Registers >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::trs_protos::NativeSystemState_Registers >(arena);
 }
-template<> PROTOBUF_NOINLINE ::NativeSystemState_MemoryRegion*
-Arena::CreateMaybeMessage< ::NativeSystemState_MemoryRegion >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::NativeSystemState_MemoryRegion >(arena);
+template<> PROTOBUF_NOINLINE ::trs_protos::NativeSystemState_MemoryRegion*
+Arena::CreateMaybeMessage< ::trs_protos::NativeSystemState_MemoryRegion >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::trs_protos::NativeSystemState_MemoryRegion >(arena);
 }
-template<> PROTOBUF_NOINLINE ::NativeSystemState*
-Arena::CreateMaybeMessage< ::NativeSystemState >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::NativeSystemState >(arena);
+template<> PROTOBUF_NOINLINE ::trs_protos::NativeSystemState*
+Arena::CreateMaybeMessage< ::trs_protos::NativeSystemState >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::trs_protos::NativeSystemState >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

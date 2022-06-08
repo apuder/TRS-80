@@ -42,7 +42,7 @@ public class EmulatorState {
     private static final String TAG = "EmulatorState";
     private static final String FILE_SCREENSHOT = "screenshot.png";
     private static final String FILE_STATE = "state";
-    private static final String FILE_XRAY_STATE = "xray_state.pb";
+    private static final String FILE_XRAY_STATE = "state-xray.pb";
     private static final String FILE_CASSETTE = "cassette.cas";
 
     private final FileManager fileManager;

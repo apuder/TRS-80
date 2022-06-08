@@ -42,6 +42,7 @@ PROTOBUF_NAMESPACE_CLOSE
 struct TableStruct_system_5fstate_2eproto {
   static const uint32_t offsets[];
 };
+namespace trs_protos {
 class NativeSystemState;
 struct NativeSystemStateDefaultTypeInternal;
 extern NativeSystemStateDefaultTypeInternal _NativeSystemState_default_instance_;
@@ -51,11 +52,13 @@ extern NativeSystemState_MemoryRegionDefaultTypeInternal _NativeSystemState_Memo
 class NativeSystemState_Registers;
 struct NativeSystemState_RegistersDefaultTypeInternal;
 extern NativeSystemState_RegistersDefaultTypeInternal _NativeSystemState_Registers_default_instance_;
+}  // namespace trs_protos
 PROTOBUF_NAMESPACE_OPEN
-template<> ::NativeSystemState* Arena::CreateMaybeMessage<::NativeSystemState>(Arena*);
-template<> ::NativeSystemState_MemoryRegion* Arena::CreateMaybeMessage<::NativeSystemState_MemoryRegion>(Arena*);
-template<> ::NativeSystemState_Registers* Arena::CreateMaybeMessage<::NativeSystemState_Registers>(Arena*);
+template<> ::trs_protos::NativeSystemState* Arena::CreateMaybeMessage<::trs_protos::NativeSystemState>(Arena*);
+template<> ::trs_protos::NativeSystemState_MemoryRegion* Arena::CreateMaybeMessage<::trs_protos::NativeSystemState_MemoryRegion>(Arena*);
+template<> ::trs_protos::NativeSystemState_Registers* Arena::CreateMaybeMessage<::trs_protos::NativeSystemState_Registers>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
+namespace trs_protos {
 
 enum Trs80Model : int {
   UNKNOWN_MODEL = 0,
@@ -84,7 +87,7 @@ bool Trs80Model_Parse(
 // ===================================================================
 
 class NativeSystemState_Registers final :
-    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:NativeSystemState.Registers) */ {
+    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:trs_protos.NativeSystemState.Registers) */ {
  public:
   inline NativeSystemState_Registers() : NativeSystemState_Registers(nullptr) {}
   ~NativeSystemState_Registers() override;
@@ -172,7 +175,7 @@ class NativeSystemState_Registers final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "NativeSystemState.Registers";
+    return "trs_protos.NativeSystemState.Registers";
   }
   protected:
   explicit NativeSystemState_Registers(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -337,7 +340,7 @@ class NativeSystemState_Registers final :
   void _internal_set_r_2(int32_t value);
   public:
 
-  // @@protoc_insertion_point(class_scope:NativeSystemState.Registers)
+  // @@protoc_insertion_point(class_scope:trs_protos.NativeSystemState.Registers)
  private:
   class _Internal;
 
@@ -368,7 +371,7 @@ class NativeSystemState_Registers final :
 // -------------------------------------------------------------------
 
 class NativeSystemState_MemoryRegion final :
-    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:NativeSystemState.MemoryRegion) */ {
+    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:trs_protos.NativeSystemState.MemoryRegion) */ {
  public:
   inline NativeSystemState_MemoryRegion() : NativeSystemState_MemoryRegion(nullptr) {}
   ~NativeSystemState_MemoryRegion() override;
@@ -456,7 +459,7 @@ class NativeSystemState_MemoryRegion final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "NativeSystemState.MemoryRegion";
+    return "trs_protos.NativeSystemState.MemoryRegion";
   }
   protected:
   explicit NativeSystemState_MemoryRegion(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -496,7 +499,7 @@ class NativeSystemState_MemoryRegion final :
   void _internal_set_start(int32_t value);
   public:
 
-  // @@protoc_insertion_point(class_scope:NativeSystemState.MemoryRegion)
+  // @@protoc_insertion_point(class_scope:trs_protos.NativeSystemState.MemoryRegion)
  private:
   class _Internal;
 
@@ -514,7 +517,7 @@ class NativeSystemState_MemoryRegion final :
 // -------------------------------------------------------------------
 
 class NativeSystemState final :
-    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:NativeSystemState) */ {
+    public ::PROTOBUF_NAMESPACE_ID::MessageLite /* @@protoc_insertion_point(class_definition:trs_protos.NativeSystemState) */ {
  public:
   inline NativeSystemState() : NativeSystemState(nullptr) {}
   ~NativeSystemState() override;
@@ -602,7 +605,7 @@ class NativeSystemState final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "NativeSystemState";
+    return "trs_protos.NativeSystemState";
   }
   protected:
   explicit NativeSystemState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -623,52 +626,52 @@ class NativeSystemState final :
     kRegistersFieldNumber = 2,
     kModelFieldNumber = 1,
   };
-  // repeated .NativeSystemState.MemoryRegion memoryRegions = 3;
+  // repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
   int memoryregions_size() const;
   private:
   int _internal_memoryregions_size() const;
   public:
   void clear_memoryregions();
-  ::NativeSystemState_MemoryRegion* mutable_memoryregions(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::NativeSystemState_MemoryRegion >*
+  ::trs_protos::NativeSystemState_MemoryRegion* mutable_memoryregions(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion >*
       mutable_memoryregions();
   private:
-  const ::NativeSystemState_MemoryRegion& _internal_memoryregions(int index) const;
-  ::NativeSystemState_MemoryRegion* _internal_add_memoryregions();
+  const ::trs_protos::NativeSystemState_MemoryRegion& _internal_memoryregions(int index) const;
+  ::trs_protos::NativeSystemState_MemoryRegion* _internal_add_memoryregions();
   public:
-  const ::NativeSystemState_MemoryRegion& memoryregions(int index) const;
-  ::NativeSystemState_MemoryRegion* add_memoryregions();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::NativeSystemState_MemoryRegion >&
+  const ::trs_protos::NativeSystemState_MemoryRegion& memoryregions(int index) const;
+  ::trs_protos::NativeSystemState_MemoryRegion* add_memoryregions();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion >&
       memoryregions() const;
 
-  // .NativeSystemState.Registers registers = 2;
+  // .trs_protos.NativeSystemState.Registers registers = 2;
   bool has_registers() const;
   private:
   bool _internal_has_registers() const;
   public:
   void clear_registers();
-  const ::NativeSystemState_Registers& registers() const;
-  PROTOBUF_NODISCARD ::NativeSystemState_Registers* release_registers();
-  ::NativeSystemState_Registers* mutable_registers();
-  void set_allocated_registers(::NativeSystemState_Registers* registers);
+  const ::trs_protos::NativeSystemState_Registers& registers() const;
+  PROTOBUF_NODISCARD ::trs_protos::NativeSystemState_Registers* release_registers();
+  ::trs_protos::NativeSystemState_Registers* mutable_registers();
+  void set_allocated_registers(::trs_protos::NativeSystemState_Registers* registers);
   private:
-  const ::NativeSystemState_Registers& _internal_registers() const;
-  ::NativeSystemState_Registers* _internal_mutable_registers();
+  const ::trs_protos::NativeSystemState_Registers& _internal_registers() const;
+  ::trs_protos::NativeSystemState_Registers* _internal_mutable_registers();
   public:
   void unsafe_arena_set_allocated_registers(
-      ::NativeSystemState_Registers* registers);
-  ::NativeSystemState_Registers* unsafe_arena_release_registers();
+      ::trs_protos::NativeSystemState_Registers* registers);
+  ::trs_protos::NativeSystemState_Registers* unsafe_arena_release_registers();
 
-  // .Trs80Model model = 1;
+  // .trs_protos.Trs80Model model = 1;
   void clear_model();
-  ::Trs80Model model() const;
-  void set_model(::Trs80Model value);
+  ::trs_protos::Trs80Model model() const;
+  void set_model(::trs_protos::Trs80Model value);
   private:
-  ::Trs80Model _internal_model() const;
-  void _internal_set_model(::Trs80Model value);
+  ::trs_protos::Trs80Model _internal_model() const;
+  void _internal_set_model(::trs_protos::Trs80Model value);
   public:
 
-  // @@protoc_insertion_point(class_scope:NativeSystemState)
+  // @@protoc_insertion_point(class_scope:trs_protos.NativeSystemState)
  private:
   class _Internal;
 
@@ -676,8 +679,8 @@ class NativeSystemState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::NativeSystemState_MemoryRegion > memoryregions_;
-    ::NativeSystemState_Registers* registers_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion > memoryregions_;
+    ::trs_protos::NativeSystemState_Registers* registers_;
     int model_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -703,7 +706,7 @@ inline int32_t NativeSystemState_Registers::_internal_ix() const {
   return _impl_.ix_;
 }
 inline int32_t NativeSystemState_Registers::ix() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.ix)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.ix)
   return _internal_ix();
 }
 inline void NativeSystemState_Registers::_internal_set_ix(int32_t value) {
@@ -712,7 +715,7 @@ inline void NativeSystemState_Registers::_internal_set_ix(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_ix(int32_t value) {
   _internal_set_ix(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.ix)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.ix)
 }
 
 // int32 iy = 2;
@@ -723,7 +726,7 @@ inline int32_t NativeSystemState_Registers::_internal_iy() const {
   return _impl_.iy_;
 }
 inline int32_t NativeSystemState_Registers::iy() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.iy)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.iy)
   return _internal_iy();
 }
 inline void NativeSystemState_Registers::_internal_set_iy(int32_t value) {
@@ -732,7 +735,7 @@ inline void NativeSystemState_Registers::_internal_set_iy(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_iy(int32_t value) {
   _internal_set_iy(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.iy)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.iy)
 }
 
 // int32 pc = 3;
@@ -743,7 +746,7 @@ inline int32_t NativeSystemState_Registers::_internal_pc() const {
   return _impl_.pc_;
 }
 inline int32_t NativeSystemState_Registers::pc() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.pc)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.pc)
   return _internal_pc();
 }
 inline void NativeSystemState_Registers::_internal_set_pc(int32_t value) {
@@ -752,7 +755,7 @@ inline void NativeSystemState_Registers::_internal_set_pc(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_pc(int32_t value) {
   _internal_set_pc(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.pc)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.pc)
 }
 
 // int32 sp = 4;
@@ -763,7 +766,7 @@ inline int32_t NativeSystemState_Registers::_internal_sp() const {
   return _impl_.sp_;
 }
 inline int32_t NativeSystemState_Registers::sp() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.sp)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.sp)
   return _internal_sp();
 }
 inline void NativeSystemState_Registers::_internal_set_sp(int32_t value) {
@@ -772,7 +775,7 @@ inline void NativeSystemState_Registers::_internal_set_sp(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_sp(int32_t value) {
   _internal_set_sp(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.sp)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.sp)
 }
 
 // int32 af = 5;
@@ -783,7 +786,7 @@ inline int32_t NativeSystemState_Registers::_internal_af() const {
   return _impl_.af_;
 }
 inline int32_t NativeSystemState_Registers::af() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.af)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.af)
   return _internal_af();
 }
 inline void NativeSystemState_Registers::_internal_set_af(int32_t value) {
@@ -792,7 +795,7 @@ inline void NativeSystemState_Registers::_internal_set_af(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_af(int32_t value) {
   _internal_set_af(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.af)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.af)
 }
 
 // int32 bc = 6;
@@ -803,7 +806,7 @@ inline int32_t NativeSystemState_Registers::_internal_bc() const {
   return _impl_.bc_;
 }
 inline int32_t NativeSystemState_Registers::bc() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.bc)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.bc)
   return _internal_bc();
 }
 inline void NativeSystemState_Registers::_internal_set_bc(int32_t value) {
@@ -812,7 +815,7 @@ inline void NativeSystemState_Registers::_internal_set_bc(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_bc(int32_t value) {
   _internal_set_bc(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.bc)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.bc)
 }
 
 // int32 de = 7;
@@ -823,7 +826,7 @@ inline int32_t NativeSystemState_Registers::_internal_de() const {
   return _impl_.de_;
 }
 inline int32_t NativeSystemState_Registers::de() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.de)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.de)
   return _internal_de();
 }
 inline void NativeSystemState_Registers::_internal_set_de(int32_t value) {
@@ -832,7 +835,7 @@ inline void NativeSystemState_Registers::_internal_set_de(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_de(int32_t value) {
   _internal_set_de(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.de)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.de)
 }
 
 // int32 hl = 8;
@@ -843,7 +846,7 @@ inline int32_t NativeSystemState_Registers::_internal_hl() const {
   return _impl_.hl_;
 }
 inline int32_t NativeSystemState_Registers::hl() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.hl)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.hl)
   return _internal_hl();
 }
 inline void NativeSystemState_Registers::_internal_set_hl(int32_t value) {
@@ -852,7 +855,7 @@ inline void NativeSystemState_Registers::_internal_set_hl(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_hl(int32_t value) {
   _internal_set_hl(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.hl)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.hl)
 }
 
 // int32 af_prime = 9;
@@ -863,7 +866,7 @@ inline int32_t NativeSystemState_Registers::_internal_af_prime() const {
   return _impl_.af_prime_;
 }
 inline int32_t NativeSystemState_Registers::af_prime() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.af_prime)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.af_prime)
   return _internal_af_prime();
 }
 inline void NativeSystemState_Registers::_internal_set_af_prime(int32_t value) {
@@ -872,7 +875,7 @@ inline void NativeSystemState_Registers::_internal_set_af_prime(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_af_prime(int32_t value) {
   _internal_set_af_prime(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.af_prime)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.af_prime)
 }
 
 // int32 bc_prime = 10;
@@ -883,7 +886,7 @@ inline int32_t NativeSystemState_Registers::_internal_bc_prime() const {
   return _impl_.bc_prime_;
 }
 inline int32_t NativeSystemState_Registers::bc_prime() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.bc_prime)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.bc_prime)
   return _internal_bc_prime();
 }
 inline void NativeSystemState_Registers::_internal_set_bc_prime(int32_t value) {
@@ -892,7 +895,7 @@ inline void NativeSystemState_Registers::_internal_set_bc_prime(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_bc_prime(int32_t value) {
   _internal_set_bc_prime(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.bc_prime)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.bc_prime)
 }
 
 // int32 de_prime = 11;
@@ -903,7 +906,7 @@ inline int32_t NativeSystemState_Registers::_internal_de_prime() const {
   return _impl_.de_prime_;
 }
 inline int32_t NativeSystemState_Registers::de_prime() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.de_prime)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.de_prime)
   return _internal_de_prime();
 }
 inline void NativeSystemState_Registers::_internal_set_de_prime(int32_t value) {
@@ -912,7 +915,7 @@ inline void NativeSystemState_Registers::_internal_set_de_prime(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_de_prime(int32_t value) {
   _internal_set_de_prime(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.de_prime)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.de_prime)
 }
 
 // int32 hl_prime = 12;
@@ -923,7 +926,7 @@ inline int32_t NativeSystemState_Registers::_internal_hl_prime() const {
   return _impl_.hl_prime_;
 }
 inline int32_t NativeSystemState_Registers::hl_prime() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.hl_prime)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.hl_prime)
   return _internal_hl_prime();
 }
 inline void NativeSystemState_Registers::_internal_set_hl_prime(int32_t value) {
@@ -932,7 +935,7 @@ inline void NativeSystemState_Registers::_internal_set_hl_prime(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_hl_prime(int32_t value) {
   _internal_set_hl_prime(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.hl_prime)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.hl_prime)
 }
 
 // int32 i = 13;
@@ -943,7 +946,7 @@ inline int32_t NativeSystemState_Registers::_internal_i() const {
   return _impl_.i_;
 }
 inline int32_t NativeSystemState_Registers::i() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.i)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.i)
   return _internal_i();
 }
 inline void NativeSystemState_Registers::_internal_set_i(int32_t value) {
@@ -952,7 +955,7 @@ inline void NativeSystemState_Registers::_internal_set_i(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_i(int32_t value) {
   _internal_set_i(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.i)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.i)
 }
 
 // int32 r_1 = 14;
@@ -963,7 +966,7 @@ inline int32_t NativeSystemState_Registers::_internal_r_1() const {
   return _impl_.r_1_;
 }
 inline int32_t NativeSystemState_Registers::r_1() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.r_1)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.r_1)
   return _internal_r_1();
 }
 inline void NativeSystemState_Registers::_internal_set_r_1(int32_t value) {
@@ -972,7 +975,7 @@ inline void NativeSystemState_Registers::_internal_set_r_1(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_r_1(int32_t value) {
   _internal_set_r_1(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.r_1)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.r_1)
 }
 
 // int32 r_2 = 15;
@@ -983,7 +986,7 @@ inline int32_t NativeSystemState_Registers::_internal_r_2() const {
   return _impl_.r_2_;
 }
 inline int32_t NativeSystemState_Registers::r_2() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.Registers.r_2)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.Registers.r_2)
   return _internal_r_2();
 }
 inline void NativeSystemState_Registers::_internal_set_r_2(int32_t value) {
@@ -992,7 +995,7 @@ inline void NativeSystemState_Registers::_internal_set_r_2(int32_t value) {
 }
 inline void NativeSystemState_Registers::set_r_2(int32_t value) {
   _internal_set_r_2(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.Registers.r_2)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.Registers.r_2)
 }
 
 // -------------------------------------------------------------------
@@ -1007,7 +1010,7 @@ inline int32_t NativeSystemState_MemoryRegion::_internal_start() const {
   return _impl_.start_;
 }
 inline int32_t NativeSystemState_MemoryRegion::start() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.MemoryRegion.start)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.MemoryRegion.start)
   return _internal_start();
 }
 inline void NativeSystemState_MemoryRegion::_internal_set_start(int32_t value) {
@@ -1016,7 +1019,7 @@ inline void NativeSystemState_MemoryRegion::_internal_set_start(int32_t value) {
 }
 inline void NativeSystemState_MemoryRegion::set_start(int32_t value) {
   _internal_set_start(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.MemoryRegion.start)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.MemoryRegion.start)
 }
 
 // bytes data = 2;
@@ -1024,7 +1027,7 @@ inline void NativeSystemState_MemoryRegion::clear_data() {
   _impl_.data_.ClearToEmpty();
 }
 inline const std::string& NativeSystemState_MemoryRegion::data() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.MemoryRegion.data)
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.MemoryRegion.data)
   return _internal_data();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1032,11 +1035,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void NativeSystemState_MemoryRegion::set_data(ArgT0&& arg0, ArgT... args) {
  
  _impl_.data_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:NativeSystemState.MemoryRegion.data)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.MemoryRegion.data)
 }
 inline std::string* NativeSystemState_MemoryRegion::mutable_data() {
   std::string* _s = _internal_mutable_data();
-  // @@protoc_insertion_point(field_mutable:NativeSystemState.MemoryRegion.data)
+  // @@protoc_insertion_point(field_mutable:trs_protos.NativeSystemState.MemoryRegion.data)
   return _s;
 }
 inline const std::string& NativeSystemState_MemoryRegion::_internal_data() const {
@@ -1051,7 +1054,7 @@ inline std::string* NativeSystemState_MemoryRegion::_internal_mutable_data() {
   return _impl_.data_.Mutable(GetArenaForAllocation());
 }
 inline std::string* NativeSystemState_MemoryRegion::release_data() {
-  // @@protoc_insertion_point(field_release:NativeSystemState.MemoryRegion.data)
+  // @@protoc_insertion_point(field_release:trs_protos.NativeSystemState.MemoryRegion.data)
   return _impl_.data_.Release();
 }
 inline void NativeSystemState_MemoryRegion::set_allocated_data(std::string* data) {
@@ -1066,34 +1069,34 @@ inline void NativeSystemState_MemoryRegion::set_allocated_data(std::string* data
     _impl_.data_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NativeSystemState.MemoryRegion.data)
+  // @@protoc_insertion_point(field_set_allocated:trs_protos.NativeSystemState.MemoryRegion.data)
 }
 
 // -------------------------------------------------------------------
 
 // NativeSystemState
 
-// .Trs80Model model = 1;
+// .trs_protos.Trs80Model model = 1;
 inline void NativeSystemState::clear_model() {
   _impl_.model_ = 0;
 }
-inline ::Trs80Model NativeSystemState::_internal_model() const {
-  return static_cast< ::Trs80Model >(_impl_.model_);
+inline ::trs_protos::Trs80Model NativeSystemState::_internal_model() const {
+  return static_cast< ::trs_protos::Trs80Model >(_impl_.model_);
 }
-inline ::Trs80Model NativeSystemState::model() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.model)
+inline ::trs_protos::Trs80Model NativeSystemState::model() const {
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.model)
   return _internal_model();
 }
-inline void NativeSystemState::_internal_set_model(::Trs80Model value) {
+inline void NativeSystemState::_internal_set_model(::trs_protos::Trs80Model value) {
   
   _impl_.model_ = value;
 }
-inline void NativeSystemState::set_model(::Trs80Model value) {
+inline void NativeSystemState::set_model(::trs_protos::Trs80Model value) {
   _internal_set_model(value);
-  // @@protoc_insertion_point(field_set:NativeSystemState.model)
+  // @@protoc_insertion_point(field_set:trs_protos.NativeSystemState.model)
 }
 
-// .NativeSystemState.Registers registers = 2;
+// .trs_protos.NativeSystemState.Registers registers = 2;
 inline bool NativeSystemState::_internal_has_registers() const {
   return this != internal_default_instance() && _impl_.registers_ != nullptr;
 }
@@ -1106,17 +1109,17 @@ inline void NativeSystemState::clear_registers() {
   }
   _impl_.registers_ = nullptr;
 }
-inline const ::NativeSystemState_Registers& NativeSystemState::_internal_registers() const {
-  const ::NativeSystemState_Registers* p = _impl_.registers_;
-  return p != nullptr ? *p : reinterpret_cast<const ::NativeSystemState_Registers&>(
-      ::_NativeSystemState_Registers_default_instance_);
+inline const ::trs_protos::NativeSystemState_Registers& NativeSystemState::_internal_registers() const {
+  const ::trs_protos::NativeSystemState_Registers* p = _impl_.registers_;
+  return p != nullptr ? *p : reinterpret_cast<const ::trs_protos::NativeSystemState_Registers&>(
+      ::trs_protos::_NativeSystemState_Registers_default_instance_);
 }
-inline const ::NativeSystemState_Registers& NativeSystemState::registers() const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.registers)
+inline const ::trs_protos::NativeSystemState_Registers& NativeSystemState::registers() const {
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.registers)
   return _internal_registers();
 }
 inline void NativeSystemState::unsafe_arena_set_allocated_registers(
-    ::NativeSystemState_Registers* registers) {
+    ::trs_protos::NativeSystemState_Registers* registers) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.registers_);
   }
@@ -1126,11 +1129,11 @@ inline void NativeSystemState::unsafe_arena_set_allocated_registers(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NativeSystemState.registers)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:trs_protos.NativeSystemState.registers)
 }
-inline ::NativeSystemState_Registers* NativeSystemState::release_registers() {
+inline ::trs_protos::NativeSystemState_Registers* NativeSystemState::release_registers() {
   
-  ::NativeSystemState_Registers* temp = _impl_.registers_;
+  ::trs_protos::NativeSystemState_Registers* temp = _impl_.registers_;
   _impl_.registers_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -1143,27 +1146,27 @@ inline ::NativeSystemState_Registers* NativeSystemState::release_registers() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::NativeSystemState_Registers* NativeSystemState::unsafe_arena_release_registers() {
-  // @@protoc_insertion_point(field_release:NativeSystemState.registers)
+inline ::trs_protos::NativeSystemState_Registers* NativeSystemState::unsafe_arena_release_registers() {
+  // @@protoc_insertion_point(field_release:trs_protos.NativeSystemState.registers)
   
-  ::NativeSystemState_Registers* temp = _impl_.registers_;
+  ::trs_protos::NativeSystemState_Registers* temp = _impl_.registers_;
   _impl_.registers_ = nullptr;
   return temp;
 }
-inline ::NativeSystemState_Registers* NativeSystemState::_internal_mutable_registers() {
+inline ::trs_protos::NativeSystemState_Registers* NativeSystemState::_internal_mutable_registers() {
   
   if (_impl_.registers_ == nullptr) {
-    auto* p = CreateMaybeMessage<::NativeSystemState_Registers>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::trs_protos::NativeSystemState_Registers>(GetArenaForAllocation());
     _impl_.registers_ = p;
   }
   return _impl_.registers_;
 }
-inline ::NativeSystemState_Registers* NativeSystemState::mutable_registers() {
-  ::NativeSystemState_Registers* _msg = _internal_mutable_registers();
-  // @@protoc_insertion_point(field_mutable:NativeSystemState.registers)
+inline ::trs_protos::NativeSystemState_Registers* NativeSystemState::mutable_registers() {
+  ::trs_protos::NativeSystemState_Registers* _msg = _internal_mutable_registers();
+  // @@protoc_insertion_point(field_mutable:trs_protos.NativeSystemState.registers)
   return _msg;
 }
-inline void NativeSystemState::set_allocated_registers(::NativeSystemState_Registers* registers) {
+inline void NativeSystemState::set_allocated_registers(::trs_protos::NativeSystemState_Registers* registers) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.registers_;
@@ -1180,10 +1183,10 @@ inline void NativeSystemState::set_allocated_registers(::NativeSystemState_Regis
     
   }
   _impl_.registers_ = registers;
-  // @@protoc_insertion_point(field_set_allocated:NativeSystemState.registers)
+  // @@protoc_insertion_point(field_set_allocated:trs_protos.NativeSystemState.registers)
 }
 
-// repeated .NativeSystemState.MemoryRegion memoryRegions = 3;
+// repeated .trs_protos.NativeSystemState.MemoryRegion memoryRegions = 3;
 inline int NativeSystemState::_internal_memoryregions_size() const {
   return _impl_.memoryregions_.size();
 }
@@ -1193,33 +1196,33 @@ inline int NativeSystemState::memoryregions_size() const {
 inline void NativeSystemState::clear_memoryregions() {
   _impl_.memoryregions_.Clear();
 }
-inline ::NativeSystemState_MemoryRegion* NativeSystemState::mutable_memoryregions(int index) {
-  // @@protoc_insertion_point(field_mutable:NativeSystemState.memoryRegions)
+inline ::trs_protos::NativeSystemState_MemoryRegion* NativeSystemState::mutable_memoryregions(int index) {
+  // @@protoc_insertion_point(field_mutable:trs_protos.NativeSystemState.memoryRegions)
   return _impl_.memoryregions_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::NativeSystemState_MemoryRegion >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion >*
 NativeSystemState::mutable_memoryregions() {
-  // @@protoc_insertion_point(field_mutable_list:NativeSystemState.memoryRegions)
+  // @@protoc_insertion_point(field_mutable_list:trs_protos.NativeSystemState.memoryRegions)
   return &_impl_.memoryregions_;
 }
-inline const ::NativeSystemState_MemoryRegion& NativeSystemState::_internal_memoryregions(int index) const {
+inline const ::trs_protos::NativeSystemState_MemoryRegion& NativeSystemState::_internal_memoryregions(int index) const {
   return _impl_.memoryregions_.Get(index);
 }
-inline const ::NativeSystemState_MemoryRegion& NativeSystemState::memoryregions(int index) const {
-  // @@protoc_insertion_point(field_get:NativeSystemState.memoryRegions)
+inline const ::trs_protos::NativeSystemState_MemoryRegion& NativeSystemState::memoryregions(int index) const {
+  // @@protoc_insertion_point(field_get:trs_protos.NativeSystemState.memoryRegions)
   return _internal_memoryregions(index);
 }
-inline ::NativeSystemState_MemoryRegion* NativeSystemState::_internal_add_memoryregions() {
+inline ::trs_protos::NativeSystemState_MemoryRegion* NativeSystemState::_internal_add_memoryregions() {
   return _impl_.memoryregions_.Add();
 }
-inline ::NativeSystemState_MemoryRegion* NativeSystemState::add_memoryregions() {
-  ::NativeSystemState_MemoryRegion* _add = _internal_add_memoryregions();
-  // @@protoc_insertion_point(field_add:NativeSystemState.memoryRegions)
+inline ::trs_protos::NativeSystemState_MemoryRegion* NativeSystemState::add_memoryregions() {
+  ::trs_protos::NativeSystemState_MemoryRegion* _add = _internal_add_memoryregions();
+  // @@protoc_insertion_point(field_add:trs_protos.NativeSystemState.memoryRegions)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::NativeSystemState_MemoryRegion >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trs_protos::NativeSystemState_MemoryRegion >&
 NativeSystemState::memoryregions() const {
-  // @@protoc_insertion_point(field_list:NativeSystemState.memoryRegions)
+  // @@protoc_insertion_point(field_list:trs_protos.NativeSystemState.memoryRegions)
   return _impl_.memoryregions_;
 }
 
@@ -1233,10 +1236,11 @@ NativeSystemState::memoryregions() const {
 
 // @@protoc_insertion_point(namespace_scope)
 
+}  // namespace trs_protos
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::Trs80Model> : ::std::true_type {};
+template <> struct is_proto_enum< ::trs_protos::Trs80Model> : ::std::true_type {};
 
 PROTOBUF_NAMESPACE_CLOSE
 

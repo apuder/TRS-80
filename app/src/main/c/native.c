@@ -9,6 +9,7 @@
 #include "trs_iodefs.h"
 #include "trs_uart.h"
 #include "trs_state_save.h"
+#include "trs_xray_state_save.h"
 
 
 #include <SDL/SDL.h>
@@ -265,6 +266,11 @@ void Java_org_puder_trs80_XTRS_saveState(JNIEnv* env, jclass cls, jstring fileNa
     const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
     trs_cassette_reset();
     trs_state_save(fn);
+
+    char xray_state_filename[100];
+    snprintf(xray_state_filename, sizeof(xray_state_filename),"%s-xray.pb", fn);
+    trs_xray_save_system_state(xray_state_filename);
+
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 
