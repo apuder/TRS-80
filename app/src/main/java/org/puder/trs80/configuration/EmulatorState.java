@@ -16,23 +16,33 @@
 
 package org.puder.trs80.configuration;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.google.common.base.Optional;
+import com.google.common.io.Files;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.puder.trs80.XTRS;
 import org.puder.trs80.io.FileManager;
+import org.puder.trs80.proto.NativeSystemState;
+import org.retrostore.client.common.proto.SystemState;
+import org.retrostore.client.common.proto.Trs80Model;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 /**
  * Persists the state of an emulator session so it can be resumed later.
  */
 public class EmulatorState {
+    private static final String TAG = "EmulatorState";
     private static final String FILE_SCREENSHOT = "screenshot.png";
     private static final String FILE_STATE = "state";
+    private static final String FILE_XRAY_STATE = "xray_state.pb";
     private static final String FILE_CASSETTE = "cassette.cas";
 
     private final FileManager fileManager;
@@ -68,8 +78,85 @@ public class EmulatorState {
         XTRS.loadState(getStateFileName());
     }
 
+    @SuppressLint("CheckResult")
+    public Optional<SystemState> loadSystemState() {
+        if (!fileManager.hasFile(FILE_XRAY_STATE)) {
+            return Optional.absent();
+        }
+        byte[] stateBytes = new byte[0];
+        try {
+            String absolutePathForFile = fileManager.getAbsolutePathForFile(FILE_XRAY_STATE);
+            stateBytes = Files.toByteArray(new File(absolutePathForFile));
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to load xray state file from file.", e);
+            return Optional.absent();
+        }
+        NativeSystemState nativeState = null;
+        try {
+            nativeState = NativeSystemState.parseFrom(stateBytes);
+        } catch (InvalidProtocolBufferException e) {
+            Log.e(TAG, "Unable to parse xray state protocol buffer.", e);
+            return Optional.absent();
+        }
+
+        SystemState.Builder rsState = SystemState.newBuilder();
+
+        // Set model number.
+        switch (nativeState.getModel()) {
+            case MODEL_I:
+                rsState.setModel(Trs80Model.MODEL_I);
+            case MODEL_III:
+                rsState.setModel(Trs80Model.MODEL_III);
+                break;
+            case MODEL_4:
+                rsState.setModel(Trs80Model.MODEL_4);
+                break;
+            case MODEL_4P:
+                rsState.setModel(Trs80Model.MODEL_4P);
+                break;
+            case UNKNOWN_MODEL:
+                rsState.setModel(Trs80Model.UNKNOWN_MODEL);
+                break;
+            case UNRECOGNIZED:
+                rsState.setModel(Trs80Model.UNRECOGNIZED);
+                break;
+        }
+
+        // Set all registers.
+        SystemState.Registers.Builder rsRegisters = SystemState.Registers.newBuilder()
+                .setIx(nativeState.getRegisters().getIx())
+                .setIy(nativeState.getRegisters().getIy())
+                .setPc(nativeState.getRegisters().getPc())
+                .setSp(nativeState.getRegisters().getSp())
+                .setAf(nativeState.getRegisters().getAf())
+                .setBc(nativeState.getRegisters().getBc())
+                .setDe(nativeState.getRegisters().getDe())
+                .setHl(nativeState.getRegisters().getHl())
+                .setAfPrime(nativeState.getRegisters().getAfPrime())
+                .setBcPrime(nativeState.getRegisters().getBcPrime())
+                .setDePrime(nativeState.getRegisters().getDePrime())
+                .setHlPrime(nativeState.getRegisters().getHlPrime())
+                .setI(nativeState.getRegisters().getI())
+                .setR1(nativeState.getRegisters().getR1())
+                .setR2(nativeState.getRegisters().getR2());
+        rsState.setRegisters(rsRegisters);
+
+        // Add memory regions.
+        for (NativeSystemState.MemoryRegion nativeMem : nativeState.getMemoryRegionsList()) {
+            rsState.addMemoryRegions(SystemState.MemoryRegion
+                    .newBuilder()
+                    .setStart(nativeMem.getStart())
+                    .setData(nativeMem.getData()));
+        }
+
+        return Optional.of(rsState.build());
+    }
+
     public boolean hasState() {
         return fileManager.hasFile(FILE_STATE);
+    }
+    public boolean hasXrayState() {
+        return fileManager.hasFile(FILE_XRAY_STATE);
     }
 
     public void saveScreenshot(Bitmap screenshot) {
