@@ -39,6 +39,16 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
+task syncGeneratedativeProtoFilesDebug(type: Sync) {
+    from "$projectDir/src/debug/cpp"
+    into "$projectDir/src/main/c/proto"
+}
+task syncGeneratedativeProtoFilesRelease(type: Sync) {
+    from "$projectDir/src/release/cpp"
+    into "$projectDir/src/main/c/proto"
+
+}
+
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.0.0"
@@ -54,8 +64,10 @@ protobuf {
         all().each { task ->
             task.builtins {
                 remove java
-                cpp {}
+                cpp {
+                }
             }
+            task.finalizedBy(syncGeneratedativeProtoFilesDebug, syncGeneratedativeProtoFilesRelease)
             task.plugins {
                 javalite {
                     outputSubDir = "java"
@@ -106,6 +118,14 @@ android {
         }
     }
 }
+
+//// Android
+//tasks.named("preBuild") { finalizedBy("syncGeneratedativeProtoFilesDebug") }
+//tasks.named("preBuild") { finalizedBy("syncGeneratedativeProtoFilesRelease") }
+//
+//tasks.named("build") { finalizedBy("syncGeneratedativeProtoFilesDebug") }
+//tasks.named("build") { finalizedBy("syncGeneratedativeProtoFilesRelease") }
+
 
 clean {
     // Generates protocol buffer files end up in here.
