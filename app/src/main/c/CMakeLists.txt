@@ -36,7 +36,6 @@ add_library( # Sets the name of the library.
              trs_interrupt.c
              trs_uart.c
              trs_state_save.c
-             trs_xray_state_save.cpp
              main.c
              trs_io.c
              trs_sdl_interface.c
@@ -44,6 +43,7 @@ add_library( # Sets the name of the library.
              z80.c
              trs_cassette.c
              trs_memory.c
+             trs_xray_state_save.cpp
              trsio-wrapper.cpp
              SDL/SDL.c
              trs-io/core.cpp

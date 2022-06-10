@@ -10,7 +10,6 @@
 using namespace std;
 
 extern "C" {
-
 void trs_xray_save_system_state(char* file) {
     TrsXraySystemStateSaver::saveState(file);
 }
@@ -21,6 +20,9 @@ void trs_xray_save_system_state(char* file) {
 #define  ALOGI(...)  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define  ALOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
+#define VIDEO_START	(0x3c00)
+
+// static
 bool TrsXraySystemStateSaver::saveState(char* filename) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -42,7 +44,19 @@ bool TrsXraySystemStateSaver::saveState(char* filename) {
     registers->set_hl_prime(REG_HL_PRIME);
     registers->set_i(REG_I);
 
-    // TODO: Add memory regions.
+    // Add video RAM.
+    char video_memory[1024];
+    readMemory(VIDEO_START, 1024, video_memory);
+    auto video_memory_region = state.add_memoryregions();
+    video_memory_region->set_start(VIDEO_START);
+    video_memory_region->set_data(video_memory);
+
+    // Add the upper 32k.
+    char upper_32k_memory[0x8000];
+    readMemory(0x8000, 0x8000, upper_32k_memory);
+    auto upper_32k_memory_region = state.add_memoryregions();
+    upper_32k_memory_region->set_start(0x8000);
+    upper_32k_memory_region->set_data(upper_32k_memory);
 
     // Write the system state to the requested file.
     fstream output(filename, ios::out | ios::trunc | ios::binary);
@@ -52,4 +66,11 @@ bool TrsXraySystemStateSaver::saveState(char* filename) {
     }
     ALOGI("System state file written to %s", filename);
     return true;
+}
+
+// static
+void TrsXraySystemStateSaver::readMemory(int start, int length, char* buffer) {
+    for (int addr = start; addr < start + length; ++addr) {
+        buffer[addr - start] = static_cast<char>(mem_read(addr));
+    }
 }
