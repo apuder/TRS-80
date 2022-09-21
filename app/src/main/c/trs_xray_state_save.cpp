@@ -49,14 +49,14 @@ bool TrsXraySystemStateSaver::saveState(char* filename) {
     readMemory(VIDEO_START, 1024, video_memory);
     auto video_memory_region = state.add_memoryregions();
     video_memory_region->set_start(VIDEO_START);
-    video_memory_region->set_data(video_memory);
+    video_memory_region->set_data(video_memory, 1024);
 
     // Add the upper 32k.
     char upper_32k_memory[0x8000];
     readMemory(0x8000, 0x8000, upper_32k_memory);
     auto upper_32k_memory_region = state.add_memoryregions();
     upper_32k_memory_region->set_start(0x8000);
-    upper_32k_memory_region->set_data(upper_32k_memory);
+    upper_32k_memory_region->set_data(upper_32k_memory, 0x8000);
 
     // Write the system state to the requested file.
     fstream output(filename, ios::out | ios::trunc | ios::binary);
