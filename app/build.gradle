@@ -81,12 +81,12 @@ protobuf {
 }
 
 android {
-    compileSdk 29
+    compileSdk 33
     ndkVersion '24.0.8215888'
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 16
-        targetSdk 30
+        targetSdk 33
         versionCode 45
         versionName "0.45"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -119,6 +119,7 @@ android {
             include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
     }
+    namespace 'org.puder.trs80'
 }
 
 clean {
