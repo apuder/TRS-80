@@ -67,7 +67,7 @@ public class FileManager {
         }
 
         public FileManager createForAppSubDir(String dirName) throws IOException {
-            File sdcard = TRS80Application.getAppContext().getExternalFilesDir(null);
+            File sdcard = TRS80Application.getAppContext().getFilesDir();
             File localStoreDir = new File(sdcard, appBaseDir);
             if (dirName != null) {
                 localStoreDir = new File(localStoreDir, dirName);
