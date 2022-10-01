@@ -58,6 +58,13 @@ bool TrsXraySystemStateSaver::saveState(char* filename) {
     upper_32k_memory_region->set_start(0x8000);
     upper_32k_memory_region->set_data(upper_32k_memory, 0x8000);
 
+    // Add the lower 32k.
+    char lower_32k_memory[0x8000];
+    readMemory(0, 0x8000, lower_32k_memory);
+    auto lower_32k_memory_region = state.add_memoryregions();
+    lower_32k_memory_region->set_start(0x0);
+    lower_32k_memory_region->set_data(lower_32k_memory, 0x8000);
+
     // Write the system state to the requested file.
     fstream output(filename, ios::out | ios::trunc | ios::binary);
     if (!state.SerializeToOstream(&output)) {
