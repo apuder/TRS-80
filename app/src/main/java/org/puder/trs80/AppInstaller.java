@@ -27,6 +27,7 @@ import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
+import org.retrostore.client.common.proto.MediaType;
 import org.retrostore.client.common.proto.Trs80Extension;
 import org.retrostore.client.common.proto.Trs80Model;
 
@@ -78,19 +79,23 @@ public class AppInstaller {
      */
     public boolean installApp(AppPackage appPackage) {
         List<ConfigurationManager.ConfigMedia> configMedia = new ArrayList<>();
-        // The first four items will be the media images. The fifth is the cassette.
-        for (int i = 0; i < 4; ++i) {
-            MediaImage mediaImage = appPackage.mediaImages.get(i);
-            if (mediaImage != null) {
-                configMedia.add(new ConfigurationManager.ConfigMedia(mediaImage.getFilename(),
-                        mediaImage.getData().toByteArray()));
-            }
-        }
+        // The first four items will be the disk images. The fifth is the cassette.
+        appPackage.mediaImages.stream()
+                .filter(mediaImage -> mediaImage.getType() == MediaType.DISK)
+                .forEach(mediaImage -> {
+                    configMedia.add(new ConfigurationManager.ConfigMedia(mediaImage.getFilename(),
+                            mediaImage.getData().toByteArray()));
+
+                });
+
+        java.util.Optional<MediaImage> cassetteImage =
+                appPackage.mediaImages
+                        .stream().filter(i -> i.getType() == MediaType.CASSETTE)
+                        .findFirst();
         ConfigurationManager.ConfigMedia cassetteMedia = null;
-        MediaImage cassetteImage = appPackage.mediaImages.get(4);
-        if (cassetteImage != null) {
+        if (cassetteImage.isPresent()) {
             cassetteMedia = new ConfigurationManager.ConfigMedia(
-                    cassetteImage.getFilename(), cassetteImage.getData().toByteArray());
+                    cassetteImage.get().getFilename(), cassetteImage.get().getData().toByteArray());
         }
         App app = appPackage.appData;
         Optional<Configuration> newConfiguration = configManager.addNewConfiguration(

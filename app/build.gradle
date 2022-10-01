@@ -85,7 +85,7 @@ android {
     ndkVersion '24.0.8215888'
     defaultConfig {
         applicationId "org.puder.trs80"
-        minSdk 16
+        minSdk 24
         targetSdk 33
         versionCode 45
         versionName "0.45"
