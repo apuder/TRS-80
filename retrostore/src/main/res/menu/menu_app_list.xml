@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_download_state"
+        android:title="@string/download_state"
+        android:icon="@drawable/ic_download_state_black_24dp"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/menu_refresh"
         android:title="@string/refresh_apps_list"
         android:icon="@drawable/ic_refresh_black_24dp"

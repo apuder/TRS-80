@@ -12,4 +12,6 @@
     <string name="description_title">Beschreibung</string>
     <string name="error_downloading_app">Fehler beim Laden der App aufgetreten.</string>
     <string name="application_thumbnail">App Logo</string>
+    <string name="download_state">Zustand herunterladen</string>
+    <string name="ok">OK</string>
 </resources>

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Retrostore</string>
     <string name="dialog_yes_install">Yes, Install</string>
+    <string name="ok">OK</string>
     <string name="dialog_no">No</string>
     <string name="dialog_install">Do you want to install "%1$s" now?</string>
     <string name="action_settings">Settings</string>
@@ -9,6 +10,7 @@
     <string name="action_uninstall">Uninstall</string>
     <string name="app_version">Version %1$s</string>
     <string name="refresh_apps_list">Refresh apps list</string>
+    <string name="download_state">Download state</string>
 
     <string name="description_title">Description</string>
     <string name="error_downloading_app">Oops, there was an issue downloading the app.</string>
