@@ -222,7 +222,7 @@ public class ConfigurationManager {
      * @param model      defines which model this entry is for. See {@link Hardware}.
      * @param configName the name of this new configuration.
      * @param disks      the disk images for this configuration.
-     * @param cassette   the cassete image, or null, for this configuration.
+     * @param cassette   the cassette image, or null, for this configuration.
      * @return If the configuration was successfully added it will be returned.
      */
     public Optional<Configuration> addNewConfiguration(int model,
