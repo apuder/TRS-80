@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.google.common.base.Optional;
 import com.google.common.io.Files;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.puder.trs80.Hardware;
@@ -149,6 +150,52 @@ public class EmulatorState {
         }
 
         return Optional.of(rsState.build());
+    }
+
+    public boolean storeSystemState(SystemState state) {
+        // Don't overwrite existing state. This method should only be used for brand new configs.
+        if (fileManager.hasFile(FILE_XRAY_STATE)) {
+            return false;
+        }
+        NativeSystemState.Builder nativeState = NativeSystemState.newBuilder();
+
+        // Copy registers.
+        SystemState.Registers stateRegs = state.getRegisters();
+        NativeSystemState.Registers.Builder nativeRegs = NativeSystemState.Registers.newBuilder();
+        nativeRegs.setAf(stateRegs.getAf());
+        nativeRegs.setAfPrime(stateRegs.getAfPrime());
+        nativeRegs.setBc(stateRegs.getBc());
+        nativeRegs.setBcPrime(stateRegs.getBcPrime());
+        nativeRegs.setDe(stateRegs.getDe());
+        nativeRegs.setDePrime(stateRegs.getDePrime());
+        nativeRegs.setHl(stateRegs.getHl());
+        nativeRegs.setHlPrime(stateRegs.getHlPrime());
+        nativeRegs.setIx(stateRegs.getIx());
+        nativeRegs.setIy(stateRegs.getIy());
+        nativeRegs.setSp(stateRegs.getSp());
+        nativeRegs.setPc(stateRegs.getPc());
+        nativeRegs.setI(stateRegs.getI());
+        nativeRegs.setR1(stateRegs.getR1());
+        nativeRegs.setR2(stateRegs.getR2());
+        nativeState.setRegisters(nativeRegs);
+
+        // Copy the memory regions.
+        for (SystemState.MemoryRegion region : state.getMemoryRegionsList()) {
+            NativeSystemState.MemoryRegion.Builder nativeRegion =
+                    NativeSystemState.MemoryRegion.newBuilder();
+            nativeRegion.setStart(region.getStart());
+            nativeRegion.setData(region.getData());
+            nativeState.addMemoryRegions(nativeRegion);
+        }
+
+        // Write the native state file.
+        try {
+            String absolutePathForFile = fileManager.getAbsolutePathForFile(FILE_XRAY_STATE);
+            Files.write(nativeState.build().toByteArray(), new File(absolutePathForFile));
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
     }
 
     public boolean hasState() {
