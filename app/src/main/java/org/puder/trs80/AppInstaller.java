@@ -16,21 +16,25 @@
 
 package org.puder.trs80;
 
+import android.util.Log;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import org.puder.trs80.configuration.Configuration;
 import org.puder.trs80.configuration.ConfigurationManager;
+import org.puder.trs80.configuration.EmulatorState;
 import org.retrostore.android.AppPackage;
 import org.retrostore.android.RetrostoreApi;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
 import org.retrostore.client.common.proto.MediaType;
-import org.retrostore.client.common.proto.Trs80Extension;
+import org.retrostore.client.common.proto.SystemState;
 import org.retrostore.client.common.proto.Trs80Model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,6 +106,24 @@ public class AppInstaller {
                 getHardwareModelId(app.getExtTrs80().getModel()), app.getName(),
                 configMedia, cassetteMedia);
         if (!newConfiguration.isPresent()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean installFromSystemState(SystemState state) {
+        // FIXME: Make string I18N.
+        Optional<Configuration> newConfigOpt = configManager.addNewConfiguration(
+                getHardwareModelId(state.getModel()), "Downloaded State", new ArrayList<>(), null);
+        if (!newConfigOpt.isPresent()) {
+            return false;
+        }
+        Configuration newConfiguration = newConfigOpt.get();
+        try {
+            EmulatorState emulatorState = configManager.getEmulatorState(newConfiguration.getId());
+            emulatorState.storeSystemState(state);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to fetch new config emulator state", e);
             return false;
         }
         return true;

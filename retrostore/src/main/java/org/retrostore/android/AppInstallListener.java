@@ -17,6 +17,7 @@
 package org.retrostore.android;
 
 import org.retrostore.client.common.proto.App;
+import org.retrostore.client.common.proto.SystemState;
 
 /**
  * Classes implementing this interface can be notified about the user intent to install an app.
@@ -24,4 +25,7 @@ import org.retrostore.client.common.proto.App;
 public interface AppInstallListener {
     /** Called when an app is to be installed. */
     void onInstallApp(App app);
+
+    /** Called when a system state is to be installed. */
+    void onInstallSystemState(SystemState state);
 }

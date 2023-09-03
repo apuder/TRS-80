@@ -16,8 +16,6 @@
 
 package org.retrostore.android.net;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -25,10 +23,12 @@ import org.retrostore.ApiException;
 import org.retrostore.RetrostoreClient;
 import org.retrostore.client.common.proto.App;
 import org.retrostore.client.common.proto.MediaImage;
+import org.retrostore.client.common.proto.SystemState;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -43,7 +43,7 @@ public class DataFetcher {
 
     public static Optional<DataFetcher> get() {
         // Might be null if the app got cleaned up but the details activity was resumed.
-        return Optional.fromNullable(sInstance);
+        return Optional.ofNullable(sInstance);
     }
 
     public static DataFetcher initialize(RetrostoreClient client, Executor executor) {
@@ -65,16 +65,13 @@ public class DataFetcher {
      */
     public ListenableFuture<List<App>> getAppsAsync() {
         final SettableFuture<List<App>> future = SettableFuture.create();
-        mRequestExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<App> apps = mClient.fetchApps(0, 100);
-                    updateCache(apps);
-                    future.set(apps);
-                } catch (ApiException e) {
-                    future.setException(e);
-                }
+        mRequestExecutor.execute(() -> {
+            try {
+                List<App> apps = mClient.fetchApps(0, 100);
+                updateCache(apps);
+                future.set(apps);
+            } catch (ApiException e) {
+                future.setException(e);
             }
         });
         return future;
@@ -85,21 +82,30 @@ public class DataFetcher {
      */
     public ListenableFuture<List<MediaImage>> fetchMediaImages(final String appId) {
         final SettableFuture<List<MediaImage>> future = SettableFuture.create();
-        mRequestExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    future.set(mClient.fetchMediaImages(appId));
-                } catch (ApiException e) {
-                    future.setException(e);
-                }
+        mRequestExecutor.execute(() -> {
+            try {
+                future.set(mClient.fetchMediaImages(appId));
+            } catch (ApiException e) {
+                future.setException(e);
             }
         });
         return future;
     }
 
     public Optional<App> getFromCache(String id) {
-        return Optional.fromNullable(mAppCache.get(id));
+        return Optional.ofNullable(mAppCache.get(id));
+    }
+
+    public ListenableFuture<SystemState> getSystemState(final long token) {
+        final SettableFuture<SystemState> future = SettableFuture.create();
+        mRequestExecutor.execute(() -> {
+            try {
+                future.set(mClient.downloadState(token));
+            } catch (ApiException e) {
+                future.setException(e);
+            }
+        });
+        return future;
     }
 
     private void updateCache(List<App> apps) {

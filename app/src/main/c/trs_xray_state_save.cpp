@@ -13,6 +13,9 @@ extern "C" {
 void trs_xray_save_system_state(char* file) {
     TrsXraySystemStateSaver::saveState(file);
 }
+void trs_xray_load_system_state(char* file) {
+    TrsXraySystemStateSaver::loadState(file);
+}
 
 }
 
@@ -76,8 +79,53 @@ bool TrsXraySystemStateSaver::saveState(char* filename) {
 }
 
 // static
+bool TrsXraySystemStateSaver::loadState(char* filename) {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    ALOGI("Loading XRAY system state from %s", filename);
+    trs_protos::NativeSystemState state;
+    fstream input(filename, ios::in | ios::binary);
+    if (!state.ParseFromIstream(&input)) {
+        ALOGE("Failed to read system state from file.");
+        return false;
+    }
+    ALOGI("Successfully read xray system state from file. Mem regions: %d", state.memoryregions_size());
+
+    // Read the registers.
+    REG_IX = state.registers().ix();
+    REG_IY = state.registers().iy();
+    REG_PC = state.registers().pc();
+    REG_SP = state.registers().sp();
+    REG_AF = state.registers().af();
+    REG_BC = state.registers().bc();
+    REG_DE = state.registers().de();
+    REG_HL = state.registers().hl();
+    REG_AF_PRIME = state.registers().af_prime();
+    REG_BC_PRIME = state.registers().bc_prime();
+    REG_DE_PRIME = state.registers().de_prime();
+    REG_HL_PRIME = state.registers().hl_prime();
+    REG_I = state.registers().i();
+
+    // Write memory regions.
+    for (int i = 0; i < state.memoryregions_size(); ++i) {
+        auto& region = state.memoryregions(i);
+        writeMemory(region.start(), region.data().size(), region.data().c_str());
+    }
+    return true;
+}
+
+// static
 void TrsXraySystemStateSaver::readMemory(int start, int length, char* buffer) {
     for (int addr = start; addr < start + length; ++addr) {
         buffer[addr - start] = static_cast<char>(mem_read(addr));
     }
 }
+
+
+// static
+void TrsXraySystemStateSaver::writeMemory(int start, int length, const char* buffer) {
+    ALOGI("Writing memory. Start:%d, Len:%d", start, length);
+    for (int addr = start; addr < start + length; ++addr) {
+        mem_write(addr, (int)buffer[addr - start]);
+    }
+}
+

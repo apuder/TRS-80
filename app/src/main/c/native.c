@@ -276,7 +276,15 @@ void Java_org_puder_trs80_XTRS_saveState(JNIEnv* env, jclass cls, jstring fileNa
 
 void Java_org_puder_trs80_XTRS_loadState(JNIEnv* env, jclass cls, jstring fileName) {
     const char* fn = (*env)->GetStringUTFChars(env, fileName, NULL);
-    trs_state_load(fn);
+    int save_state_loaded = trs_state_load(fn);
+
+    if (!save_state_loaded) {
+        // If internal memory blob is not present but xray state is, load it!
+        // It means that we
+        char xray_state_filename[100];
+        snprintf(xray_state_filename, sizeof(xray_state_filename),"%s-xray.pb", fn);
+        trs_xray_load_system_state(xray_state_filename);
+    }
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
 }
 

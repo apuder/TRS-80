@@ -113,6 +113,13 @@ public class MainActivity extends BaseActivity implements
             public void onInstallApp(App app) {
                 asyncDownloadAndInstallApp(app);
             }
+
+            @Override
+            public void onInstallSystemState(SystemState state) {
+                // TODO: I18N.
+                appInstaller.installFromSystemState(state);
+                showToast("System state downloaded.");
+            }
         });
         PreferenceManager.setDefaultValues(this, R.xml.configuration, false);
         sharedPrefs = this.getSharedPreferences(SettingsActivity.SHARED_PREF_NAME,
@@ -609,13 +616,10 @@ public class MainActivity extends BaseActivity implements
 
 
     private void asyncDownloadAndInstallApp(final App app) {
-        mInstallExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (appInstaller.downloadAndInstallApp(app)) {
-                    String msg = getString(R.string.successfully_installed);
-                    showToast(StrUtil.form(msg, app.getName()));
-                }
+        mInstallExecutor.execute(() -> {
+            if (appInstaller.downloadAndInstallApp(app)) {
+                String msg = getString(R.string.successfully_installed);
+                showToast(StrUtil.form(msg, app.getName()));
             }
         });
     }

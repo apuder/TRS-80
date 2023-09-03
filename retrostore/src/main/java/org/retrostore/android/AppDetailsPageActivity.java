@@ -28,13 +28,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.common.base.Optional;
-
 import org.retrostore.android.net.DataFetcher;
 import org.retrostore.android.view.ImageLoader;
 import org.retrostore.client.common.proto.App;
 
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Shows details about an app, and lets the user install it.
@@ -90,24 +89,24 @@ public class AppDetailsPageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent == null) {
             Log.i(TAG, "No intent.");
-            return Optional.absent();
+            return Optional.empty();
         }
         Bundle extras = intent.getExtras();
         if (extras == null) {
             Log.i(TAG, "No extras.");
-            return Optional.absent();
+            return Optional.empty();
         }
         String appId = extras.getString(EXTRA_APP_ID, null);
         if (appId == null) {
             Log.w(TAG, "No 'appId' given.");
-            return Optional.absent();
+            return Optional.empty();
         }
 
         // TODO: Make this work so that we instantiate a new fetcher if it got clean-up.
-        mFetcher = DataFetcher.get().orNull();
+        mFetcher = DataFetcher.get().orElse(null);
         if (mFetcher == null) {
             Log.w(TAG, "No data fetcher available.");
-            return Optional.absent();
+            return Optional.empty();
         }
 
         Optional<App> appOpt = mFetcher.getFromCache(appId);

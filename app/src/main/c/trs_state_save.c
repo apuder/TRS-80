@@ -60,40 +60,42 @@ void trs_state_save(char *filename)
   }
 }
 
-void trs_state_load(char *filename)
+int trs_state_load(char *filename)
 {
   FILE *file;
   char banner[80];
   unsigned version;
   
   file = fopen(filename, "rb");
-  if (file) {
-    trs_load_uchar(file, (unsigned char *)banner, strlen(stateFileBanner));
-    banner[strlen(stateFileBanner)] = 0;
-    if (strcmp(banner, stateFileBanner)) {
-      fclose(file);
-      return;
-    }
-    trs_load_uint32(file, &version, 1);
-    if (version != stateVersionNumber) {
-      fclose(file);
-      return;
-    }
-    trs_main_load(file);
-    trs_cassette_load(file);
-    trs_disk_load(file);
-    trs_hard_load(file);
-    trs_interrupt_load(file);
-    trs_io_load(file);
-    trs_mem_load(file);
-    trs_keyboard_load(file);
-#ifndef ANDROID
-    trs_uart_load(file);
-#endif
-    trs_z80_load(file);
-    trs_imp_exp_load(file);
-    fclose(file);
+  if (!file) {
+    return 0;
   }
+  trs_load_uchar(file, (unsigned char *)banner, strlen(stateFileBanner));
+  banner[strlen(stateFileBanner)] = 0;
+  if (strcmp(banner, stateFileBanner)) {
+    fclose(file);
+    return 0;
+  }
+  trs_load_uint32(file, &version, 1);
+  if (version != stateVersionNumber) {
+    fclose(file);
+    return 0;
+  }
+  trs_main_load(file);
+  trs_cassette_load(file);
+  trs_disk_load(file);
+  trs_hard_load(file);
+  trs_interrupt_load(file);
+  trs_io_load(file);
+  trs_mem_load(file);
+  trs_keyboard_load(file);
+#ifndef ANDROID
+  trs_uart_load(file);
+#endif
+  trs_z80_load(file);
+  trs_imp_exp_load(file);
+  fclose(file);
+  return 1;
 }
 
 void trs_save_uchar(FILE *file, unsigned char *buffer, int count)

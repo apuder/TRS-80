@@ -52,6 +52,11 @@ public class RetrostoreApi {
             public void onInstallApp(App app) {
                 RetrostoreApi.this.onInstallApp(app);
             }
+
+            @Override
+            public void onInstallSystemState(SystemState state) {
+                RetrostoreApi.this.onInstallSystemState(state);
+            }
         });
     }
 
@@ -110,6 +115,12 @@ public class RetrostoreApi {
     private void onInstallApp(App app) {
         if (mInstallListener != null) {
             mInstallListener.onInstallApp(app);
+        }
+    }
+
+    private void onInstallSystemState(SystemState state) {
+        if (mInstallListener != null) {
+            mInstallListener.onInstallSystemState(state);
         }
     }
 }
