@@ -49,6 +49,7 @@
 #define SHIFT_F1_IS_F13 1     /* use if X reports Shift+F1..F8 as F13..F20 */
 /*#define SHIFT_F1_IS_F11 1*/ /* use if X reports Shift+F1..F10 as F11..F20 */
 
+#include <strings.h> /* for bzero() */
 #include <SDL/SDL.h>
 #include "z80.h"
 #include "trs.h"

@@ -3,13 +3,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.0'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
     }
 }
 
 plugins {
     id 'com.android.application'
-    id 'com.google.protobuf' version '0.9.0'
+    id 'com.google.protobuf' version '0.9.4'
 }
 
 sourceSets{
@@ -32,8 +32,8 @@ dependencies {
     implementation 'com.android.support:mediarouter-v7:33.0.0'
     implementation 'com.android.support:recyclerview-v7:33.0.0'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
-    implementation 'com.google.android.gms:play-services-cast:21.3.0'
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'com.google.android.gms:play-services-cast:21.5.0'
+    implementation 'commons-io:commons-io:2.13.0'
     implementation 'org.simpleframework:simple-http:6.+'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':retrostore')
@@ -70,14 +70,11 @@ protobuf {
         all().each { task ->
             task.builtins {
                 remove java
-                cpp {
-                }
+                cpp { }
             }
             task.finalizedBy(syncGeneratedativeProtoFilesDebug, syncGeneratedativeProtoFilesRelease)
             task.plugins {
-                javalite {
-                    outputSubDir = "java"
-                }
+                javalite { }
             }
         }
     }
@@ -85,12 +82,12 @@ protobuf {
 }
 
 android {
-    compileSdk 33
-    ndkVersion '24.0.8215888'
+    compileSdk 35
+    // ndkVersion '24.0.8215888'
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 24
-        targetSdk 33
+        targetSdk 35
         versionCode 46
         versionName "0.46"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

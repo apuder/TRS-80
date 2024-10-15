@@ -64,6 +64,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <strings.h> /* for bzero() */
 #include <sys/stat.h>
 
 #include <SDL/SDL.h>

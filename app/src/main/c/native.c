@@ -2,6 +2,7 @@
 #include <string.h>
 #include <android/log.h>
 #include <setjmp.h>
+#include "load_cmd.h"
 #include "trs.h"
 #include "trs_disk.h"
 #include "trs_mkdisk.h"

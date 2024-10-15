@@ -60,6 +60,7 @@
  * sometimes happens.  stopxfer = 0 should be considered the default.
  */
 
+#include <stdio.h>
 
 int
 load_cmd(FILE* f, unsigned char memory[65536],

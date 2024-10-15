@@ -70,6 +70,7 @@
 #include "trs_imp_exp.h"
 #include "trs_state_save.h"
 #include <stdlib.h>  /* for rand() */
+#include <strings.h> /* for bzero() */
 #include <time.h>    /* for time() */
 
 /*

@@ -263,4 +263,6 @@ extern int disassemble(unsigned short pc);
 extern void debug_init(void);
 extern void debug_shell(void);
 
+extern void fatal(const char *fmt, ...);
+
 #endif
