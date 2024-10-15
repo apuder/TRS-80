@@ -1,40 +1,40 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/emulator"
-    android:focusable="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:focusable="true"
     tools:context=".EmulatorActivity"
     tools:ignore="MergeRootFrame">
 
     <org.puder.trs80.Screen
         android:id="@+id/screen"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="@dimen/emulator_top_margin"
-        android:layout_gravity="top|center_horizontal" />
+        android:visibility="gone" />
 
     <ProgressBar
         android:id="@+id/spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center" />
 
     <ImageView
         android:id="@+id/cast_icon"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/cast_icon"/>
+        android:src="@drawable/cast_icon"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|left"/>
+        android:layout_gravity="top|left" />
 
     <RelativeLayout
         android:id="@+id/keyboard_container"
@@ -46,11 +46,11 @@
         android:id="@+id/switch_keyboard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0.4"
-        android:padding="5dp"
         android:layout_gravity="bottom|left"
+        android:alpha="0.4"
         android:onClick="onKeyboardSwitchClicked"
-        android:src="@drawable/keyboard_icon"/>
+        android:padding="5dp"
+        android:src="@drawable/keyboard_icon" />
 
-    <include layout="@layout/tutorial"/>
+    <include layout="@layout/tutorial" />
 </FrameLayout>

@@ -90,6 +90,12 @@ public class CreateDiskFragment extends PreferenceFragment implements Preference
         updateSummaries();
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setFitsSystemWindows(true);
+    }
+
     private void updateSummaries() {
         String val;
 

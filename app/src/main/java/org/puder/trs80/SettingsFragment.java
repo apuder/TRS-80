@@ -24,6 +24,9 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import org.puder.trs80.browser.FileBrowserActivity;
 
@@ -78,6 +81,12 @@ public class SettingsFragment extends PreferenceFragment implements OnPreference
         defaultRomModel4PSummary = romModel4p.getSummary();
         */
         updateSummaries();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setFitsSystemWindows(true);
     }
 
     private void updateSummaries() {

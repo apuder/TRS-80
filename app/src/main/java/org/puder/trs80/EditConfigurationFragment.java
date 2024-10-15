@@ -24,6 +24,9 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.util.Log;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Optional;
 
@@ -161,6 +164,12 @@ public class EditConfigurationFragment extends PreferenceFragment implements
         keyboardLandscape.setOnPreferenceChangeListener(this);
 
         updateSummaries();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setFitsSystemWindows(true);
     }
 
     private void updateSummaries() {
