@@ -21,8 +21,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +38,7 @@ import android.widget.TextView;
 import androidx.core.view.MenuItemCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.primitives.Bytes;
 
 import org.puder.trs80.AlertDialogUtil;
 import org.puder.trs80.BaseActivity;
@@ -41,18 +46,29 @@ import org.puder.trs80.CreateDiskActivity;
 import org.puder.trs80.R;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public class FileBrowserActivity extends BaseActivity implements OnItemClickListener {
+    private static final String TAG = "FileBrowser";
 
     // Action Menu
     private static final int MENU_OPTION_EJECT = 0;
     private static final int MENU_OPTION_ADD = 1;
+    private static final int MENU_OPTION_IMPORT = 2;
 
     private static final int MKDISK_REQUEST = 0;
+    private static final int IMPORT_FILE_REQUEST = 1;
 
     private final List<String> items = new ArrayList<String>();
     private String pathPrefix;
@@ -90,6 +106,9 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
                 this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon).setShowAsAction(
                 MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_IMPORT, Menu.NONE,
+                this.getString(R.string.menu_add)).setIcon(R.drawable.download_icon).setShowAsAction(
+                MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
@@ -105,6 +124,9 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
                 return true;
             case MENU_OPTION_ADD:
                 createDisk();
+                return true;
+            case MENU_OPTION_IMPORT:
+                importFile();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -152,18 +174,60 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         startActivityForResult(intent, MKDISK_REQUEST);
     }
 
+    private void importFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, IMPORT_FILE_REQUEST);
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index >= 0) result = cursor.getString(index);
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == MKDISK_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                View root = findViewById(android.R.id.content);
-                Snackbar.make(root, getString(R.string.disk_image_created) + data.getStringExtra("PATH"),
-                        Snackbar.LENGTH_SHORT).show();
-                getFiles(currentPath);
+        if (requestCode == MKDISK_REQUEST && resultCode == Activity.RESULT_OK) {
+            View root = findViewById(android.R.id.content);
+            Snackbar.make(root, getString(R.string.disk_image_created) + data.getStringExtra("PATH"),
+                    Snackbar.LENGTH_SHORT).show();
+            getFiles(currentPath);
+        } else if (requestCode == IMPORT_FILE_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                Uri fileUri = data.getData();
+                String fileName = getFileName(fileUri);
+                try (InputStream inputStream = getContentResolver().openInputStream(fileUri)) {
+                    if (inputStream != null) {
+                        writeFileToCurrentDir(inputStream, fileName);
+                        refreshFiles();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void refreshFiles() {
+        getFiles(currentPath);
     }
 
     @SuppressLint("SetTextI18n")
@@ -190,6 +254,12 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         }
 
         fileListAdapter.notifyDataSetChanged();
+    }
+
+    private void writeFileToCurrentDir(InputStream inputStream, String fileName) throws IOException {
+        Path outPath = Paths.get(currentPath, fileName);
+        long bytesCopied = Files.copy(inputStream, outPath, StandardCopyOption.REPLACE_EXISTING);
+        Log.i(TAG, String.format("Copied file of size %d", bytesCopied));
     }
 
     @Override
