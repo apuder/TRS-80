@@ -16,6 +16,7 @@
 
 package org.puder.trs80.browser;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -43,19 +44,20 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class FileBrowserActivity extends BaseActivity implements OnItemClickListener {
 
     // Action Menu
-    private static final int       MENU_OPTION_EJECT  = 0;
-    private static final int       MENU_OPTION_ADD    = 1;
+    private static final int MENU_OPTION_EJECT = 0;
+    private static final int MENU_OPTION_ADD = 1;
 
-    private static final int       MKDISK_REQUEST     = 0;
+    private static final int MKDISK_REQUEST = 0;
 
-    private List<String>           items              = new ArrayList<String>();
-    private String                 pathPrefix;
-    private TextView               pathLabel;
-    private String                 currentPath;
+    private final List<String> items = new ArrayList<String>();
+    private String pathPrefix;
+    private TextView pathLabel;
+    private String currentPath;
     private BrowserListViewAdapter fileListAdapter;
 
 
@@ -63,11 +65,11 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.file_browser);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         pathPrefix = this.getString(R.string.path) + ": ";
-        pathLabel = (TextView) this.findViewById(R.id.path);
+        pathLabel = this.findViewById(R.id.path);
         fileListAdapter = new BrowserListViewAdapter(this, items);
-        ListView listView = (ListView) this.findViewById(R.id.file_list);
+        ListView listView = this.findViewById(R.id.file_list);
         listView.setAdapter(fileListAdapter);
         listView.setOnItemClickListener(this);
 
@@ -82,30 +84,28 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_EJECT, Menu.NONE,
-                        this.getString(R.string.menu_eject)).setIcon(R.drawable.eject_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(
-                menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
-                        this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon),
-                MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_EJECT, Menu.NONE,
+                this.getString(R.string.menu_eject)).setIcon(R.drawable.eject_icon).setShowAsAction(
+                MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, MENU_OPTION_ADD, Menu.NONE,
+                this.getString(R.string.menu_add)).setIcon(R.drawable.add_icon).setShowAsAction(
+                MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case android.R.id.home:
-            setResult(RESULT_CANCELED, getIntent());
-            finish();
-            return true;
-        case MENU_OPTION_EJECT:
-            eject();
-            return true;
-        case MENU_OPTION_ADD:
-            createDisk();
-            return true;
+            case android.R.id.home:
+                setResult(RESULT_CANCELED, getIntent());
+                finish();
+                return true;
+            case MENU_OPTION_EJECT:
+                eject();
+                return true;
+            case MENU_OPTION_ADD:
+                createDisk();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -134,27 +134,15 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
     private void eject() {
         AlertDialog.Builder builder = AlertDialogUtil.createAlertDialog(this, R.string.app_name,
                 R.drawable.warning_icon, R.string.alert_dialog_confirm_eject);
-        builder.setPositiveButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface d, int which) {
-                AlertDialogUtil.dismissDialog(FileBrowserActivity.this);
-                Intent i = getIntent();
-                i.putExtra("PATH", (String) null);
-                setResult(RESULT_OK, i);
-                finish();
-            }
-
+        builder.setPositiveButton(R.string.alert_dialog_ok, (d, which) -> {
+            AlertDialogUtil.dismissDialog(FileBrowserActivity.this);
+            Intent i = getIntent();
+            i.putExtra("PATH", (String) null);
+            setResult(RESULT_OK, i);
+            finish();
         });
         builder.setNegativeButton(R.string.alert_dialog_cancel,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        AlertDialogUtil.dismissDialog(FileBrowserActivity.this);
-                    }
-
-                });
+                (d, which) -> AlertDialogUtil.dismissDialog(FileBrowserActivity.this));
         AlertDialogUtil.showDialog(this, builder);
     }
 
@@ -178,6 +166,7 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void getFiles(String path) {
         currentPath = path;
         pathLabel.setText(pathPrefix + currentPath);

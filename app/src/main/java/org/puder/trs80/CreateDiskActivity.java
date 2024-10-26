@@ -34,6 +34,7 @@ import androidx.appcompat.app.ActionBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CreateDiskActivity extends BaseActivity
@@ -46,7 +47,6 @@ public class CreateDiskActivity extends BaseActivity
     public static final String MKDISK_SIZE = "mkdisk_size";
     public static final String MKDISK_IGNORE_DENSITY = "mkdisk_ignore_density";
 
-    private CreateDiskFragment fragment;
     private SharedPreferences sharedPrefs;
 
     @Override
@@ -54,16 +54,14 @@ public class CreateDiskActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         // Dummy view. Will be replaced by CreateDiskFragment.
         setContentView(new View(this));
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
         clearDiskImageName();
 
-        fragment = new CreateDiskFragment();
+        CreateDiskFragment fragment = new CreateDiskFragment();
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, fragment).commit();
     }
