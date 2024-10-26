@@ -53,8 +53,7 @@ public class FileDownloader {
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
             if (fileInZip != null) {
-                ZipInputStream zis = new ZipInputStream(in);
-                try {
+                try (ZipInputStream zis = new ZipInputStream(in)) {
                     ZipEntry ze;
                     while ((ze = zis.getNextEntry()) != null) {
                         if (ze.getName().equals(fileInZip)) {
@@ -64,8 +63,6 @@ public class FileDownloader {
                             break;
                         }
                     }
-                } finally {
-                    zis.close();
                 }
             } else {
                 ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
