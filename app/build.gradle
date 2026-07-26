@@ -66,7 +66,11 @@ protobuf {
     }
     plugins {
         javalite {
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+            // On Macs pin the Intel binary: protoc-gen-javalite was never
+            // published for Apple Silicon, but the Intel one runs via Rosetta.
+            def isMac = System.getProperty('os.name').toLowerCase().contains('mac')
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0' +
+                    (isMac ? ':osx-x86_64' : '')
         }
     }
 
@@ -104,6 +108,19 @@ android {
             }
         }
     }
+    signingConfigs {
+        release {
+            // Credentials come from ~/.gradle/gradle.properties so they stay
+            // out of the repository. Where they are absent (CI), the release
+            // build is left unsigned instead of failing.
+            if (project.hasProperty('TRS80_KEYSTORE')) {
+                storeFile file(project.property('TRS80_KEYSTORE'))
+                storePassword project.property('TRS80_KEYSTORE_PASSWORD')
+                keyAlias project.property('TRS80_KEY_ALIAS')
+                keyPassword project.property('TRS80_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         debug {
             resValue "bool", "debug", "true"
@@ -112,6 +129,9 @@ android {
             resValue "bool", "debug", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            if (project.hasProperty('TRS80_KEYSTORE')) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     externalNativeBuild {
