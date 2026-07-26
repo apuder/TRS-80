@@ -82,14 +82,16 @@ protobuf {
 }
 
 android {
-    compileSdk 35
-    // ndkVersion '24.0.8215888'
+    compileSdk 36
+    // NDK r28+ produces 16 KB page-size-aligned native libs, required by
+    // Google Play for apps targeting Android 15+.
+    ndkVersion '28.2.13676358'
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 26
-        targetSdk 35
-        versionCode 47
-        versionName "0.47"
+        targetSdk 36
+        versionCode 48
+        versionName "0.48"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
