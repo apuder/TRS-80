@@ -23,7 +23,12 @@ dependencies {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://maven.haberling.net' }
+        maven {
+        // The server currently redirects https to http, which Gradle
+        // rejects unless insecure access is explicitly allowed.
+        url 'http://maven.haberling.net'
+        allowInsecureProtocol = true
+    }
     }
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:33.0.0'
