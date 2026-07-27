@@ -70,7 +70,7 @@
 
 #include "crc.c"
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 #undef __linux
 #include "atrs.h"
 #endif
@@ -3909,7 +3909,7 @@ real_writetrk()
 #endif
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_disk__init()
 {
   int i;

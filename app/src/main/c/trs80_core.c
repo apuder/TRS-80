@@ -116,7 +116,7 @@ static void init_emulator()
     trs_io_init();
     trs_mem_init();
     trs_keyboard_init();
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
     trs_uart_init();
 #endif
     trs_z80_init();

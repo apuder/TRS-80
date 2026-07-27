@@ -467,7 +467,7 @@ void trs_io_load(FILE *file)
   trs_load_int(file,&rominimage,1);
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_io_init()
 {
   modesel = 0;

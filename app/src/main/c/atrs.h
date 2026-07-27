@@ -28,7 +28,7 @@ void trs_interrupt_init();
 void trs_io_init();
 void trs_mem_init();
 void trs_keyboard_init();
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 void trs_uart_init();
 #endif
 void trs_z80_init();

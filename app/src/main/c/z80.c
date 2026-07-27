@@ -2167,7 +2167,7 @@ static void do_CB_instruction()
 	break;
 
       default:
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 	disassemble(REG_PC - 2);
 #endif
 	error("unsupported instruction");
@@ -3000,7 +3000,7 @@ static int do_ED_instruction()
 	break;
 
       default:
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 	disassemble(REG_PC - 2);
 #endif
 	error("unsupported instruction");
@@ -4322,7 +4322,7 @@ int z80_run(int continuous)
 	    break;
 	    
 	  default:
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 	    disassemble(REG_PC - 1);
 #endif
 	    error("unsupported instruction");
@@ -4434,7 +4434,7 @@ void trs_z80_load(FILE *file)
   trs_load_uint64(file,(unsigned long long *)&last_t_count,1);
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_z80_init()
 {
     bzero(&z80_state, sizeof(struct z80_state_struct));

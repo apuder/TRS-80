@@ -106,7 +106,7 @@ static int soundDeviceOpen = FALSE;
 
 /* Windows won't work with a sound fragment size smaller than 2048,
    or you get gaps in sound */
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 #define FRAGSIZE 14
 #else
 #ifdef _WIN32
@@ -142,7 +142,7 @@ static int cassette_pulsestate;
 #define SPEED_250     2
 int cassette_speed = SPEED_500;
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void flush_audio_queue()
 {
     SDL_LockAudio();
@@ -1421,7 +1421,7 @@ trs_cassette_load(FILE *file)
   }
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void
 trs_cassette_init()
 {

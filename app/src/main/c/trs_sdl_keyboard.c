@@ -529,7 +529,7 @@ void trs_keyboard_load(FILE *file)
   fread(&trs_kb_bracket_state,1,sizeof(int),file);
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_keyboard_init()
 {
     keystate[0] = 0;

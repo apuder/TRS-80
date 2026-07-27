@@ -70,7 +70,7 @@ static unsigned char nmi_mask = M3_RESET_BIT;
 #define TIMER_HZ_4 60
 int timer_hz;
 int timer_overclock = 0;
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 int timer_overclock_rate = 1000;
 #else
 int timer_overclock_rate = 5;
@@ -671,7 +671,7 @@ void trs_interrupt_load(FILE *file)
   trs_load_int(file, &event_arg, 1);
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_interrupt_init()
 {
     interrupt_latch = 0;

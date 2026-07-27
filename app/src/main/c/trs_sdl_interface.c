@@ -70,7 +70,7 @@
 #include "trs_disk.h"
 #include "trs_uart.h"
 #include "trs_state_save.h"
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 #include "trs_sdl_gui.h"
 #else
 #include "atrs.h"
@@ -141,7 +141,7 @@ int trs_charset4 = 8;
 int trs_emu_mouse = FALSE;
 
 /* Private data */
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 extern
 #else
 static
@@ -357,7 +357,7 @@ trs_opt options[] = {
 {"truedam",trs_opt_truedam,0,1,NULL},
 {"notruedam",trs_opt_truedam,0,0,NULL},
 {"samplerate",trs_opt_samplerate,1,0,NULL},
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 {"serial",trs_opt_string,1,0,trs_uart_name},
 #endif
 {"switches",trs_opt_switches,1,0,NULL},
@@ -1169,7 +1169,7 @@ void trs_screen_init()
     top_margin = border_width;
   }
 
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
   if (fullscreen) {
      screen = SDL_SetVideoMode(OrigWidth, OrigHeight, 0, 
                                SDL_ANYFORMAT | SDL_FULLSCREEN);
@@ -1651,7 +1651,7 @@ void trs_get_event(int wait)
       if (!SDL_PollEvent(&event)) return;
     }
     switch(event.type) {
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
     case SDL_QUIT:
      trs_exit();
      break;
@@ -1669,7 +1669,7 @@ void trs_get_event(int wait)
 
     case SDL_KEYDOWN:
       keysym  = event.key.keysym;
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 #if XDEBUG
         debug("KeyDown: mod 0x%x, scancode 0x%x keycode 0x%x, unicode 0x%x\n",
 	        keysym.mod, keysym.scancode, keysym.sym, keysym.unicode);
@@ -2100,14 +2100,14 @@ void trs_screen_expanded(int flag)
   int bit = flag ? EXPANDED : 0;
   if ((currentmode ^ bit) & EXPANDED) {
     currentmode ^= EXPANDED;
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 	SDL_FillRect(screen,NULL,background);
     trs_screen_refresh();
 #endif
   }
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 int is_expanded_mode()
 {
   return currentmode & EXPANDED;
@@ -2552,7 +2552,7 @@ void trs_hard_led(int drive, int on_off)
 
 void trs_screen_write_char(int position, int char_index)
 {
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
   trs_screen[position] = char_index;
 #else
   int row,col,destx,desty;
@@ -2708,7 +2708,7 @@ void trs_screen_write_char(int position, int char_index)
 #endif
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_gui_write_char(int position, int char_index, int invert);
 #endif
 
@@ -2802,7 +2802,7 @@ void trs_screen_scroll()
   for (i = row_chars; i < screen_chars; i++)
     trs_screen[i-row_chars] = trs_screen[i];
 
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
   if (grafyx_enable) {
     if (grafyx_overlay) {
       trs_screen_refresh();
@@ -3477,7 +3477,7 @@ void trs_main_load(FILE *file)
   trs_load_int(file,&key_queue_entries,1);
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_main_init()
 {
   int i;

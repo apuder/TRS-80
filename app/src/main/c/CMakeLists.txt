@@ -13,6 +13,13 @@ cmake_minimum_required(VERSION 3.6.0)
 
 
 include_directories(. SDL retrostore/include trs-io/include tcpip/include proto)
+
+# Selects the embedded-host build: the emulator is a library driven by a host
+# UI rather than a standalone SDL process. It renders into a shared character
+# buffer instead of an SDL surface, and exposes trs_*_init() entry points so
+# its global state can be reset in-process. Every host defines this, not just
+# Android - it replaced an ANDROID macro that was never about Android.
+add_compile_definitions(TRS80_EMBEDDED)
 add_library( # Sets the name of the library.
              xtrs
 

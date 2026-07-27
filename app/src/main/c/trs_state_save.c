@@ -51,7 +51,7 @@ void trs_state_save(char *filename)
     trs_io_save(file);
     trs_mem_save(file);
     trs_keyboard_save(file);
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
     trs_uart_save(file);
 #endif
     trs_z80_save(file);
@@ -87,7 +87,7 @@ void trs_state_load(char *filename)
     trs_io_load(file);
     trs_mem_load(file);
     trs_keyboard_load(file);
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
     trs_uart_load(file);
 #endif
     trs_z80_load(file);
@@ -335,7 +335,7 @@ void trs_save_filename(FILE *file, char *filename)
 
   getcwd(dirname, FILENAME_MAX);
   
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
   if (strncmp(filename, dirname, strlen(dirname)) == 0)
     filename = &filename[strlen(dirname)+1];
 #endif

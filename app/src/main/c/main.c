@@ -137,7 +137,7 @@ void trs_load_compiled_rom(int size, unsigned char rom[])
     }
 }
 
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
 int SDLmain(int argc, char *argv[])
 {
     int debug = FALSE;

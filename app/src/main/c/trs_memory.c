@@ -144,7 +144,7 @@ void trs_reset(int poweron)
 {
     trs_emu_mouse = FALSE;
 
-#ifndef ANDROID
+#ifndef TRS80_EMBEDDED
     /* Close disks opened by Z80 programs */
     do_emt_resetdisk();
 #endif
@@ -606,7 +606,7 @@ void trs_mem_load(FILE *file)
   }
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_mem_init()
 {
 	int i;

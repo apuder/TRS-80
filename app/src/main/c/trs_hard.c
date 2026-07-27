@@ -638,7 +638,7 @@ void trs_hard_load(FILE *file)
   }
 }
 
-#ifdef ANDROID
+#ifdef TRS80_EMBEDDED
 void trs_hard__init()
 {
   int i;
