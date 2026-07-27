@@ -10,7 +10,8 @@ java {
 }
 
 android {
-    compileSdk 36
+    compileSdk 37
+    compileSdkMinor 1
     // Without this the build defaults to source/target 8, which JDK 21 has
     // deprecated and will eventually refuse to compile.
     compileOptions {
@@ -48,8 +49,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     api 'org.retrostore:retrostore-client:0.2.13'
     implementation 'com.google.guava:guava:27.0.1-android'

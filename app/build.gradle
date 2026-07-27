@@ -35,16 +35,13 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Held one step behind the newest AndroidX on purpose: core 1.19 and
-    // material 1.14 require AGP 9.1 / compileSdk 37. Bump these right after the
-    // AGP 9 upgrade - see doc/MODERNIZATION-PLAN.md §4.4.
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.core:core:1.17.0'
+    implementation 'androidx.core:core:1.19.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.mediarouter:mediarouter:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.mediarouter:mediarouter:1.8.1'
+    implementation 'com.google.android.material:material:1.14.0'
 
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'com.google.guava:guava:27.0.1-android'
@@ -87,7 +84,8 @@ protobuf {
 }
 
 android {
-    compileSdk 36
+    compileSdk 37
+    compileSdkMinor 1
     // NDK r28+ produces 16 KB page-size-aligned native libs, required by
     // Google Play for apps targeting Android 15+.
     ndkVersion '28.2.13676358'
