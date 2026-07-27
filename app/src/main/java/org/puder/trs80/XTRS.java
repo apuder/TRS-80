@@ -34,9 +34,14 @@ import java.nio.ByteBuffer;
 public class XTRS {
     private static final String TAG = "XTRS";
 
+    /**
+     * Size of the character buffer shared with the native emulator. Must match
+     * TRS_SCREEN_BUFFER_SIZE in atrs.h.
+     */
+    private static final int SCREEN_BUFFER_SIZE = 2048;
+
     static {
-        final int screenBufferSize = 0x3fff - 0x3c00 + 1;
-        xtrsScreenBuffer = ByteBuffer.allocateDirect(2048);
+        xtrsScreenBuffer = ByteBuffer.allocateDirect(SCREEN_BUFFER_SIZE);
         Log.d(TAG, "Loading native library ...");
         System.loadLibrary("xtrs");
         Log.d(TAG, "Native library successfully loaded.");
@@ -129,12 +134,6 @@ public class XTRS {
 
     public static void setEmulatorActivity(EmulatorActivity activity) {
         emulator = activity;
-    }
-
-    public static void xlog(String msg) {
-        if (emulator != null) {
-            emulator.log(msg);
-        }
     }
 
     public static void notImplemented(String msg) {

@@ -22,14 +22,14 @@
 
 #define NO_ERROR 0
 #define ERR_GET_JVM -1
-#define ERR_GET_METHOD_XLOG -5
 #define ERR_GET_METHOD_NOT_IMPLEMENTED -10
 
-int isRunning = 0;
+// Polled by the CPU thread, written by the UI thread; volatile keeps the
+// compiler from hoisting the load out of the run loop.
+volatile int isRunning = 0;
 
 static JavaVM *jvm;
 static jclass clazzXTRS = NULL;
-static jmethodID xlogMethodId;
 static jmethodID notImplementedMethodId;
 
 static jmp_buf ex_buf;
@@ -224,12 +224,6 @@ Java_org_puder_trs80_XTRS_initNative(JNIEnv *env, jclass cls) {
         clazzXTRS = (*env)->NewGlobalRef(env, cls);
     }
 
-    xlogMethodId = (*env)->GetStaticMethodID(env, cls, "xlog",
-            "(Ljava/lang/String;)V");
-    if (xlogMethodId == 0) {
-        return ERR_GET_METHOD_XLOG;
-    }
-
     notImplementedMethodId = (*env)->GetStaticMethodID(env, cls, "notImplemented",
             "(Ljava/lang/String;)V");
     if (notImplementedMethodId == 0) {
@@ -366,13 +360,6 @@ jboolean Java_org_puder_trs80_XTRS_createBlankDMK(JNIEnv* env, jclass cls, jstri
     int rc = trs_create_blank_dmk(fn, sides, density, eight, ignden);
     (*env)->ReleaseStringUTFChars(env, fileName, fn);
     return (rc == 0) ? JNI_TRUE : JNI_FALSE;
-}
-
-void xlog(const char* msg) {
-    JNIEnv *env = getEnv();
-    jstring jmsg = (*env)->NewStringUTF(env, msg);
-    (*env)->CallStaticVoidMethod(env, clazzXTRS, xlogMethodId, jmsg);
-    (*env)->DeleteLocalRef(env, jmsg);
 }
 
 void not_implemented(const char* msg) {

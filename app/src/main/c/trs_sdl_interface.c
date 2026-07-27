@@ -2179,7 +2179,7 @@ void screen_init()
   int i;
 
   /* initially, screen is blank (i.e. full of spaces) */
-  for (i = 0; i < sizeof(trs_screen); i++)
+  for (i = 0; i < TRS_SCREEN_BUFFER_SIZE; i++)
     trs_screen[i] = ' ';
 }
 
@@ -3428,7 +3428,7 @@ void trs_main_save(FILE *file)
 {
   int i;
   trs_save_int(file,&trs_model,1);
-  trs_save_uchar(file,trs_screen,2048);
+  trs_save_uchar(file,trs_screen,TRS_SCREEN_BUFFER_SIZE);
   trs_save_int(file,&screen_chars,1);
   trs_save_int(file,&col_chars,1);
   trs_save_int(file,&row_chars,1);
@@ -3455,7 +3455,7 @@ void trs_main_load(FILE *file)
   int i;
                     
   trs_load_int(file,&trs_model,1);
-  trs_load_uchar(file,trs_screen,2048);
+  trs_load_uchar(file,trs_screen,TRS_SCREEN_BUFFER_SIZE);
   trs_load_int(file,&screen_chars,1);
   trs_load_int(file,&col_chars,1);
   trs_load_int(file,&row_chars,1);
@@ -3482,7 +3482,7 @@ void trs_main_init()
 {
   int i;
 
-  for (i = 0; i < 2048; i++) {
+  for (i = 0; i < TRS_SCREEN_BUFFER_SIZE; i++) {
     trs_screen[i] = 0;
   };
   screen_chars = 1024;

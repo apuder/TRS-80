@@ -94,7 +94,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private Hardware           currentHardware;
     private Thread             cpuThread;
     private RenderThread       renderThread;
-    private TextView           logView;
     private int                orientation;
     private boolean            soundMuted            = false;
     private MenuItem           pasteMenuItem         = null;
@@ -561,7 +560,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         top.setFocusable(true);
         top.setFocusableInTouchMode(true);
         top.requestFocus();
-        logView = (TextView) findViewById(R.id.log);
 
         if (CastMessageSender.get().isReadyToSend()) {
             ImageView castIcon = (ImageView) findViewById(R.id.cast_icon);
@@ -795,16 +793,6 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
             }
             pasteMenuItem.setEnabled(hasClip);
         }
-    }
-
-    public void log(final String msg) {
-        logView.post(new Runnable() {
-
-            @Override
-            public void run() {
-                logView.setText(msg);
-            }
-        });
     }
 
     @Override

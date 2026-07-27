@@ -39,7 +39,6 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.google.android.gms:play-services-cast:21.5.0'
     implementation 'commons-io:commons-io:2.13.0'
-    implementation 'org.simpleframework:simple-http:6.+'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':retrostore')
 

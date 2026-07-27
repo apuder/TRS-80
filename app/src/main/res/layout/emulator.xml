@@ -31,12 +31,6 @@
         android:src="@drawable/cast_icon"
         android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/log"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left" />
-
     <RelativeLayout
         android:id="@+id/keyboard_container"
         android:layout_width="match_parent"

@@ -4,6 +4,10 @@
 
 #include "z80.h"
 
+// Size of the character buffer shared with the host. One byte per screen cell;
+// 2048 covers every supported geometry (Model I/III use 64x16 = 1024).
+#define TRS_SCREEN_BUFFER_SIZE 2048
+
 // Will be set by native.c to a direct buffer.
 extern unsigned char* trs_screen;
 
@@ -29,7 +33,6 @@ void trs_uart_init();
 #endif
 void trs_z80_init();
 
-void xlog(const char* msg);
 void not_implemented(const char* msg);
 
 #endif

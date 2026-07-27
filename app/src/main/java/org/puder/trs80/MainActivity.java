@@ -181,8 +181,6 @@ public class MainActivity extends BaseActivity implements
         super.onResume();
         updateView(-1, -1, -1);
         castMessageSender.start();
-        // TODO: Enable once fully supported.
-        // AudioHttpServer.get().start();
 
         boolean firstTime = sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true);
         boolean ranNewAssistant = sharedPrefs.getBoolean(SettingsActivity.CONF_RAN_NEW_ASSISTANT,
@@ -202,8 +200,6 @@ public class MainActivity extends BaseActivity implements
     protected void onPause() {
         if (isFinishing()) {
             castMessageSender.stop();
-            // TODO: Enable once fully supported.
-            // AudioHttpServer.get().stop();
         }
         super.onPause();
     }
