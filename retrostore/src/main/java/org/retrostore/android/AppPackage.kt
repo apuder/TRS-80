@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package org.retrostore.android;
+package org.retrostore.android
 
-import com.google.common.collect.ImmutableList;
-
-import org.retrostore.client.common.proto.App;
-import org.retrostore.client.common.proto.MediaImage;
-
-import java.util.List;
+import org.retrostore.client.common.proto.App
+import org.retrostore.client.common.proto.MediaImage
 
 /**
  * Contains app metadata and disk images.
+ *
+ * The fields are exposed with [JvmField] so the Java call sites in the app module keep reading
+ * them as plain fields.
+ *
+ * @property appData the app's metadata.
+ * @property mediaImages the app's media (disk and cassette) images.
  */
-public class AppPackage {
-    public final App appData;
-    public final List<MediaImage> mediaImages;
-
-    public AppPackage(App appData, List<MediaImage> mediaImages) {
-        this.appData = appData;
-        this.mediaImages = ImmutableList.copyOf(mediaImages);
-    }
-}
+data class AppPackage(
+        @JvmField val appData: App,
+        @JvmField val mediaImages: List<MediaImage>)

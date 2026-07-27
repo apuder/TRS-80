@@ -19,22 +19,16 @@ package org.puder.trs80.keyboard
 /**
  * A single entry of the on-screen keyboard layout, as parsed from `res/xml/keymap_*.xml`.
  *
- * The properties are `@JvmField`s filled in one by one after construction because
- * `KeyboardManager` (still Java) builds instances that way.
+ * @property label the text drawn on the on-screen key.
+ * @property sym the SDL key symbol handed to the emulator core.
+ * @property key the SDL key code handed to the emulator core. For printable keys this is the
+ * character itself; the others are handed a synthetic code by the parser.
+ * @property name the symbolic name the entry is looked up by, e.g. `key_ENTER`.
+ * @property value the index of the entry, matching the `Key.TK_*` constants.
  */
-class KeyMap {
-    @JvmField
-    var label: String? = null
-
-    @JvmField
-    var sym = 0
-
-    @JvmField
-    var key = 0
-
-    @JvmField
-    var name: String? = null
-
-    @JvmField
-    var value = 0
-}
+data class KeyMap(
+        val label: String,
+        val sym: Int,
+        val key: Int,
+        val name: String,
+        val value: Int)
