@@ -71,7 +71,7 @@ public class ImageLoader {
             @Override
             public void run() {
                 try {
-                    future.set(Glide.with(context).load(url).asBitmap().into(width, height).get());
+                    future.set(Glide.with(context).asBitmap().load(url).submit(width, height).get());
                 } catch (InterruptedException | ExecutionException e) {
                     Log.e(TAG, "Could not load image as bitmap.", e);
                     future.setException(e);

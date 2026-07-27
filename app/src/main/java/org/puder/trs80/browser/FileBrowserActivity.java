@@ -264,7 +264,9 @@ public class FileBrowserActivity extends BaseActivity implements OnItemClickList
 
     @Override
     public void onBackPressed() {
+        // Set the result, then let the framework perform the back navigation so
+        // it routes through the back-pressed dispatcher.
         setResult(RESULT_CANCELED, getIntent());
-        finish();
+        super.onBackPressed();
     }
 }

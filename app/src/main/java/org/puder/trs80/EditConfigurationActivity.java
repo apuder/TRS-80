@@ -73,7 +73,11 @@ public class EditConfigurationActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        doneEditing(!fragment.configurationWasEdited());
+        // Set the result, then let the framework perform the back navigation so
+        // it routes through the back-pressed dispatcher.
+        boolean cancel = !fragment.configurationWasEdited();
+        setResult(cancel ? RESULT_CANCELED : RESULT_OK, getIntent());
+        super.onBackPressed();
     }
 
     private void doneEditing(boolean cancel) {

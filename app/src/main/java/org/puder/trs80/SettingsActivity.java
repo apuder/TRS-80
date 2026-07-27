@@ -84,7 +84,10 @@ public class SettingsActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        doDone();
+        // Set the result, then let the framework perform the back navigation so
+        // it routes through the back-pressed dispatcher.
+        setResult(Activity.RESULT_OK, getIntent());
+        super.onBackPressed();
     }
 
     private void doDone() {

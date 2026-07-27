@@ -119,38 +119,34 @@ public class ConfigurationListViewAdapter extends
             if (position == NO_POSITION) {
                 return;
             }
-            switch (v.getId()) {
-                case R.id.configuration_info:
-                    if (listener.showHint()) {
-                        break;
-                    }
-                case R.id.configuration_back:
-                    AnimationFactory.flipTransition(viewFlipper,
-                            AnimationFactory.FlipDirection.LEFT_RIGHT);
-                    break;
-                case R.id.configuration_edit:
-                    listener.onConfigurationEdit(configuration, position);
-                    break;
-                case R.id.configuration_stop:
-                    listener.onConfigurationStop(configuration, position);
-                    break;
-                case R.id.configuration_delete:
-                    listener.onConfigurationDelete(configuration, position);
-                    break;
-                case R.id.configuration_run:
+            // if/else rather than switch: resource ids are no longer compile-time
+            // constants, so they cannot be case labels.
+            int id = v.getId();
+            if (id == R.id.configuration_info || id == R.id.configuration_back) {
+                // The info button shows the one-time hint first, and showing it
+                // consumes the tap.
+                if (id == R.id.configuration_info && listener.showHint()) {
+                    return;
+                }
+                AnimationFactory.flipTransition(viewFlipper,
+                        AnimationFactory.FlipDirection.LEFT_RIGHT);
+            } else if (id == R.id.configuration_edit) {
+                listener.onConfigurationEdit(configuration, position);
+            } else if (id == R.id.configuration_stop) {
+                listener.onConfigurationStop(configuration, position);
+            } else if (id == R.id.configuration_delete) {
+                listener.onConfigurationDelete(configuration, position);
+            } else if (id == R.id.configuration_run) {
+                listener.onConfigurationRun(configuration, position);
+            } else if (id == R.id.configuration_share) {
+                listener.onConfigurationShare(configuration, position);
+            } else {
+                if (listener.showHint()) {
+                    return;
+                }
+                if (viewFlipper.getDisplayedChild() == 0) {
                     listener.onConfigurationRun(configuration, position);
-                    break;
-                case R.id.configuration_share:
-                    listener.onConfigurationShare(configuration, position);
-                    break;
-                default:
-                    if (listener.showHint()) {
-                        break;
-                    }
-                    if (viewFlipper.getDisplayedChild() == 0) {
-                        listener.onConfigurationRun(configuration, position);
-                    }
-                    break;
+                }
             }
         }
     }
