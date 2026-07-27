@@ -19,6 +19,7 @@ add_library( # Sets the name of the library.
              # Sets the library as a shared library.
              SHARED
              native.c
+             trs80_core.c
              blit.c
              opensl.c
              trs_chars.c

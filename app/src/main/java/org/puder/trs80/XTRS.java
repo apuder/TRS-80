@@ -34,76 +34,54 @@ import java.nio.ByteBuffer;
 public class XTRS {
     private static final String TAG = "XTRS";
 
-    /**
-     * Size of the character buffer shared with the native emulator. Must match
-     * TRS_SCREEN_BUFFER_SIZE in atrs.h.
-     */
-    private static final int SCREEN_BUFFER_SIZE = 2048;
-
     static {
-        xtrsScreenBuffer = ByteBuffer.allocateDirect(SCREEN_BUFFER_SIZE);
         Log.d(TAG, "Loading native library ...");
         System.loadLibrary("xtrs");
         Log.d(TAG, "Native library successfully loaded.");
     }
 
-    /*
-     * The following fields with prefix "xtrs" are configuration parameters for
-     * xtrs. They are read via JNI within native.c
-     */
-    @SuppressWarnings("unused")
-    private static int             xtrsModel;
-    @SuppressWarnings("unused")
-    private static String          xtrsRomFile;
-    @SuppressWarnings("unused")
-    private static ByteBuffer      xtrsScreenBuffer;
-    @SuppressWarnings("unused")
-    private static int             xtrsEntryAddr;
-    @SuppressWarnings("unused")
-    private static String          xtrsCassette;
-    @SuppressWarnings("unused")
-    private static String          xtrsDisk0;
-    @SuppressWarnings("unused")
-    private static String          xtrsDisk1;
-    @SuppressWarnings("unused")
-    private static String          xtrsDisk2;
-    @SuppressWarnings("unused")
-    private static String          xtrsDisk3;
-
     private static EmulatorActivity emulator = null;
 
     public static int init(Configuration configuration, EmulatorState emulatorState) {
-        xtrsModel = configuration.getModel();
-        xtrsCassette = configuration.getCassettePath().or(emulatorState.getDefaultCassettePath());
-        xtrsDisk0 = configuration.getDiskPath(0).orNull();
-        xtrsDisk1 = configuration.getDiskPath(1).orNull();
-        xtrsDisk2 = configuration.getDiskPath(2).orNull();
-        xtrsDisk3 = configuration.getDiskPath(3).orNull();
+        int model = configuration.getModel();
+        String romFile = null;
 
-        switch (xtrsModel) {
+        switch (model) {
             case Hardware.MODEL1:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
+                romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1);
                 break;
             case Hardware.MODEL3:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
+                romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3);
                 break;
             case Hardware.MODEL4:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
+                romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4);
                 break;
             case Hardware.MODEL4P:
-                xtrsRomFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
+                romFile = SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P);
                 break;
             default:
                 //TODO return -1?
                 break;
         }
 
-        return initNative();
+        return initNative(
+                model,
+                romFile,
+                0 /* entryAddr; a .cmd image supplies its own */,
+                configuration.getCassettePath().or(emulatorState.getDefaultCassettePath()),
+                configuration.getDiskPath(0).orNull(),
+                configuration.getDiskPath(1).orNull(),
+                configuration.getDiskPath(2).orNull(),
+                configuration.getDiskPath(3).orNull());
     }
 
     public static native void setRunning(boolean run);
 
-    public static native int initNative();
+    private static native int initNative(int model, String romFile, int entryAddr,
+                                         String cassette, String disk0, String disk1,
+                                         String disk2, String disk3);
+
+    private static native ByteBuffer getScreenBufferNative();
 
     public static native void saveState(String fileName);
 
@@ -140,7 +118,12 @@ public class XTRS {
         emulator.notImplemented(msg);
     }
 
+    /**
+     * Returns the character buffer shared with the native emulator, one byte
+     * per screen cell. The buffer is owned by the native side and written to
+     * as the emulated machine updates its video RAM.
+     */
     public static ByteBuffer getScreenBuffer() {
-        return xtrsScreenBuffer;
+        return getScreenBufferNative();
     }
 }
