@@ -2,8 +2,21 @@ plugins {
     id 'com.android.library'
 }
 
+// Pins the JDK that compiles, independently of the JDK that launches Gradle.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 android {
     compileSdk 36
+    // Without this the build defaults to source/target 8, which JDK 21 has
+    // deprecated and will eventually refuse to compile.
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     defaultConfig {
         minSdk 17
         targetSdk 36

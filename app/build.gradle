@@ -16,6 +16,15 @@ sourceSets{
     main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
 }
 
+// Pins the JDK that compiles, independently of the JDK that launches Gradle,
+// so local and CI builds agree. Becomes kotlin { jvmToolchain(21) } once the
+// Kotlin conversion lands.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 dependencies {
     repositories {
         google()
@@ -81,6 +90,12 @@ android {
     // NDK r28+ produces 16 KB page-size-aligned native libs, required by
     // Google Play for apps targeting Android 15+.
     ndkVersion '28.2.13676358'
+    // Without this the build defaults to source/target 8, which JDK 21 has
+    // deprecated and will eventually refuse to compile.
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     defaultConfig {
         applicationId "org.puder.trs80"
         minSdk 26
