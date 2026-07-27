@@ -49,6 +49,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.view.MenuItemCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Optional;
@@ -112,6 +114,8 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
     private SurfaceHolder      surfaceHolder;
     private boolean            isGeneratingFont;
     private boolean            isStopped;
+    /** Landscape hides the system and action bars, so no insets are wanted. */
+    private boolean            isFullscreen;
 
 
     @Override
@@ -146,7 +150,11 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         setContentView(R.layout.emulator_measure);
         // Applied before the window is measured: the measured rect is what sizes
         // the emulated display, so it has to exclude the system and action bars.
-        applyContentInsets();
+        // In fullscreen there are no bars to avoid, and insetting would both
+        // shrink the picture and clip its bottom rows.
+        if (!isFullscreen) {
+            applyContentInsets();
+        }
         final View root = findViewById(R.id.emulator_measure);
         root.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
@@ -206,8 +214,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         }
 
         orientation = getResources().getConfiguration().orientation;
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-                && !isCasting && !isInMultiWindowMode) {
+        isFullscreen = orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                && !isCasting && !isInMultiWindowMode;
+        if (isFullscreen) {
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -559,9 +568,15 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
     private void initRootView() {
         setContentView(R.layout.emulator);
-        // The action bar is hidden in landscape, so the inset depends on
-        // orientation and has to be recomputed here.
-        applyContentInsets();
+        if (isFullscreen) {
+            // The root CoordinatorLayout declares fitsSystemWindows, so it still
+            // offsets its children by the status bar inset even though the bar is
+            // hidden. Swallow the insets so the picture starts at the top edge.
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.emulator),
+                    (v, insets) -> WindowInsetsCompat.CONSUMED);
+        } else {
+            applyContentInsets();
+        }
         View top = this.findViewById(R.id.emulator);
         top.setFocusable(true);
         top.setFocusableInTouchMode(true);
