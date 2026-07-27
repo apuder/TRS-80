@@ -144,6 +144,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
         isGeneratingFont = true;
         isStopped = false;
         setContentView(R.layout.emulator_measure);
+        // Applied before the window is measured: the measured rect is what sizes
+        // the emulated display, so it has to exclude the system and action bars.
+        applyContentInsets();
         final View root = findViewById(R.id.emulator_measure);
         root.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
@@ -556,6 +559,9 @@ public class EmulatorActivity extends BaseActivity implements SensorEventListene
 
     private void initRootView() {
         setContentView(R.layout.emulator);
+        // The action bar is hidden in landscape, so the inset depends on
+        // orientation and has to be recomputed here.
+        applyContentInsets();
         View top = this.findViewById(R.id.emulator);
         top.setFocusable(true);
         top.setFocusableInTouchMode(true);
