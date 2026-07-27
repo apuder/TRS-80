@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013, Arno Puder
+ * Copyright 2017, Sascha Haeberling
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80.async
 
-import android.graphics.Typeface;
+import android.os.Handler
+import android.os.Looper
+import java.util.concurrent.Executor
 
-public class Fonts {
-    static public Typeface getTypeface(int model) {
-        String fontName = null;
-        switch (model) {
-        case Hardware.MODEL1:
-            fontName = "fonts/AnotherMansTreasureMIB64C2X3Y.ttf";
-            break;
-        case Hardware.MODEL3:
-            fontName = "fonts/AnotherMansTreasureMIII64C.ttf";
-            break;
-        }
-        return TypefaceCache.get().getTypeface(fontName, TRS80Application.getAppContext());
+/**
+ * Executor that runs tasks on the Android main-thread.
+ */
+class UiExecutor private constructor(private val handler: Handler) : Executor {
+
+    override fun execute(runnable: Runnable) {
+        handler.post(runnable)
+    }
+
+    companion object {
+        /** Creates a new UiExecutor. */
+        @JvmStatic
+        fun create(): Executor = UiExecutor(Handler(Looper.getMainLooper()))
     }
 }

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration;
+package org.puder.trs80.configuration
 
-import android.util.SparseArray;
-
-import com.google.common.base.Optional;
+import com.google.common.base.Optional
 
 /**
  * Various keyboard layouts.
+ *
+ * @property id the persisted ID of the layout. These IDs end up in the user's saved
+ * configurations, so they must never be renumbered.
  */
-public enum KeyboardLayout {
+enum class KeyboardLayout(@JvmField val id: Int) {
     KEYBOARD_LAYOUT_ORIGINAL(0),
     KEYBOARD_LAYOUT_COMPACT(1),
     KEYBOARD_LAYOUT_JOYSTICK(2),
@@ -31,23 +32,14 @@ public enum KeyboardLayout {
     KEYBOARD_TILT(4),
     KEYBOARD_EXTERNAL(5);
 
-    public final int id;
+    companion object {
+        private val BY_ID: Map<Int, KeyboardLayout> =
+            KeyboardLayout.entries.associateBy(KeyboardLayout::id)
 
-    KeyboardLayout(int id) {
-        this.id = id;
-    }
-
-    public static Optional<KeyboardLayout> fromId(int id) {
-        return Optional.fromNullable(mapped.get(id, null));
-    }
-
-    private static final SparseArray<KeyboardLayout> mapped = createMap();
-
-    private static SparseArray<KeyboardLayout> createMap() {
-        SparseArray<KeyboardLayout> arr = new SparseArray<>();
-        for (KeyboardLayout layout : KeyboardLayout.values()) {
-            arr.put(layout.id, layout);
-        }
-        return arr;
+        /**
+         * @return The layout with the given [id], or absent if no layout uses that ID.
+         */
+        @JvmStatic
+        fun fromId(id: Int): Optional<KeyboardLayout> = Optional.fromNullable(BY_ID[id])
     }
 }

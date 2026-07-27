@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013, Arno Puder
+ * Copyright 2017, Sascha Haeberling
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.keyboard;
+package org.puder.trs80
 
-class KeyMap {
-    String label;
-    int    sym;
-    int    key;
-    String name;
-    int    value;
+import java.util.Locale
+
+/**
+ * String utilities
+ */
+object StrUtil {
+    /** Formats the string with the given arguments using the default locale. */
+    @JvmStatic
+    fun form(str: String, vararg args: Any?): String =
+        String.format(Locale.getDefault(), str, *args)
 }

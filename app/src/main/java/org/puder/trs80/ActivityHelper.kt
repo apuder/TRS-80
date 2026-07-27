@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80
 
-import android.content.Intent;
-import android.util.Log;
+import android.content.Intent
+import android.util.Log
+import com.google.common.base.Optional
 
-import com.google.common.base.Optional;
+private const val TAG = "ActivityHelper"
 
 /**
  * Helper for common Activity-related functions.
  */
-class ActivityHelper {
-    private static final String TAG = "ActivityHelper";
+object ActivityHelper {
 
     /**
      * Returns an extra value with the given key, if the intent, the extras and the key itself are
      * present.
      */
-    static Optional<Integer> getIntExtra(Intent intent, String key) {
+    @JvmStatic
+    fun getIntExtra(intent: Intent?, key: String): Optional<Int> {
         if (intent == null) {
-            Log.i(TAG, "No intent.");
-            return Optional.absent();
+            Log.i(TAG, "No intent.")
+            return Optional.absent()
         }
         if (!intent.hasExtra(key)) {
-            Log.i(TAG, StrUtil.form("No extra named '%s'.", key));
-            return Optional.absent();
+            Log.i(TAG, StrUtil.form("No extra named '%s'.", key))
+            return Optional.absent()
         }
-        return Optional.of(intent.getIntExtra(key, 0));
+        return Optional.of(intent.getIntExtra(key, 0))
     }
 }

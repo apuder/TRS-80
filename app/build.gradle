@@ -13,8 +13,7 @@ plugins {
 }
 
 // Pins the JDK that compiles, independently of the JDK that launches Gradle,
-// so local and CI builds agree. Becomes kotlin { jvmToolchain(21) } once the
-// Kotlin conversion lands.
+// so local and CI builds agree.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)

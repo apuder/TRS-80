@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Sascha Haeberling
+ * Copyright 2012-2013, Arno Puder
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
-
-import java.util.Locale;
+package org.puder.trs80.keyboard
 
 /**
- * String utilities
+ * A single entry of the on-screen keyboard layout, as parsed from `res/xml/keymap_*.xml`.
+ *
+ * The properties are `@JvmField`s filled in one by one after construction because
+ * `KeyboardManager` (still Java) builds instances that way.
  */
-public final class StrUtil {
-    /** Formats the string with the given arguments using the default locale. */
-    public static String form(String str, Object... args) {
-        return String.format(Locale.getDefault(), str, args);
-    }
+class KeyMap {
+    @JvmField
+    var label: String? = null
+
+    @JvmField
+    var sym = 0
+
+    @JvmField
+    var key = 0
+
+    @JvmField
+    var name: String? = null
+
+    @JvmField
+    var value = 0
 }

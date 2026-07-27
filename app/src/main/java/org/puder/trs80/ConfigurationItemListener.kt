@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80
 
-import org.puder.trs80.configuration.Configuration;
+import org.puder.trs80.configuration.Configuration
 
-public interface ConfigurationItemListener {
+/** Callbacks for the actions offered on a single configuration list item. */
+interface ConfigurationItemListener {
 
-    boolean showHint();
+    fun showHint(): Boolean
 
-    void onConfigurationEdit(Configuration configuration, int position);
+    fun onConfigurationEdit(configuration: Configuration, position: Int)
 
-    void onConfigurationDelete(Configuration configuration, int position);
+    fun onConfigurationDelete(configuration: Configuration, position: Int)
 
-    void onConfigurationStop(Configuration configuration, int position);
+    fun onConfigurationStop(configuration: Configuration, position: Int)
 
-    void onConfigurationRun(Configuration configuration, int position);
+    fun onConfigurationRun(configuration: Configuration, position: Int)
 
-    void onConfigurationShare(Configuration configuration, int position);
-
+    fun onConfigurationShare(configuration: Configuration, position: Int)
 }

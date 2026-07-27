@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package org.puder.trs80;
+package org.puder.trs80
 
-public interface GameControllerListener {
+/** Receives the d-pad actions decoded by [GameController]. */
+interface GameControllerListener {
 
-    void onGameControllerAction(GameController.Action action);
+    // GameController.Action is package-private in the (still Java) GameController;
+    // Kotlin flags a public member exposing it. Drop the suppression once
+    // GameController itself is converted.
+    @Suppress("EXPOSED_PARAMETER_TYPE")
+    fun onGameControllerAction(action: GameController.Action)
 }
