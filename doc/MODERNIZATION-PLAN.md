@@ -52,18 +52,31 @@ hardware knowledge. Do not rewrite it. Give it a clean C API and never touch it 
 | Native boundary | 13 coarse functions; screen is a **2 KB shared buffer**, zero copies per frame; audio is 100 % native | Interop is a non-issue on any toolkit |
 | Audio | OpenSL ES behind a **10-line interface** (`opensl.h`) | iOS needs one new implementation, nothing else |
 | Rendering | Glyph rasterization + blitting live in Java (`Hardware`, `RenderThread`, `DirtyRect` ≈ 330 LOC) | Must be rewritten — once, in `commonMain` |
-| Protobuf | **271,000 vendored LOC** to serialize one 84-line state dump | Replace with nanopb (already vendored) |
-| AndroidX | `com.android.support:*:33.0.0` substituted by AGP to **AndroidX 1.0.0** (2018), `enableJetifier` still on | Full dependency refresh needed |
-| RetroStore | Client is a **JVM-only JAR** from a private Maven repo | **Blocks iOS** — must be reimplemented |
+| Protobuf | **271,000 vendored LOC** to serialize one 84-line state dump | *(Phase 0: removed — `libxtrs.so` 12.5 MB → 2.8 MB per ABI)* |
+| AndroidX | `com.android.support:*:33.0.0` substituted by AGP to **AndroidX 1.0.0** (2018), `enableJetifier` still on | Full dependency refresh needed — see §4.2 |
+| RetroStore | Client is a **JVM-only JAR** from a private Maven repo, and the app uses exactly **four** of its methods | **Blocks iOS** — retire and reimplement, see D7 |
 | Storage | Raw filesystem paths, external storage, custom file browser | Already fragile under scoped storage; unworkable on iOS |
 | Hi-res graphics | Grafyx / HRG modes hit an unimplemented stub and `longjmp` out | Latent crash, inherited by any port |
 
 ---
 
-## 3. Phase 0 — Clean the native boundary
+## 3. Phase 0 — Clean the native boundary ✅ DONE
 
-*Android-only. Ships. No user-visible change. This is the de-risking phase and should happen first
-regardless of anything else.*
+*Merged to master July 2026. CI green, and verified by running the app on an emulator: the Z80 core
+executed and rendered through the new buffer ownership, audio initialized through the renamed sink,
+and the state file written by the new encoder was validated by official protoc.*
+
+Two deviations from the plan below, both deliberate:
+
+- **The xray state dump is encoded by hand, not by nanopb.** Only nanopb's *decoder* is vendored
+  here, so the swap would have meant adding the encoder plus a generator toolchain plus callback
+  plumbing for the 64 KB memory images. The message is three types and seventeen fields, so the wire
+  format is written directly instead — about 90 lines, no new dependencies.
+- **`trs_chars.c` / `blit.c` are still compiled.** Removing them requires guarding `bitmap_init`,
+  which is currently compiled unguarded. Left as a small follow-up; it is a size optimization only.
+
+The C core is now down to two Android-coupled files, both of which are *supposed* to be: `native.c`
+(the JNI adapter) and `audio_opensl.c` (the Android audio backend).
 
 ### 3.1 Extract a real C API
 
@@ -120,24 +133,73 @@ standalone with no Android headers.
 Roughly 60 files, IDE-assisted, module by module. Mechanical but do it before restructuring — it
 makes everything after this easier.
 
-### 4.2 Refresh the dependency stack
+### 4.2 Version targets
 
-This is overdue independent of the port:
+**Do not chase the latest AGP.** AGP 9.3.0 is current (July 2026) and requires Gradle 9.5.0, but
+Kotlin 2.4.0 supports AGP only up to **9.1.0**. Because the endgame is KMP, *Kotlin's* compatibility
+window is the binding constraint, not AGP's newest release.
 
-| Current | Replace with |
-|---|---|
-| `com.android.support:*:33.0.0` → AndroidX **1.0.0** | Current AndroidX + Material 3 |
-| `android.enableJetifier=true` | Remove |
-| `android.preference` (deprecated) | Compose settings screens (Phase 2) |
-| `AsyncTask`, `ProgressDialog` | Coroutines, Compose |
-| EventBus 3.0.0 (reflection-based) | `StateFlow` |
-| Glide 3.8.0 | Coil |
-| Guava 27 (Android flavor) | Kotlin stdlib |
+| Component | Phase 0 state | Target | Why that number |
+|---|---|---|---|
+| Gradle | 8.13 | **9.5.0** | Kotlin 2.4's maximum; satisfies AGP 9.x |
+| AGP | 8.13.2 | **9.1.0** | Kotlin 2.4's maximum — *not* 9.3.0 |
+| Kotlin | — | **2.4.0** | Latest stable (22 July 2026) |
+| Compose Multiplatform | — | **1.11.1** | Needs Kotlin ≥ 2.1; tracks latest Kotlin |
+| JDK | 17 (CI) / 21 (pin) | **21 everywhere** | LTS, above AGP's minimum of 17 |
 
-Removing Guava and EventBus also removes the reflection dependencies that currently make R8
-minification unsafe — which is what the Play Console deobfuscation notice was pointing at.
+Sources: [AGP releases](https://developer.android.com/build/releases/gradle-plugin),
+[KMP compatibility guide](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html),
+[CMP compatibility](https://kotlinlang.org/docs/multiplatform/compose-compatibility-and-versioning.html).
 
-### 4.3 Stand up the KMP module and move domain logic into `commonMain`
+**Fix the JDK ambiguity first.** There are currently three answers in three places: CI provisions
+Temurin 17, `gradle/gradle-daemon-jvm.properties` demands JetBrains JDK 21, and Gradle papers over
+the gap by auto-provisioning through foojay using a feature it labels incubating. Three steps:
+
+1. Delete `gradle/gradle-daemon-jvm.properties` — generated by the Studio upgrade, pins a *vendor*
+   for no benefit.
+2. Move CI to `java-version: '21'` (Temurin).
+3. Add a Java toolchain (`jvmToolchain(21)`) so the compiling JDK is pinned independently of the one
+   launching Gradle.
+
+### 4.3 Refresh the dependency stack
+
+Six current dependencies are JVM- or Android-only and therefore **cannot move into `commonMain`**.
+Every replacement is also a reduction:
+
+| Current | Replace with | Note |
+|---|---|---|
+| Guava 27.0.1 (2018) | Kotlin nullable types | `Optional.orNull()` is used throughout the config code |
+| commons-io | okio | |
+| EventBus 3.0.0 | `StateFlow` / `SharedFlow` | Also removes the reflection that makes R8 unsafe |
+| Glide 3.8.0 | Coil 3 | Coil 3 is multiplatform |
+| protobuf-lite 3.0.0 (Java) | Wire or kotlinx-serialization-protobuf | |
+| `org.retrostore:retrostore-client` | Ktor client (see D7) | Also retires `maven.haberling.net` |
+
+Play Services Cast stays Android-only by design — that belongs behind an `expect`/`actual`, not a
+replacement.
+
+Separately, the whole `com.android.support:*:33.0.0` set must become real AndroidX coordinates. Those
+fake version numbers resolve to **AndroidX 1.0.0 from 2018** through jetifier substitution, so this
+is less an upgrade than adopting AndroidX for the first time. Also drop `android.enableJetifier` and
+flip `nonTransitiveRClass` / `nonFinalResIds` off their legacy `false` settings.
+
+Housekeeping found along the way: `com.google.gms:google-services:4.3.15` sits on the root classpath
+but **the plugin is never applied anywhere** — dead weight from an old Firebase experiment. And
+introduce a `gradle/libs.versions.toml` version catalog before the KMP restructure; sharing versions
+across modules and source sets gets unpleasant without one.
+
+### 4.4 Upgrade order — one rule that matters
+
+1. **Fix the JDK ambiguity** (§4.2). Isolated, low risk.
+2. **Migrate to real AndroidX**, drop jetifier, flip the R-class flags.
+3. **Then** AGP → 9.1.0 and Gradle → 9.5.0.
+4. **Then** Kotlin 2.4.0 and the Java→Kotlin conversion.
+
+Step 2 must come **before** step 3. The AndroidX migration is the riskiest change here, and you want
+a working, testable app between "new libraries" and "new build system" rather than both failing at
+once.
+
+### 4.5 Stand up the KMP module and move domain logic into `commonMain`
 
 Create `shared/` with the three source sets even though only Android builds. Move, with
 `expect`/`actual` only where genuinely platform-bound (file I/O, preferences):
@@ -204,10 +266,8 @@ Views left.
 2. **cinterop bindings.** A `.def` file over `trs80_core.h` — 13 functions, no marshalling design work.
 3. **iOS audio sink.** Implement the ten-line interface on AudioQueue or AVAudioEngine. Match the
    existing contract: 44.1 kHz, mono, S16LE, pull-style, 1024-byte buffers.
-4. **Reimplement the RetroStore client in `commonMain`.** *This is the critical path.* The current
-   client is a JVM-only JAR, so nothing about RetroStore works on iOS until it is replaced — Ktor
-   plus protobuf is the obvious shape. Bonus: it is the only artifact from the private Maven repo, so
-   this also removes the `allowInsecureProtocol` workaround added during the API 36 work.
+4. **RetroStore client** — see **D7**. Pull this forward to just after the Kotlin conversion rather
+   than doing it here: it pays off on Android immediately and retires the biggest iOS unknown.
 5. **iOS host app.** SwiftUI `App` wrapping `ComposeUIViewController`, plus native document picking.
 6. **CI.** Add a macOS runner for the iOS build.
 
@@ -235,19 +295,45 @@ platforms and removes a screen that the UI spec identifies as the worst in the a
 and half-finished support is scattered through the code. This changes both the renderer and the
 configuration form, so **decide before the design is finalized**, not after.
 
-**D5 — Protobuf → nanopb.** *Recommend:* yes, in Phase 0.
+**D5 — Protobuf.** *Resolved in Phase 0:* replaced with a hand-written encoder rather than nanopb —
+see §3.
 
 **D6 — Font pipeline.** Rasterize TTFs at runtime in `commonMain`, or bake a glyph atlas at build
 time. *Recommend:* decide during the Phase 2 renderer spike; build-time baking is simpler and the
 fonts never change.
+
+**D7 — The RetroStore JVM SDK** (`github.com/shaeberling/retrostore-jvm-sdk`). The app depends on it
+as `org.retrostore:retrostore-client:0.2.13`, published to `maven.haberling.net`.
+
+What it is: ~66 KB of Java, of which **37 KB is CLI test harnesses** (`TestCli`, `TestCliOldApi`) —
+the real client is roughly 26 KB. Last pushed **August 2023**. No license. Dependencies are Guava 20
+(2016), Gson 2.8.0 (2016) and protobuf-lite 3.0.0. And the app calls exactly **four** of its methods:
+`fetchApps`, `fetchMediaImages`, `getApp`, `uploadState`.
+
+*Recommend:* **retire it and reimplement those four calls in `commonMain`** with Ktor plus
+Wire/kotlinx-serialization over the existing `.proto`. Vendoring the SDK source into this repo would
+kill the private Maven dependency but leaves it Java and JVM-only — relocating the iOS blocker rather
+than removing it, while importing Guava and Gson into a graph we are trying to shrink.
+
+Retiring it deletes, in one move: the private Maven repo and the `allowInsecureProtocol` workaround,
+Guava 20, Gson, protobuf-lite 3.0.0, and the hardest iOS blocker in this plan. The result will likely
+be *smaller* than the Java original, since it skips the CLI harnesses and Guava-era boilerplate.
+
+Keep `ApiProtos.proto` as the artifact that matters — it is the real contract, and it already exists
+twice (that repo, plus a nanopb-generated copy in this repo's native tree). Consolidate on one copy
+here and generate from it. **The native C RetroStore client stays as-is**: it serves the emulated
+machine's TRS-IO card, is decode-only, and is a genuinely different consumer — do not unify them.
+
+Archive the SDK repo rather than deleting it, and give it a `LICENSE` if it stays public (TRS-80's
+sources are Apache 2.0; that repo currently has no license at all).
 
 ---
 
 ## 8. Risks
 
 **RetroStore is the hidden iOS blocker.** It is easy to plan the whole port around the emulator and
-discover late that content acquisition does not exist on iOS. Schedule it early in Phase 3, or pull
-it forward into Phase 2 — replacing the JAR benefits Android immediately too.
+discover late that content acquisition does not exist on iOS. Do it right after the Kotlin
+conversion, not in Phase 3 — see D7.
 
 **App Store review.** Apple has allowed retro *console* emulators since 2024; a home-computer
 emulator is adjacent but not squarely covered. Separately, the RetroStore backend uses raw sockets
@@ -283,10 +369,11 @@ must resolve before Phase 2 can start in earnest:
 
 | Phase | Scope | Ships | User-visible |
 |---|---|---|---|
-| 0 | Clean C API, kill dead code, nanopb | Android | No |
-| 1 | Kotlin, AndroidX refresh, KMP skeleton | Android | No |
+| 0 ✅ | Clean C API, kill dead code, drop protobuf runtime | Android | No |
+| 1a | JDK fix → AndroidX → AGP 9.1 / Gradle 9.5 → Kotlin 2.4 (§4.2–4.4) | Android | No |
+| 1b | Java→Kotlin, KMP skeleton, RetroStore client in `commonMain` (D7) | Android | No |
 | 2 | Redesigned UI in `commonMain` | Android, incrementally | **Yes — the redesign** |
-| 3 | iOS core build, audio, RetroStore client, host app | iOS beta | Yes — new platform |
+| 3 | iOS core build, audio, host app, App Store review | iOS beta | Yes — new platform |
 
 Phases 0 and 1 are pure risk reduction and pay for themselves on Android alone. If the iOS ambition
 ever stalls, stopping after Phase 2 leaves a modern, native, fully redesigned Android app — which is
