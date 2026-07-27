@@ -3,17 +3,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.10.0'
     }
 }
 
 plugins {
     id 'com.android.application'
-    id 'com.google.protobuf' version '0.9.4'
-}
-
-sourceSets{
-    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
+    id 'com.google.protobuf' version '0.10.0'
 }
 
 // Pins the JDK that compiles, independently of the JDK that launches Gradle,
@@ -88,7 +84,6 @@ protobuf {
             }
         }
     }
-    generatedFilesBaseDir = "$projectDir/src"
 }
 
 android {
@@ -129,13 +124,9 @@ android {
         }
     }
     buildTypes {
-        debug {
-            resValue "bool", "debug", "true"
-        }
         release {
-            resValue "bool", "debug", "false"
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
             if (project.hasProperty('TRS80_KEYSTORE')) {
                 signingConfig signingConfigs.release
             }
@@ -160,10 +151,4 @@ android {
             baseline = file("lint-baseline.xml")
         }
     }
-}
-
-clean {
-    // Generated protocol buffer files end up in here.
-    delete "$projectDir/src/debug"
-    delete "$projectDir/src/release"
 }
