@@ -23,7 +23,7 @@
 #include <SDL/SDL.h>
 
 #include "atrs.h"
-#include "opensl.h"
+#include "trs80_audio.h"
 #include "trs80_core.h"
 
 /* Polled by the CPU thread, written by the host thread. */
@@ -234,7 +234,7 @@ void trs80_run(void)
     } else {
         // Unwound by not_implemented().
     }
-    OpenSLWrap_Shutdown();
+    trs80_audio_shutdown();
 }
 
 void trs80_set_running(int running)

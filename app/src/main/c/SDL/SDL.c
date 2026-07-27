@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <android/log.h>
 #include "atrs.h"
-#include "opensl.h"
+#include "trs80_audio.h"
 
 #define DEBUG_TAG "TRS80"
 
@@ -300,7 +300,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
         return 0;
     }
     pthread_mutex_lock(&mutex_engine);
-    int result = OpenSLWrap_Init(fillBuffer) == 1 ? 0 : -1;
+    int result = trs80_audio_init(fillBuffer) == 1 ? 0 : -1;
     pthread_mutex_unlock(&mutex_engine);
     return result;
 }
@@ -309,7 +309,7 @@ void SDL_CloseAudio(void)
 {
     // Can be called from different threads
     pthread_mutex_lock(&mutex_engine);
-    OpenSLWrap_Shutdown();
+    trs80_audio_shutdown();
     pthread_mutex_unlock(&mutex_engine);
 }
 

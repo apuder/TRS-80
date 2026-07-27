@@ -21,7 +21,7 @@ add_library( # Sets the name of the library.
              native.c
              trs80_core.c
              blit.c
-             opensl.c
+             audio_opensl.c
              trs_chars.c
              trs_printer.c
              trs_disk.c

@@ -13,7 +13,7 @@
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
-#include "opensl.h"
+#include "trs80_audio.h"
 
 // This is kinda ugly, but for simplicity I've left these as globals just like in the sample,
 // as there's not really any use case for this where we have multiple audio devices yet.
@@ -37,7 +37,7 @@ static SLVolumeItf bqPlayerVolume;
 static char buffer[NUM_BUFFERS][BUFFER_SIZE];
 static int curBuffer = 0;
 
-static AndroidAudioCallback audioCallback;
+static trs80_audio_fill audioCallback;
 
 // This callback handler is called every time a buffer finishes playing.
 // The documentation available is very unclear about how to best manage buffers.
@@ -63,7 +63,7 @@ static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 }
 
 // create the engine and output mix objects
-int OpenSLWrap_Init(AndroidAudioCallback cb) {
+int trs80_audio_init(trs80_audio_fill cb) {
   audioCallback = cb;
 
   SLresult result;
@@ -155,7 +155,7 @@ int OpenSLWrap_Init(AndroidAudioCallback cb) {
 }
 
 // shut down the native audio system
-void OpenSLWrap_Shutdown() {
+void trs80_audio_shutdown() {
   if (bqPlayerObject != NULL) {
     (*bqPlayerObject)->Destroy(bqPlayerObject);
     bqPlayerObject = NULL;
