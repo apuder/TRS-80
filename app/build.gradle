@@ -47,20 +47,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
-task syncGeneratedativeProtoFilesDebug(type: Sync) {
-    from "$projectDir/src/debug/cpp"
-    into "$projectDir/src/main/c/proto"
-}
-task syncGeneratedativeProtoFilesRelease(type: Sync) {
-    from "$projectDir/src/release/cpp"
-    into "$projectDir/src/main/c/proto"
-
-}
-
 protobuf {
     protoc {
-        // Note: Version must be compatible with the version in src/c/google/protobuf.
-        //       Check stubs/common.h for GOOGLE_PROTOBUF_VERSION.
         artifact = "com.google.protobuf:protoc:3.21.1"
     }
     plugins {
@@ -73,14 +61,13 @@ protobuf {
         }
     }
 
-    // Generate java and cpp versions of the files.
+    // Java only. The native side no longer needs generated protobuf code:
+    // trs_xray_state_save.cpp encodes the one message it writes by hand.
     generateProtoTasks {
         all().each { task ->
             task.builtins {
                 remove java
-                cpp { }
             }
-            task.finalizedBy(syncGeneratedativeProtoFilesDebug, syncGeneratedativeProtoFilesRelease)
             task.plugins {
                 javalite { }
             }
@@ -155,8 +142,7 @@ android {
 }
 
 clean {
-    // Generates protocol buffer files end up in here.
+    // Generated protocol buffer files end up in here.
     delete "$projectDir/src/debug"
     delete "$projectDir/src/release"
-    delete "$projectDir/src/main/c/proto"
 }
