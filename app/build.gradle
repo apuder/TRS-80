@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
     implementation 'com.google.android.gms:play-services-cast:21.5.0'
-    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0'
     implementation project(':retrostore')
 
     testImplementation 'junit:junit:4.13.2'

@@ -43,13 +43,12 @@ import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import kotlinx.coroutines.launch
 import org.puder.trs80.cast.CastMessageSender
 import org.puder.trs80.configuration.Configuration
@@ -153,16 +152,13 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
 
         ItemTouchHelper(ConfigurationItemTouchHelperCallback(configurationListViewAdapter))
             .attachToRecyclerView(configurationListView)
+
+        observeScreenshots()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         toggle.syncState()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
     }
 
     override fun onResume() {
@@ -191,11 +187,6 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
         super.onPause()
     }
 
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
-    }
-
     override fun onBackPressed() {
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -205,10 +196,18 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
         }
     }
 
-    /** Refreshes the card of the configuration a screenshot was just taken for. */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: ScreenshotTakenEvent) {
-        updateView(positionChanged = configManager.getPositionOfConfigWithId(event.configurationId))
+    /**
+     * Refreshes the card of a configuration whose screenshot was just saved. Collection is bound to
+     * the STARTED state, matching where the previous event-bus registration lived.
+     */
+    private fun observeScreenshots() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            ScreenshotEvents.screenshots.collect { configurationId ->
+                updateView(
+                    positionChanged = configManager.getPositionOfConfigWithId(configurationId)
+                )
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

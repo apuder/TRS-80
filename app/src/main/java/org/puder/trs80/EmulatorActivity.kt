@@ -42,7 +42,6 @@ import android.view.WindowManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.snackbar.Snackbar
-import org.greenrobot.eventbus.EventBus
 import org.puder.trs80.cast.CastMessageSender
 import org.puder.trs80.cast.RemoteCastScreen
 import org.puder.trs80.configuration.Configuration
@@ -485,7 +484,7 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
         }
         val id = currentConfiguration.id
         emulatorState.saveScreenshot(thread.takeScreenshot(currentHardware))
-        EventBus.getDefault().post(ScreenshotTakenEvent(id))
+        ScreenshotEvents.notifyScreenshotTaken(id)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
