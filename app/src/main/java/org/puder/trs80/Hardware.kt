@@ -22,7 +22,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.AsyncTask
 import org.puder.trs80.configuration.Configuration
-import org.puder.trs80.configuration.KeyboardLayout
+import org.puder.trs80.shared.KeyboardLayout
 
 /** The largest a key "box" may get, in dp. */
 private const val MAX_KEY_BOX_SIZE_DP = 55f

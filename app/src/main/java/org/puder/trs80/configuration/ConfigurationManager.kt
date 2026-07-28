@@ -16,6 +16,8 @@
 
 package org.puder.trs80.configuration
 
+import org.puder.trs80.shared.KeyboardLayout
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager

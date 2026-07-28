@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration
+package org.puder.trs80.shared
 
 /**
  * Various keyboard layouts.
@@ -22,7 +22,7 @@ package org.puder.trs80.configuration
  * @property id the persisted ID of the layout. These IDs end up in the user's saved
  * configurations, so they must never be renumbered.
  */
-enum class KeyboardLayout(@JvmField val id: Int) {
+enum class KeyboardLayout(val id: Int) {
     KEYBOARD_LAYOUT_ORIGINAL(0),
     KEYBOARD_LAYOUT_COMPACT(1),
     KEYBOARD_LAYOUT_JOYSTICK(2),
@@ -37,7 +37,6 @@ enum class KeyboardLayout(@JvmField val id: Int) {
         /**
          * @return The layout with the given [id], or null if no layout uses that ID.
          */
-        @JvmStatic
         fun fromId(id: Int): KeyboardLayout? = BY_ID[id]
     }
 }

@@ -16,6 +16,8 @@
 
 package org.puder.trs80.configuration
 
+import org.puder.trs80.shared.KeyboardLayout
+
 import android.util.SparseArray
 
 /**

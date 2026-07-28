@@ -47,7 +47,7 @@ import org.puder.trs80.cast.RemoteCastScreen
 import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.EmulatorState
-import org.puder.trs80.configuration.KeyboardLayout
+import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.io.FileManager
 import org.puder.trs80.keyboard.KeyboardManager
 import java.io.IOException

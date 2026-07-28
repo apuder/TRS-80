@@ -1,0 +1,36 @@
+// The shared Kotlin Multiplatform module: the domain layer that both the
+// Android app and (eventually) an iOS app build against.
+//
+// Note this uses com.android.kotlin.multiplatform.library rather than
+// com.android.library. Since AGP 9.0 the ordinary Android library plugin is
+// incompatible with the Kotlin Multiplatform plugin in the same module.
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'com.android.kotlin.multiplatform.library'
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+kotlin {
+    androidLibrary {
+        namespace = 'org.puder.trs80.shared'
+        compileSdk = 37
+        minSdk = 26
+    }
+
+    // Named so the produced framework is importable from Swift as `Shared`.
+    iosX64 { binaries.framework { baseName = 'Shared' } }
+    iosArm64 { binaries.framework { baseName = 'Shared' } }
+    iosSimulatorArm64 { binaries.framework { baseName = 'Shared' } }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+            }
+        }
+    }
+}

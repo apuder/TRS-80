@@ -35,7 +35,7 @@ import com.tekle.oss.android.animation.AnimationFactory
 import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.EmulatorState
-import org.puder.trs80.configuration.KeyboardLayout
+import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.drag.ItemTouchHelperAdapter
 import java.io.IOException
 

@@ -1,5 +1,8 @@
 /bin
-/build
+
+# Gradle build output for every module, at any depth.
+build/
+
 /app/.externalNativeBuild
 /app/.cxx
 /app/build
