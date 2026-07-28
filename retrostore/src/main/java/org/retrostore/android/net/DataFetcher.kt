@@ -16,8 +16,6 @@
 
 package org.retrostore.android.net
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.retrostore.RetrostoreClient
 import org.retrostore.client.common.proto.App
 import org.retrostore.client.common.proto.MediaImage
@@ -34,7 +32,7 @@ private const val PAGE_SIZE = 100
 /**
  * Fetches data from the RetroStore.
  *
- * The requests block, so they run on [Dispatchers.IO] and are safe to call from the main thread.
+ * The requests run on the IO dispatcher and are safe to call from the main thread.
  */
 class DataFetcher private constructor(private val client: RetrostoreClient) {
 
@@ -45,10 +43,10 @@ class DataFetcher private constructor(private val client: RetrostoreClient) {
      *
      * @throws org.retrostore.ApiException if the request fails.
      */
-    suspend fun getAppsAsync(): List<App> = withContext(Dispatchers.IO) {
-        val apps: List<App> = client.fetchApps(PAGE_START, PAGE_SIZE)
+    suspend fun getAppsAsync(): List<App> {
+        val apps = client.fetchApps(PAGE_START, PAGE_SIZE)
         updateCache(apps)
-        apps
+        return apps
     }
 
     /**
@@ -56,9 +54,7 @@ class DataFetcher private constructor(private val client: RetrostoreClient) {
      *
      * @throws org.retrostore.ApiException if the request fails.
      */
-    suspend fun fetchMediaImages(appId: String): List<MediaImage> = withContext(Dispatchers.IO) {
-        client.fetchMediaImages(appId)
-    }
+    suspend fun fetchMediaImages(appId: String): List<MediaImage> = client.fetchMediaImages(appId)
 
     /** @return The app with the given [id], or null if it is not in the cache. */
     fun getFromCache(id: String): App? = appCache[id]

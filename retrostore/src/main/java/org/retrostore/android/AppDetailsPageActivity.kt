@@ -61,9 +61,8 @@ class AppDetailsPageActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.appAuthor).text = app.author
         findViewById<TextView>(R.id.appVersion).text =
                 getString(R.string.app_version, app.version)
-        if (app.screenshotUrlCount > 0) {
-            imageLoader.loadUrlIntoView(
-                    app.getScreenshotUrl(0), findViewById<ImageView>(R.id.appThumbnail))
+        app.screenshot_url.firstOrNull()?.let { url ->
+            imageLoader.loadUrlIntoView(url, findViewById<ImageView>(R.id.appThumbnail))
         }
         findViewById<View>(R.id.installButton).setOnClickListener { onAskForInstallation(app) }
     }

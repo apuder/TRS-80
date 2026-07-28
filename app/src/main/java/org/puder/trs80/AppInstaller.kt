@@ -67,16 +67,16 @@ class AppInstaller(
 
         val app = appPackage.appData
         return configManager.addNewConfiguration(
-            getHardwareModelId(app.extTrs80.model), app.name, disks, cassette
+            getHardwareModelId(app.ext_trs80?.model), app.name, disks, cassette
         ) != null
     }
 }
 
 private fun toConfigMedia(image: MediaImage): ConfigMedia =
-    ConfigMedia(image.filename, image.data.toByteArray())
+    ConfigMedia(image.filename, image.data_.toByteArray())
 
 /** @return The `Hardware.MODEL*` constant matching the RetroStore [model]. */
-private fun getHardwareModelId(model: Trs80Model): Int = when (model) {
+private fun getHardwareModelId(model: Trs80Model?): Int = when (model) {
     Trs80Model.MODEL_I -> Hardware.MODEL1
     Trs80Model.MODEL_III -> Hardware.MODEL3
     Trs80Model.MODEL_4 -> Hardware.MODEL4

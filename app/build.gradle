@@ -20,25 +20,10 @@ java {
     }
 }
 
-configurations.configureEach {
-    // Guava is no longer used directly, but the RetroStore client JAR drags in
-    // guava 20, which bundles ListenableFuture. AndroidX pulls the separate
-    // listenablefuture stub artifact for the same class, so the two collide.
-    // Retiring the RetroStore JVM client removes Guava entirely - see
-    // doc/MODERNIZATION-PLAN.md D7.
-    exclude group: 'com.google.guava', module: 'listenablefuture'
-}
-
 dependencies {
     repositories {
         google()
         mavenCentral()
-        maven {
-            // The server currently redirects https to http, which Gradle
-            // rejects unless insecure access is explicitly allowed.
-            url 'http://maven.haberling.net'
-            allowInsecureProtocol = true
-        }
     }
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

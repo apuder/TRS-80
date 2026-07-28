@@ -302,7 +302,7 @@ see §3.
 time. *Recommend:* decide during the Phase 2 renderer spike; build-time baking is simpler and the
 fonts never change.
 
-**D7 — The RetroStore JVM SDK** (`github.com/shaeberling/retrostore-jvm-sdk`). The app depends on it
+**D7 — The RetroStore JVM SDK** ✅ DONE (July 2026) (`github.com/shaeberling/retrostore-jvm-sdk`). The app depends on it
 as `org.retrostore:retrostore-client:0.2.13`, published to `maven.haberling.net`.
 
 What it is: ~66 KB of Java, of which **37 KB is CLI test harnesses** (`TestCli`, `TestCliOldApi`) —
@@ -310,8 +310,13 @@ the real client is roughly 26 KB. Last pushed **August 2023**. No license. Depen
 (2016), Gson 2.8.0 (2016) and protobuf-lite 3.0.0. And the app calls exactly **four** of its methods:
 `fetchApps`, `fetchMediaImages`, `getApp`, `uploadState`.
 
-*Recommend:* **retire it and reimplement those four calls in `commonMain`** with Ktor plus
-Wire/kotlinx-serialization over the existing `.proto`. Vendoring the SDK source into this repo would
+*Resolved:* retired and reimplemented with Wire (protobuf) plus Ktor. The full `ApiProtos.proto`
+now lives in `retrostore/src/main/proto/` and Wire generates Kotlin from it; the client is five
+suspend functions. This removed `maven.haberling.net`, the `allowInsecureProtocol` workaround,
+Guava, and protobuf-lite from the module. Original recommendation follows.
+
+*Recommended at the time:* **retire it and reimplement those four calls in `commonMain`** with Ktor
+plus Wire/kotlinx-serialization over the existing `.proto`. Vendoring the SDK source into this repo would
 kill the private Maven dependency but leaves it Java and JVM-only — relocating the iOS blocker rather
 than removing it, while importing Guava and Gson into a graph we are trying to shrink.
 

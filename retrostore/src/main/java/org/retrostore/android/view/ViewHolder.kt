@@ -43,8 +43,9 @@ class ViewHolder internal constructor(
         appDescriptionView.text = app.description
         authorView.text = app.author
         versionView.text = itemView.resources.getString(R.string.app_version, app.version)
-        if (app.screenshotUrlCount > 0) {
-            imageLoader.loadUrlIntoView(app.getScreenshotUrl(0), thumbnailView)
+        val screenshotUrl = app.screenshot_url.firstOrNull()
+        if (screenshotUrl != null) {
+            imageLoader.loadUrlIntoView(screenshotUrl, thumbnailView)
             // TODO: Add an icon to indicate that loading failed.
         } else {
             // TODO: Display something indicating that there are no screenshots.

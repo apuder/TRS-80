@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.launch
 import org.retrostore.ApiException
-import org.retrostore.RetrostoreClientImpl
+import org.retrostore.RetrostoreClient
 import org.retrostore.android.net.DataFetcher
 import org.retrostore.android.view.ImageLoader
 import org.retrostore.android.view.ViewAdapter
@@ -48,7 +48,7 @@ class RetrostoreActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_retrostore)
-        fetcher = DataFetcher.initialize(RetrostoreClientImpl.getDefault("n/a"))
+        fetcher = DataFetcher.initialize(RetrostoreClient.default)
         imageLoader = ImageLoader.get(applicationContext)
         recyclerView = findViewById<RecyclerView>(R.id.appList).apply {
             setHasFixedSize(true)

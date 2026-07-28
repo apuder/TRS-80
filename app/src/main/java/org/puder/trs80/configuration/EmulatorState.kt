@@ -16,11 +16,11 @@
 
 package org.puder.trs80.configuration
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.google.protobuf.InvalidProtocolBufferException
+import okio.ByteString.Companion.toByteString
 import org.puder.trs80.Hardware
 import org.puder.trs80.XTRS
 import org.puder.trs80.io.FileManager
@@ -81,7 +81,6 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
      * @param model the emulated model, see [Hardware].
      * @return The converted state, or null if no valid state was dumped.
      */
-    @SuppressLint("CheckResult")
     fun getSystemState(model: Int): SystemState? {
         if (!fileManager.hasFile(FILE_XRAY_STATE)) {
             return null
@@ -100,37 +99,33 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
         }
 
         val registers = nativeState.registers
-        val state = SystemState.newBuilder()
+        return SystemState(
             // Set the model number, which we don't get from the native info.
-            .setModel(toRetroStoreModel(model))
-            .setRegisters(
-                SystemState.Registers.newBuilder()
-                    .setIx(registers.ix)
-                    .setIy(registers.iy)
-                    .setPc(registers.pc)
-                    .setSp(registers.sp)
-                    .setAf(registers.af)
-                    .setBc(registers.bc)
-                    .setDe(registers.de)
-                    .setHl(registers.hl)
-                    .setAfPrime(registers.afPrime)
-                    .setBcPrime(registers.bcPrime)
-                    .setDePrime(registers.dePrime)
-                    .setHlPrime(registers.hlPrime)
-                    .setI(registers.i)
-                    .setR1(registers.r1)
-                    .setR2(registers.r2)
-            )
-
-        for (nativeMem in nativeState.memoryRegionsList) {
-            state.addMemoryRegions(
-                SystemState.MemoryRegion.newBuilder()
-                    .setStart(nativeMem.start)
-                    .setData(nativeMem.data)
-            )
-        }
-
-        return state.build()
+            model = toRetroStoreModel(model),
+            registers = SystemState.Registers(
+                ix = registers.ix,
+                iy = registers.iy,
+                pc = registers.pc,
+                sp = registers.sp,
+                af = registers.af,
+                bc = registers.bc,
+                de = registers.de,
+                hl = registers.hl,
+                af_prime = registers.afPrime,
+                bc_prime = registers.bcPrime,
+                de_prime = registers.dePrime,
+                hl_prime = registers.hlPrime,
+                i = registers.i,
+                r_1 = registers.r1,
+                r_2 = registers.r2
+            ),
+            memoryRegions = nativeState.memoryRegionsList.map { nativeMem ->
+                SystemState.MemoryRegion(
+                    start = nativeMem.start,
+                    data_ = nativeMem.data.toByteArray().toByteString()
+                )
+            }
+        )
     }
 
     /** Whether a saved emulator state exists. */

@@ -1,12 +1,36 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.squareup.wire:wire-gradle-plugin:6.4.5'
+    }
+}
+
 plugins {
     id 'com.android.library'
 }
+
+// Generates the RetroStore API messages from src/main/proto. Applied the
+// classpath way rather than through the plugins block so it resolves from
+// Maven Central instead of the Gradle plugin portal.
+apply plugin: 'com.squareup.wire'
 
 // Pins the JDK that compiles, independently of the JDK that launches Gradle.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+wire {
+    sourcePath {
+        srcDir 'src/main/proto'
+    }
+    // Generates Kotlin data holders plus their ProtoAdapters. The package comes
+    // from the proto's java_package option, so the generated types keep landing
+    // in org.retrostore.client.common.proto.
+    kotlin {}
 }
 
 android {
@@ -37,12 +61,6 @@ dependencies {
     repositories {
         google()
         mavenCentral()
-        maven {
-        // The server currently redirects https to http, which Gradle
-        // rejects unless insecure access is explicitly allowed.
-        url 'http://maven.haberling.net'
-        allowInsecureProtocol = true
-    }
     }
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.7.1'
@@ -51,8 +69,11 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
     implementation 'com.google.android.material:material:1.14.0'
-    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
-    api 'org.retrostore:retrostore-client:0.2.13'
+    // api, not implementation: the generated messages are part of this module's
+    // public surface, so their Message supertype and okio.ByteString have to be
+    // on the consuming module's compile classpath too.
+    api 'com.squareup.wire:wire-runtime:6.4.5'
+    implementation 'io.ktor:ktor-client-okhttp:3.5.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     testImplementation 'junit:junit:4.13.2'
