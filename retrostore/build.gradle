@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.14.0'
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     api 'org.retrostore:retrostore-client:0.2.13'
-    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     testImplementation 'junit:junit:4.13.2'
 }

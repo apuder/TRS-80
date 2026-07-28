@@ -17,7 +17,6 @@
 package org.puder.trs80.configuration
 
 import android.util.SparseArray
-import com.google.common.base.Optional
 
 private const val CONFIG_BACKUP_IS_IMMUTABLE = "ConfigurationBackup is immutable"
 private const val NUM_DISKS = 4
@@ -28,13 +27,13 @@ private const val NUM_DISKS = 4
  */
 internal class ConfigurationBackup private constructor(
     override val id: Int,
-    name: String?,
+    override val name: String?,
     model: Int,
-    cassettePath: String?,
+    override val cassettePath: String?,
     diskPaths: SparseArray<String?>,
     cassettePosition: Float,
-    keyboardLayoutPortrait: KeyboardLayout?,
-    keyboardLayoutLandscape: KeyboardLayout?,
+    override val keyboardLayoutPortrait: KeyboardLayout?,
+    override val keyboardLayoutLandscape: KeyboardLayout?,
     characterColor: Int,
     override val characterColorAsRGB: Int,
     screenColorAsRGB: Int,
@@ -46,18 +45,18 @@ internal class ConfigurationBackup private constructor(
         fun from(orig: Configuration): Configuration {
             val diskPaths = SparseArray<String?>(NUM_DISKS).apply {
                 for (disk in 0 until NUM_DISKS) {
-                    put(disk, orig.getDiskPath(disk).orNull())
+                    put(disk, orig.getDiskPath(disk))
                 }
             }
             return ConfigurationBackup(
                 orig.id,
-                orig.name.orNull(),
+                orig.name,
                 orig.model,
-                orig.cassettePath.orNull(),
+                orig.cassettePath,
                 diskPaths,
                 orig.cassettePosition,
-                orig.keyboardLayoutPortrait.orNull(),
-                orig.keyboardLayoutLandscape.orNull(),
+                orig.keyboardLayoutPortrait,
+                orig.keyboardLayoutLandscape,
                 orig.characterColor,
                 orig.characterColorAsRGB,
                 orig.screenColorAsRGB,
@@ -65,16 +64,6 @@ internal class ConfigurationBackup private constructor(
             )
         }
     }
-
-    override val name: Optional<String> = Optional.fromNullable(name)
-
-    override val cassettePath: Optional<String> = Optional.fromNullable(cassettePath)
-
-    override val keyboardLayoutPortrait: Optional<KeyboardLayout> =
-        Optional.fromNullable(keyboardLayoutPortrait)
-
-    override val keyboardLayoutLandscape: Optional<KeyboardLayout> =
-        Optional.fromNullable(keyboardLayoutLandscape)
 
     override var model: Int = model
         set(value) = immutable()
@@ -94,7 +83,7 @@ internal class ConfigurationBackup private constructor(
     override var isSoundMuted: Boolean = isSoundMuted
         set(value) = immutable()
 
-    override fun getDiskPath(disk: Int): Optional<String> = Optional.fromNullable(diskPaths[disk])
+    override fun getDiskPath(disk: Int): String? = diskPaths[disk]
 
     override fun setName(name: String?) = immutable()
 

@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.util.Log
-import com.google.common.base.Optional
 import org.puder.trs80.Hardware
 import org.puder.trs80.io.FileManager
 import java.io.IOException
@@ -108,7 +107,7 @@ class ConfigurationManager private constructor(
      * @return Whether the configuration and its saved state were fully removed.
      */
     fun deleteConfigWithId(id: Int): Boolean {
-        val config = getConfigById(id).orNull() ?: return false
+        val config = getConfigById(id) ?: return false
         configurations.remove(config)
         config.delete()
         saveConfigurationIds()
@@ -124,10 +123,9 @@ class ConfigurationManager private constructor(
     }
 
     /**
-     * @return The configuration with the given ID, if it exists.
+     * @return The configuration with the given ID, or null if it does not exist.
      */
-    fun getConfigById(id: Int): Optional<Configuration> =
-        Optional.fromNullable(configurations.firstOrNull { it.id == id })
+    fun getConfigById(id: Int): Configuration? = configurations.firstOrNull { it.id == id }
 
     /**
      * @return The position of the configuration with the given ID, or -1 if the configuration
@@ -154,13 +152,13 @@ class ConfigurationManager private constructor(
     /** Writes the values of the given configuration back into its persisted storage. */
     fun persistConfig(configuration: Configuration) {
         val toSave = ConfigurationImpl.fromId(configuration.id, context)
-        toSave.setName(configuration.name.orNull())
+        toSave.setName(configuration.name)
         toSave.model = configuration.model
-        toSave.setCassettePath(configuration.cassettePath.orNull())
+        toSave.setCassettePath(configuration.cassettePath)
         toSave.diskPaths = configuration.diskPaths
         toSave.cassettePosition = configuration.cassettePosition
-        toSave.setKeyboardLayoutPortrait(configuration.keyboardLayoutPortrait.orNull())
-        toSave.setKeyboardLayoutLandscape(configuration.keyboardLayoutLandscape.orNull())
+        toSave.setKeyboardLayoutPortrait(configuration.keyboardLayoutPortrait)
+        toSave.setKeyboardLayoutLandscape(configuration.keyboardLayoutLandscape)
         toSave.characterColor = configuration.characterColor
         toSave.screenColorAsRGB = configuration.screenColorAsRGB
         toSave.isSoundMuted = configuration.isSoundMuted
@@ -177,14 +175,14 @@ class ConfigurationManager private constructor(
      * @param configName the name of this new configuration.
      * @param disks      the disk images for this configuration.
      * @param cassette   the cassette image, or null, for this configuration.
-     * @return If the configuration was successfully added it will be returned.
+     * @return The new configuration, or null if it could not be added.
      */
     fun addNewConfiguration(
         model: Int,
         configName: String?,
         disks: List<ConfigMedia?>,
         cassette: ConfigMedia?
-    ): Optional<Configuration> {
+    ): Configuration? {
         // Configurations automatically persist.
         val newConfig = newConfiguration()
         newConfig.setName(configName)
@@ -194,7 +192,7 @@ class ConfigurationManager private constructor(
             fileManagerCreator.createForAppSubDir(newConfig.id)
         } catch (e: IOException) {
             Log.e(TAG, "Could not create configuration sub-dir.")
-            return Optional.absent()
+            return null
         }
 
         for (disk in 0 until minOf(MAX_DISKS, disks.size)) {
@@ -209,7 +207,7 @@ class ConfigurationManager private constructor(
             // If any disk fails writing, delete the whole config.
             if (!configFileManager.writeFile(filename, data)) {
                 deleteConfigWithId(newConfig.id)
-                return Optional.absent()
+                return null
             }
             newConfig.setDiskPath(disk, configFileManager.getAbsolutePathForFile(filename))
         }
@@ -222,7 +220,7 @@ class ConfigurationManager private constructor(
             } else if (!configFileManager.writeFile(cassetteName, cassetteData)) {
                 // If the cassette fails writing, delete the whole config.
                 deleteConfigWithId(newConfig.id)
-                return Optional.absent()
+                return null
             } else {
                 newConfig.setCassettePath(
                     configFileManager.getAbsolutePathForFile(cassetteName)
@@ -230,7 +228,7 @@ class ConfigurationManager private constructor(
             }
         }
 
-        return Optional.of(newConfig)
+        return newConfig
     }
 
     /**

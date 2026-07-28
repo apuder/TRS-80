@@ -16,8 +16,6 @@
 
 package org.puder.trs80.configuration
 
-import com.google.common.base.Optional
-
 /**
  * Various keyboard layouts.
  *
@@ -37,9 +35,9 @@ enum class KeyboardLayout(@JvmField val id: Int) {
             KeyboardLayout.entries.associateBy(KeyboardLayout::id)
 
         /**
-         * @return The layout with the given [id], or absent if no layout uses that ID.
+         * @return The layout with the given [id], or null if no layout uses that ID.
          */
         @JvmStatic
-        fun fromId(id: Int): Optional<KeyboardLayout> = Optional.fromNullable(BY_ID[id])
+        fun fromId(id: Int): KeyboardLayout? = BY_ID[id]
     }
 }

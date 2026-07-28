@@ -103,7 +103,7 @@ class ConfigurationListViewAdapter(
         holder.configuration = conf
 
         // Name
-        conf.name.orNull()?.let { name ->
+        conf.name?.let { name ->
             card.nameFront.text = name
             card.nameBack.text = name
         }
@@ -119,7 +119,7 @@ class ConfigurationListViewAdapter(
 
         // Disks
         card.disks.text = (0 until NUM_DISKS)
-            .count { !conf.getDiskPath(it).orNull().isNullOrEmpty() }
+            .count { !conf.getDiskPath(it).isNullOrEmpty() }
             .toString()
 
         // Cassette
@@ -134,8 +134,8 @@ class ConfigurationListViewAdapter(
         )
 
         // Keyboards
-        card.keyboardPortrait.text = keyboardLabel(conf.keyboardLayoutPortrait.orNull())
-        card.keyboardLandscape.text = keyboardLabel(conf.keyboardLayoutLandscape.orNull())
+        card.keyboardPortrait.text = keyboardLabel(conf.keyboardLayoutPortrait)
+        card.keyboardLandscape.text = keyboardLabel(conf.keyboardLayoutLandscape)
 
         // Screenshot
         card.screenshot.setScreenshotBitmap(null)

@@ -27,8 +27,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
-import org.puder.trs80.async.UiExecutor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia
 import org.puder.trs80.io.FileDownloader
@@ -37,8 +40,6 @@ import org.puder.trs80.localstore.InitialDownloads.Download
 import org.puder.trs80.localstore.RomManager
 import org.retrostore.android.RetrostoreApi
 import java.io.IOException
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 private const val TAG = "InitlStpFgrmnt"
 private const val TUTORIAL_APP_ID = "2420f832-a7aa-11e7-8132-7343fef39a1f"
@@ -50,8 +51,6 @@ private const val TUTORIAL_APP_ID = "2420f832-a7aa-11e7-8132-7343fef39a1f"
 class InitialSetupDialogFragment : DialogFragment() {
 
     private val fileDownloader = FileDownloader()
-    private val downloadExecutor: Executor = Executors.newSingleThreadExecutor()
-    private val uiExecutor: Executor = UiExecutor.create()
     private val romManager: RomManager = RomManager.get()
 
     private lateinit var listener: DownloadCompletionListener
@@ -92,30 +91,24 @@ class InitialSetupDialogFragment : DialogFragment() {
         }
         val appInstaller = AppInstaller(configurationManager, RetrostoreApi.get())
 
-        // Initialize the downloads of all initial items.
+        // The items are downloaded one after another, so progress can simply be reported as the
+        // loop advances and completion is whatever follows it.
         val downloads = InitialDownloads.get()
         val totalDownloads = downloads.size + 1
-        for (item in downloads) {
-            downloadExecutor.execute {
+        lifecycleScope.launch {
+            for (item in downloads) {
                 onDownloadProgress(++downloadCounter, totalDownloads)
-                download(item, configurationManager)
+                withContext(Dispatchers.IO) { download(item, configurationManager) }
             }
-        }
-
-        // Download and install the tutorial.
-        downloadExecutor.execute {
             onDownloadProgress(++downloadCounter, totalDownloads)
             appInstaller.downloadAndInstallApp(TUTORIAL_APP_ID)
+            doneDownloading()
         }
-
-        // Since the download executor is a single threaded one, we add another task that will
-        // let us know when we're done.
-        downloadExecutor.execute { uiExecutor.execute { doneDownloading() } }
     }
 
     /** Downloads the given item. */
     private fun download(item: Download, configurationManager: ConfigurationManager) {
-        val data = fileDownloader.download(item.url, item.fileInZip).orNull()
+        val data = fileDownloader.download(item.url, item.fileInZip)
         if (data == null) {
             Log.e(TAG, StrUtil.form("Could not load data for '%s'.", item.url))
             return
@@ -131,12 +124,12 @@ class InitialSetupDialogFragment : DialogFragment() {
                 listOf(ConfigMedia(item.destinationFilename, data)),
                 null /* No cassette */
             )
-            Log.i(TAG, "Adding configuration success: ${newConfig.isPresent}")
+            Log.i(TAG, "Adding configuration success: ${newConfig != null}")
         }
     }
 
-    /** Update download progress. */
-    private fun onDownloadProgress(num: Int, total: Int) = uiExecutor.execute {
+    /** Update download progress. Called from the main thread. */
+    private fun onDownloadProgress(num: Int, total: Int) {
         (dialog as ProgressDialog).setMessage(getString(R.string.downloading, num, total))
     }
 

@@ -34,24 +34,22 @@ class AppInstaller(
 ) {
 
     /**
-     * Downloads the app with the given ID and creates a configuration for it. Do not call this on
-     * the main thread.
+     * Downloads the app with the given ID and creates a configuration for it.
      *
      * @return Whether the download and configuration creation was successful.
      */
-    fun downloadAndInstallApp(appId: String): Boolean {
+    suspend fun downloadAndInstallApp(appId: String): Boolean {
         require(appId.isNotEmpty()) { "appId must not be empty." }
-        return retroStoreApi.downloadApp(appId).orNull()?.let(::installApp) ?: false
+        return retroStoreApi.downloadApp(appId)?.let(::installApp) ?: false
     }
 
     /**
-     * Downloads the disk images of [app] and installs it by creating the configuration. Do not
-     * call this on the main thread.
+     * Downloads the disk images of [app] and installs it by creating the configuration.
      *
      * @return Whether the download and configuration creation was successful.
      */
-    fun downloadAndInstallApp(app: App): Boolean =
-        retroStoreApi.downloadImages(app).orNull()?.let(::installApp) ?: false
+    suspend fun downloadAndInstallApp(app: App): Boolean =
+        retroStoreApi.downloadImages(app)?.let(::installApp) ?: false
 
     /**
      * Creates a configuration for the given app package.
@@ -70,7 +68,7 @@ class AppInstaller(
         val app = appPackage.appData
         return configManager.addNewConfiguration(
             getHardwareModelId(app.extTrs80.model), app.name, disks, cassette
-        ).isPresent
+        ) != null
     }
 }
 

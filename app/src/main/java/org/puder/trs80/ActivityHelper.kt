@@ -18,7 +18,6 @@ package org.puder.trs80
 
 import android.content.Intent
 import android.util.Log
-import com.google.common.base.Optional
 
 private const val TAG = "ActivityHelper"
 
@@ -32,15 +31,15 @@ object ActivityHelper {
      * present.
      */
     @JvmStatic
-    fun getIntExtra(intent: Intent?, key: String): Optional<Int> {
+    fun getIntExtra(intent: Intent?, key: String): Int? {
         if (intent == null) {
             Log.i(TAG, "No intent.")
-            return Optional.absent()
+            return null
         }
         if (!intent.hasExtra(key)) {
             Log.i(TAG, StrUtil.form("No extra named '%s'.", key))
-            return Optional.absent()
+            return null
         }
-        return Optional.of(intent.getIntExtra(key, 0))
+        return intent.getIntExtra(key, 0)
     }
 }

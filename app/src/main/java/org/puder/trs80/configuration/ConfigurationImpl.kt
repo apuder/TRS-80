@@ -19,7 +19,6 @@ package org.puder.trs80.configuration
 import android.content.Context
 import android.graphics.Color
 import android.util.SparseArray
-import com.google.common.base.Optional
 import org.puder.trs80.Hardware
 
 private const val NUM_DISKS = 4
@@ -39,14 +38,14 @@ internal class ConfigurationImpl private constructor(
             ConfigurationImpl(id, ConfigurationPersistence.forId(id, context))
     }
 
-    override val name: Optional<String>
+    override val name: String?
         get() = persistence.name
 
     override fun setName(name: String?) = persistence.setName(name)
 
     // TODO: This should be an enum.
     override var model: Int
-        get() = when (persistence.model.orNull()?.toInt()) {
+        get() = when (persistence.model?.toInt()) {
             1 -> Hardware.MODEL1
             3 -> Hardware.MODEL3
             4 -> Hardware.MODEL4
@@ -60,19 +59,19 @@ internal class ConfigurationImpl private constructor(
             }
         )
 
-    override val cassettePath: Optional<String>
+    override val cassettePath: String?
         get() = persistence.casettePath
 
     override fun setCassettePath(path: String?) = persistence.setCasettePath(path)
 
-    override fun getDiskPath(disk: Int): Optional<String> = persistence.getDiskPath(disk)
+    override fun getDiskPath(disk: Int): String? = persistence.getDiskPath(disk)
 
     override fun setDiskPath(disk: Int, path: String?) = persistence.setDiskPath(disk, path)
 
     override var diskPaths: SparseArray<String?>
         get() = SparseArray<String?>(NUM_DISKS).apply {
             for (disk in 0 until NUM_DISKS) {
-                put(disk, persistence.getDiskPath(disk).orNull())
+                put(disk, persistence.getDiskPath(disk))
             }
         }
         set(paths) {
@@ -85,14 +84,14 @@ internal class ConfigurationImpl private constructor(
         get() = persistence.getCassettePosition(0f)
         set(pos) = persistence.setCassettePosition(pos)
 
-    override val keyboardLayoutPortrait: Optional<KeyboardLayout>
+    override val keyboardLayoutPortrait: KeyboardLayout?
         get() = KeyboardLayout.fromId(persistence.keyboardLayoutPortrait)
 
     override fun setKeyboardLayoutPortrait(layout: KeyboardLayout?) {
         layout?.let { persistence.setKeyboardLayoutPortrait(it.id) }
     }
 
-    override val keyboardLayoutLandscape: Optional<KeyboardLayout>
+    override val keyboardLayoutLandscape: KeyboardLayout?
         get() = KeyboardLayout.fromId(persistence.keyboardLayoutLandscape)
 
     override fun setKeyboardLayoutLandscape(layout: KeyboardLayout?) {

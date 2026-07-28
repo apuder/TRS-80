@@ -17,8 +17,8 @@
 package org.retrostore.android
 
 import android.util.Log
-import com.google.common.base.Optional
-import com.google.common.collect.ImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.retrostore.ApiException
 import org.retrostore.RetrostoreClient
 import org.retrostore.RetrostoreClientImpl
@@ -53,62 +53,77 @@ object RetrostoreApi {
     }
 
     /**
-     * Downloads all aspects of an app package. Do not call this on the main thread.
+     * Downloads all aspects of an app package. The blocking network calls run on [Dispatchers.IO],
+     * so this is safe to call from the main thread.
      *
      * @param appId the ID of the app to download. Must not be empty.
-     * @return The complete package, or absent if it could not be downloaded.
+     * @return The complete package, or null if it could not be downloaded.
      */
-    fun downloadApp(appId: String): Optional<AppPackage> {
+    suspend fun downloadApp(appId: String): AppPackage? {
         require(appId.isNotEmpty()) { "appId must not be empty." }
-        return try {
-            downloadImages(retrostoreClient.getApp(appId))
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot download media images.", e)
-            Optional.absent<AppPackage>()
+        return withContext(Dispatchers.IO) {
+            try {
+                packageOf(retrostoreClient.getApp(appId))
+            } catch (e: ApiException) {
+                Log.e(TAG, "Cannot download media images.", e)
+                null
+            }
         }
     }
 
     /**
-     * Downloads the media images for [app] and returns the whole package.
+     * Downloads the media images for [app] and returns the whole package. The blocking network
+     * call runs on [Dispatchers.IO], so this is safe to call from the main thread.
      *
-     * @return The complete package, or absent if [app] is null or the images could not be
+     * @return The complete package, or null if [app] is null or the images could not be
      * downloaded.
      */
-    fun downloadImages(app: App?): Optional<AppPackage> {
+    suspend fun downloadImages(app: App?): AppPackage? {
         if (app == null) {
-            return Optional.absent()
+            return null
         }
-        return try {
-            val mediaImages = retrostoreClient.fetchMediaImages(app.id)
-            Optional.of(AppPackage(app, ImmutableList.copyOf(mediaImages)))
-        } catch (e: ApiException) {
-            Log.e(TAG, "Cannot download media images.", e)
-            Optional.absent<AppPackage>()
+        return withContext(Dispatchers.IO) {
+            try {
+                packageOf(app)
+            } catch (e: ApiException) {
+                Log.e(TAG, "Cannot download media images.", e)
+                null
+            }
         }
     }
 
     /**
-     * Uploads a system state ephemerally to the RetroStore.
+     * Uploads a system state ephemerally to the RetroStore. The blocking network call runs on
+     * [Dispatchers.IO], so this is safe to call from the main thread.
      *
-     * @return The token identifying the uploaded state, or absent if the upload failed.
+     * @return The token identifying the uploaded state, or null if the upload failed.
      */
-    fun uploadSystemState(state: SystemState): Optional<Long> = try {
-        Optional.of(retrostoreClient.uploadState(state))
-    } catch (e: ApiException) {
-        Log.e(TAG, "Cannot upload system state.", e)
-        Optional.absent<Long>()
+    suspend fun uploadSystemState(state: SystemState): Long? = withContext(Dispatchers.IO) {
+        try {
+            retrostoreClient.uploadState(state)
+        } catch (e: ApiException) {
+            Log.e(TAG, "Cannot upload system state.", e)
+            null
+        }
     }
 
     /**
-     * Downloads an ephemeral system state from the RetroStore.
+     * Downloads an ephemeral system state from the RetroStore. The blocking network call runs on
+     * [Dispatchers.IO], so this is safe to call from the main thread.
      *
      * @param token the token the state was uploaded under.
-     * @return The state, or absent if it could not be downloaded.
+     * @return The state, or null if it could not be downloaded.
      */
-    fun downloadSystemState(token: Long): Optional<SystemState> = try {
-        Optional.of(retrostoreClient.downloadState(token))
-    } catch (e: ApiException) {
-        Log.e(TAG, "Cannot download system state.", e)
-        Optional.absent<SystemState>()
+    suspend fun downloadSystemState(token: Long): SystemState? = withContext(Dispatchers.IO) {
+        try {
+            retrostoreClient.downloadState(token)
+        } catch (e: ApiException) {
+            Log.e(TAG, "Cannot download system state.", e)
+            null
+        }
     }
+
+    /** Fetches the media images belonging to [app] and bundles both into a package. */
+    private fun packageOf(app: App?): AppPackage? =
+            app?.let { AppPackage(it, retrostoreClient.fetchMediaImages(it.id).toList()) }
 }

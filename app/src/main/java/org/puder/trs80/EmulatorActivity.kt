@@ -253,7 +253,7 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
         try {
             emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get(resources))
             val configManager = ConfigurationManager.get(applicationContext)
-            val config = configManager.getConfigById(id).orNull()
+            val config = configManager.getConfigById(id)
             if (config == null) {
                 Log.e(TAG, "Configuration not found.")
                 return
@@ -616,8 +616,7 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
         val builder = AlertDialogUtil.createAlertDialog(this)
         builder.setSingleChoiceItems(keyboardTypes, keyboardType.id) { _, which ->
             AlertDialogUtil.dismissDialog(this)
-            val layout = KeyboardLayout.fromId(which).orNull()
-                ?: return@setSingleChoiceItems
+            val layout = KeyboardLayout.fromId(which) ?: return@setSingleChoiceItems
             when (orientation) {
                 AndroidConfiguration.ORIENTATION_LANDSCAPE ->
                     currentConfiguration.setKeyboardLayoutLandscape(layout)
@@ -640,12 +639,12 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
             }
             val landscape =
                 if (orientation == AndroidConfiguration.ORIENTATION_LANDSCAPE) {
-                    currentConfiguration.keyboardLayoutLandscape.orNull()
+                    currentConfiguration.keyboardLayoutLandscape
                 } else {
                     null
                 }
             return landscape
-                ?: currentConfiguration.keyboardLayoutPortrait.orNull()
+                ?: currentConfiguration.keyboardLayoutPortrait
                 ?: KeyboardLayout.KEYBOARD_LAYOUT_ORIGINAL
         }
 
@@ -764,7 +763,7 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
     }
 
     private fun showTutorial() {
-        val name = currentConfiguration.name.orNull()
+        val name = currentConfiguration.name
         if (name != null && name != CONFIGURATION_TUTORIAL_NAME) {
             showDialog(R.string.help_title_emulator, -1, R.string.tutorial_prereq)
             return

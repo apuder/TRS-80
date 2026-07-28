@@ -43,12 +43,14 @@ import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import kotlinx.coroutines.launch
 import org.puder.trs80.cast.CastMessageSender
 import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.configuration.ConfigurationManager
@@ -60,8 +62,6 @@ import org.retrostore.android.RetrostoreApi
 import org.retrostore.client.common.proto.App
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 private const val TAG = "MainActivity"
 
@@ -105,7 +105,6 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
 
     // Note: This is in the RetroStore package.
     private lateinit var appInstaller: AppInstaller
-    private val installExecutor: Executor = Executors.newSingleThreadExecutor()
     private lateinit var castMessageSender: CastMessageSender
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -309,7 +308,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
             } catch (e: IOException) {
                 Log.e(TAG, "Could not delete emulator state.", e)
             }
-            configManager.getConfigById(id).orNull()?.cassettePosition = 0f
+            configManager.getConfigById(id)?.cassettePosition = 0f
             // Update UI
             if (isNew) updateView(positionInserted = position)
             else updateView(positionChanged = position)
@@ -377,7 +376,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
     }
 
     private fun deleteConfiguration(conf: Configuration, position: Int) {
-        val msg = getString(R.string.alert_dialog_confirm_delete, conf.name.orNull())
+        val msg = getString(R.string.alert_dialog_confirm_delete, conf.name)
         val builder = AlertDialogUtil.createAlertDialog(
             this, R.string.app_name, R.drawable.warning_icon, msg
         ).apply {
@@ -394,7 +393,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
     }
 
     private fun stopEmulator(conf: Configuration, position: Int) {
-        val msg = getString(R.string.alert_dialog_confirm_stop_emu, conf.name.orNull())
+        val msg = getString(R.string.alert_dialog_confirm_stop_emu, conf.name)
         val builder = AlertDialogUtil.createAlertDialog(
             this, R.string.app_name, R.drawable.warning_icon, msg
         ).apply {
@@ -430,7 +429,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
             return
         }
         for (disk in 0 until NUM_DISKS) {
-            if (!checkIfFileExists(conf.getDiskPath(disk).orNull(), true, R.string.error_no_disk)) {
+            if (!checkIfFileExists(conf.getDiskPath(disk), true, R.string.error_no_disk)) {
                 return
             }
         }
@@ -443,7 +442,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
 
     private fun shareEmulatorState(conf: Configuration) {
         val state = try {
-            configManager.getEmulatorState(conf.id).getSystemState(conf.model).orNull()
+            configManager.getEmulatorState(conf.id).getSystemState(conf.model)
         } catch (e: IOException) {
             Log.e(TAG, "Cannot get emulator state.", e)
             showToast("Cannot get emulator state")
@@ -455,13 +454,13 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
             return
         }
 
-        installExecutor.execute {
-            val token = RetrostoreApi.get().uploadSystemState(state).orNull()
+        lifecycleScope.launch {
+            val token = RetrostoreApi.get().uploadSystemState(state)
             if (token == null) {
                 Log.e(TAG, "Failed uploading state to RetroStore")
                 // TODO: I18N.
                 showToast("Failed uploading state to RetroStore")
-                return@execute
+                return@launch
             }
             showToast(StrUtil.form("System state uploaded. TOKEN: %d", token))
         }
@@ -536,7 +535,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
         startActivity(Intent.createChooser(sendIntent, resources.getText(R.string.share_title)))
     }
 
-    private fun asyncDownloadAndInstallApp(app: App) = installExecutor.execute {
+    private fun asyncDownloadAndInstallApp(app: App) = lifecycleScope.launch {
         if (appInstaller.downloadAndInstallApp(app)) {
             showToast(StrUtil.form(getString(R.string.successfully_installed), app.name))
         }

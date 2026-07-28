@@ -20,8 +20,6 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.google.common.base.Optional
-import com.google.common.io.Files
 import com.google.protobuf.InvalidProtocolBufferException
 import org.puder.trs80.Hardware
 import org.puder.trs80.XTRS
@@ -81,24 +79,24 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
      * Converts the state that the emulator dumped for TRS-Xray into the RetroStore format.
      *
      * @param model the emulated model, see [Hardware].
-     * @return The converted state, or absent if no valid state was dumped.
+     * @return The converted state, or null if no valid state was dumped.
      */
     @SuppressLint("CheckResult")
-    fun getSystemState(model: Int): Optional<SystemState> {
+    fun getSystemState(model: Int): SystemState? {
         if (!fileManager.hasFile(FILE_XRAY_STATE)) {
-            return Optional.absent()
+            return null
         }
         val stateBytes = try {
-            Files.toByteArray(File(fileManager.getAbsolutePathForFile(FILE_XRAY_STATE)))
+            File(fileManager.getAbsolutePathForFile(FILE_XRAY_STATE)).readBytes()
         } catch (e: IOException) {
             Log.e(TAG, "Unable to load xray state file from file.", e)
-            return Optional.absent()
+            return null
         }
         val nativeState = try {
             NativeSystemState.parseFrom(stateBytes)
         } catch (e: InvalidProtocolBufferException) {
             Log.e(TAG, "Unable to parse xray state protocol buffer.", e)
-            return Optional.absent()
+            return null
         }
 
         val registers = nativeState.registers
@@ -132,7 +130,7 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
             )
         }
 
-        return Optional.of(state.build())
+        return state.build()
     }
 
     /** Whether a saved emulator state exists. */
@@ -160,7 +158,7 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
      * @return The stored screenshot, or null if there is none.
      */
     fun loadScreenshot(): Bitmap? {
-        val screenshot = fileManager.readFile(FILE_SCREENSHOT).orNull() ?: return null
+        val screenshot = fileManager.readFile(FILE_SCREENSHOT) ?: return null
         val options = BitmapFactory.Options().apply {
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }

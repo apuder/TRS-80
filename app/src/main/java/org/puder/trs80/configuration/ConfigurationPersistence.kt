@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.Preference
 import android.preference.PreferenceManager
-import com.google.common.base.Optional
 
 private const val PREF_NAME_PREFIX = "CONFIG_"
 private const val CONF_NAME = "conf_name"
@@ -71,26 +70,24 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
         }
     }
 
-    /** The stored model as its raw string value. */
-    val model: Optional<String>
-        get() = getString(CONF_MODEL, null)
+    /** The stored model as its raw string value, or null if none is stored. */
+    val model: String?
+        get() = sharedPrefs.getString(CONF_MODEL, null)
 
     internal fun setModel(model: String?) = setStringOrRemove(CONF_MODEL, model)
 
-    /** The stored path of the cassette image. */
-    val casettePath: Optional<String>
-        get() = getString(CONF_CASSETTE, null)
+    /** The stored path of the cassette image, or null if none is stored. */
+    val casettePath: String?
+        get() = sharedPrefs.getString(CONF_CASSETTE, null)
 
     fun setCasettePath(path: String?) = setStringOrRemove(CONF_CASSETTE, path)
 
     /**
      * @param disk the zero-based index of the disk drive.
-     * @return The stored path of the image in that drive.
+     * @return The stored path of the image in that drive, or null if there is none.
      */
-    fun getDiskPath(disk: Int): Optional<String> {
-        val key = diskIdToKey(disk) ?: return Optional.absent()
-        return getString(key, null)
-    }
+    fun getDiskPath(disk: Int): String? =
+        diskIdToKey(disk)?.let { sharedPrefs.getString(it, null) }
 
     fun setDiskPath(disk: Int, path: String?) {
         val key = diskIdToKey(disk) ?: return
@@ -108,8 +105,8 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
         sharedPrefs.edit().putFloat(KEY_CASSETTE_POSITION, pos).apply()
 
     /** The stored name of the configuration, defaulting to "unknown". */
-    val name: Optional<String>
-        get() = getString(CONF_NAME, "unknown")
+    val name: String?
+        get() = sharedPrefs.getString(CONF_NAME, "unknown")
 
     internal fun setName(name: String?) = setStringOrRemove(CONF_NAME, name)
 
@@ -136,9 +133,6 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
     /** @return A finder for the preferences of this configuration. */
     fun forPreferenceProvider(provider: PreferenceProvider): PreferenceFinder =
         PreferenceFinder(provider)
-
-    private fun getString(key: String, defaultValue: String?): Optional<String> =
-        Optional.fromNullable(sharedPrefs.getString(key, defaultValue))
 
     private fun setStringOrRemove(key: String, value: String?) {
         val editor = sharedPrefs.edit()

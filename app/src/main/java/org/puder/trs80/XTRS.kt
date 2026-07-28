@@ -81,11 +81,11 @@ object XTRS {
             model,
             romFile,
             0, // entryAddr; a .cmd image supplies its own.
-            configuration.cassettePath.or(emulatorState.defaultCassettePath),
-            configuration.getDiskPath(0).orNull(),
-            configuration.getDiskPath(1).orNull(),
-            configuration.getDiskPath(2).orNull(),
-            configuration.getDiskPath(3).orNull()
+            configuration.cassettePath ?: emulatorState.defaultCassettePath,
+            configuration.getDiskPath(0),
+            configuration.getDiskPath(1),
+            configuration.getDiskPath(2),
+            configuration.getDiskPath(3)
         )
     }
 

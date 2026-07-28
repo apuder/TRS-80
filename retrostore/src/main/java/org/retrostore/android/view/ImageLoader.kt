@@ -21,12 +21,10 @@ import android.graphics.Bitmap
 import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.SettableFuture
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.concurrent.ExecutionException
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 private const val TAG = "ImageLoader"
 
@@ -35,7 +33,7 @@ private const val TAG = "ImageLoader"
  *
  * The context is only held weakly, so requests made after it went away are silently dropped.
  */
-class ImageLoader(context: Context, private val executor: Executor) {
+class ImageLoader(context: Context) {
     private val contextRef = WeakReference(context)
 
     /** Loads the image at [url] into [view], scaled with a centre crop. */
@@ -44,39 +42,31 @@ class ImageLoader(context: Context, private val executor: Executor) {
     }
 
     /**
-     * Asynchronously loads the image at [url] as a bitmap of [width] x [height] pixels.
+     * Loads the image at [url] as a bitmap of [width] x [height] pixels. The blocking Glide call
+     * runs on [Dispatchers.IO], so this is safe to call from the main thread.
      *
-     * @return A future with the bitmap, which fails if the context went away or the image could
-     * not be loaded.
+     * @return The loaded bitmap.
+     * @throws RuntimeException if the context went away.
+     * @throws ExecutionException if the image could not be loaded.
      */
-    fun loadAsBitmapAsync(url: String, width: Int, height: Int): ListenableFuture<Bitmap> {
-        val future = SettableFuture.create<Bitmap>()
-        val context = contextRef.get()
-        if (context == null) {
-            future.setException(RuntimeException("Context invalid."))
-            return future
-        }
+    suspend fun loadAsBitmapAsync(url: String, width: Int, height: Int): Bitmap {
+        val context = contextRef.get() ?: throw RuntimeException("Context invalid.")
 
-        executor.execute {
+        return withContext(Dispatchers.IO) {
             try {
-                future.set(Glide.with(context).asBitmap().load(url).submit(width, height).get())
+                Glide.with(context).asBitmap().load(url).submit(width, height).get()
             } catch (e: Exception) {
-                when (e) {
-                    is InterruptedException, is ExecutionException -> {
-                        Log.e(TAG, "Could not load image as bitmap.", e)
-                        future.setException(e)
-                    }
-                    else -> throw e
+                if (e is InterruptedException || e is ExecutionException) {
+                    Log.e(TAG, "Could not load image as bitmap.", e)
                 }
+                throw e
             }
         }
-        return future
     }
 
     companion object {
-        /** @return A new loader that loads images on a cached thread pool, using [context]. */
+        /** @return A new loader that loads images on [Dispatchers.IO], using [context]. */
         @JvmStatic
-        fun get(context: Context): ImageLoader =
-                ImageLoader(context, Executors.newCachedThreadPool())
+        fun get(context: Context): ImageLoader = ImageLoader(context)
     }
 }

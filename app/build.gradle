@@ -20,6 +20,15 @@ java {
     }
 }
 
+configurations.configureEach {
+    // Guava is no longer used directly, but the RetroStore client JAR drags in
+    // guava 20, which bundles ListenableFuture. AndroidX pulls the separate
+    // listenablefuture stub artifact for the same class, so the two collide.
+    // Retiring the RetroStore JVM client removes Guava entirely - see
+    // doc/MODERNIZATION-PLAN.md D7.
+    exclude group: 'com.google.guava', module: 'listenablefuture'
+}
+
 dependencies {
     repositories {
         google()
@@ -43,9 +52,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.14.0'
 
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
-    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
     implementation 'com.google.android.gms:play-services-cast:21.5.0'
-    implementation 'commons-io:commons-io:2.13.0'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':retrostore')
 

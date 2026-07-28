@@ -81,7 +81,7 @@ class EditConfigurationFragment : PreferenceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val configId = ActivityHelper.getIntExtra(activity.intent, EXTRA_CONFIG_ID).orNull()
+        val configId = ActivityHelper.getIntExtra(activity.intent, EXTRA_CONFIG_ID)
         if (configId == null) {
             Log.w(TAG, "Cannot get CONFIG_ID. Finishing activity.")
             activity.finish()
@@ -100,10 +100,10 @@ class EditConfigurationFragment : PreferenceFragment() {
             val currentPath: String?
             if (key == KEY_CASSETTE) {
                 requestCode = REQUEST_CASSETTE
-                currentPath = configPersistence.casettePath.orNull()
+                currentPath = configPersistence.casettePath
             } else {
                 requestCode = key.last().digitToInt()
-                currentPath = configPersistence.getDiskPath(requestCode - 1).orNull()
+                currentPath = configPersistence.getDiskPath(requestCode - 1)
             }
 
             // Start out in the directory of the currently selected image, or in the
@@ -181,14 +181,12 @@ class EditConfigurationFragment : PreferenceFragment() {
     }
 
     private fun updateSummaries() {
-        configPersistence.name.orNull()?.let { namePref.summary = it }
-        configPersistence.model.orNull()?.let { modelPref.summary = "Model " + modelLabel(it) }
+        configPersistence.name?.let { namePref.summary = it }
+        configPersistence.model?.let { modelPref.summary = "Model " + modelLabel(it) }
 
-        cassette.preference.summary =
-            configPersistence.casettePath.orNull() ?: cassette.defaultSummary
+        cassette.preference.summary = configPersistence.casettePath ?: cassette.defaultSummary
         disks.forEachIndexed { drive, disk ->
-            disk.preference.summary =
-                configPersistence.getDiskPath(drive).orNull() ?: disk.defaultSummary
+            disk.preference.summary = configPersistence.getDiskPath(drive) ?: disk.defaultSummary
         }
 
         setCharacterColorSummary(configPersistence.getCharacterColor(0))

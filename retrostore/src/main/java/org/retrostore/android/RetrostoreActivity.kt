@@ -22,24 +22,23 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.common.util.concurrent.FutureCallback
-import com.google.common.util.concurrent.Futures
+import kotlinx.coroutines.launch
+import org.retrostore.ApiException
 import org.retrostore.RetrostoreClientImpl
 import org.retrostore.android.net.DataFetcher
 import org.retrostore.android.view.ImageLoader
 import org.retrostore.android.view.ViewAdapter
 import org.retrostore.client.common.proto.App
-import java.util.concurrent.Executors
 
 /**
  * Shows the apps available in the RetroStore, and lets the user open one for installation.
  */
 class RetrostoreActivity : AppCompatActivity() {
     private val appInstallListener = InternalAppInstallListener { app -> showDetailsPage(app.id) }
-    private val networkExecutor = Executors.newSingleThreadExecutor()
 
     private lateinit var fetcher: DataFetcher
     private lateinit var imageLoader: ImageLoader
@@ -49,8 +48,7 @@ class RetrostoreActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_retrostore)
-        fetcher = DataFetcher.initialize(
-                RetrostoreClientImpl.getDefault("n/a"), Executors.newSingleThreadExecutor())
+        fetcher = DataFetcher.initialize(RetrostoreClientImpl.getDefault("n/a"))
         imageLoader = ImageLoader.get(applicationContext)
         recyclerView = findViewById<RecyclerView>(R.id.appList).apply {
             setHasFixedSize(true)
@@ -81,32 +79,34 @@ class RetrostoreActivity : AppCompatActivity() {
                 .putExtra(AppDetailsPageActivity.EXTRA_APP_ID, appId))
     }
 
+    /**
+     * Reloads the list of apps. The request runs in [lifecycleScope], so it is cancelled if the
+     * activity goes away while it is still in flight, and the UI updates below happen on the main
+     * thread without any manual hopping.
+     */
     private fun refreshApps() {
         setRefreshingStatus(true)
-        Futures.addCallback(fetcher.getAppsAsync(), object : FutureCallback<List<App>> {
-            override fun onSuccess(result: List<App>?) {
-                onAppsReceived(result.orEmpty())
-                setRefreshingStatus(false)
+        lifecycleScope.launch {
+            try {
+                onAppsReceived(fetcher.getAppsAsync())
+            } catch (e: ApiException) {
+                showToast("Something went wrong during the request: ${e.message}")
             }
-
-            override fun onFailure(t: Throwable) {
-                showToast("Something went wrong during the request: ${t.message}")
-                setRefreshingStatus(false)
-            }
-        }, networkExecutor)
+            setRefreshingStatus(false)
+        }
     }
 
     /** Apps list received. Display in list. */
-    private fun onAppsReceived(apps: List<App>) = runOnUiThread {
+    private fun onAppsReceived(apps: List<App>) {
         recyclerView.adapter = ViewAdapter(imageLoader, apps, appInstallListener)
     }
 
-    private fun setRefreshingStatus(refreshing: Boolean) = runOnUiThread {
+    private fun setRefreshingStatus(refreshing: Boolean) {
         refreshLayout.isRefreshing = refreshing
     }
 
-    /** Shows a toast with the given [message] on the main thread. */
-    private fun showToast(message: String) = runOnUiThread {
+    /** Shows a toast with the given [message]. */
+    private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 

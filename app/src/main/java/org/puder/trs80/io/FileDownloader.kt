@@ -17,7 +17,6 @@
 package org.puder.trs80.io
 
 import android.util.Log
-import com.google.common.base.Optional
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.io.InputStream
@@ -36,16 +35,15 @@ class FileDownloader {
      *
      * @param urlStr the URL to download.
      * @param fileInZip if the URL is a ZIP file, specify which file to extract from it.
-     * @return The file contents or absent, if the file could not be downloaded or extracted.
+     * @return The file contents, or null if the file could not be downloaded or extracted.
      */
-    fun download(urlStr: String, fileInZip: String?): Optional<ByteArray> = try {
+    fun download(urlStr: String, fileInZip: String?): ByteArray? = try {
         BufferedInputStream(URL(urlStr).openConnection().inputStream).use { input ->
-            Optional.fromNullable(
-                    if (fileInZip == null) input.readBytes() else extractFromZip(input, fileInZip))
+            if (fileInZip == null) input.readBytes() else extractFromZip(input, fileInZip)
         }
     } catch (e: IOException) {
         Log.e(TAG, "Could not load data", e)
-        Optional.absent<ByteArray>()
+        null
     }
 
     /**

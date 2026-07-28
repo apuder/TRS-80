@@ -82,13 +82,13 @@ class AppDetailsPageActivity : AppCompatActivity() {
         }
 
         // TODO: Make this work so that we instantiate a new fetcher if it got clean-up.
-        val fetcher = DataFetcher.get().orNull()
+        val fetcher = DataFetcher.get()
         if (fetcher == null) {
             Log.w(TAG, "No data fetcher available.")
             return null
         }
 
-        val app = fetcher.getFromCache(appId).orNull()
+        val app = fetcher.getFromCache(appId)
         if (app == null) {
             Log.w(TAG, "App not in cache.")
         }

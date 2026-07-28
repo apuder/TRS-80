@@ -17,37 +17,32 @@
 package org.puder.trs80.configuration
 
 import android.util.SparseArray
-import com.google.common.base.Optional
 
 /**
  * Interface for a configuration.
- *
- * Getters that may have no value return a Guava [Optional] because Java callers outside this
- * package still depend on that shape. They are meant to become nullable Kotlin types once those
- * callers have been converted.
  */
 interface Configuration {
     /** The ID that identifies this configuration and its storage. */
     val id: Int
 
-    /** The user-visible name of this configuration, if one was ever set. */
-    val name: Optional<String>
+    /** The user-visible name of this configuration, or null if one was never set. */
+    val name: String?
 
     fun setName(name: String?)
 
     /** The emulated hardware model, one of the `MODEL*` constants of `Hardware`. */
     var model: Int
 
-    /** The path of the cassette image, if one is configured. */
-    val cassettePath: Optional<String>
+    /** The path of the cassette image, or null if none is configured. */
+    val cassettePath: String?
 
     fun setCassettePath(path: String?)
 
     /**
      * @param disk the zero-based index of the disk drive.
-     * @return The path of the image in the given drive, if one is configured.
+     * @return The path of the image in the given drive, or null if none is configured.
      */
-    fun getDiskPath(disk: Int): Optional<String>
+    fun getDiskPath(disk: Int): String?
 
     fun setDiskPath(disk: Int, path: String?)
 
@@ -57,13 +52,13 @@ interface Configuration {
     /** The position the cassette is wound to. */
     var cassettePosition: Float
 
-    /** The keyboard layout to use in portrait orientation, if a valid one is stored. */
-    val keyboardLayoutPortrait: Optional<KeyboardLayout>
+    /** The keyboard layout to use in portrait orientation, or null if none is stored. */
+    val keyboardLayoutPortrait: KeyboardLayout?
 
     fun setKeyboardLayoutPortrait(layout: KeyboardLayout?)
 
-    /** The keyboard layout to use in landscape orientation, if a valid one is stored. */
-    val keyboardLayoutLandscape: Optional<KeyboardLayout>
+    /** The keyboard layout to use in landscape orientation, or null if none is stored. */
+    val keyboardLayoutLandscape: KeyboardLayout?
 
     fun setKeyboardLayoutLandscape(layout: KeyboardLayout?)
 

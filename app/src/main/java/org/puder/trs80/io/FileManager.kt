@@ -18,7 +18,6 @@ package org.puder.trs80.io
 
 import android.content.res.Resources
 import android.util.Log
-import com.google.common.base.Optional
 import org.puder.trs80.R
 import org.puder.trs80.StrUtil
 import org.puder.trs80.TRS80Application
@@ -127,12 +126,12 @@ class FileManager private constructor(private val baseDir: File) {
      * Reads a file within the base path of this manager.
      *
      * @param filename the filename to read
-     * @return The contents of the file, if it could be read.
+     * @return The contents of the file, or null if it could not be read.
      */
-    fun readFile(filename: String): Optional<ByteArray> = try {
-        Optional.of(baseDir.resolve(filename).readBytes())
+    fun readFile(filename: String): ByteArray? = try {
+        baseDir.resolve(filename).readBytes()
     } catch (e: IOException) {
-        Optional.absent<ByteArray>()
+        null
     }
 
     /**

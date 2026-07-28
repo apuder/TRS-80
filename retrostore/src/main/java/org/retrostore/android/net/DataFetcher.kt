@@ -16,14 +16,11 @@
 
 package org.retrostore.android.net
 
-import com.google.common.base.Optional
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.SettableFuture
-import org.retrostore.ApiException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.retrostore.RetrostoreClient
 import org.retrostore.client.common.proto.App
 import org.retrostore.client.common.proto.MediaImage
-import java.util.concurrent.Executor
 
 /** The index of the first app the list request asks for. */
 private const val PAGE_START = 0
@@ -36,48 +33,35 @@ private const val PAGE_SIZE = 100
 
 /**
  * Fetches data from the RetroStore.
+ *
+ * The requests block, so they run on [Dispatchers.IO] and are safe to call from the main thread.
  */
-class DataFetcher private constructor(
-        private val client: RetrostoreClient,
-        private val requestExecutor: Executor) {
+class DataFetcher private constructor(private val client: RetrostoreClient) {
 
     private val appCache = mutableMapOf<String, App>()
 
     /**
-     * Turns the synchronous API request into an asynchronous one and returns a listenable future
-     * with the result. The apps are also added to the cache backing [getFromCache].
+     * Fetches the list of apps. The apps are also added to the cache backing [getFromCache].
+     *
+     * @throws org.retrostore.ApiException if the request fails.
      */
-    fun getAppsAsync(): ListenableFuture<List<App>> = submit {
+    suspend fun getAppsAsync(): List<App> = withContext(Dispatchers.IO) {
         val apps: List<App> = client.fetchApps(PAGE_START, PAGE_SIZE)
         updateCache(apps)
         apps
     }
 
     /**
-     * Asynchronously fetches and returns all media images associated with the app with the given
-     * [appId].
+     * Fetches and returns all media images associated with the app with the given [appId].
+     *
+     * @throws org.retrostore.ApiException if the request fails.
      */
-    fun fetchMediaImages(appId: String): ListenableFuture<List<MediaImage>> = submit {
+    suspend fun fetchMediaImages(appId: String): List<MediaImage> = withContext(Dispatchers.IO) {
         client.fetchMediaImages(appId)
     }
 
-    /** @return The app with the given [id], or absent if it is not in the cache. */
-    fun getFromCache(id: String): Optional<App> = Optional.fromNullable(appCache[id])
-
-    /**
-     * Runs [request] on the request executor and completes the returned future with its result, or
-     * with the [ApiException] it failed with.
-     */
-    private fun <T> submit(request: () -> T): ListenableFuture<T> =
-            SettableFuture.create<T>().also { future ->
-                requestExecutor.execute {
-                    try {
-                        future.set(request())
-                    } catch (e: ApiException) {
-                        future.setException(e)
-                    }
-                }
-            }
+    /** @return The app with the given [id], or null if it is not in the cache. */
+    fun getFromCache(id: String): App? = appCache[id]
 
     private fun updateCache(apps: List<App>) {
         apps.forEach { appCache[it.id] = it }
@@ -87,18 +71,18 @@ class DataFetcher private constructor(
         private var instance: DataFetcher? = null
 
         /**
-         * @return The shared fetcher, or absent if [initialize] has not been called yet. It might
-         * be absent if the app got cleaned up but the details activity was resumed.
+         * @return The shared fetcher, or null if [initialize] has not been called yet. It might be
+         * null if the app got cleaned up but the details activity was resumed.
          */
         @JvmStatic
-        fun get(): Optional<DataFetcher> = Optional.fromNullable(instance)
+        fun get(): DataFetcher? = instance
 
         /**
          * Creates the shared fetcher on the first call and returns it. Subsequent calls return the
-         * existing instance and ignore [client] and [executor].
+         * existing instance and ignore [client].
          */
         @JvmStatic
-        fun initialize(client: RetrostoreClient, executor: Executor): DataFetcher =
-                instance ?: DataFetcher(client, executor).also { instance = it }
+        fun initialize(client: RetrostoreClient): DataFetcher =
+                instance ?: DataFetcher(client).also { instance = it }
     }
 }
