@@ -19,9 +19,6 @@ package org.puder.trs80
 /** Receives the d-pad actions decoded by [GameController]. */
 interface GameControllerListener {
 
-    // GameController.Action is package-private in the (still Java) GameController;
-    // Kotlin flags a public member exposing it. Drop the suppression once
-    // GameController itself is converted.
-    @Suppress("EXPOSED_PARAMETER_TYPE")
+    /** Reports one direction, or the centre button, going down or coming back up. */
     fun onGameControllerAction(action: GameController.Action)
 }

@@ -143,9 +143,9 @@ android {
         }
     }
     namespace 'org.puder.trs80'
-    android {
-        lint {
-            baseline = file("lint-baseline.xml")
-        }
+    lint {
+        // No baseline: the project currently has no lint errors, only warnings.
+        // The old baseline referenced the pre-Kotlin .java paths and was stale.
+        abortOnError = true
     }
 }
