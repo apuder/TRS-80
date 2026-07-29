@@ -56,6 +56,12 @@ class InitialSetupDialogFragment : DialogFragment() {
     private lateinit var listener: DownloadCompletionListener
     private var downloadCounter = 0
 
+    /**
+     * The progress to show, held here because it is produced before the dialog exists and has
+     * to survive the dialog being torn down and rebuilt.
+     */
+    private var progressMessage: String? = null
+
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
         listener = activity as? DownloadCompletionListener
@@ -66,6 +72,9 @@ class InitialSetupDialogFragment : DialogFragment() {
         ProgressDialog(requireContext()).apply {
             setCancelable(false)
             setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            // The first download is already under way by the time this runs, so adopt whatever
+            // progress it has reported rather than coming up blank.
+            progressMessage?.let { setMessage(it) }
         }
 
     override fun onDestroyView() {
@@ -128,9 +137,19 @@ class InitialSetupDialogFragment : DialogFragment() {
         }
     }
 
-    /** Update download progress. Called from the main thread. */
+    /**
+     * Update download progress. Called from the main thread.
+     *
+     * [lifecycleScope] dispatches with `Dispatchers.Main.immediate`, so the download loop runs
+     * synchronously until it first suspends — which means the first call here happens inside
+     * [onCreate], before [onCreateDialog] has built the dialog. Later calls can also arrive
+     * while the dialog is torn down. Either way the message is kept, and [onCreateDialog]
+     * applies it once there is a dialog to apply it to.
+     */
     private fun onDownloadProgress(num: Int, total: Int) {
-        (dialog as ProgressDialog).setMessage(getString(R.string.downloading, num, total))
+        val message = getString(R.string.downloading, num, total)
+        progressMessage = message
+        (dialog as? ProgressDialog)?.setMessage(message)
     }
 
     /** Called on the main thread when downloading is done. */
