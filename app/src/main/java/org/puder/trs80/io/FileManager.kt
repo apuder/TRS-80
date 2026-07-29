@@ -80,7 +80,6 @@ class FileManager private constructor(private val baseDir: File) {
 
         companion object {
             /** Creates a creator rooted at the app's data directory. */
-            @JvmStatic
             fun get(res: Resources): Creator = Creator(res.getString(R.string.trs80_dir))
         }
     }

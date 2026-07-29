@@ -48,7 +48,6 @@ class EmulatorState private constructor(private val fileManager: FileManager) {
          *
          * @throws IOException if the storage directory could not be created.
          */
-        @JvmStatic
         @Throws(IOException::class)
         fun forConfigId(
             configId: Int,

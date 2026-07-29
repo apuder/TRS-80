@@ -81,7 +81,6 @@ class RomManager private constructor(
          *
          * @return The singleton [RomManager] instance.
          */
-        @JvmStatic
         @Throws(IOException::class)
         fun init(fileManagerCreator: FileManager.Creator): RomManager =
                 instance ?: RomManager(
@@ -92,7 +91,6 @@ class RomManager private constructor(
         /**
          * @return The singleton [RomManager] instance.
          */
-        @JvmStatic
         fun get(): RomManager = checkNotNull(instance) { "Must call RomManager.init() first." }
     }
 }

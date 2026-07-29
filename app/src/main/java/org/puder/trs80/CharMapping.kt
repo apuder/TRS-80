@@ -8,7 +8,6 @@ object CharMapping {
      * Indices 0x000..0x0FF cover the Model 3 character set; 0x100..0x13F hold the
      * alternate halfwidth-Katakana bank for codes 0xC0..0xFF.
      */
-    @JvmField
     val m3toUnicode = charArrayOf(
         // Special characters, highly ad-hoc.
         '\u0020', '\u00A3', '\u007C', '\u00E9', '\u00DC', '\u00C5', '\u00AC', '\u00F6',

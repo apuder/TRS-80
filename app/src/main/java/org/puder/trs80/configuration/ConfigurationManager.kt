@@ -53,7 +53,6 @@ class ConfigurationManager private constructor(
          * @return The singleton [ConfigurationManager]. It is important that there is only a
          * single instance in the app since the state needs to be shared.
          */
-        @JvmStatic
         @Throws(IOException::class)
         fun get(context: Context): ConfigurationManager =
             singleton ?: initDefault(FileManager.Creator.get(context.resources), context)

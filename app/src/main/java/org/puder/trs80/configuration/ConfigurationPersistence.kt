@@ -54,7 +54,6 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
          * Create an instance for the configuration with the given ID that is backed by the
          * preferences of the given manager.
          */
-        @JvmStatic
         fun forIdAndManager(
             configId: Int,
             prefManager: PreferenceManager

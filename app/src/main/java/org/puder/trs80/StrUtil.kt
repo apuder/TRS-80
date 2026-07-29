@@ -23,7 +23,6 @@ import java.util.Locale
  */
 object StrUtil {
     /** Formats the string with the given arguments using the default locale. */
-    @JvmStatic
     fun form(str: String, vararg args: Any?): String =
         String.format(Locale.getDefault(), str, *args)
 }

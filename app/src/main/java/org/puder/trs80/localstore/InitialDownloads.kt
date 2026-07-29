@@ -24,7 +24,6 @@ import org.puder.trs80.Hardware
 object InitialDownloads {
 
     /** @return The ROMs and disk images to fetch when the app is started for the first time. */
-    @JvmStatic
     fun get(): Array<Download> = arrayOf(
             Download(true, Hardware.MODEL1, null,
                     "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model1-level2.rom",
@@ -78,10 +77,10 @@ object InitialDownloads {
      * @property destinationFilename the name to store the item under.
      */
     data class Download(
-            @JvmField val isROM: Boolean,
-            @JvmField val model: Int,
-            @JvmField val configurationName: String?,
-            @JvmField val url: String,
-            @JvmField val fileInZip: String?,
-            @JvmField val destinationFilename: String)
+            val isROM: Boolean,
+            val model: Int,
+            val configurationName: String?,
+            val url: String,
+            val fileInZip: String?,
+            val destinationFilename: String)
 }
