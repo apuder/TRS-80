@@ -14,34 +14,27 @@
  * limitations under the License.
  */
 
-package org.puder.trs80
-
-import android.graphics.Rect
-import java.nio.ByteBuffer
+package org.puder.trs80.shared
 
 /**
  * Tracks the region of the emulated screen that changed since the last frame, so that only
  * that region has to be redrawn.
  *
- * The bounds are in character cells, [clipRect] is the same region in pixels. Everything is
- * mutated in place: an instance of this is touched 60 times a second and must not allocate.
+ * [top], [left], [bottom] and [right] are in character cells; [clipTop] and friends are the
+ * same region in pixels. Everything is mutated in place: an instance of this is touched 60
+ * times a second and must not allocate.
  */
-internal class DirtyRect(hardware: Hardware, private val screenBuffer: ByteBuffer) {
-
-    private val trsScreenCols = hardware.screenConfiguration.trsScreenCols
-    private val trsScreenRows = hardware.screenConfiguration.trsScreenRows
-    private val trsCharWidth = hardware.charWidth
-    private val trsCharHeight = hardware.charHeight
+class DirtyRect(private val metrics: CellMetrics, private val screenBuffer: ScreenBuffer) {
 
     /**
      * The contents of every cell as of the last [computeDirtyRect]. Held as shorts so that
      * [Short.MAX_VALUE] can mark a cell whose contents are not known yet; no byte read from
      * [screenBuffer] can collide with it.
      */
-    private val lastScreenBuffer = ShortArray(trsScreenCols * trsScreenRows)
+    private val lastScreenBuffer = ShortArray(metrics.columns * metrics.rows)
 
     /** The horizontal step between cells: 2 in expanded (wide character) mode, 1 otherwise. */
-    private var colStep = 0
+    private var colStep = 1
 
     /** The topmost dirty row. */
     var top = 0
@@ -58,12 +51,6 @@ internal class DirtyRect(hardware: Hardware, private val screenBuffer: ByteBuffe
     /** The rightmost dirty column. */
     var right = 0
         private set
-
-    /** The dirty region in pixels, to be handed to `SurfaceHolder.lockCanvas()`. */
-    val clipRect = Rect()
-
-    /** [clipRect] as this class computed it, to detect the surface widening it. */
-    private val originalClipRect = Rect()
 
     /**
      * Whether the emulator draws wide characters. Switching modes invalidates everything
@@ -82,13 +69,29 @@ internal class DirtyRect(hardware: Hardware, private val screenBuffer: ByteBuffe
     val isEmpty: Boolean
         get() = bottom == -1
 
+    /** The left edge of the dirty region in pixels. Meaningless while [isEmpty]. */
+    val clipLeft: Int
+        get() = metrics.cellWidth * left * colStep
+
+    /** The top edge of the dirty region in pixels. Meaningless while [isEmpty]. */
+    val clipTop: Int
+        get() = metrics.cellHeight * top
+
+    /** The right edge of the dirty region in pixels, exclusive. Meaningless while [isEmpty]. */
+    val clipRight: Int
+        get() = metrics.cellWidth * (right + 1) * colStep
+
+    /** The bottom edge of the dirty region in pixels, exclusive. Meaningless while [isEmpty]. */
+    val clipBottom: Int
+        get() = metrics.cellHeight * (bottom + 1)
+
     init {
         resetLastScreenBuffer()
     }
 
     /**
-     * Compares the screen buffer against the previous frame and updates the bounds and
-     * [clipRect] to cover everything that changed.
+     * Compares the screen buffer against the previous frame and updates the bounds to cover
+     * everything that changed.
      */
     fun computeDirtyRect() {
         var newTop = Int.MAX_VALUE
@@ -96,10 +99,10 @@ internal class DirtyRect(hardware: Hardware, private val screenBuffer: ByteBuffe
         var newBottom = -1
         var newRight = -1
         val step = colStep
-        val cols = trsScreenCols / step
+        val cols = metrics.columns / step
         val last = lastScreenBuffer
         var i = 0
-        for (row in 0 until trsScreenRows) {
+        for (row in 0 until metrics.rows) {
             for (col in 0 until cols) {
                 // Read the cell once: the native side writes to this buffer concurrently,
                 // so comparing one read and storing another would lose an update.
@@ -118,31 +121,25 @@ internal class DirtyRect(hardware: Hardware, private val screenBuffer: ByteBuffe
         left = newLeft
         bottom = newBottom
         right = newRight
-        if (newBottom == -1) {
-            return
-        }
-        clipRect.left = trsCharWidth * newLeft * step
-        clipRect.right = trsCharWidth * (newRight + 1) * step
-        clipRect.top = trsCharHeight * newTop
-        clipRect.bottom = trsCharHeight * (newBottom + 1)
-        originalClipRect.set(clipRect)
     }
 
     /** Marks the whole screen dirty. */
     fun reset() {
         left = 0
         top = 0
-        right = trsScreenCols / colStep - 1
-        bottom = trsScreenRows - 1
+        right = metrics.columns / colStep - 1
+        bottom = metrics.rows - 1
     }
 
     /**
-     * Call after `SurfaceHolder.lockCanvas()`, which may hand back a larger region than the
-     * one that was asked for. When it does, the whole screen has to be redrawn because the
-     * extra area holds a stale frame.
+     * Call with the region the host actually locked for drawing, which may be larger than
+     * the region it was asked for. When it is, the whole screen has to be redrawn, because
+     * the extra area holds a stale frame.
      */
-    fun adjustClipRect() {
-        if (clipRect != originalClipRect) {
+    fun onRegionLocked(lockedLeft: Int, lockedTop: Int, lockedRight: Int, lockedBottom: Int) {
+        if (lockedLeft != clipLeft || lockedTop != clipTop ||
+            lockedRight != clipRight || lockedBottom != clipBottom
+        ) {
             reset()
         }
     }

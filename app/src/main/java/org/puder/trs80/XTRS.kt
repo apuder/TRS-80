@@ -19,6 +19,7 @@ package org.puder.trs80
 import android.util.Log
 import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.configuration.EmulatorState
+import org.puder.trs80.shared.ScreenBuffer
 import java.nio.ByteBuffer
 
 private const val TAG = "XTRS"
@@ -95,8 +96,8 @@ object XTRS {
      * its video RAM.
      */
     @JvmStatic
-    val screenBuffer: ByteBuffer
-        get() = getScreenBufferNative()
+    val screenBuffer: ScreenBuffer
+        get() = DirectScreenBuffer(getScreenBufferNative())
 
     /**
      * Upcall from the emulator, reporting that it hit an unsupported code path.
@@ -164,4 +165,12 @@ object XTRS {
     external fun createBlankDMK(
         filename: String, sides: Int, density: Int, eight: Int, ignden: Int
     ): Boolean
+}
+
+/**
+ * Reads the emulator's screen memory straight out of the direct buffer JNI handed back, which
+ * addresses the native buffer itself rather than a copy of it.
+ */
+private class DirectScreenBuffer(private val buffer: ByteBuffer) : ScreenBuffer {
+    override fun get(index: Int): Byte = buffer.get(index)
 }

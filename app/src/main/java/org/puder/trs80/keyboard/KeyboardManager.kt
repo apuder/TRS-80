@@ -23,6 +23,7 @@ import android.view.KeyEvent
 import org.puder.trs80.R
 import org.puder.trs80.TRS80Application
 import org.puder.trs80.XTRS
+import org.puder.trs80.shared.KeyMap
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException

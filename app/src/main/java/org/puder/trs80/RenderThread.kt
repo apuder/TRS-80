@@ -18,10 +18,12 @@ package org.puder.trs80
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.view.SurfaceHolder
 import org.puder.trs80.cast.RemoteCastScreen
 import org.puder.trs80.cast.RemoteDisplayChannel
-import java.nio.ByteBuffer
+import org.puder.trs80.shared.DirtyRect
+import org.puder.trs80.shared.ScreenBuffer
 import kotlin.math.floor
 
 private const val TARGET_FPS = 60L
@@ -36,7 +38,13 @@ private const val TARGET_FPS = 60L
 internal class RenderThread(private val isCasting: Boolean) : Thread() {
 
     private val fpsLimiter = FpsLimiter(TARGET_FPS)
-    private val screenBuffer: ByteBuffer = XTRS.screenBuffer
+    private val screenBuffer: ScreenBuffer = XTRS.screenBuffer
+
+    /**
+     * The region handed to [SurfaceHolder.lockCanvas], which widens it in place to the area
+     * it actually locked. Reused so that the frame loop does not allocate.
+     */
+    private val lockedRegion = Rect()
 
     /** Set to `false` to make the frame loop return after the current frame. */
     @Volatile
@@ -66,7 +74,7 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
         trsCharWidth = hardware.charWidth
         trsCharHeight = hardware.charHeight
         screenCharBuffer = StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows)
-        dirtyRect = DirtyRect(hardware, screenBuffer)
+        dirtyRect = DirtyRect(hardware.cellMetrics, screenBuffer)
     }
 
     override fun run() {
@@ -93,8 +101,10 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
 
             // Read the holder once; it is replaced from the UI thread.
             val holder = surfaceHolder ?: continue
-            val canvas = holder.lockCanvas(dirty.clipRect) ?: continue
-            dirty.adjustClipRect()
+            val region = lockedRegion
+            region.set(dirty.clipLeft, dirty.clipTop, dirty.clipRight, dirty.clipBottom)
+            val canvas = holder.lockCanvas(region) ?: continue
+            dirty.onRegionLocked(region.left, region.top, region.right, region.bottom)
             renderScreenToCanvas(canvas, expandedMode)
             holder.unlockCanvasAndPost(canvas)
         }

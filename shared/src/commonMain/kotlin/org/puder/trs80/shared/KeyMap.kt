@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.keyboard
+package org.puder.trs80.shared
 
 /**
- * A single entry of the on-screen keyboard layout, as parsed from `res/xml/keymap_*.xml`.
+ * A single entry of the on-screen keyboard layout, as parsed from the platform's keyboard
+ * layout resource.
  *
  * @property label the text drawn on the on-screen key.
  * @property sym the SDL key symbol handed to the emulator core.

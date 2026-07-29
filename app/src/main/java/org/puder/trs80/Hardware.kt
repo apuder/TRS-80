@@ -22,6 +22,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.AsyncTask
 import org.puder.trs80.configuration.Configuration
+import org.puder.trs80.shared.CellMetrics
 import org.puder.trs80.shared.KeyboardLayout
 
 /** The largest a key "box" may get, in dp. */
@@ -108,6 +109,15 @@ class Hardware(private val configuration: Configuration) {
         get() = when (model) {
             MODEL1, MODEL3 -> ScreenConfiguration(SCREEN_COLS, SCREEN_ROWS, SCREEN_ASPECT_RATIO)
             else -> throw IllegalArgumentException("No screen configuration for model $model")
+        }
+
+    /**
+     * The emulated screen geometry together with the cell size it is drawn at. Only valid
+     * once [generateFont] has computed the cell size for the display.
+     */
+    internal val cellMetrics: CellMetrics
+        get() = screenConfiguration.let {
+            CellMetrics(it.trsScreenCols, it.trsScreenRows, charWidth, charHeight)
         }
 
     /**
