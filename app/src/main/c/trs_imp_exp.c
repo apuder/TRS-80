@@ -57,6 +57,18 @@
 #include "trs_state_save.h"
 
 /*
+ * iOS has no system(), so the emulated machine cannot shell out to the host
+ * there at all. Detected rather than passed in, because it is a property of
+ * the platform's libc and not a choice the host gets to make.
+ */
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE
+#define TRS80_NO_HOST_SYSTEM 1
+#endif
+#endif
+
+/*
    If the following option is set, potentially dangerous emulator traps
    will be blocked, including file writes to the host filesystem and shell
    command execution.
@@ -87,6 +99,13 @@ int xtrshard_fd[4] = {-1,-1,-1,-1};
 
 void do_emt_system()
 {
+#ifdef TRS80_NO_HOST_SYSTEM
+  /* Refused the same way trs_emtsafe refuses it, so the guest sees one
+     consistent answer whether the trap is blocked or simply unavailable. */
+  error("shell command execution is not available on this platform");
+  REG_A = EACCES;
+  REG_F &= ~ZERO_MASK;
+#else
   int res;
   if (trs_emtsafe) {
     error("potentially dangerous emulator trap blocked");
@@ -103,6 +122,7 @@ void do_emt_system()
     REG_F |= ZERO_MASK;
   }
   REG_BC = res;
+#endif
 }
 
 void do_emt_mouse()

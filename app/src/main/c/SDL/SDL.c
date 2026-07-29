@@ -17,16 +17,17 @@
 #include <SDL.h>
 #include <pthread.h>
 #include <errno.h>
-#include <android/log.h>
 #include "atrs.h"
 #include "trs80_audio.h"
 
-#define DEBUG_TAG "TRS80"
-
+/*
+ * Reports an unsupported code path to the host, which decides how to surface
+ * it. not_implemented() unwinds out of the CPU loop, so nothing after this
+ * runs.
+ */
 #define NOT_IMPLEMENTED() \
     char buf[1024]; \
     sprintf(buf, "%s:%d", __FILE__, __LINE__); \
-    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NOT_IMPLEMENTED: %s", buf); \
     not_implemented(buf);
 
 static struct timeval start_tv;
