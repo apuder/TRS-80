@@ -1,0 +1,16 @@
+# cinterop bindings over the emulator core's host-facing C API.
+#
+# The header is the whole contract: 17 functions, one config struct and one
+# callback struct. Nothing here is Android- or JVM-specific, which is what
+# Phase 0 was for.
+#
+# Only trs80_core.h is listed. The rest of the native tree is the emulator's
+# own business and must not leak into Kotlin.
+headers = trs80_core.h
+headerFilter = trs80_core.h
+
+package = org.puder.trs80.core
+
+# The static library and its location are supplied by the build script, which
+# knows which SDK and architecture are being compiled for.
+staticLibraries = libtrs80core.a

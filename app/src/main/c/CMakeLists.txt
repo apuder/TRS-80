@@ -80,13 +80,17 @@ if(ANDROID)
     find_library(OpenSLES-lib OpenSLES)
     target_link_libraries(xtrs ${log-lib} ${OpenSLES-lib})
 else()
-    # Static, so Kotlin/Native can link it straight into the framework. The
-    # audio sink (trs80_audio.h) is the host's to implement.
-    add_library(trs80core STATIC ${TRS80_CORE_SOURCES})
+    # Static, so Kotlin/Native can link it straight into the framework.
+    add_library(trs80core STATIC ${TRS80_CORE_SOURCES} audio_audioqueue.c)
 
     # Gradle supplies these for the Android build; a standalone build has to
     # ask for them itself.
     target_compile_features(trs80core PRIVATE cxx_std_11)
     target_compile_options(trs80core PRIVATE
             $<$<COMPILE_LANGUAGE:CXX>:-frtti -fexceptions>)
+
+    # Recorded for anything that links this archive. A static library does not
+    # link frameworks itself, so the final binary needs this too - see the
+    # linkerOpts in shared/build.gradle.
+    target_link_libraries(trs80core "-framework AudioToolbox")
 endif()

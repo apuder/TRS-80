@@ -57,11 +57,18 @@ jobs:
         restore-keys: konan-${{ runner.os }}-
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
-    # Compiling covers the device and Apple-silicon simulator targets; linking a
-    # framework additionally proves the artifact an Xcode project would consume.
+    # Linking a framework proves the artifact an Xcode project would consume,
+    # and pulls in the C emulator core: the linker is what catches a missing
+    # platform implementation of trs80_audio.h.
     - name: Compile and link the shared module for iOS
       run: >-
         ./gradlew
         :shared:compileKotlinIosArm64
-        :shared:compileKotlinIosSimulatorArm64
+        :shared:linkDebugFrameworkIosArm64
         :shared:linkDebugFrameworkIosSimulatorArm64
+    # The only step that actually runs the emulator core on iOS. Covers the
+    # CMake build, cinterop, linking and execution in one go, so it is the step
+    # that would catch the core breaking on iOS rather than merely failing to
+    # compile.
+    - name: Run the shared module's tests on the iOS simulator
+      run: ./gradlew :shared:iosSimulatorArm64Test

@@ -14,6 +14,66 @@ repositories {
     mavenCentral()
 }
 
+// ---------------------------------------------------------------------------
+// The emulator core, built for iOS.
+//
+// On Android the core is compiled by AGP's externalNativeBuild. iOS has no
+// equivalent, so CMake is driven directly, once per target, into a directory
+// derived from the target name so that cinterop can be pointed at it without
+// resolving task outputs during configuration.
+// ---------------------------------------------------------------------------
+
+def nativeSrcDir = rootProject.file('app/src/main/c')
+def iosMinVersion = '15.0'
+
+// Kotlin target name -> the Xcode SDK and architecture it needs.
+def iosTargets = [
+        iosArm64         : [sdk: 'iphoneos', arch: 'arm64'],
+        iosSimulatorArm64: [sdk: 'iphonesimulator', arch: 'arm64'],
+        iosX64           : [sdk: 'iphonesimulator', arch: 'x86_64'],
+]
+
+// Where a given target's static library lands. A plain path, so both the
+// producing task and the cinterop configuration can name it eagerly.
+def coreLibDir = { String targetName ->
+    layout.buildDirectory.dir("ios-core/$targetName").get().asFile
+}
+
+// Declared as a closure rather than a method: a method could not see the
+// script-level definitions above, which is a Groovy scoping rule rather than
+// anything to do with Gradle.
+def registerCoreBuild = { String targetName, String sdk, String arch ->
+    def outputDir = coreLibDir(targetName)
+    return tasks.register("buildIosCore${targetName.capitalize()}") {
+        description = "Builds the TRS-80 emulator core for $sdk/$arch."
+        inputs.dir(nativeSrcDir).withPathSensitivity(PathSensitivity.RELATIVE)
+        outputs.file(new File(outputDir, 'libtrs80core.a'))
+        outputs.cacheIf { true }
+        doLast {
+            outputDir.mkdirs()
+            def runCmake = { List<String> args ->
+                providers.exec { commandLine(['cmake'] + args) }
+                        .result.get().assertNormalExitValue()
+            }
+            runCmake([
+                    '-S', nativeSrcDir.absolutePath,
+                    '-B', outputDir.absolutePath,
+                    '-G', 'Unix Makefiles',
+                    '-DCMAKE_SYSTEM_NAME=iOS',
+                    "-DCMAKE_OSX_ARCHITECTURES=$arch".toString(),
+                    "-DCMAKE_OSX_SYSROOT=$sdk".toString(),
+                    "-DCMAKE_OSX_DEPLOYMENT_TARGET=$iosMinVersion".toString(),
+                    '-DCMAKE_BUILD_TYPE=Release',
+            ])
+            runCmake(['--build', outputDir.absolutePath, '--parallel'])
+        }
+    }
+}
+
+def coreBuilds = iosTargets.collectEntries { name, spec ->
+    [(name): registerCoreBuild(name, spec.sdk, spec.arch)]
+}
+
 kotlin {
     androidLibrary {
         namespace = 'org.puder.trs80.shared'
@@ -26,10 +86,45 @@ kotlin {
     iosArm64 { binaries.framework { baseName = 'Shared' } }
     iosSimulatorArm64 { binaries.framework { baseName = 'Shared' } }
 
+    targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget).configureEach { target ->
+        def coreBuild = coreBuilds[target.name]
+        if (coreBuild == null) {
+            return
+        }
+        def libDir = coreLibDir(target.name).absolutePath
+
+        target.compilations.named('main') {
+            cinterops.register('trs80core') {
+                definitionFile = file('src/nativeInterop/cinterop/trs80core.def')
+                // The header comes from the native tree; the archive named by
+                // the .def is found under this target's build directory.
+                includeDirs.allHeaders(nativeSrcDir)
+                extraOpts('-libraryPath', libDir)
+            }
+        }
+
+        // cinterop resolves the .def's staticLibraries when it runs, so the
+        // archive has to have been built already.
+        tasks.named("cinteropTrs80core${target.name.capitalize()}") {
+            dependsOn(coreBuild)
+        }
+
+        // The core's audio sink is AudioQueue on iOS. The archive records the
+        // dependency but cannot satisfy it; the final binary has to link it.
+        target.binaries.all {
+            linkerOpts('-framework', 'AudioToolbox')
+        }
+    }
+
     sourceSets {
         commonMain {
             dependencies {
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation kotlin('test')
             }
         }
     }
