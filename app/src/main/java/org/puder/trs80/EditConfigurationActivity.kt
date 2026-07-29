@@ -38,14 +38,13 @@ class EditConfigurationActivity : BaseActivity() {
 
     private lateinit var fragment: EditConfigurationFragment
 
-    @Suppress("DEPRECATION") // android.preference; the androidx migration is a separate change.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Dummy view. Will be replaced by EditConfigurationFragment.
         setContentView(View(this))
         requireNotNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
         fragment = EditConfigurationFragment()
-        fragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(android.R.id.content, fragment)
             .commit()
     }

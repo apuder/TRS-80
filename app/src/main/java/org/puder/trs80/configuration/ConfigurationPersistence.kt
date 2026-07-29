@@ -20,8 +20,8 @@ import org.puder.trs80.shared.KeyboardLayout
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.Preference
-import android.preference.PreferenceManager
+import androidx.preference.Preference
+import androidx.preference.PreferenceManager
 
 private const val PREF_NAME_PREFIX = "CONFIG_"
 private const val CONF_NAME = "conf_name"
@@ -59,7 +59,12 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
             prefManager: PreferenceManager
         ): ConfigurationPersistence {
             prefManager.sharedPreferencesName = PREF_NAME_PREFIX + configId
-            return ConfigurationPersistence(prefManager.sharedPreferences)
+            // Null only once a PreferenceDataStore is installed on the manager, which is the
+            // point at which this whole class stops being backed by SharedPreferences.
+            val prefs = requireNotNull(prefManager.sharedPreferences) {
+                "Preference manager for configuration $configId has no shared preferences."
+            }
+            return ConfigurationPersistence(prefs)
         }
 
         private fun diskIdToKey(disk: Int): String? = when (disk) {

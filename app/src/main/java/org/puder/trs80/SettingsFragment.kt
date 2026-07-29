@@ -20,9 +20,9 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.Preference
-import android.preference.PreferenceFragment
 import android.view.View
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import org.puder.trs80.browser.FileBrowserActivity
 
 /** Intent extra the file browser returns the picked file in. */
@@ -43,9 +43,7 @@ private val ROM_KEYS = listOf(
  * Lets the user pick a ROM image per emulated model. Each ROM preference opens a
  * [FileBrowserActivity] and shows the picked path as its summary.
  */
-// android.preference; the androidx migration is a separate change.
-@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-class SettingsFragment : PreferenceFragment() {
+class SettingsFragment : PreferenceFragmentCompat() {
 
     private lateinit var sharedPrefs: SharedPreferences
     private lateinit var romPreferences: List<RomPreference>
@@ -55,15 +53,21 @@ class SettingsFragment : PreferenceFragment() {
         true
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        addPreferencesFromResource(R.xml.settings)
+    // startActivityForResult; the file browser it drives is replaced by a document picker
+    // rather than migrated to the Activity Result API.
+    @Suppress("DEPRECATION")
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        // The store has to be named before the hierarchy is inflated, or the preferences bind
+        // to the default shared preferences instead of the app-wide settings file.
         val manager = preferenceManager
         manager.sharedPreferencesName = SettingsActivity.SHARED_PREF_NAME
-        sharedPrefs = manager.sharedPreferences
+        sharedPrefs = requireNotNull(manager.sharedPreferences) {
+            "Settings preference manager has no shared preferences."
+        }
+        setPreferencesFromResource(R.xml.settings, rootKey)
 
         val clickListener = Preference.OnPreferenceClickListener { pref ->
-            val intent = Intent(activity, FileBrowserActivity::class.java)
+            val intent = Intent(requireActivity(), FileBrowserActivity::class.java)
             startActivityForResult(intent, pref.key.hashCode())
             true
         }
@@ -81,7 +85,7 @@ class SettingsFragment : PreferenceFragment() {
         view.fitsSystemWindows = true
     }
 
-    @Suppress("DEPRECATION") // startActivityForResult/onActivityResult, see onCreate.
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION") // See onCreatePreferences.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) {
             return

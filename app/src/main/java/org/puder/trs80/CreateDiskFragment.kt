@@ -21,10 +21,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.preference.Preference
-import android.preference.PreferenceFragment
-import android.preference.PreferenceManager
 import android.view.View
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import org.puder.trs80.CreateDiskActivity.Companion.MKDISK_DENSITY
 import org.puder.trs80.CreateDiskActivity.Companion.MKDISK_FORMAT
@@ -37,18 +37,16 @@ import org.puder.trs80.CreateDiskActivity.Companion.MKDISK_SIZE
  * Collects the parameters of the blank disk image to create. [CreateDiskActivity] reads them
  * back out of the default shared preferences when the user confirms.
  */
-// android.preference; the androidx migration is a separate change.
-@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-class CreateDiskFragment : PreferenceFragment() {
+class CreateDiskFragment : PreferenceFragmentCompat() {
 
     private val handler = Handler(Looper.getMainLooper())
 
     private val changeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
         val rejected = preference.key.equals(MKDISK_NAME, ignoreCase = true) &&
-                !(activity as CreateDiskActivity).validateDiskImageName(newValue.toString())
+                !(requireActivity() as CreateDiskActivity).validateDiskImageName(newValue.toString())
         if (rejected) {
             Snackbar.make(
-                activity.findViewById<View>(android.R.id.content),
+                requireActivity().findViewById<View>(android.R.id.content),
                 getString(R.string.mkdisk_bad_path) + newValue,
                 Snackbar.LENGTH_SHORT
             ).show()
@@ -76,10 +74,9 @@ class CreateDiskFragment : PreferenceFragment() {
     private lateinit var defaultDensitySummary: String
     private lateinit var defaultSizeSummary: String
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        addPreferencesFromResource(R.xml.mkdisk)
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        setPreferencesFromResource(R.xml.mkdisk, rootKey)
 
         name = listeningPreference(MKDISK_NAME)
         defaultNameSummary = name.summary.toString()
@@ -107,7 +104,8 @@ class CreateDiskFragment : PreferenceFragment() {
     }
 
     private fun listeningPreference(key: String): Preference =
-        findPreference(key).also { it.onPreferenceChangeListener = changeListener }
+        requireNotNull(findPreference<Preference>(key)) { "No preference named '$key'." }
+            .also { it.onPreferenceChangeListener = changeListener }
 
     private fun updateSummaries() {
         name.summary =

@@ -20,10 +20,10 @@ package org.puder.trs80
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.io.IOException
@@ -59,7 +59,6 @@ class CreateDiskActivity : BaseActivity() {
         }
     }
 
-    @Suppress("DEPRECATION") // android.preference; the androidx migration is a separate change.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Dummy view. Will be replaced by CreateDiskFragment.
@@ -71,7 +70,7 @@ class CreateDiskActivity : BaseActivity() {
 
         clearDiskImageName()
 
-        fragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(android.R.id.content, CreateDiskFragment())
             .commit()
     }

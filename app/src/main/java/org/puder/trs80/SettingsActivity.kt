@@ -30,13 +30,12 @@ private const val MENU_OPTION_HELP = 0
  */
 class SettingsActivity : BaseActivity() {
 
-    @Suppress("DEPRECATION") // android.preference; the androidx migration is a separate change.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Dummy view. Will be replaced by SettingsFragment.
         setContentView(View(this))
         requireNotNull(supportActionBar).setDisplayHomeAsUpEnabled(true)
-        fragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(android.R.id.content, SettingsFragment())
             .commit()
     }

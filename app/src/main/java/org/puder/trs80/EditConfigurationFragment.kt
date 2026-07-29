@@ -21,10 +21,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.preference.Preference
-import android.preference.PreferenceFragment
 import android.util.Log
 import android.view.View
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import org.puder.trs80.browser.FileBrowserActivity
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.ConfigurationPersistence
@@ -52,9 +52,7 @@ private const val DISK_COUNT = 4
  * preferences, so [configurationWasEdited] is what tells the caller whether it has to restore
  * its backup.
  */
-// android.preference; the androidx migration is a separate change.
-@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-class EditConfigurationFragment : PreferenceFragment() {
+class EditConfigurationFragment : PreferenceFragmentCompat() {
 
     /** Whether the user changed anything since this fragment was created. */
     var configurationWasEdited = false
@@ -79,17 +77,23 @@ class EditConfigurationFragment : PreferenceFragment() {
     private lateinit var cassette: MediaPreference
     private lateinit var disks: List<MediaPreference>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val configId = ActivityHelper.getIntExtra(activity.intent, EXTRA_CONFIG_ID)
+    // startActivityForResult; the file browser it drives is replaced by a document picker
+    // rather than migrated to the Activity Result API.
+    @Suppress("DEPRECATION")
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        val configId = ActivityHelper.getIntExtra(requireActivity().intent, EXTRA_CONFIG_ID)
         if (configId == null) {
             Log.w(TAG, "Cannot get CONFIG_ID. Finishing activity.")
-            activity.finish()
+            requireActivity().finish()
             return
         }
+        // This names the configuration's own preference store on the manager, so it has to
+        // happen before the hierarchy below is inflated.
         configPersistence = ConfigurationPersistence.forIdAndManager(configId, preferenceManager)
-        val prefFinder = configPersistence.forPreferenceProvider { name -> findPreference(name) }
-        addPreferencesFromResource(R.xml.configuration)
+        val prefFinder = configPersistence.forPreferenceProvider { name ->
+            requireNotNull(findPreference<Preference>(name)) { "No preference named '$name'." }
+        }
+        setPreferencesFromResource(R.xml.configuration, rootKey)
 
         namePref = prefFinder.forName()
         namePref.onPreferenceChangeListener = changeListener
@@ -112,15 +116,16 @@ class EditConfigurationFragment : PreferenceFragment() {
                 File(currentPath).parent
             } else {
                 try {
-                    ConfigurationManager.get(activity).getEmulatorState(configId).basePath
+                    ConfigurationManager.get(requireContext())
+                        .getEmulatorState(configId).basePath
                 } catch (e: IOException) {
                     Log.w(TAG, "Could not get ConfigurationManager. Finishing activity.", e)
-                    activity.finish()
+                    requireActivity().finish()
                     null
                 }
             }
 
-            val intent = Intent(activity, FileBrowserActivity::class.java)
+            val intent = Intent(requireContext(), FileBrowserActivity::class.java)
             if (dir != null) {
                 intent.putExtra(EXTRA_DIR, dir)
             }
@@ -156,7 +161,7 @@ class EditConfigurationFragment : PreferenceFragment() {
         view.fitsSystemWindows = true
     }
 
-    @Suppress("DEPRECATION") // startActivityForResult/onActivityResult, see onCreate.
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION") // See onCreatePreferences.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) {
             return

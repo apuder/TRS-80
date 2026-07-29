@@ -20,8 +20,8 @@ import org.puder.trs80.shared.KeyboardLayout
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import android.util.Log
+import androidx.preference.PreferenceManager
 import org.puder.trs80.Hardware
 import org.puder.trs80.io.FileManager
 import java.io.IOException
