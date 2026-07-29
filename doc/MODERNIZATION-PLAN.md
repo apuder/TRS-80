@@ -55,7 +55,7 @@ hardware knowledge. Do not rewrite it. Give it a clean C API and never touch it 
 | Protobuf | **271,000 vendored LOC** to serialize one 84-line state dump | *(Phase 0: removed — `libxtrs.so` 12.5 MB → 2.8 MB per ABI)* |
 | AndroidX | `com.android.support:*:33.0.0` substituted by AGP to **AndroidX 1.0.0** (2018), `enableJetifier` still on | Full dependency refresh needed — see §4.2 |
 | RetroStore | Client is a **JVM-only JAR** from a private Maven repo, and the app uses exactly **four** of its methods | **Blocks iOS** — retire and reimplement, see D7 |
-| Storage | Raw filesystem paths, external storage, custom file browser | Already fragile under scoped storage; unworkable on iOS |
+| Storage | App data is already app-scoped (`filesDir`); SharedPreferences bound to the preference UI; the **import browser** walks external storage | Smaller than it looks — see D8 |
 | Hi-res graphics | Grafyx / HRG modes hit an unimplemented stub and `longjmp` out | Latent crash, inherited by any port |
 
 ---
@@ -202,12 +202,23 @@ once.
 ### 4.5 Stand up the KMP module and move domain logic into `commonMain`
 
 Create `shared/` with the three source sets even though only Android builds. Move, with
-`expect`/`actual` only where genuinely platform-bound (file I/O, preferences):
+`expect`/`actual` only where genuinely platform-bound (file I/O, preferences).
 
-- `Configuration`, `ConfigurationManager`, `ConfigurationPersistence`, `ConfigurationBackup`
-- `EmulatorState`, `RomManager`
+*Module created July 2026, with the Android and three iOS targets building; the iOS compile runs in
+CI on every push.* Migrated so far:
+
+- ✅ `KeyboardLayout`, `KeyMap` — plain data, moved as-is
+- ✅ `DirtyRect`, plus the `ScreenBuffer` and `CellMetrics` types extracted to free it of
+  `android.graphics.Rect`, `java.nio.ByteBuffer` and `Hardware`
+
+Still to move:
+
+- `Hardware`'s cell-metric arithmetic — the seam already exists as `Hardware.cellMetrics`; the glyph
+  rasterization (Bitmap/Canvas/Paint) stays on Android until the Phase 2 renderer replaces it
 - `KeyboardManager`'s mapping tables and the keymap currently in `res/xml/keymap_us.xml`
-- `Hardware`'s cell-metric arithmetic and `DirtyRect` — both are pure algorithms
+- `Configuration`, `ConfigurationManager`, `ConfigurationPersistence`, `ConfigurationBackup`,
+  `ConfigurationImpl`, `EmulatorState`, `RomManager`, `FileManager` — **all blocked on D8**, which is
+  the next thing to settle
 
 **Done when:** the Android app runs entirely on `shared/`, still ships, and `commonMain` has no
 Android imports.
@@ -244,12 +255,16 @@ proves the architecture, so it should not be last.
 Configuration list, editor, settings, RetroStore browse/detail, onboarding. Conventional Compose
 work, driven by the design. The UI spec's prioritized problem list is the brief.
 
-### 5.3 Rework storage while you are here
+### 5.3 Finish the storage rework
 
-The current model — raw absolute paths into external storage, browsed with a custom file browser —
-is already fragile under scoped storage and does not translate to iOS at all. Replace with an
-app-scoped library plus **platform document pickers** for import (see D3). This is a prerequisite
-for iOS, not a nicety, and it fixes real Android bugs today.
+Most of this lands earlier, under D8 — the app's own data is already app-scoped in `filesDir`, so
+the storage problem is narrower than the original audit implied. What remains for Phase 2 is the
+**import path**: `FileBrowserActivity` walks `Environment.getExternalStorageDirectory()`, which is
+fragile under scoped storage and has no iOS equivalent.
+
+Delete it in favour of **platform document pickers** (see D3), and drop the now-vestigial
+`WRITE_EXTERNAL_STORAGE` permission from the manifest. This removes the screen the UI spec identifies
+as the worst in the app, and it fixes real Android bugs today.
 
 **Done when:** the redesigned Android app is fully Compose, shipping from `commonMain`, with no
 Views left.
@@ -331,6 +346,106 @@ machine's TRS-IO card, is decode-only, and is a genuinely different consumer —
 
 Archive the SDK repo rather than deleting it, and give it a `LICENSE` if it stays public (TRS-80's
 sources are Apache 2.0; that repo currently has no license at all).
+
+**D8 — Storage.** The last structural decision before the domain classes can move to `commonMain`.
+`ConfigurationPersistence`, `ConfigurationManager`, `RomManager`, `EmulatorState`, `ConfigurationImpl`
+and `FileManager` all queue behind it.
+
+Storage here is **two** problems, and conflating them is the main trap.
+
+#### D8a — Files: leave the native core on real paths
+
+The C core does its own file I/O. `trs80_init()` takes `romFile`, `cassette` and `disk0..disk3` as
+path strings; `saveState`/`loadState` take a path; C opens them with `fopen`. So the shared file API
+cannot be opaque — it has to be able to *produce* a path.
+
+That is not an iOS problem. **iOS is POSIX**: `fopen`/`fseek`/`fwrite` work against the app sandbox
+exactly as on Android, and the native code compiles unchanged. What shared code owes the core is one
+`expect fun appDataDirectory(): Path`. With okio — **already on the classpath at 3.17.0 via Wire** —
+that is roughly ten lines per platform, and the file half of storage is done.
+
+The tempting alternative is to change the native API to exchange **blobs** instead of paths. Rejected,
+because the four file kinds are not alike:
+
+| File | Native I/O pattern | Blob-able? |
+|---|---|---|
+| ROM | `trs_load_rom()`, read once | Trivially |
+| Save state | 14 reads/writes, **0 seeks** — pure streaming | Trivially |
+| Blank disk creation | sequential write | Trivially |
+| Cassette | 5 seeks, read+write, position tracked across the session | Moderate |
+| **Floppy / hard disk images** | **28 seeks, interleaved read/write, `ftruncate`, `FILE*` held open all session** | **No** |
+
+`trs_disk.c` is 3,931 lines and does not do whole-file I/O. It opens the image `rb+`, holds the handle,
+and seeks around writing individual sectors and JV3 sector-ID records as the guest OS writes to disk.
+
+The decisive detail is `fflush` after sector writes (`trs_disk.c:1909, 2340, 2756, 2775`). That is
+deliberate write-through: when the emulated machine writes to disk, it reaches storage immediately.
+Blobs would mean holding a dirty image in memory and writing back at chosen moments — on a mobile OS
+that kills backgrounded apps without warning, converting **"always durable"** into *"durable if we
+picked the right moments"*. That is a real data-safety regression on users' disk images, bought in
+exchange for portability to a platform with no filesystem (web/wasm), which is not on the roadmap.
+
+If this is ever revisited, the right shape is a **callback VFS** (à la SQLite's VFS or SDL_RWops) —
+function pointers replacing `fopen/fseek/fread/fwrite/fclose` — not whole-file blobs. That preserves
+the random-access model and write-through semantics, and swaps one I/O layer instead of restructuring
+4,000 lines of format handling. The risk there is not crashes but *silent* JV1/JV3/DMK corruption:
+an image that simply stops mounting.
+
+*Decided:* native keeps paths. Shared code provides `appDataDirectory()` + okio. The save state — zero
+seeks — can convert to a blob in isolation later if RetroStore upload ever wants the bytes in memory.
+
+#### D8b — Key-value: one namespaced store, plus a one-time migration
+
+The migration surface is small: ~7 global keys (`conf_first_time`, `conf_ran_new_assistant`, four ROM
+paths, `KEY_NEXT_ID`, `KEY_CONFIGURATIONS`) plus 11 keys per configuration. A user with a dozen configs
+has under 150 flat scalar values. **No file data moves** — ROMs, disk images, cassettes and save states
+stay where they are; only the pointers migrate. `RomManager.hasRom` already drops stale ROM paths and
+re-downloads, so the one path-shaped risk has a self-healing case in place.
+
+Because a migration is cheap and safe, format compatibility should *not* drive the design. And the
+current shape has a real defect: `ConfigurationPersistence` uses **one preference file per
+configuration** (`PREF_NAME_PREFIX + configId`). On iOS that maps to `NSUserDefaults(suiteName:)`,
+which works, but suites exist for app groups — not for spawning dozens of per-entity stores. That
+shape only ever made sense because `PreferenceFragment` wanted a SharedPreferences *name*.
+
+*Recommend:* **one store with namespaced keys** (`config.7.name`) via multiplatform-settings, plus a
+one-time migration. Fixes the iOS mapping, drops the string-encoded ints in the same pass (see below),
+keeps the synchronous API, adds no heavy dependency.
+
+*Not* SQLite/Room/SQLDelight: ~150 flat scalars do not justify a schema and a migration framework.
+Revisit only if configurations grow real structure.
+
+**Sync or suspend:** keep key-value **synchronous** (tiny, memory-cached on both platforms — and going
+suspend would touch every call site); use **suspend** for file I/O, which is genuinely slow.
+
+**The string-encoded ints.** `ConfigurationPersistence.getInt` reads `getString(key, "").toIntOrNull()`
+— ints are stored as strings because `ListPreference`/`EditTextPreference` only write strings. A UI
+artifact leaked into the data format. It cannot be cleaned up while the preference screens still write
+the old format, so it is fixed *by* the migration, not before it.
+
+#### D8c — Ordering: `androidx.preference` unlocks this early
+
+`ConfigurationPersistence` hands out `android.preference.Preference` objects via
+`PreferenceFinder`/`PreferenceProvider`, and five UI files are `PreferenceFragment`s bound to the same
+keys. Storage and settings UI are two-way bound by key name — which looks like it forces the storage
+work to wait for the Compose rewrite in Phase 2.
+
+It does not. The deprecated `android.preference` has no way to redirect where a screen stores values,
+but **`androidx.preference` has `PreferenceDataStore`**, which exists precisely to back preference
+screens with something other than SharedPreferences. The code already carries five
+`@Suppress("DEPRECATION")` notes saying the androidx migration is a separate change.
+
+*Sequence:*
+
+1. `android.preference` → `androidx.preference` (independently useful; removes five deprecation suppressions).
+2. New namespaced store behind `PreferenceDataStore`, with the one-time migration. Existing screens
+   read and write it directly.
+3. Domain classes move to `commonMain`.
+4. Compose replaces the preference screens in Phase 2, on its own schedule — and the string-encoded
+   ints die with them.
+
+This turns one hard ordering dependency into two independent steps, and unblocks §4.5 without waiting
+on design work.
 
 ---
 
