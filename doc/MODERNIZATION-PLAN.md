@@ -1,8 +1,9 @@
 # TRS-80 Emulator — Modernization Plan
 
 **Decision:** Kotlin Multiplatform with Compose Multiplatform for shared UI, keeping the existing C
-emulator core. Android ships continuously throughout; iOS is enabled once the shared layer exists.
-The UI is fully redesigned as part of the work, not ported.
+emulator core. Android ships continuously throughout. iOS is *proven* early with a throwaway spike
+(§5) and *shipped* last, so its unknowns are answered before anything is built on top of them. The UI
+is fully redesigned as part of the work, not ported.
 
 This document says what has to happen, in what order, and what has to be decided along the way.
 It is grounded in an audit of the current code — see `doc/UI-SPEC.md` for the UI inventory.
@@ -33,6 +34,10 @@ a few hundred lines each.
 
 **Every phase ends shippable to Play.** No long-lived branch. Compose interoperates with Views, so
 the redesign lands screen by screen while the old screens keep working.
+
+*One deliberate exception:* the iOS spike (§5) does not ship, because its entire purpose is to be
+thrown away. It buys answers, not features. Everything else holds to the rule — and the one piece of
+the spike that is *not* throwaway, the renderer, ships on Android as part of Phase 2.
 
 **Write the new UI in `commonMain` from day one — even before iOS exists.** This is the single most
 important sequencing decision in the plan. Building the redesign as Android-only Compose and porting
@@ -225,37 +230,88 @@ Android imports.
 
 ---
 
-## 5. Phase 2 — The new UI, in `commonMain`
+## 5. Phase 1c — Prove iOS end to end (the spike)
+
+*Runs in parallel with D8. Not shipped. Deliberately throwaway except for the renderer, which is
+not.*
+
+This phase did not exist in the original plan, which put all of iOS after the redesign. That
+ordering is wrong, for two reasons.
+
+**The emulator surface is design-independent.** 64×16 character cells, 4:3, integer-only scaling —
+that geometry comes from the hardware, not from a designer. It is also the one part of the UI with
+no precedent in the codebase and the only part whose performance is genuinely unknown. Building it
+before the design lands costs nothing against the redesign and removes the largest unknown from it.
+
+**Everything else about iOS is UI-independent plumbing.** The core build, cinterop and the audio
+sink do not care what the app looks like. Deferring them until after the redesign means discovering
+any iOS blocker at the most expensive possible moment, having already built a UI for a platform that
+might reject it.
+
+So: get a game running on iOS with **no shell at all**. Bundle a ROM and a disk image as resources
+and hardcode one configuration. No configuration list, no settings, no RetroStore browser.
+
+**Critically, this bypasses storage entirely**, so it does not wait on D8 — the two run in parallel.
+
+The `TRS80_EMBEDDED` rename (§3.2) is **already done** — the only `ANDROID` conditionals left in the
+native tree are two sites inside vendored SDL. That was the prerequisite that would otherwise have
+made an iOS build silently take the SDL rendering paths.
+
+1. **Build `core/` for iOS.** CMake with an iOS toolchain producing a static library packaged as an
+   XCFramework. Only ~5 lines of `CMakeLists.txt` are Android-coupled (`find_library(log)`,
+   `OpenSLES`, and their `target_link_libraries` entries), plus the C++ flags Gradle injects today.
+   `audio_opensl.c` and `native.c` are the two files that do not come along: the first is replaced
+   by the iOS sink below, the second by cinterop.
+   Add it to CI — the iOS job currently compiles only the *Kotlin* shared module, so the C core has
+   never been built for iOS at all.
+2. **cinterop bindings.** A `.def` file over `trs80_core.h` — 13 functions, no marshalling design.
+3. **iOS audio sink.** Implement the ten-line interface on AudioQueue or AVAudioEngine. Match the
+   existing contract: 44.1 kHz, mono, S16LE, pull-style, 1024-byte buffers.
+4. **The renderer, in `commonMain`.** A Compose `Canvas` reading the shared 2 KB buffer at 60 fps,
+   drawing glyphs from an atlas of `ImageBitmap`s. `DirtyRect` is already in `commonMain` and
+   carries over unchanged. Benchmark on a real device: worst case is 1024 draws per frame, and if
+   that will not hold, the first fix is a batched atlas draw.
+5. **Glyph rasterization.** Currently `Canvas.drawText` into 256 `Bitmap`s from bundled TTFs.
+   Compose has equivalent text APIs in common code; alternatively bake the atlas at build time —
+   see D6, which this phase is the right place to settle.
+6. **Ask Apple.** See §9: policy is now the *only* remaining App Store unknown, and answering it
+   costs nothing at this stage.
+
+**Done when:** a game runs on an iOS device, with measured frame timings, and the App Store question
+has an answer.
+
+This phase also makes **D1** decidable on evidence instead of guesswork. If 1024 draws per frame
+will not hold 60 fps on iOS, moving rasterization into C stops being hypothetical.
+
+---
+
+## 6. Phase 2 — The new UI, in `commonMain`
 
 *Android-only initially. Ships incrementally. This is the bulk of the work and where the redesign lands.*
 
 Build the redesigned screens as Compose Multiplatform composables in `commonMain`, replacing the old
-Views one screen at a time via Compose/View interop. Order them so the riskiest thing comes first.
+Views one screen at a time via Compose/View interop.
 
-### 5.1 The emulator surface (do this first)
+The renderer and glyph pipeline are **already done by Phase 1c** — that was the riskiest piece and
+the reason the original plan said to do it first. What is left here is everything that genuinely
+depends on the design.
 
-Everything else is a conventional app; this is the part with no precedent. It is also the part that
-proves the architecture, so it should not be last.
+### 6.1 The emulator surface: input and layout
 
-- **Renderer**: a Compose `Canvas` reading the shared 2 KB buffer at 60 fps, drawing glyphs from an
-  atlas of `ImageBitmap`s. `DirtyRect` carries over as pure Kotlin. Benchmark early — worst case is
-  1024 draws per frame today, and if that is a problem the fix is a batched atlas draw, not a
-  redesign.
-- **Glyph rasterization**: currently `Canvas.drawText` into 256 `Bitmap`s from bundled TTFs. Compose
-  has equivalent text APIs in common code; alternatively bake the atlas at build time. Decide early
-  (see D6).
 - **Keyboards**: the five input modes become composables. This is a rewrite regardless, and per the
   UI spec it needs real design attention — the current 43 %-opacity labels fail contrast outright.
+  Note that the on-screen keyboards have never been verified on an emulator during this work, since
+  every AVD used had `hw.keyboard=yes` and therefore took the external-keyboard path.
 - **Landscape**: the spec's biggest open problem. The emulated picture is height-limited in
   landscape, leaving no room for controls, which is why the action bar disappears entirely today.
   The designer needs to solve this; the implementation follows.
 
-### 5.2 The shell
+### 6.2 The shell
 
 Configuration list, editor, settings, RetroStore browse/detail, onboarding. Conventional Compose
 work, driven by the design. The UI spec's prioritized problem list is the brief.
 
-### 5.3 Finish the storage rework
+### 6.3 Finish the storage rework
 
 Most of this lands earlier, under D8 — the app's own data is already app-scoped in `filesDir`, so
 the storage problem is narrower than the original audit implied. What remains for Phase 2 is the
@@ -271,26 +327,35 @@ Views left.
 
 ---
 
-## 6. Phase 3 — iOS enablement
+## 7. Phase 3 — iOS as a shipping product
 
-*No new UI work if Phase 2 was done in `commonMain`. This phase is plumbing.*
+*Small, because Phase 1c already proved the hard parts and Phase 2 wrote the UI in `commonMain`.
+What is left is the difference between "a game runs" and "an app someone can install".*
 
-1. **Build `core/` for iOS.** CMake with an iOS toolchain producing a static library, packaged as an
-   XCFramework. The `CMakeLists.txt` needs six lines guarded (`find_library(log)`, `OpenSLES`, and
-   their `target_link_libraries` entries) plus the C++ flags currently injected by Gradle.
-2. **cinterop bindings.** A `.def` file over `trs80_core.h` — 13 functions, no marshalling design work.
-3. **iOS audio sink.** Implement the ten-line interface on AudioQueue or AVAudioEngine. Match the
-   existing contract: 44.1 kHz, mono, S16LE, pull-style, 1024-byte buffers.
-4. **RetroStore client** — see **D7**. Pull this forward to just after the Kotlin conversion rather
-   than doing it here: it pays off on Android immediately and retires the biggest iOS unknown.
-5. **iOS host app.** SwiftUI `App` wrapping `ComposeUIViewController`, plus native document picking.
-6. **CI.** Add a macOS runner for the iOS build.
+The core build, cinterop, the audio sink and the renderer are all done by then (§5). Remaining:
 
-**Done when:** the iOS app runs a game end to end.
+1. **iOS host app.** SwiftUI `App` wrapping `ComposeUIViewController`. The spike's throwaway
+   entry point is replaced by a real one.
+2. **Storage `actual`s for iOS** — the other half of D8. The spike sidestepped this by bundling
+   files; a real app needs the key-value store on `NSUserDefaults` and `appDataDirectory()` on the
+   sandbox's Documents directory.
+3. **Content acquisition.** `FileDownloader` is still JVM-only (`java.net.URL`,
+   `java.util.zip.ZipInputStream`) and has to move to Ktor plus okio. The RetroStore client is
+   already multiplatform-ready (D7).
+4. **Native document picking**, per D3.
+5. **App Store submission** proper — signing, review, metadata. The policy question was already
+   answered in Phase 1c.
+
+**Done when:** the iOS app is installable and does everything the Android app does.
+
+*Historical note:* items 1–3 of the original Phase 3 (core build, cinterop, audio) moved into
+Phase 1c, and item 4 (the RetroStore client) was pulled all the way forward and is done. Item 6, the
+macOS CI runner, is done — though today it compiles only the Kotlin shared module, and Phase 1c
+extends it to the C core.
 
 ---
 
-## 7. Decisions to make (and my recommendation)
+## 8. Decisions to make (and my recommendation)
 
 **D1 — Screen model: keep character cells, or move rendering into C?**
 Today C exposes one byte per character cell and the host rasterizes glyphs. The alternative is for C
@@ -314,7 +379,7 @@ configuration form, so **decide before the design is finalized**, not after.
 see §3.
 
 **D6 — Font pipeline.** Rasterize TTFs at runtime in `commonMain`, or bake a glyph atlas at build
-time. *Recommend:* decide during the Phase 2 renderer spike; build-time baking is simpler and the
+time. *Recommend:* decide during the Phase 1c renderer work (§5); build-time baking is simpler and the
 fonts never change.
 
 **D7 — The RetroStore JVM SDK** ✅ DONE (July 2026) (`github.com/shaeberling/retrostore-jvm-sdk`). The app depends on it
@@ -449,16 +514,23 @@ on design work.
 
 ---
 
-## 8. Risks
+## 9. Risks
 
-**RetroStore is the hidden iOS blocker.** It is easy to plan the whole port around the emulator and
-discover late that content acquisition does not exist on iOS. Do it right after the Kotlin
-conversion, not in Phase 3 — see D7.
+**RetroStore was the hidden iOS blocker** ✅ *retired.* It was easy to plan the whole port around the
+emulator and discover late that content acquisition did not exist on iOS. Pulled forward and done —
+see D7. `FileDownloader` is the remaining JVM-only piece of content acquisition (§7 item 3).
 
-**App Store review.** Apple has allowed retro *console* emulators since 2024; a home-computer
-emulator is adjacent but not squarely covered. Separately, the RetroStore backend uses raw sockets
-over cleartext HTTP, which trips App Transport Security. **Resolve both before investing in the iOS
-UI**, not after — this is the cheapest possible time to discover a blocker.
+**App Store review** — now the *only* remaining App Store unknown, and it is policy, not code.
+Apple has allowed retro *console* emulators since 2024; a home-computer emulator is adjacent but not
+squarely covered. **Answer it in Phase 1c**, before any iOS UI exists — that is the cheapest possible
+moment to discover a blocker.
+
+*Correction:* earlier versions of this plan also listed cleartext HTTP tripping App Transport
+Security. **That is no longer true.** Retiring the JVM SDK (D7) replaced the raw-socket client with
+Ktor against `https://retrostore.org/api/%s`, and the initial ROM downloads are HTTPS from GitHub.
+The app's own networking is TLS throughout. (The *native* C RetroStore client still serves the
+emulated machine's TRS-IO card, but that is the guest talking to a virtual peripheral, not the app's
+network stack, and it is decode-only.)
 
 **Hi-res graphics crash.** Grafyx/HRG `longjmp` out of the CPU loop. Not caused by the port, but it
 will look like a port regression the first time someone hits it.
@@ -468,7 +540,7 @@ discipline in §1.1: if a phase cannot ship, it is too big.
 
 ---
 
-## 9. Parallel track: design
+## 10. Parallel track: design
 
 Design work does not block on any of this and should start now — `doc/UI-SPEC.md` is the brief.
 Phases 0 and 1 are invisible to users and can run underneath it. The specific things the designer
@@ -485,15 +557,21 @@ must resolve before Phase 2 can start in earnest:
 
 ---
 
-## 10. Summary
+## 11. Summary
 
 | Phase | Scope | Ships | User-visible |
 |---|---|---|---|
 | 0 ✅ | Clean C API, kill dead code, drop protobuf runtime | Android | No |
-| 1a | JDK fix → AndroidX → AGP 9.1 / Gradle 9.5 → Kotlin 2.4 (§4.2–4.4) | Android | No |
-| 1b | Java→Kotlin, KMP skeleton, RetroStore client in `commonMain` (D7) | Android | No |
-| 2 | Redesigned UI in `commonMain` | Android, incrementally | **Yes — the redesign** |
-| 3 | iOS core build, audio, host app, App Store review | iOS beta | Yes — new platform |
+| 1a ✅ | JDK fix → AndroidX → AGP 9.1 / Gradle 9.5 → Kotlin 2.4 (§4.2–4.4) | Android | No |
+| 1b ✅ | Java→Kotlin, KMP skeleton, RetroStore client in `commonMain` (D7) | Android | No |
+| 1c | **iOS spike**: core for iOS, cinterop, audio, renderer, ask Apple (§5) | No | No |
+| 1d | Storage: `androidx.preference` ✅ → namespaced store + migration (D8) | Android | No |
+| 2 | Redesigned UI in `commonMain` — shell, keyboards, landscape | Android, incrementally | **Yes — the redesign** |
+| 3 | iOS host app, iOS storage, `FileDownloader`, submission | iOS beta | Yes — new platform |
+
+**1c and 1d are independent and can run in parallel** — the spike bundles its files and so needs no
+storage, and the storage work needs no iOS. 1c is the higher-value one to do first: it answers the
+questions that could invalidate the whole iOS ambition, at the point where they cost least.
 
 Phases 0 and 1 are pure risk reduction and pay for themselves on Android alone. If the iOS ambition
 ever stalls, stopping after Phase 2 leaves a modern, native, fully redesigned Android app — which is
