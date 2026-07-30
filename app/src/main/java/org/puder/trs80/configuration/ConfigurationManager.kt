@@ -19,16 +19,15 @@ package org.puder.trs80.configuration
 import org.puder.trs80.shared.KeyboardLayout
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.preference.PreferenceManager
+import com.russhwolf.settings.Settings
 import org.puder.trs80.Hardware
 import org.puder.trs80.io.FileManager
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
 import java.io.IOException
 
 private const val TAG = "ConfigManager"
-private const val KEY_NEXT_ID = "NEXT_ID"
-private const val KEY_CONFIGURATIONS = "CONFIGURATIONS"
 
 /** The maximum number of disk images a configuration can hold. */
 private const val MAX_DISKS = 4
@@ -74,23 +73,23 @@ class ConfigurationManager private constructor(
             }
             // Makes sure the app's base directory exists.
             fileManagerCreator.forAppBaseDir()
-            val globalPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val settings = AppStorage.get().settings
             return ConfigurationManager(
                 fileManagerCreator,
-                loadConfigurations(globalPrefs, context),
-                GlobalPersistence(globalPrefs),
+                loadConfigurations(settings, context),
+                GlobalPersistence(settings),
                 context
             ).also { singleton = it }
         }
 
         private fun loadConfigurations(
-            globalPrefs: SharedPreferences,
+            settings: Settings,
             context: Context
         ): MutableList<Configuration> =
-            globalPrefs.getString(KEY_CONFIGURATIONS, "").orEmpty()
+            settings.getStringOrNull(StorageKeys.CONFIGURATION_IDS).orEmpty()
                 .split(",")
-                .filter { it.isNotEmpty() }
-                .mapTo(mutableListOf()) { ConfigurationImpl.fromId(it.toInt(), context) }
+                .mapNotNull { it.trim().toIntOrNull() }
+                .mapTo(mutableListOf()) { ConfigurationImpl.fromId(it, context) }
     }
 
     /** The number of configurations. */
@@ -248,13 +247,14 @@ class ConfigurationManager private constructor(
         EmulatorState.forConfigId(configId, fileManagerCreator)
 
     /** Data that is global to all configurations. */
-    private class GlobalPersistence(private val prefs: SharedPreferences) {
+    private class GlobalPersistence(private val settings: Settings) {
 
         fun incrementNextId(): Int =
-            (prefs.getInt(KEY_NEXT_ID, 0) + 1).also { prefs.edit().putInt(KEY_NEXT_ID, it).apply() }
+            ((settings.getIntOrNull(StorageKeys.NEXT_CONFIGURATION_ID) ?: 0) + 1)
+                .also { settings.putInt(StorageKeys.NEXT_CONFIGURATION_ID, it) }
 
         fun persistConfigurationIds(ids: List<Int>) =
-            prefs.edit().putString(KEY_CONFIGURATIONS, ids.joinToString(",")).apply()
+            settings.putString(StorageKeys.CONFIGURATION_IDS, ids.joinToString(","))
     }
 
     /** A media image (disk or cassette) to be stored with a configuration. */

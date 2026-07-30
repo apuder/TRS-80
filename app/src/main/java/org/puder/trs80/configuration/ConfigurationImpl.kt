@@ -35,9 +35,16 @@ internal class ConfigurationImpl private constructor(
 ) : Configuration {
 
     companion object {
-        /** @return The configuration stored under the given [id]. */
+        /**
+         * @return The configuration stored under the given [id].
+         *
+         * The context is no longer needed now that the values come from the
+         * shared store rather than a preferences file of their own. It is kept
+         * so the callers do not all change in this step.
+         */
+        @Suppress("UNUSED_PARAMETER")
         fun fromId(id: Int, context: Context): Configuration =
-            ConfigurationImpl(id, ConfigurationPersistence.forId(id, context))
+            ConfigurationImpl(id, ConfigurationPersistence.forId(id))
     }
 
     override val name: String?

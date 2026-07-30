@@ -18,15 +18,19 @@ package org.puder.trs80
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.russhwolf.settings.Settings
 import org.puder.trs80.browser.FileBrowserActivity
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
+import org.puder.trs80.storage.SettingsPreferenceDataStore
 
 /** Intent extra the file browser returns the picked file in. */
 private const val EXTRA_PATH = "PATH"
+
 
 /**
  * The ROM settings, in the order they appear on screen. Model 4 and 4P are only declared by
@@ -45,7 +49,7 @@ private val ROM_KEYS = listOf(
  */
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    private lateinit var sharedPrefs: SharedPreferences
+    private lateinit var settings: Settings
     private lateinit var romPreferences: List<RomPreference>
 
     private val changeListener = Preference.OnPreferenceChangeListener { pref, newValue ->
@@ -57,13 +61,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
     // rather than migrated to the Activity Result API.
     @Suppress("DEPRECATION")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        // The store has to be named before the hierarchy is inflated, or the preferences bind
-        // to the default shared preferences instead of the app-wide settings file.
-        val manager = preferenceManager
-        manager.sharedPreferencesName = SettingsActivity.SHARED_PREF_NAME
-        sharedPrefs = requireNotNull(manager.sharedPreferences) {
-            "Settings preference manager has no shared preferences."
-        }
+        // The ROM paths are domain data, so they live in the shared store under
+        // the app-wide namespace. Bound before the hierarchy is inflated, so the
+        // preferences read their initial values from the right place.
+        settings = AppStorage.get().settings
+        preferenceManager.preferenceDataStore =
+            SettingsPreferenceDataStore(settings, StorageKeys.APP_PREFIX)
         setPreferencesFromResource(R.xml.settings, rootKey)
 
         val clickListener = Preference.OnPreferenceClickListener { pref ->
@@ -93,13 +96,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
         // A null path means the user ejected the image, which clears the setting.
         val path = data?.getStringExtra(EXTRA_PATH)
         romPreferences.firstOrNull { it.key.hashCode() == requestCode }?.let {
-            sharedPrefs.edit().putString(it.key, path).apply()
+            if (path == null) {
+                settings.remove(StorageKeys.APP_PREFIX + it.key)
+            } else {
+                settings.putString(StorageKeys.APP_PREFIX + it.key, path)
+            }
         }
         updateSummaries()
     }
 
     private fun updateSummaries() = romPreferences.forEach {
-        it.preference.summary = sharedPrefs.getString(it.key, null) ?: it.defaultSummary
+        it.preference.summary =
+            settings.getStringOrNull(StorageKeys.APP_PREFIX + it.key) ?: it.defaultSummary
     }
 
     /** A ROM preference plus the summary to fall back to while no ROM is set. */

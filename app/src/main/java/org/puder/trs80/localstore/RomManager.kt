@@ -16,13 +16,13 @@
 
 package org.puder.trs80.localstore
 
-import android.content.Context
-import android.content.SharedPreferences
+import com.russhwolf.settings.Settings
 import org.puder.trs80.Hardware
-import org.puder.trs80.SettingsActivity
 import org.puder.trs80.StrUtil
 import org.puder.trs80.TRS80Application
 import org.puder.trs80.io.FileManager
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
 import java.io.File
 import java.io.IOException
 
@@ -30,7 +30,7 @@ import java.io.IOException
  * Manages ROMs.
  */
 class RomManager private constructor(
-        private val sharedPrefs: SharedPreferences,
+        private val settings: Settings,
         private val fileManager: FileManager) {
 
     /**
@@ -42,35 +42,27 @@ class RomManager private constructor(
      * @return Whether the file was successfully added.
      */
     fun addRom(model: Int, filename: String, content: ByteArray): Boolean {
-        sharedPrefs.edit()
-                .putString(keyForModel(model), fileManager.getAbsolutePathForFile(filename))
-                .apply()
+        settings.putString(
+                StorageKeys.romKey(model), fileManager.getAbsolutePathForFile(filename))
         return fileManager.writeFile(filename, content)
     }
 
     /** @return Whether the ROMs for both model I and model III are present. */
     fun hasAllRoms(): Boolean =
-            hasRom(SettingsActivity.CONF_ROM_MODEL1) && hasRom(SettingsActivity.CONF_ROM_MODEL3)
+            hasRom(Hardware.MODEL1) && hasRom(Hardware.MODEL3)
 
     /**
-     * @return Whether the ROM referenced by the given preference exists. If the file is gone,
-     * the stale preference is removed.
+     * @return Whether the ROM stored for [model] exists. If the file is gone, the
+     * stale entry is removed so the next download replaces it.
      */
-    private fun hasRom(prop: String): Boolean {
-        val filename = sharedPrefs.getString(prop, null) ?: return false
+    private fun hasRom(model: Int): Boolean {
+        val key = StorageKeys.romKey(model)
+        val filename = settings.getStringOrNull(key) ?: return false
         if (File(filename).exists()) {
             return true
         }
-        sharedPrefs.edit().remove(prop).apply()
+        settings.remove(key)
         return false
-    }
-
-    private fun keyForModel(model: Int): String = when (model) {
-        Hardware.MODEL1 -> SettingsActivity.CONF_ROM_MODEL1
-        Hardware.MODEL3 -> SettingsActivity.CONF_ROM_MODEL3
-        Hardware.MODEL4 -> SettingsActivity.CONF_ROM_MODEL4
-        Hardware.MODEL4P -> SettingsActivity.CONF_ROM_MODEL4P
-        else -> throw IllegalArgumentException(StrUtil.form("Model %d not found.", model))
     }
 
     companion object {
@@ -84,8 +76,7 @@ class RomManager private constructor(
         @Throws(IOException::class)
         fun init(fileManagerCreator: FileManager.Creator): RomManager =
                 instance ?: RomManager(
-                        TRS80Application.getAppContext().getSharedPreferences(
-                                SettingsActivity.SHARED_PREF_NAME, Context.MODE_PRIVATE),
+                        AppStorage.get().settings,
                         fileManagerCreator.forAppBaseDir()).also { instance = it }
 
         /**

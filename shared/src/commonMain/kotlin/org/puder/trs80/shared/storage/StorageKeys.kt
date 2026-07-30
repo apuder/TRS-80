@@ -86,11 +86,19 @@ object StorageKeys {
 
     // ---- App-wide ----------------------------------------------------------
 
+    /**
+     * The namespace app-wide values live under.
+     *
+     * Also the prefix the settings screen is bridged with, so that its
+     * preference keys resolve to the same names used here.
+     */
+    const val APP_PREFIX = "app."
+
     /** The comma-joined IDs of the configurations that exist, in display order. */
-    const val CONFIGURATION_IDS = "app.configurations"
+    const val CONFIGURATION_IDS = APP_PREFIX + "configurations"
 
     /** The counter the next configuration's ID comes from. */
-    const val NEXT_CONFIGURATION_ID = "app.nextId"
+    const val NEXT_CONFIGURATION_ID = APP_PREFIX + "nextId"
 
     /**
      * The ROM image for an emulated model. The leaf keeps its legacy name for
@@ -105,7 +113,7 @@ object StorageKeys {
             5 -> "conf_rom_model4p"
             else -> throw IllegalArgumentException("No ROM setting for model $model.")
         }
-        return "app.$leaf"
+        return APP_PREFIX + leaf
     }
 
     /** The models that have a ROM setting. */

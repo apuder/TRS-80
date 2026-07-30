@@ -28,6 +28,9 @@ import androidx.preference.PreferenceFragmentCompat
 import org.puder.trs80.browser.FileBrowserActivity
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.ConfigurationPersistence
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
+import org.puder.trs80.storage.SettingsPreferenceDataStore
 import java.io.File
 import java.io.IOException
 
@@ -87,9 +90,14 @@ class EditConfigurationFragment : PreferenceFragmentCompat() {
             requireActivity().finish()
             return
         }
-        // This names the configuration's own preference store on the manager, so it has to
-        // happen before the hierarchy below is inflated.
-        configPersistence = ConfigurationPersistence.forIdAndManager(configId, preferenceManager)
+        // Point the screen at this configuration's namespace in the shared store,
+        // which has to happen before the hierarchy below is inflated so that the
+        // preferences read their initial values from the right place.
+        preferenceManager.preferenceDataStore = SettingsPreferenceDataStore(
+            AppStorage.get().settings,
+            StorageKeys.configurationPrefix(configId),
+        )
+        configPersistence = ConfigurationPersistence.forId(configId)
         val prefFinder = configPersistence.forPreferenceProvider { name ->
             requireNotNull(findPreference<Preference>(name)) { "No preference named '$name'." }
         }
@@ -134,12 +142,8 @@ class EditConfigurationFragment : PreferenceFragmentCompat() {
         }
 
         cassette = mediaPreference(prefFinder.forCasette(), clickListener)
-        disks = listOf(
-            prefFinder.forDisk1(),
-            prefFinder.forDisk2(),
-            prefFinder.forDisk3(),
-            prefFinder.forDisk4()
-        ).map { mediaPreference(it, clickListener) }
+        disks = (0 until DISK_COUNT)
+            .map { mediaPreference(prefFinder.forDisk(it), clickListener) }
 
         modelPref = prefFinder.forModel()
         modelPref.onPreferenceChangeListener = changeListener

@@ -16,8 +16,9 @@
 
 package org.puder.trs80
 
-import android.content.Context
 import android.os.Bundle
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -92,8 +93,6 @@ class SettingsActivity : BaseActivity() {
          */
         @JvmStatic
         fun getSetting(key: String): String? =
-            TRS80Application.getAppContext()
-                .getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                .getString(key, null)
+            AppStorage.get().settings.getStringOrNull(StorageKeys.APP_PREFIX + key)
     }
 }

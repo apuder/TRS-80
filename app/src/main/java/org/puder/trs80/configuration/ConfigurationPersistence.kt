@@ -18,73 +18,59 @@ package org.puder.trs80.configuration
 
 import org.puder.trs80.shared.KeyboardLayout
 
-import android.content.Context
-import android.content.SharedPreferences
 import androidx.preference.Preference
-import androidx.preference.PreferenceManager
+import com.russhwolf.settings.Settings
+import org.puder.trs80.shared.storage.StorageKeys
+import org.puder.trs80.storage.AppStorage
 
-private const val PREF_NAME_PREFIX = "CONFIG_"
-private const val CONF_NAME = "conf_name"
-private const val CONF_MODEL = "conf_model"
-private const val CONF_CASSETTE = "conf_cassette"
-private const val CONF_DISK1 = "conf_disk1"
-private const val CONF_DISK2 = "conf_disk2"
-private const val CONF_DISK3 = "conf_disk3"
-private const val CONF_DISK4 = "conf_disk4"
-private const val CONF_CHARACTER_COLOR = "conf_character_color"
-private const val CONF_KEYBOARD_PORTRAIT = "conf_keyboard_portrait"
-private const val CONF_KEYBOARD_LANDSCAPE = "conf_keyboard_landscape"
-private const val CONF_MUTE_SOUND = "conf_mute_sound"
+private const val CONF_NAME = StorageKeys.CONFIG_NAME
+private const val CONF_MODEL = StorageKeys.CONFIG_MODEL
+private const val CONF_CASSETTE = StorageKeys.CONFIG_CASSETTE
+private const val CONF_CHARACTER_COLOR = StorageKeys.CONFIG_CHARACTER_COLOR
+private const val CONF_KEYBOARD_PORTRAIT = StorageKeys.CONFIG_KEYBOARD_PORTRAIT
+private const val CONF_KEYBOARD_LANDSCAPE = StorageKeys.CONFIG_KEYBOARD_LANDSCAPE
+private const val CONF_MUTE_SOUND = StorageKeys.CONFIG_MUTE_SOUND
 
-private const val KEY_CASSETTE_POSITION = "cassette_position"
+private const val KEY_CASSETTE_POSITION = StorageKeys.CONFIG_CASSETTE_POSITION
 
 /**
  * Persisted data about a configuration.
+ *
+ * Values live in the one shared store under this configuration's namespace,
+ * rather than in a preferences file of their own as they used to. Keys are the
+ * legacy names prefixed by [StorageKeys.configurationPrefix], which is also what
+ * lets the editor screen bind straight to them through a
+ * `SettingsPreferenceDataStore`.
  */
-class ConfigurationPersistence private constructor(private val sharedPrefs: SharedPreferences) {
+class ConfigurationPersistence private constructor(
+    private val settings: Settings,
+    private val keyPrefix: String,
+) {
 
     companion object {
-        /** Create an instance for the configuration with the given ID. */
-        internal fun forId(configId: Int, context: Context): ConfigurationPersistence =
-            ConfigurationPersistence(
-                context.getSharedPreferences(PREF_NAME_PREFIX + configId, Context.MODE_PRIVATE)
-            )
+        /** Creates an instance for the configuration with the given ID. */
+        internal fun forId(configId: Int): ConfigurationPersistence =
+            forId(configId, AppStorage.get().settings)
 
-        /**
-         * Create an instance for the configuration with the given ID that is backed by the
-         * preferences of the given manager.
-         */
-        fun forIdAndManager(
-            configId: Int,
-            prefManager: PreferenceManager
-        ): ConfigurationPersistence {
-            prefManager.sharedPreferencesName = PREF_NAME_PREFIX + configId
-            // Null only once a PreferenceDataStore is installed on the manager, which is the
-            // point at which this whole class stops being backed by SharedPreferences.
-            val prefs = requireNotNull(prefManager.sharedPreferences) {
-                "Preference manager for configuration $configId has no shared preferences."
-            }
-            return ConfigurationPersistence(prefs)
-        }
+        /** Creates an instance backed by a specific store. Exists for tests. */
+        internal fun forId(configId: Int, settings: Settings): ConfigurationPersistence =
+            ConfigurationPersistence(settings, StorageKeys.configurationPrefix(configId))
 
-        private fun diskIdToKey(disk: Int): String? = when (disk) {
-            0 -> CONF_DISK1
-            1 -> CONF_DISK2
-            2 -> CONF_DISK3
-            3 -> CONF_DISK4
-            else -> null
-        }
+        private fun diskIdToKey(disk: Int): String? =
+            if (disk in 0 until StorageKeys.DRIVE_COUNT) StorageKeys.diskKey(disk) else null
     }
+
+    private fun key(leaf: String) = keyPrefix + leaf
 
     /** The stored model as its raw string value, or null if none is stored. */
     val model: String?
-        get() = sharedPrefs.getString(CONF_MODEL, null)
+        get() = settings.getStringOrNull(key(CONF_MODEL))
 
     internal fun setModel(model: String?) = setStringOrRemove(CONF_MODEL, model)
 
     /** The stored path of the cassette image, or null if none is stored. */
     val casettePath: String?
-        get() = sharedPrefs.getString(CONF_CASSETTE, null)
+        get() = settings.getStringOrNull(key(CONF_CASSETTE))
 
     fun setCasettePath(path: String?) = setStringOrRemove(CONF_CASSETTE, path)
 
@@ -93,7 +79,7 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
      * @return The stored path of the image in that drive, or null if there is none.
      */
     fun getDiskPath(disk: Int): String? =
-        diskIdToKey(disk)?.let { sharedPrefs.getString(it, null) }
+        diskIdToKey(disk)?.let { settings.getStringOrNull(key(it)) }
 
     fun setDiskPath(disk: Int, path: String?) {
         val key = diskIdToKey(disk) ?: return
@@ -105,14 +91,14 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
     internal fun setCharacterColor(value: Int) = setInt(CONF_CHARACTER_COLOR, value)
 
     internal fun getCassettePosition(defaultValue: Float): Float =
-        sharedPrefs.getFloat(KEY_CASSETTE_POSITION, defaultValue)
+        settings.getFloatOrNull(key(KEY_CASSETTE_POSITION)) ?: defaultValue
 
     internal fun setCassettePosition(pos: Float) =
-        sharedPrefs.edit().putFloat(KEY_CASSETTE_POSITION, pos).apply()
+        settings.putFloat(key(KEY_CASSETTE_POSITION), pos)
 
     /** The stored name of the configuration, defaulting to "unknown". */
     val name: String?
-        get() = sharedPrefs.getString(CONF_NAME, "unknown")
+        get() = settings.getStringOrNull(key(CONF_NAME)) ?: "unknown"
 
     internal fun setName(name: String?) = setStringOrRemove(CONF_NAME, name)
 
@@ -130,27 +116,46 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
 
     /** Whether the emulator's sound output is muted. */
     internal var isSoundMuted: Boolean
-        get() = sharedPrefs.getBoolean(CONF_MUTE_SOUND, false)
-        set(muted) = sharedPrefs.edit().putBoolean(CONF_MUTE_SOUND, muted).apply()
+        get() = settings.getBooleanOrNull(key(CONF_MUTE_SOUND)) ?: false
+        set(muted) = settings.putBoolean(key(CONF_MUTE_SOUND), muted)
 
-    /** Removes all stored data. */
-    internal fun clear() = sharedPrefs.edit().clear().apply()
+    /**
+     * Removes all stored data of this configuration.
+     *
+     * Only this configuration's namespace, which is why the store's keys are
+     * prefixed rather than kept in a file of their own: the file used to be the
+     * unit of deletion, and now the prefix is.
+     */
+    internal fun clear() {
+        for (leaf in StorageKeys.configurationKeys) {
+            settings.remove(key(leaf))
+        }
+    }
 
     /** @return A finder for the preferences of this configuration. */
     fun forPreferenceProvider(provider: PreferenceProvider): PreferenceFinder =
         PreferenceFinder(provider)
 
-    private fun setStringOrRemove(key: String, value: String?) {
-        val editor = sharedPrefs.edit()
-        if (value.isNullOrEmpty()) editor.remove(key) else editor.putString(key, value)
-        editor.apply()
+    /**
+     * Stores [value], or removes the key when there is nothing to store.
+     *
+     * Removal rather than an empty string, because absent is what the rest of
+     * the app reads as "no disk" or "no cassette".
+     */
+    private fun setStringOrRemove(leaf: String, value: String?) {
+        if (value.isNullOrEmpty()) settings.remove(key(leaf)) else settings.putString(key(leaf), value)
     }
 
-    private fun getInt(key: String, defaultValue: Int): Int =
-        sharedPrefs.getString(key, "")?.toIntOrNull() ?: defaultValue
+    /**
+     * Reads a number that is stored as a string, because the preference screens
+     * that write these use `ListPreference`, which only writes strings.
+     */
+    private fun getInt(leaf: String, defaultValue: Int): Int =
+        settings.getStringOrNull(key(leaf))?.toIntOrNull() ?: defaultValue
 
-    private fun setInt(key: String, value: Int) =
-        sharedPrefs.edit().putString(key, value.toString()).apply()
+    /** Writes a number as a string, matching how the preference screens store it. */
+    private fun setInt(leaf: String, value: Int) =
+        settings.putString(key(leaf), value.toString())
 
     /**
      * Finds preferences for configurations.
@@ -162,13 +167,9 @@ class ConfigurationPersistence private constructor(private val sharedPrefs: Shar
 
         fun forCasette(): Preference = provider.findPreference(CONF_CASSETTE)
 
-        fun forDisk1(): Preference = provider.findPreference(CONF_DISK1)
-
-        fun forDisk2(): Preference = provider.findPreference(CONF_DISK2)
-
-        fun forDisk3(): Preference = provider.findPreference(CONF_DISK3)
-
-        fun forDisk4(): Preference = provider.findPreference(CONF_DISK4)
+        /** @param drive the zero-based drive index. */
+        fun forDisk(drive: Int): Preference =
+            provider.findPreference(StorageKeys.diskKey(drive))
 
         fun forCharacterColor(): Preference = provider.findPreference(CONF_CHARACTER_COLOR)
 
