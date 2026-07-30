@@ -216,11 +216,22 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
         }
         // Read the holder once; it is replaced from the UI thread.
         val holder = surfaceHolder ?: return false
-        val canvas = holder.lockCanvas(null) ?: return false
+        val surface = holder.surface
+        if (surface == null || !surface.isValid) {
+            return false
+        }
+        /*
+         * A hardware canvas, so the GPU does the scale. lockCanvas() hands back a
+         * software one, which made this a CPU upscale of the whole screen every
+         * frame - measured at 7-11 ms, against 0.05 ms for getting the mask out of
+         * the core. It also has to redraw the whole surface, which suits a
+         * renderer that draws one image anyway.
+         */
+        val canvas = surface.lockHardwareCanvas() ?: return false
         try {
             blitScreen(canvas)
         } finally {
-            holder.unlockCanvasAndPost(canvas)
+            surface.unlockCanvasAndPost(canvas)
         }
         return true
     }
