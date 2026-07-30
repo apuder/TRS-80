@@ -17,6 +17,24 @@
         android:layout_marginTop="@dimen/emulator_top_margin"
         android:visibility="gone" />
 
+    <!--
+        Frame timings for comparing the two renderers on a device. Hidden unless
+        the renderer stats are switched on from the emulator's menu, and goes
+        away with the comparison.
+    -->
+    <TextView
+        android:id="@+id/renderer_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:background="#a0000000"
+        android:fontFamily="monospace"
+        android:padding="6dp"
+        android:textColor="#ffeb3b"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:ignore="HardcodedText" />
+
     <ProgressBar
         android:id="@+id/spinner"
         android:layout_width="wrap_content"

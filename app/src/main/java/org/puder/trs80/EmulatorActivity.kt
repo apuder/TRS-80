@@ -32,6 +32,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -48,6 +49,7 @@ import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.configuration.EmulatorState
 import org.puder.trs80.shared.KeyboardLayout
+import org.puder.trs80.storage.AppStorage
 import org.puder.trs80.io.FileManager
 import org.puder.trs80.keyboard.KeyboardManager
 import java.io.IOException
@@ -63,6 +65,10 @@ private const val MENU_OPTION_SOUND_ON = 4
 private const val MENU_OPTION_SOUND_OFF = 5
 private const val MENU_OPTION_TUTORIAL = 6
 private const val MENU_OPTION_HELP = 7
+private const val MENU_OPTION_TOGGLE_RENDERER = 8
+
+/** Remembers the renderer choice across launches while the two are compared. */
+private const val KEY_USES_CORE_RENDERER = "debug.usesCoreRenderer"
 
 /** Only the configuration by this name knows the commands the tutorial types. */
 private const val CONFIGURATION_TUTORIAL_NAME = "TRS-80 Tutorial"
@@ -113,6 +119,11 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
 
     private var cpuThread: Thread? = null
     private var renderThread: RenderThread? = null
+    private var rendererMenuItem: MenuItem? = null
+
+    /** Which renderer to use; see the renderer menu item. */
+    private var usesCoreRenderer =
+        AppStorage.get().settings.getBoolean(KEY_USES_CORE_RENDERER, true)
     private var currentSurfaceHolder: SurfaceHolder? = null
 
     private var orientation = 0
@@ -428,9 +439,40 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
         }
         renderThread = RenderThread(isCasting).also {
             it.priority = Thread.MAX_PRIORITY
+            it.usesCoreRenderer = usesCoreRenderer
             it.setHardwareSpecs(currentHardware)
             it.surfaceHolder = currentSurfaceHolder
+            it.onStats = ::showRendererStats
         }
+    }
+
+    // ---- Renderer comparison -----------------------------------------------
+    // Temporary. Lets the core's rasterizer and the original per-cell glyph
+    // blitting be compared on a device, for looks and for frame timings, without
+    // reinstalling between them. All of this goes when one of them wins.
+
+    private fun rendererMenuTitle() =
+        if (usesCoreRenderer) "Renderer: core (tap for glyphs)"
+        else "Renderer: glyphs (tap for core)"
+
+    private fun toggleRenderer() {
+        usesCoreRenderer = !usesCoreRenderer
+        AppStorage.get().settings.putBoolean(KEY_USES_CORE_RENDERER, usesCoreRenderer)
+        rendererMenuItem?.title = rendererMenuTitle()
+        renderThread?.apply {
+            usesCoreRenderer = this@EmulatorActivity.usesCoreRenderer
+            redrawEverything()
+        }
+        findViewById<TextView>(R.id.renderer_stats)?.visibility = View.VISIBLE
+    }
+
+    private fun showRendererStats(summary: FrameStats.Summary) {
+        val which = if (usesCoreRenderer) "core" else "glyphs"
+        findViewById<TextView>(R.id.renderer_stats)?.apply {
+            text = "$which: $summary"
+            visibility = View.VISIBLE
+        }
+        Log.i(TAG, "renderer=$which $summary")
     }
 
     private fun stopRenderThread() {
@@ -526,12 +568,19 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
         menu.add(Menu.NONE, MENU_OPTION_HELP, Menu.NONE, getString(R.string.menu_help))
             .setIcon(R.drawable.help_icon_white)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+        // Temporary, for comparing the two renderers on a device. Goes away with
+        // the one that loses.
+        rendererMenuItem = menu.add(
+            Menu.NONE, MENU_OPTION_TOGGLE_RENDERER, Menu.NONE, rendererMenuTitle()
+        ).apply { setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER) }
         updateMenuIcons()
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            MENU_OPTION_TOGGLE_RENDERER -> toggleRenderer()
+
             // Pausing is just leaving: onStop() saves the machine state and a screenshot.
             android.R.id.home, MENU_OPTION_PAUSE -> finish()
 

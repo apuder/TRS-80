@@ -20,6 +20,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.os.Handler
 import android.os.Looper
 import android.view.Choreographer
 import android.view.SurfaceHolder
@@ -65,6 +66,33 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
 
     private var screenColor = 0
 
+    /**
+     * Whether to draw the mask the core rasterizes, or to blit glyph bitmaps per
+     * cell as the app did before. A comparison aid: see [EmulatorActivity]'s
+     * renderer menu item.
+     */
+    @Volatile
+    var usesCoreRenderer = true
+
+    /** The TrueType glyphs, used only by the pre-core renderer. */
+    private var font: Array<Bitmap?> = emptyArray()
+    private var trsCharWidth = 0
+    private var trsCharHeight = 0
+
+    /**
+     * The region handed to [SurfaceHolder.lockCanvas] by the glyph renderer,
+     * which widens it in place to the area it actually locked.
+     */
+    private val lockedRegion = Rect()
+
+    private val frameStats = FrameStats()
+
+    /** Receives a summary of recent frames, on the main thread. */
+    @Volatile
+    var onStats: ((FrameStats.Summary) -> Unit)? = null
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     /** Set to `false` to make the frame loop return after the current frame. */
     @Volatile
     var isRunning = true
@@ -84,6 +112,9 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
     fun setHardwareSpecs(hardware: Hardware) {
         val screenConfig = hardware.screenConfiguration
         model = hardware.model
+        font = hardware.font
+        trsCharWidth = hardware.charWidth
+        trsCharHeight = hardware.charHeight
         trsScreenCols = screenConfig.trsScreenCols
         trsScreenRows = screenConfig.trsScreenRows
         screenCharBuffer = StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows)
@@ -133,6 +164,16 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
         Looper.loop()
     }
 
+    /**
+     * Discards what both renderers believe is already on screen, so the next
+     * frame redraws everything. Needed when switching between them, since
+     * neither one's idea of the screen survives the other having drawn.
+     */
+    fun redrawEverything() {
+        XTRS.invalidateRender()
+        dirtyRect.reset()
+    }
+
     /** Stops the frame loop. Safe to call from any thread. */
     fun quit() {
         isRunning = false
@@ -153,18 +194,88 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
             return
         }
 
-        // The core rasterizes into its own buffer and reports whether anything
-        // moved, so an idle screen costs neither an upload nor a draw.
+        val startedAt = System.nanoTime()
+        val drew = if (usesCoreRenderer) drawFromCoreMask() else drawFromGlyphs()
+        frameStats.record(System.nanoTime() - startedAt, drew)
+        frameStats.takeSummary()?.let { summary ->
+            val listener = onStats
+            if (listener != null) mainHandler.post { listener(summary) }
+        }
+    }
+
+    /**
+     * Draws the mask the core rasterized: one tinted, scaled image.
+     *
+     * @return whether anything was drawn.
+     */
+    private fun drawFromCoreMask(): Boolean {
+        // The core reports whether anything moved, so an idle screen costs
+        // neither an upload nor a draw.
         if (!XTRS.render()) {
-            return
+            return false
         }
         // Read the holder once; it is replaced from the UI thread.
-        val holder = surfaceHolder ?: return
-        val canvas = holder.lockCanvas(null) ?: return
+        val holder = surfaceHolder ?: return false
+        val canvas = holder.lockCanvas(null) ?: return false
         try {
             blitScreen(canvas)
         } finally {
             holder.unlockCanvasAndPost(canvas)
+        }
+        return true
+    }
+
+    /**
+     * Draws the screen the way the app did before the core rasterized it: one
+     * bitmap per changed character cell, into the locked dirty region.
+     *
+     * Kept only so the two can be compared; it is Android-only and will go once
+     * the core renderer has been judged.
+     *
+     * @return whether anything was drawn.
+     */
+    private fun drawFromGlyphs(): Boolean {
+        val expandedMode = XTRS.isExpandedMode()
+        val dirty = dirtyRect
+        dirty.isExpandedMode = expandedMode
+        dirty.computeDirtyRect()
+        if (dirty.isEmpty) {
+            return false
+        }
+        val holder = surfaceHolder ?: return false
+        val region = lockedRegion
+        region.set(dirty.clipLeft, dirty.clipTop, dirty.clipRight, dirty.clipBottom)
+        val canvas = holder.lockCanvas(region) ?: return false
+        try {
+            dirty.onRegionLocked(region.left, region.top, region.right, region.bottom)
+            renderScreenToCanvas(canvas, expandedMode)
+        } finally {
+            holder.unlockCanvasAndPost(canvas)
+        }
+        return true
+    }
+
+    /** Renders the current dirty region of the emulated screen into [canvas]. */
+    private fun renderScreenToCanvas(canvas: Canvas, expandedMode: Boolean) {
+        if (expandedMode) {
+            canvas.scale(2f, 1f)
+        }
+        val step = if (expandedMode) 2 else 1
+        val dirty = dirtyRect
+        val glyphs = font
+        val isModel1 = model == Hardware.MODEL1
+        for (row in dirty.top..dirty.bottom) {
+            val rowStart = row * trsScreenCols
+            val y = (trsCharHeight * row).toFloat()
+            for (col in dirty.left..dirty.right) {
+                var ch = screenBuffer[rowStart + col * step].toInt() and 0xff
+                // Emulate Radio Shack lowercase mod (for Model 1).
+                if (isModel1 && ch < 0x20) {
+                    ch += 0x40
+                }
+                val glyph = glyphs[ch] ?: continue
+                canvas.drawBitmap(glyph, (trsCharWidth * col).toFloat(), y, null)
+            }
         }
     }
 
@@ -231,9 +342,16 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
         val screenshot = Bitmap.createBitmap(
             hardware.screenWidth, hardware.screenHeight, Bitmap.Config.RGB_565
         )
-        XTRS.invalidateRender()
-        XTRS.render()
-        blitScreen(Canvas(screenshot))
+        if (usesCoreRenderer) {
+            XTRS.invalidateRender()
+            XTRS.render()
+            blitScreen(Canvas(screenshot))
+        } else {
+            val expandedMode = XTRS.isExpandedMode()
+            dirtyRect.isExpandedMode = expandedMode
+            dirtyRect.reset()
+            renderScreenToCanvas(Canvas(screenshot), expandedMode)
+        }
         return screenshot
     }
 
