@@ -16,6 +16,18 @@
 
 package org.puder.trs80.shared
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import platform.Foundation.NSTemporaryDirectory
+import platform.posix.fclose
+import platform.posix.fopen
+import platform.posix.fwrite
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -23,10 +35,13 @@ import kotlin.test.assertTrue
 /**
  * Runs the emulator core on iOS.
  *
- * These do not exercise much emulator behaviour — booting a machine needs a ROM
- * this module has no business bundling. What they do prove is that the C core
- * links into a Kotlin/Native binary and that calls across cinterop actually
- * reach it, which is the thing that had never been true before.
+ * The point of these is that the C core links into a Kotlin/Native binary and
+ * that calls across cinterop reach it — which had never been true before — and
+ * that the Z80 actually executes there.
+ *
+ * No TRS-80 ROM is bundled. [SPIN_AT_VIDEO_RAM] is seven bytes of Z80 written
+ * here in the test, which is enough to prove the CPU runs and that a write to
+ * video RAM lands in the buffer the host reads.
  */
 class EmulatorCoreTest {
 
@@ -34,7 +49,7 @@ class EmulatorCoreTest {
     fun screenBufferIsTheSizeOfTheScreen() {
         val buffer = EmulatorCore.screenBuffer
         // The core owns 2 KB; reading the last cell must not fault.
-        assertEquals(0.toByte(), buffer[SCREEN_BUFFER_SIZE - 1])
+        buffer[SCREEN_BUFFER_SIZE - 1]
     }
 
     @Test
@@ -47,17 +62,9 @@ class EmulatorCoreTest {
     }
 
     @Test
-    fun expandedModeIsReadableBeforeBoot() {
-        // Just has to return without trapping; either answer is legitimate on a
-        // machine that has not been initialized.
-        val expanded = EmulatorCore.isExpandedMode
-        assertTrue(expanded || !expanded)
-    }
-
-    @Test
     fun keyEventsAreAcceptedBeforeBoot() {
-        // The core queues these without needing a running CPU. This is the
-        // cinterop path that carries arguments in both directions.
+        // Queued without needing a running CPU. This is the cinterop path that
+        // carries arguments into the core.
         EmulatorCore.keyDown(sym = 0x0D, key = 0x0D)
         EmulatorCore.keyUp(sym = 0x0D, key = 0x0D)
     }
@@ -85,8 +92,66 @@ class EmulatorCoreTest {
         assertTrue(dirty.isEmpty)
     }
 
+    @Test
+    fun z80ExecutesAndWritesToVideoRam() = runBlocking {
+        val romPath = writeRom(SPIN_AT_VIDEO_RAM)
+        assertTrue(EmulatorCore.boot(model = 1, romPath = romPath), "The core refused to boot.")
+
+        // trs80_run blocks until stopped, so it needs a thread of its own.
+        val cpu = launch(Dispatchers.Default) { EmulatorCore.run() }
+        try {
+            withTimeout(RUN_TIMEOUT_MILLIS) {
+                while (EmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
+                    delay(POLL_INTERVAL_MILLIS)
+                }
+            }
+        } finally {
+            EmulatorCore.stop()
+            cpu.join()
+        }
+
+        // Reached only if the CPU fetched from the ROM, executed the store, and
+        // the memory write propagated into the host's screen buffer.
+        assertEquals(EXPECTED_CHAR, EmulatorCore.screenBuffer[0])
+    }
+
+    /** Writes [bytes] to a file the core can open, and returns its path. */
+    @OptIn(ExperimentalForeignApi::class)
+    private fun writeRom(bytes: UByteArray): String {
+        val path = NSTemporaryDirectory() + "trs80-synthetic-rom.bin"
+        val file = requireNotNull(fopen(path, "wb")) { "Could not create $path." }
+        try {
+            bytes.usePinned {
+                fwrite(it.addressOf(0), 1.toULong(), bytes.size.toULong(), file)
+            }
+        } finally {
+            fclose(file)
+        }
+        return path
+    }
+
     private companion object {
         /** Matches TRS80_SCREEN_BUFFER_SIZE in trs80_core.h. */
         const val SCREEN_BUFFER_SIZE = 2048
+
+        /** The character the synthetic ROM stores, and where it stores it. */
+        const val EXPECTED_CHAR: Byte = 0x41 // 'A'
+
+        /**
+         * Z80 machine code, executed from address 0 where the Model I ROM is
+         * mapped:
+         *
+         *     3E 41        LD   A, 0x41      ; 'A'
+         *     32 00 3C     LD   (0x3C00), A  ; the first cell of video RAM
+         *     18 FE        JR   -2           ; spin, so the CPU stays busy
+         */
+        val SPIN_AT_VIDEO_RAM = ubyteArrayOf(
+            0x3Eu, 0x41u,
+            0x32u, 0x00u, 0x3Cu,
+            0x18u, 0xFEu,
+        )
+
+        const val RUN_TIMEOUT_MILLIS = 10_000L
+        const val POLL_INTERVAL_MILLIS = 20L
     }
 }

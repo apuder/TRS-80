@@ -125,6 +125,9 @@ kotlin {
         commonTest {
             dependencies {
                 implementation kotlin('test')
+                // trs80_run() blocks, so the iOS tests need a second thread to
+                // drive the CPU while the test polls.
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
             }
         }
     }

@@ -19,11 +19,18 @@ package org.puder.trs80.shared
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UByteVar
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.cstr
 import kotlinx.cinterop.get
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.set
 import org.puder.trs80.core.TRS80_KEY_DOWN
 import org.puder.trs80.core.TRS80_KEY_UP
 import org.puder.trs80.core.TRS80_OK
 import org.puder.trs80.core.trs80_add_key_event
+import org.puder.trs80.core.trs80_config
+import org.puder.trs80.core.trs80_init
 import org.puder.trs80.core.trs80_is_expanded_mode
 import org.puder.trs80.core.trs80_reset
 import org.puder.trs80.core.trs80_run
@@ -55,11 +62,47 @@ object EmulatorCore {
         )
 
     /**
+     * Boots a machine.
+     *
+     * @param model 1, 3, 4 or 5, matching the `model` field of `trs80_config`.
+     * @param romPath the ROM image for [model].
+     * @param diskPaths up to four disk images; missing entries leave a drive
+     * empty. A `.cmd` file in the first drive is loaded into memory directly
+     * and its entry point overrides [entryAddress].
+     * @return whether the core accepted the configuration.
+     */
+    fun boot(
+        model: Int,
+        romPath: String,
+        diskPaths: List<String?> = emptyList(),
+        cassettePath: String? = null,
+        entryAddress: Int = 0,
+    ): Boolean = memScoped {
+        val config = alloc<trs80_config>()
+        config.model = model
+        config.rom_path = romPath.cstr.ptr
+        config.cassette_path = cassettePath?.cstr?.ptr
+        for (drive in 0 until DRIVE_COUNT) {
+            config.disk_path[drive] = diskPaths.getOrNull(drive)?.cstr?.ptr
+        }
+        config.entry_addr = entryAddress.toUShort()
+        trs80_init(config.ptr) == TRS80_OK
+    }
+
+    /**
      * Runs the CPU. Blocks until [stop] is called from another thread, so this
      * must not be called on the main thread.
+     *
+     * The core's run loop tests a flag that `trs80_run()` does not itself set,
+     * so this sets it first. Calling the C function alone returns immediately
+     * and looks indistinguishable from a machine that will not boot.
      */
-    fun run() = trs80_run()
+    fun run() {
+        trs80_set_running(1)
+        trs80_run()
+    }
 
+    /** Asks [run] to return. Safe to call from any thread. */
     fun stop() = trs80_set_running(0)
 
     fun reset() = trs80_reset()
@@ -74,8 +117,8 @@ object EmulatorCore {
     fun keyUp(sym: Int, key: Int) =
         trs80_add_key_event(TRS80_KEY_UP, sym, key)
 
-    /** Whether [status] is the core's success code. */
-    fun isOk(status: Int): Boolean = status == TRS80_OK
+    /** The number of disk drives a machine has. */
+    private const val DRIVE_COUNT = 4
 }
 
 /**
