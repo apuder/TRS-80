@@ -125,11 +125,19 @@ object XTRS {
     @JvmStatic
     private external fun getScreenBufferNative(): ByteBuffer
 
-    /** The rasterized screen's width, matching TRS80_PIXEL_WIDTH. */
-    const val PIXEL_WIDTH = 64 * 8
+    /**
+     * Sets the size one character cell is drawn at, so the core rasterizes
+     * straight to it and the host never scales the result. See `trs80_render()`.
+     */
+    @JvmStatic
+    external fun setCellSize(width: Int, height: Int)
 
-    /** The rasterized screen's height, matching TRS80_PIXEL_HEIGHT. */
-    const val PIXEL_HEIGHT = 16 * 12
+    /** The rasterized screen's size, which follows [setCellSize]. */
+    @JvmStatic
+    external fun pixelWidth(): Int
+
+    @JvmStatic
+    external fun pixelHeight(): Int
 
     /**
      * The rasterized screen: one coverage byte per pixel, which the host tints

@@ -40,6 +40,7 @@
  * up directly as input latency.
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "trs80_core.h"
@@ -71,7 +72,31 @@ int trs80_is_expanded_mode(void);
 #define FOREGROUND 0xff
 #define BACKGROUND 0x00
 
-static unsigned char pixels[TRS80_PIXEL_WIDTH * TRS80_PIXEL_HEIGHT];
+/*
+ * The mask, and the size a character cell is drawn at.
+ *
+ * The cell size is the host's, not the character ROM's. Rasterizing straight to
+ * it is what keeps the strokes even: the ROM's glyphs are 8x12 one-bit bitmaps,
+ * and a host scaling those up by a fraction - 1.75 on a 1008px-wide phone - lands
+ * each one-pixel stem on either one or two output pixels depending on where it
+ * falls, so stems come out visibly uneven and thin ones disappear. No filtering
+ * at draw time fixes that; nearest-neighbour drops columns and bilinear turns the
+ * same stems into fringes of differing weight. Scaling once, here, with area
+ * coverage gives every stem the same ink wherever it lands, which is what the
+ * host's own font rasterizer used to do before the core took the job over.
+ */
+static unsigned char *pixels = NULL;
+static int pixel_width = TRS80_PIXEL_WIDTH;
+static int pixel_height = TRS80_PIXEL_HEIGHT;
+static int cell_width = TRS80_CELL_WIDTH;
+static int cell_height = TRS80_CELL_HEIGHT;
+
+/*
+ * Every character pre-scaled to the cell size, so drawing one is a row-by-row
+ * copy. Rebuilt only when the cell size changes, which is on rotation or a new
+ * session rather than per frame.
+ */
+static unsigned char *glyph_cache = NULL;
 
 /* The cells the mask was last built from, for diffing. */
 static unsigned char rendered_cells[CELLS];
@@ -82,7 +107,142 @@ static int mask_valid = 0;
 
 unsigned char *trs80_pixel_buffer(void)
 {
+    if (pixels == NULL) {
+        trs80_set_cell_size(TRS80_CELL_WIDTH, TRS80_CELL_HEIGHT);
+    }
     return pixels;
+}
+
+int trs80_pixel_width(void)
+{
+    return pixel_width;
+}
+
+int trs80_pixel_height(void)
+{
+    return pixel_height;
+}
+
+/*
+ * The coverage of one destination pixel of a glyph, as the fraction of it that
+ * the source glyph fills.
+ *
+ * A box filter: the destination pixel maps back to a rectangle of source pixels,
+ * and each source pixel contributes in proportion to how much of that rectangle
+ * it occupies. Partial overlaps at the edges are what make a stem that falls
+ * between output pixels weigh the same as one that lands squarely on it.
+ */
+static unsigned char glyph_coverage(const char *glyph, int dx, int dy)
+{
+    /*
+     * Integer arithmetic throughout, in units of 1/cell_width of a source pixel
+     * horizontally and 1/cell_height vertically, so no rounding creeps in. It
+     * matters: at 1.75x a stem's edge pixel is covered exactly half, and in
+     * floating point that lands either side of the threshold depending on the
+     * glyph, which is precisely the uneven-stem problem this is here to avoid.
+     */
+    const int x_lo = dx * TRS80_CELL_WIDTH;
+    const int x_hi = (dx + 1) * TRS80_CELL_WIDTH;
+    const int y_lo = dy * TRS80_CELL_HEIGHT;
+    const int y_hi = (dy + 1) * TRS80_CELL_HEIGHT;
+
+    long covered = 0;
+    for (int sy = 0; sy < TRS80_CELL_HEIGHT; sy++) {
+        const int top = (sy * cell_height > y_lo) ? sy * cell_height : y_lo;
+        const int bottom = ((sy + 1) * cell_height < y_hi) ? (sy + 1) * cell_height : y_hi;
+        if (bottom <= top) {
+            continue;
+        }
+        const unsigned char bits = (sy < TRS_CHAR_HEIGHT) ? (unsigned char) glyph[sy] : 0;
+        if (bits == 0) {
+            continue;
+        }
+        for (int sx = 0; sx < TRS80_CELL_WIDTH; sx++) {
+            if (((bits >> sx) & 1) == 0) {
+                continue;
+            }
+            const int left = (sx * cell_width > x_lo) ? sx * cell_width : x_lo;
+            const int right = ((sx + 1) * cell_width < x_hi) ? (sx + 1) * cell_width : x_hi;
+            if (right > left) {
+                covered += (long) (right - left) * (bottom - top);
+            }
+        }
+    }
+
+    /*
+     * Majority coverage rather than the fraction itself, which is what keeps the
+     * strokes even and hard-edged the way the host's font rasterizer used to make
+     * them. Taking the fraction would be the faithful resample, but a one-pixel
+     * stem then lands as one solid pixel between two half-lit ones and reads as
+     * thinner than a stem falling squarely. Asking whether each output pixel is
+     * at least half covered gives that stem the same width wherever it falls --
+     * two pixels at 1.75x, at every one of the eight phases -- which is what font
+     * hinting does. Ties round up, hence >=.
+     */
+    /* One destination pixel spans this much, in the units used above. */
+    const long area = (long) TRS80_CELL_WIDTH * TRS80_CELL_HEIGHT;
+    return (covered * 2 >= area) ? FOREGROUND : BACKGROUND;
+}
+
+/* Draws the 2x3 block graphics of code straight into the cache, at cell size. */
+static void cache_graphics_char(unsigned char *dest, int code)
+{
+    const int mid_x = cell_width / 2;
+    const int upper_y = cell_height / 3;
+    const int lower_y = cell_height / 3 * 2;
+
+    memset(dest, BACKGROUND, (size_t) cell_width * cell_height);
+    for (int y = 0; y < cell_height; y++) {
+        const int band = (y < upper_y) ? 0 : (y < lower_y ? 1 : 2);
+        for (int x = 0; x < cell_width; x++) {
+            const int half = (x < mid_x) ? 0 : 1;
+            if (code & (1 << (band * 2 + half))) {
+                dest[y * cell_width + x] = FOREGROUND;
+            }
+        }
+    }
+}
+
+/*
+ * Sets the size a character cell is drawn at, rebuilding the glyph cache and the
+ * mask for it. Pass the host's cell size so nothing has to be scaled afterwards.
+ *
+ * Call before reading trs80_pixel_buffer(), and again whenever the cell size
+ * changes. Cheap enough to call on rotation: it rasterizes 256 glyphs once.
+ */
+void trs80_set_cell_size(int width, int height)
+{
+    if (width <= 0 || height <= 0) {
+        width = TRS80_CELL_WIDTH;
+        height = TRS80_CELL_HEIGHT;
+    }
+    if (pixels != NULL && width == cell_width && height == cell_height) {
+        return;
+    }
+    cell_width = width;
+    cell_height = height;
+    pixel_width = TRS80_SCREEN_COLS * cell_width;
+    pixel_height = TRS80_SCREEN_ROWS * cell_height;
+
+    free(pixels);
+    free(glyph_cache);
+    pixels = calloc((size_t) pixel_width * pixel_height, 1);
+    glyph_cache = calloc((size_t) MAXCHARS * cell_width * cell_height, 1);
+
+    for (int code = 0; code < MAXCHARS; code++) {
+        unsigned char *dest = glyph_cache + (size_t) code * cell_width * cell_height;
+        if (code >= FIRST_GRAPHICS_CHAR && code <= LAST_GRAPHICS_CHAR) {
+            cache_graphics_char(dest, code);
+            continue;
+        }
+        const char *glyph = trs_char_data[trs_charset][code];
+        for (int dy = 0; dy < cell_height; dy++) {
+            for (int dx = 0; dx < cell_width; dx++) {
+                dest[dy * cell_width + dx] = glyph_coverage(glyph, dx, dy);
+            }
+        }
+    }
+    mask_valid = 0;
 }
 
 void trs80_invalidate_render(void)
@@ -90,70 +250,32 @@ void trs80_invalidate_render(void)
     mask_valid = 0;
 }
 
-/* Fills the rectangle [x, x + w) x [y, y + h) of the mask with value. */
-static void fill(int x, int y, int w, int h, unsigned char value)
-{
-    for (int row = y; row < y + h; row++) {
-        memset(pixels + row * TRS80_PIXEL_WIDTH + x, value, (size_t) w);
-    }
-}
-
 /*
- * Draws the block-graphics character code at the given pixel origin.
+ * Draws one character into the mask at the given cell position.
  *
- * Each of the low six bits lights one cell of a 2x3 grid, in the order
- * top-left, top-right, middle-left, middle-right, bottom-left, bottom-right.
- * That is the same mapping the Android host used, so the graphics look
- * unchanged.
+ * Everything expensive already happened when the cache was built, so this is a
+ * row-by-row copy. In expanded mode each column is doubled, which is an exact
+ * 2x and so introduces none of the unevenness a fractional scale would.
  */
-static void draw_graphics_char(int code, int x, int y, int cell_width)
+static void draw_cell(int code, int column, int row, int scale)
 {
-    const int mid_x = cell_width / 2;
-    const int upper_y = TRS80_CELL_HEIGHT / 3;
-    const int lower_y = TRS80_CELL_HEIGHT / 3 * 2;
+    const unsigned char *glyph =
+            glyph_cache + (size_t) code * cell_width * cell_height;
+    const int x = column * cell_width * scale;
+    const int y = row * cell_height;
 
-    fill(x, y, cell_width, TRS80_CELL_HEIGHT, BACKGROUND);
-
-    if (code & 0x01) fill(x, y, mid_x, upper_y, FOREGROUND);
-    if (code & 0x02) fill(x + mid_x, y, cell_width - mid_x, upper_y, FOREGROUND);
-    if (code & 0x04) fill(x, y + upper_y, mid_x, lower_y - upper_y, FOREGROUND);
-    if (code & 0x08) fill(x + mid_x, y + upper_y, cell_width - mid_x, lower_y - upper_y, FOREGROUND);
-    if (code & 0x10) fill(x, y + lower_y, mid_x, TRS80_CELL_HEIGHT - lower_y, FOREGROUND);
-    if (code & 0x20)
-        fill(x + mid_x, y + lower_y, cell_width - mid_x, TRS80_CELL_HEIGHT - lower_y, FOREGROUND);
-}
-
-/*
- * Draws a text character from the selected character ROM.
- *
- * In the ROM data each row is one byte and bit n is column n, so bit 0 is the
- * leftmost pixel. Only the first eight rows carry glyph data; the remaining
- * four are the leading between text lines.
- *
- * @param scale 1 normally, 2 in expanded mode, where each column is doubled.
- */
-static void draw_text_char(int code, int x, int y, int scale)
-{
-    const char *glyph = trs_char_data[trs_charset][code];
-
-    for (int row = 0; row < TRS80_CELL_HEIGHT; row++) {
-        unsigned char bits = (row < TRS_CHAR_HEIGHT) ? (unsigned char) glyph[row] : 0;
-        unsigned char *out = pixels + (y + row) * TRS80_PIXEL_WIDTH + x;
-        for (int col = 0; col < TRS80_CELL_WIDTH; col++) {
-            unsigned char value = ((bits >> col) & 1) ? FOREGROUND : BACKGROUND;
+    for (int line = 0; line < cell_height; line++) {
+        unsigned char *out = pixels + (size_t) (y + line) * pixel_width + x;
+        const unsigned char *in = glyph + (size_t) line * cell_width;
+        if (scale == 1) {
+            memcpy(out, in, (size_t) cell_width);
+            continue;
+        }
+        for (int dx = 0; dx < cell_width; dx++) {
             for (int repeat = 0; repeat < scale; repeat++) {
-                *out++ = value;
+                *out++ = in[dx];
             }
         }
-    }
-}
-
-static void draw_cell(int code, int x, int y, int scale)
-{
-    if (code >= FIRST_GRAPHICS_CHAR && code <= LAST_GRAPHICS_CHAR) {
-        draw_graphics_char(code, x, y, TRS80_CELL_WIDTH * scale);
-    } else {
-        draw_text_char(code, x, y, scale);
     }
 }
 
@@ -172,6 +294,10 @@ static int adjust_for_model(int code)
 int trs80_render(void)
 {
     unsigned char snapshot[CELLS];
+
+    if (pixels == NULL) {
+        trs80_set_cell_size(cell_width, cell_height);
+    }
 
     /*
      * The only place the CPU thread is raced, and deliberately so: a cell read
@@ -200,10 +326,7 @@ int trs80_render(void)
             if (mask_valid && rendered_cells[index] == code) {
                 continue;
             }
-            draw_cell(adjust_for_model(code),
-                      column * TRS80_CELL_WIDTH * scale,
-                      row * TRS80_CELL_HEIGHT,
-                      scale);
+            draw_cell(adjust_for_model(code), column, row, scale);
             rendered_cells[index] = code;
             changed = 1;
         }

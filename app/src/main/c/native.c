@@ -106,7 +106,25 @@ JNIEXPORT jobject JNICALL
 Java_org_puder_trs80_XTRS_getPixelBufferNative(JNIEnv *env, jclass cls)
 {
     return (*env)->NewDirectByteBuffer(env, trs80_pixel_buffer(),
-                                       TRS80_PIXEL_WIDTH * TRS80_PIXEL_HEIGHT);
+                                       (jlong) trs80_pixel_width() * trs80_pixel_height());
+}
+
+JNIEXPORT void JNICALL
+Java_org_puder_trs80_XTRS_setCellSize(JNIEnv *env, jclass cls, jint width, jint height)
+{
+    trs80_set_cell_size(width, height);
+}
+
+JNIEXPORT jint JNICALL
+Java_org_puder_trs80_XTRS_pixelWidth(JNIEnv *env, jclass cls)
+{
+    return trs80_pixel_width();
+}
+
+JNIEXPORT jint JNICALL
+Java_org_puder_trs80_XTRS_pixelHeight(JNIEnv *env, jclass cls)
+{
+    return trs80_pixel_height();
 }
 
 JNIEXPORT jboolean JNICALL

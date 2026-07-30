@@ -40,7 +40,7 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
     private val screenBuffer: ScreenBuffer = XTRS.screenBuffer
 
     /** The core's rasterized screen, read straight out of its own memory. */
-    private val pixelBuffer = XTRS.pixelBuffer
+    private lateinit var pixelBuffer: java.nio.ByteBuffer
 
     /** Set once the frame loop's looper exists, so [quit] can stop it. */
     @Volatile
@@ -93,10 +93,18 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
 
         screenColor = hardware.screenColor
         maskPaint.color = hardware.characterColor
-        maskBounds.set(0, 0, XTRS.PIXEL_WIDTH, XTRS.PIXEL_HEIGHT)
-        screenBounds.set(0, 0, hardware.screenWidth, hardware.screenHeight)
-        screenMask =
-            Bitmap.createBitmap(XTRS.PIXEL_WIDTH, XTRS.PIXEL_HEIGHT, Bitmap.Config.ALPHA_8)
+        // Rasterize at the size this screen is actually drawn at, so the mask is
+        // blitted one-to-one. Scaling it here instead would land the ROM's
+        // one-pixel stems on one or two output pixels depending where they fall,
+        // which is what made the strokes uneven.
+        XTRS.setCellSize(hardware.charWidth, hardware.charHeight)
+        val maskWidth = XTRS.pixelWidth()
+        val maskHeight = XTRS.pixelHeight()
+        maskBounds.set(0, 0, maskWidth, maskHeight)
+        screenBounds.set(0, 0, maskWidth, maskHeight)
+        screenMask = Bitmap.createBitmap(maskWidth, maskHeight, Bitmap.Config.ALPHA_8)
+        // Taken after the cell size is set: the buffer moves when it is resized.
+        pixelBuffer = XTRS.pixelBuffer
         // The surface is new, so nothing the core drew before still applies.
         XTRS.invalidateRender()
     }

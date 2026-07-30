@@ -92,6 +92,26 @@ unsigned char *trs80_screen_buffer(void);
  */
 unsigned char *trs80_pixel_buffer(void);
 
+/* The mask's current size, which follows the cell size set below. */
+int trs80_pixel_width(void);
+int trs80_pixel_height(void);
+
+/*
+ * Sets the size one character cell is drawn at, and rebuilds the mask for it.
+ *
+ * Pass the size the host actually draws a cell at, so that nothing needs scaling
+ * afterwards. That is the point: the character ROM's glyphs are 8x12 one-bit
+ * bitmaps, and scaling those up by a fraction leaves each one-pixel stem on
+ * either one or two output pixels depending where it falls, so stems come out
+ * uneven and thin ones vanish. Scaling once here, with area coverage, gives every
+ * stem the same weight wherever it lands.
+ *
+ * Passing 0 for either falls back to the ROM's own 8x12. Call before reading
+ * trs80_pixel_buffer(), and again whenever the cell size changes; it rasterizes
+ * 256 glyphs, so it belongs on rotation rather than in a frame.
+ */
+void trs80_set_cell_size(int width, int height);
+
 /*
  * Rasterizes whatever the emulated machine currently has in video RAM into
  * trs80_pixel_buffer(), redrawing only the cells that changed.
