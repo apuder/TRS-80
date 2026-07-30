@@ -175,9 +175,10 @@ class LegacyImportTest {
     // ---- Never overwriting -------------------------------------------------
 
     @Test
-    fun theManualImportDoesNotOverwriteWhatTheUserHasSince() {
-        // The reason writes are guarded at all: Settings can trigger this months
-        // later, and it must not cost the user their current settings.
+    fun aReImportDoesNotOverwriteWhatTheUserHasSince() {
+        // The reason writes are guarded at all. The status lives in the store it
+        // guards while the legacy files are kept forever, so anything that loses
+        // one but not the other re-runs this.
         val target = MapSettings()
         val configs = mapOf(
             1 to MapSettings(
@@ -195,7 +196,8 @@ class LegacyImportTest {
         target.putBoolean("config.1.conf_mute_sound", true)
         target.putFloat("config.1.cassette_position", 0.75f)
 
-        val result = subject.run()
+        target.remove(StorageKeys.IMPORT_STATUS)
+        val result = subject.runIfNeeded()
 
         assertIs<ImportResult.Imported>(result)
         assertEquals(0, result.values, "Nothing was left to fill in.")
@@ -215,7 +217,8 @@ class LegacyImportTest {
         subject.runIfNeeded()
 
         target.putString("config.1.conf_cassette", "")
-        subject.run()
+        target.remove(StorageKeys.IMPORT_STATUS)
+        subject.runIfNeeded()
 
         assertEquals("", target.getStringOrNull("config.1.conf_cassette"))
     }

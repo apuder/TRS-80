@@ -56,6 +56,7 @@ import org.puder.trs80.configuration.ConfigurationManager
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback
 import org.puder.trs80.io.FileManager
 import org.puder.trs80.localstore.RomManager
+import org.puder.trs80.shared.storage.ImportResult
 import org.retrostore.android.RetrostoreActivity
 import org.retrostore.android.RetrostoreApi
 import org.retrostore.client.common.proto.App
@@ -165,6 +166,7 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
         super.onResume()
         updateView()
         castMessageSender.start()
+        reportFailedLegacyImport()
 
         val firstTime = sharedPrefs.getBoolean(SettingsActivity.CONF_FIRST_TIME, true)
         val ranNewAssistant =
@@ -185,6 +187,32 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
             castMessageSender.stop()
         }
         super.onPause()
+    }
+
+    /**
+     * Tells the user if the startup import of their previous settings failed.
+     *
+     * Worth a dialog rather than a snackbar: the visible symptom is a
+     * configuration list that is empty or missing entries, which otherwise looks
+     * like the app lost their data. It has not — the old values are still on disk
+     * and the import is retried on the next launch.
+     *
+     * The result is consumed, so this is shown once rather than on every return
+     * to this screen.
+     */
+    private fun reportFailedLegacyImport() {
+        val failure = TRS80Application.consumeLegacyImportResult() as? ImportResult.Failed ?: return
+        AlertDialogUtil.showDialog(
+            this,
+            AlertDialogUtil.createAlertDialog(
+                this,
+                R.string.legacy_import_failed_title,
+                -1,
+                getString(R.string.legacy_import_failed_msg, failure.message)
+            ).setPositiveButton(android.R.string.ok) { _, _ ->
+                AlertDialogUtil.dismissDialog(this)
+            }
+        )
     }
 
     override fun onBackPressed() {

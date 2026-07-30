@@ -46,11 +46,7 @@ class AppStorage private constructor(private val context: Context) {
     /** The store the domain classes read and write. */
     val settings: Settings = named(STORE_NAME)
 
-    /**
-     * The legacy import, built fresh each time so that [LegacyImport.status]
-     * reflects the store as it is now rather than as it was at startup.
-     */
-    val legacyImport: LegacyImport
+    private val legacyImport: LegacyImport
         get() = LegacyImport(
             target = settings,
             // Where ConfigurationManager kept the list of configurations.
@@ -73,9 +69,6 @@ class AppStorage private constructor(private val context: Context) {
      */
     fun importLegacyDataIfNeeded(): ImportResult =
         legacyImport.runIfNeeded().also { logOutcome(it) }
-
-    /** Runs the import even if it already succeeded. Triggered from Settings. */
-    fun importLegacyDataNow(): ImportResult = legacyImport.run().also { logOutcome(it) }
 
     private fun logOutcome(result: ImportResult) = when (result) {
         is ImportResult.Imported ->

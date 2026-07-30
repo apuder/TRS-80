@@ -118,6 +118,11 @@
     <string name="pref_trs_model_title">TRS-80 Model</string>
     <string name="rewinding_cassette">Kassette wird zurückgespult&#8230;</string>
     <string name="roms_download_failure_msg">Nicht alle ROMs konnten heruntergeladen werden!</string>
+    <string name="legacy_import_failed_title">Einstellungen konnten nicht geladen werden</string>
+    <string name="legacy_import_failed_msg"><![CDATA[Ihre Konfigurationen aus der vorherigen Version
+        konnten nicht gelesen werden. Einige fehlen möglicherweise oder sind
+        unvollständig.<br/><br/>Es wurde nichts gelöscht. Beim nächsten Start der App wird es erneut
+        versucht.<br/><br/>Grund: %1$s]]></string>
     <string name="sound_disabled">deaktiviert</string>
     <string name="sound_enabled">aktiviert</string>
     <string name="start_casting">GoogleCast starten</string>

@@ -77,9 +77,9 @@ sealed interface ImportResult {
  * Brings the Android app's original three-file preference layout into the single
  * namespaced store.
  *
- * Runs automatically at startup, and can be triggered again by the user from
- * Settings for as long as [hasLegacyData] is true. Both paths run the same code;
- * the manual one differs only in ignoring [ImportStatus.SUCCEEDED].
+ * Runs automatically at startup, via [runIfNeeded]. A failed attempt is recorded
+ * rather than retried in a loop, and is tried again the next time the app starts,
+ * because [ImportStatus.FAILED] is not [ImportStatus.SUCCEEDED].
  *
  * **Nothing is deleted.** The legacy values stay where they are, so releasing
  * this and rolling it back does not destroy a user's configurations. That costs
@@ -94,11 +94,14 @@ sealed interface ImportResult {
  * already-validated write loop can still leave a partial result. The status is
  * not recorded in that case, so the next attempt finishes the job.
  *
- * **Writes never overwrite.** Not as the guard against re-running — [status] is
- * that — but because the manual entry point exists. A user tapping "import"
- * after months of use must not lose their settings, so a value already in the
- * store always beats the legacy copy of it. It is tested for by *key*, since a
- * stored empty string or `false` is a real answer the user gave.
+ * **Writes never overwrite**, and [status] is not what guarantees that. The
+ * status lives in the very store it guards, while the legacy files are kept
+ * forever, so anything that loses the one but not the others would re-run this —
+ * Android's Auto Backup restoring an older preferences set being the realistic
+ * route. Without the guard, such a restore would silently roll a user's settings
+ * back to whatever they were before they first upgraded. Presence is tested by
+ * *key*, because a stored empty string or `false` is a real answer the user gave
+ * and must not be replaced just because it looks unset.
  */
 class LegacyImport(
     private val target: Settings,
@@ -119,30 +122,26 @@ class LegacyImport(
     val lastError: String?
         get() = target.getStringOrNull(StorageKeys.IMPORT_ERROR)
 
-    /**
-     * Whether the old layout is present at all.
-     *
-     * Drives whether Settings offers the manual entry point: there is no point
-     * showing it on a device that never had the old layout.
-     */
+    /** Whether the old layout is present at all. */
     val hasLegacyData: Boolean
         get() = legacyGlobal.hasKey(LEGACY_CONFIGURATION_IDS) ||
                 legacyGlobal.hasKey(LEGACY_NEXT_ID) ||
                 StorageKeys.romModels.any {
-                    legacyAppSettings.hasKey(StorageKeys.romKey(it).removePrefix("app."))
+                    legacyAppSettings.hasKey(
+                        StorageKeys.romKey(it).removePrefix(StorageKeys.APP_PREFIX)
+                    )
                 }
 
-    /** Runs the import unless it has already succeeded. Called at startup. */
+    /**
+     * Runs the import unless it has already succeeded.
+     *
+     * Safe to call repeatedly: existing values are never replaced, so the worst
+     * case is that it finds nothing left to fill in.
+     */
     fun runIfNeeded(): ImportResult =
         if (status == ImportStatus.SUCCEEDED) ImportResult.AlreadyDone else run()
 
-    /**
-     * Runs the import regardless of [status]. This is what Settings calls.
-     *
-     * Safe at any time: existing values are never replaced, so the worst case is
-     * that it finds nothing left to fill in.
-     */
-    fun run(): ImportResult {
+    private fun run(): ImportResult {
         if (!hasLegacyData) {
             // Recorded so startup stops retrying on every launch.
             recordSuccess()

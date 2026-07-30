@@ -71,6 +71,11 @@
     <!-- InitialSetupDialogFragment -->
     <string name="downloading">Downloading (%1$d/%2$d)&#8230;</string>
     <string name="roms_download_failure_msg">Not all ROMs could be downloaded!</string>
+    <string name="legacy_import_failed_title">Could not load your settings</string>
+    <!-- Rendered as HTML by AlertDialogUtil, so paragraph breaks are <br/> and not \n. -->
+    <string name="legacy_import_failed_msg"><![CDATA[Your configurations from the previous version
+        could not be read, so some may be missing or incomplete.<br/><br/>Nothing has been deleted.
+        This will be tried again the next time the app is started.<br/><br/>Reason: %1$s]]></string>
 
     <!-- EditConfigurationActivity -->
     <string name="pref_title">General</string>
