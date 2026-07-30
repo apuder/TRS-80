@@ -30,12 +30,10 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.puder.trs80.shared.configuration.ConfigurationManager
 import org.puder.trs80.shared.configuration.ConfigurationManager.ConfigMedia
-import org.puder.trs80.io.FileDownloader
+import org.puder.trs80.shared.io.FileDownloader
 import org.puder.trs80.shared.localstore.InitialDownloads
 import org.puder.trs80.shared.localstore.InitialDownloads.Download
 import org.puder.trs80.shared.localstore.RomManager
@@ -108,7 +106,7 @@ class InitialSetupDialogFragment : DialogFragment() {
         lifecycleScope.launch {
             for (item in downloads) {
                 onDownloadProgress(++downloadCounter, totalDownloads)
-                withContext(Dispatchers.IO) { download(item, configurationManager) }
+                download(item, configurationManager)
             }
             onDownloadProgress(++downloadCounter, totalDownloads)
             appInstaller.downloadAndInstallApp(TUTORIAL_APP_ID)
@@ -117,7 +115,7 @@ class InitialSetupDialogFragment : DialogFragment() {
     }
 
     /** Downloads the given item. */
-    private fun download(item: Download, configurationManager: ConfigurationManager) {
+    private suspend fun download(item: Download, configurationManager: ConfigurationManager) {
         val data = fileDownloader.download(item.url, item.fileInZip)
         if (data == null) {
             Log.e(TAG, StrUtil.form("Could not load data for '%s'.", item.url))

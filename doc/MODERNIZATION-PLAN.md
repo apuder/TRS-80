@@ -442,12 +442,25 @@ The screens are the thin part. Underneath them:
 - `configuration/`, `io/` and `localstore/` — the domain. Their platform coupling is shallower than
   it looks: `java.io.File`, `android.util.Log`, `SparseArray`, and a couple of `Bitmap` uses. okio
   for files, an `expect` logger, and they are portable.
-- **`FileDownloader`** off `java.net.URL` and `java.util.zip.ZipInputStream`, onto Ktor plus okio.
+- **`FileDownloader`** off `java.net.URL` and `java.util.zip.ZipInputStream`. The archive handling
+  moves to okio, which reads a ZIP as a file system. The *fetch* does **not** move to Ktor — see the
+  note below.
 - **Storage `actual`s for iOS** — the other half of D8. `NSUserDefaults` behind
   multiplatform-settings, and `appDataDirectory()` on the sandbox's Documents directory.
 - **Navigation.** Activities and `startActivityForResult` become one composable navigation model.
   This is the part with no Android equivalent to copy, so it is worth designing rather than
   transliterating — even though the *navigation itself* does not change.
+
+**Ktor cannot go in this framework yet, and the reason is worth recording.** The plan said Ktor for
+content acquisition; it does not work here. From 3.4.0 on, Ktor's Kotlin/Native artifacts are built
+with Kotlin 2.3, whose klib ABI the 2.2.10 compiler AGP pins us to refuses to read — reported as
+"could not find" the klib, which is not what it means. And 3.3.x, which does link, **segfaults at
+start-up** inside Kotlin/Native's worker runtime init, before any Ktor code runs: merely linking
+`ktor-client-core` into the framework is enough, with no call to it anywhere. Bisected by removing
+the dependency and watching the crash disappear. Since the app makes exactly one kind of request —
+an unauthenticated GET of a whole file — `httpGetBytes` is an `expect`/`actual` over
+`HttpURLConnection` and `NSURLSession` instead. Roughly forty lines each, no dependency, no version
+pin, and the ZIP handling and error behaviour above it stay shared. Revisit when Kotlin moves.
 
 ### 7.2 The screens
 

@@ -22,12 +22,10 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import org.puder.trs80.SettingsActivity
 import org.puder.trs80.shared.storage.ImportResult
+import org.puder.trs80.shared.storage.initAppSettings
 import org.puder.trs80.shared.storage.LegacyImport
 
 private const val TAG = "AppStorage"
-
-/** The one preferences file everything shared is stored in from now on. */
-private const val STORE_NAME = "trs80_store"
 
 /** The per-configuration preferences files the app used to keep. */
 private const val LEGACY_CONFIG_PREFIX = "CONFIG_"
@@ -43,8 +41,13 @@ private const val LEGACY_CONFIG_PREFIX = "CONFIG_"
  */
 class AppStorage private constructor(private val context: Context) {
 
-    /** The store the domain classes read and write. */
-    val settings: Settings = named(STORE_NAME)
+    /**
+     * The store the domain classes read and write.
+     *
+     * Opened through the shared module, so its name is defined once and iOS's
+     * NSUserDefaults equivalent sits behind the same call.
+     */
+    val settings: Settings = initAppSettings(context)
 
     private val legacyImport: LegacyImport
         get() = LegacyImport(
