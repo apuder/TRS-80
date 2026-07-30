@@ -102,6 +102,25 @@ Java_org_puder_trs80_XTRS_getScreenBufferNative(JNIEnv *env, jclass cls)
                                        TRS80_SCREEN_BUFFER_SIZE);
 }
 
+JNIEXPORT jobject JNICALL
+Java_org_puder_trs80_XTRS_getPixelBufferNative(JNIEnv *env, jclass cls)
+{
+    return (*env)->NewDirectByteBuffer(env, trs80_pixel_buffer(),
+                                       TRS80_PIXEL_WIDTH * TRS80_PIXEL_HEIGHT);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_puder_trs80_XTRS_render(JNIEnv *env, jclass cls)
+{
+    return trs80_render() ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL
+Java_org_puder_trs80_XTRS_invalidateRender(JNIEnv *env, jclass cls)
+{
+    trs80_invalidate_render();
+}
+
 JNIEXPORT void JNICALL
 Java_org_puder_trs80_XTRS_run(JNIEnv *env, jclass cls)
 {

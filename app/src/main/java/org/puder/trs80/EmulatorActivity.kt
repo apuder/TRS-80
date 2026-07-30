@@ -436,8 +436,9 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
     private fun stopRenderThread() {
         val thread = renderThread
         if (thread != null && thread.isAlive) {
-            thread.isRunning = false
-            thread.interrupt()
+            // The frame loop runs on a looper now, which interrupt() does not
+            // break out of; quit() stops the looper as well as the loop flag.
+            thread.quit()
             var retry = true
             while (retry) {
                 try {

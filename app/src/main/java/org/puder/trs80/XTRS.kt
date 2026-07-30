@@ -125,6 +125,42 @@ object XTRS {
     @JvmStatic
     private external fun getScreenBufferNative(): ByteBuffer
 
+    /** The rasterized screen's width, matching TRS80_PIXEL_WIDTH. */
+    const val PIXEL_WIDTH = 64 * 8
+
+    /** The rasterized screen's height, matching TRS80_PIXEL_HEIGHT. */
+    const val PIXEL_HEIGHT = 16 * 12
+
+    /**
+     * The rasterized screen: one coverage byte per pixel, which the host tints
+     * and scales. See `trs80_render()`.
+     */
+    @JvmStatic
+    val pixelBuffer: ByteBuffer
+        get() = getPixelBufferNative()
+
+    @JvmStatic
+    private external fun getPixelBufferNative(): ByteBuffer
+
+    /**
+     * Rasterizes video RAM into [pixelBuffer], redrawing only what changed.
+     *
+     * Must be called from the thread that reads [pixelBuffer], and never from the
+     * one running [run]: the core snapshots video RAM first so that a write
+     * landing mid-rasterize cannot produce a half-drawn character, and doing this
+     * work on the CPU thread would both lose that property and steal time from
+     * the emulated machine.
+     *
+     * @return whether anything changed. When it has not, there is nothing to
+     * upload and the frame can be skipped entirely.
+     */
+    @JvmStatic
+    external fun render(): Boolean
+
+    /** Makes the next [render] redraw the whole screen. */
+    @JvmStatic
+    external fun invalidateRender()
+
     @JvmStatic
     external fun saveState(fileName: String)
 

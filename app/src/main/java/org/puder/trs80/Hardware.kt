@@ -111,6 +111,14 @@ class Hardware(private val configuration: Configuration) {
             else -> throw IllegalArgumentException("No screen configuration for model $model")
         }
 
+    /** The colour the emulated characters are drawn in. */
+    internal val characterColor: Int
+        get() = configuration.characterColorAsRGB
+
+    /** The colour behind the emulated characters. */
+    internal val screenColor: Int
+        get() = configuration.screenColorAsRGB
+
     /**
      * The emulated screen geometry together with the cell size it is drawn at. Only valid
      * once [generateFont] has computed the cell size for the display.

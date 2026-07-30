@@ -18,33 +18,52 @@ package org.puder.trs80
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.Rect
+import android.os.Looper
+import android.view.Choreographer
 import android.view.SurfaceHolder
 import org.puder.trs80.cast.RemoteCastScreen
 import org.puder.trs80.cast.RemoteDisplayChannel
 import org.puder.trs80.shared.DirtyRect
 import org.puder.trs80.shared.ScreenBuffer
-import kotlin.math.floor
-
-private const val TARGET_FPS = 60L
 
 /**
- * Draws the emulated screen at [TARGET_FPS], either onto a [SurfaceHolder] or, while
- * casting, into a character buffer sent to the remote display.
+ * Draws the emulated screen onto a [SurfaceHolder] or, while casting, into a
+ * character buffer sent to the remote display.
  *
  * The frame loop is the hottest code in the app. It must not allocate: everything it needs
  * is set up by [setHardwareSpecs] before the thread is started.
  */
 internal class RenderThread(private val isCasting: Boolean) : Thread() {
 
-    private val fpsLimiter = FpsLimiter(TARGET_FPS)
     private val screenBuffer: ScreenBuffer = XTRS.screenBuffer
 
+    /** The core's rasterized screen, read straight out of its own memory. */
+    private val pixelBuffer = XTRS.pixelBuffer
+
+    /** Set once the frame loop's looper exists, so [quit] can stop it. */
+    @Volatile
+    private var looper: Looper? = null
+
     /**
-     * The region handed to [SurfaceHolder.lockCanvas], which widens it in place to the area
-     * it actually locked. Reused so that the frame loop does not allocate.
+     * The mask the core rasterizes into, as a bitmap the canvas can draw. `ALPHA_8`
+     * because the emulated screen is monochrome: the bytes are coverage and the
+     * colour comes from [maskPaint].
      */
-    private val lockedRegion = Rect()
+    private var screenMask: Bitmap? = null
+
+    /** The whole mask, and where on the surface it is stretched to. */
+    private val maskBounds = Rect()
+    private val screenBounds = Rect()
+
+    /**
+     * Filtering off, deliberately: this is pixel art, and the emulated picture is
+     * scaled by whole multiples, so nearest-neighbour is both correct and crisper.
+     */
+    private val maskPaint = Paint().apply { isFilterBitmap = false }
+
+    private var screenColor = 0
 
     /** Set to `false` to make the frame loop return after the current frame. */
     @Volatile
@@ -55,11 +74,8 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
     var surfaceHolder: SurfaceHolder? = null
 
     private var model = Hardware.MODEL_NONE
-    private var font: Array<Bitmap?> = emptyArray()
     private var trsScreenCols = 0
     private var trsScreenRows = 0
-    private var trsCharWidth = 0
-    private var trsCharHeight = 0
 
     private lateinit var dirtyRect: DirtyRect
     private lateinit var screenCharBuffer: StringBuilder
@@ -68,70 +84,104 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
     fun setHardwareSpecs(hardware: Hardware) {
         val screenConfig = hardware.screenConfiguration
         model = hardware.model
-        font = hardware.font
         trsScreenCols = screenConfig.trsScreenCols
         trsScreenRows = screenConfig.trsScreenRows
-        trsCharWidth = hardware.charWidth
-        trsCharHeight = hardware.charHeight
         screenCharBuffer = StringBuilder(trsScreenCols * trsScreenRows + trsScreenRows)
         dirtyRect = DirtyRect(hardware.cellMetrics, screenBuffer)
+
+        screenColor = hardware.screenColor
+        maskPaint.color = hardware.characterColor
+        maskBounds.set(0, 0, XTRS.PIXEL_WIDTH, XTRS.PIXEL_HEIGHT)
+        screenBounds.set(0, 0, hardware.screenWidth, hardware.screenHeight)
+        screenMask =
+            Bitmap.createBitmap(XTRS.PIXEL_WIDTH, XTRS.PIXEL_HEIGHT, Bitmap.Config.ALPHA_8)
+        // The surface is new, so nothing the core drew before still applies.
+        XTRS.invalidateRender()
     }
 
+    /**
+     * Samples and draws the screen, paced by the display rather than by a timer.
+     *
+     * The emulated machine has no frames: a program writes video RAM whenever it
+     * likes and the picture follows immediately, so there is nothing to
+     * synchronize with and the host simply samples at its own rate. The rate that
+     * minimizes latency is the display's own, because anything else leaves two
+     * unaligned waits in the path — one until the next sample, one until the next
+     * refresh — which together jitter and beat against each other. A
+     * [Choreographer] on this thread's own [Looper] removes the first wait by
+     * phase-locking sampling to presentation, and follows the panel's real refresh
+     * rate rather than a hard-coded 60.
+     */
     override fun run() {
-        while (isRunning) {
-            try {
-                fpsLimiter.onFrame()
-            } catch (e: InterruptedException) {
-                break
-            }
+        Looper.prepare()
+        looper = Looper.myLooper()
+        val choreographer = Choreographer.getInstance()
 
+        val frameCallback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                if (!isRunning) {
+                    looper?.quitSafely()
+                    return
+                }
+                // Queued before the work, so a slow frame delays the next one
+                // rather than dropping the loop.
+                choreographer.postFrameCallback(this)
+                drawFrame()
+            }
+        }
+        choreographer.postFrameCallback(frameCallback)
+        Looper.loop()
+    }
+
+    /** Stops the frame loop. Safe to call from any thread. */
+    fun quit() {
+        isRunning = false
+        looper?.quitSafely()
+    }
+
+    private fun drawFrame() {
+        if (isCasting) {
+            // The remote display takes characters rather than pixels, so casting
+            // still samples the character buffer directly.
             val expandedMode = XTRS.isExpandedMode()
             val dirty = dirtyRect
             dirty.isExpandedMode = expandedMode
             dirty.computeDirtyRect()
-            if (dirty.isEmpty) {
-                // Nothing to update.
-                continue
-            }
-
-            if (isCasting) {
+            if (!dirty.isEmpty) {
                 renderScreenToCast(RemoteCastScreen.get(), expandedMode)
-                continue
             }
+            return
+        }
 
-            // Read the holder once; it is replaced from the UI thread.
-            val holder = surfaceHolder ?: continue
-            val region = lockedRegion
-            region.set(dirty.clipLeft, dirty.clipTop, dirty.clipRight, dirty.clipBottom)
-            val canvas = holder.lockCanvas(region) ?: continue
-            dirty.onRegionLocked(region.left, region.top, region.right, region.bottom)
-            renderScreenToCanvas(canvas, expandedMode)
+        // The core rasterizes into its own buffer and reports whether anything
+        // moved, so an idle screen costs neither an upload nor a draw.
+        if (!XTRS.render()) {
+            return
+        }
+        // Read the holder once; it is replaced from the UI thread.
+        val holder = surfaceHolder ?: return
+        val canvas = holder.lockCanvas(null) ?: return
+        try {
+            blitScreen(canvas)
+        } finally {
             holder.unlockCanvasAndPost(canvas)
         }
     }
 
-    /** Renders the current dirty region of the emulated screen into [canvas]. */
-    private fun renderScreenToCanvas(canvas: Canvas, expandedMode: Boolean) {
-        if (expandedMode) {
-            canvas.scale(2f, 1f)
-        }
-        val step = if (expandedMode) 2 else 1
-        val dirty = dirtyRect
-        val glyphs = font
-        val isModel1 = model == Hardware.MODEL1
-        for (row in dirty.top..dirty.bottom) {
-            val rowStart = row * trsScreenCols
-            val y = (trsCharHeight * row).toFloat()
-            for (col in dirty.left..dirty.right) {
-                var ch = screenBuffer[rowStart + col * step].toInt() and 0xff
-                // Emulate Radio Shack lowercase mod (for Model 1).
-                if (isModel1 && ch < 0x20) {
-                    ch += 0x40
-                }
-                val glyph = glyphs[ch] ?: continue
-                canvas.drawBitmap(glyph, (trsCharWidth * col).toFloat(), y, null)
-            }
-        }
+    /**
+     * Draws the emulated screen as a single tinted, scaled image.
+     *
+     * The core produces an 8-bit coverage mask at the character ROM's own
+     * resolution, so this is one `drawBitmap` rather than up to 1024 — and the
+     * colours are applied here instead of being baked into glyph bitmaps, which
+     * is why changing them no longer means re-rasterizing anything.
+     */
+    private fun blitScreen(canvas: Canvas) {
+        val mask = screenMask ?: return
+        pixelBuffer.rewind()
+        mask.copyPixelsFromBuffer(pixelBuffer)
+        canvas.drawColor(screenColor)
+        canvas.drawBitmap(mask, maskBounds, screenBounds, maskPaint)
     }
 
     /**
@@ -170,29 +220,21 @@ internal class RenderThread(private val isCasting: Boolean) : Thread() {
         remoteDisplay.sendScreenBuffer(expandedMode, chars.toString())
     }
 
-    /** Renders the whole emulated screen into a new bitmap. */
+    /**
+     * Renders the whole emulated screen into a new bitmap.
+     *
+     * Forces a full rasterize first, because the core only redraws what changed
+     * and the screenshot needs every cell present rather than just the ones that
+     * moved since the last frame.
+     */
     fun takeScreenshot(hardware: Hardware): Bitmap {
         val screenshot = Bitmap.createBitmap(
             hardware.screenWidth, hardware.screenHeight, Bitmap.Config.RGB_565
         )
-        val expandedMode = XTRS.isExpandedMode()
-        dirtyRect.isExpandedMode = expandedMode
-        dirtyRect.reset()
-        renderScreenToCanvas(Canvas(screenshot), expandedMode)
+        XTRS.invalidateRender()
+        XTRS.render()
+        blitScreen(Canvas(screenshot))
         return screenshot
     }
 
-    /** Encapsulated logic to limit the frame rate to the given FPS. */
-    private class FpsLimiter(fps: Long) {
-        private val frameTimeMillis = floor(1000.0 / fps).toLong()
-        private var lastFrameTime = 0L
-
-        /** Call once per frame-loop iteration; waits out the rest of the frame budget. */
-        fun onFrame() {
-            val now = System.currentTimeMillis()
-            val waitFor = (lastFrameTime + frameTimeMillis - now).coerceAtLeast(0L)
-            Thread.sleep(waitFor)
-            lastFrameTime = now
-        }
-    }
 }
