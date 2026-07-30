@@ -3,10 +3,11 @@
 **Decision:** Kotlin Multiplatform with Compose Multiplatform for shared UI, keeping the existing C
 emulator core. Android ships continuously throughout. iOS is *proven* early with a throwaway spike
 (§5) and *shipped* last, so its **technical** unknowns are answered before anything is built on top of
-them. The one unknown that cannot be retired early is App Store policy (§10) — App Review does not
+them. The one unknown that cannot be retired early is App Store policy (§11) — App Review does not
 rule on apps that do not exist yet — so that risk is carried deliberately, and every phase before
-submission pays for itself on Android alone. The UI is fully redesigned as part of the work, not
-ported.
+submission pays for itself on Android alone. The UI is ported to Compose Multiplatform first
+(§7) and restyled afterwards (§9) — two phases, because otherwise a port bug and a design change are
+indistinguishable — and it is fully redesigned by the end, not merely carried across.
 
 This document says what has to happen, in what order, and what has to be decided along the way.
 It is grounded in an audit of the current code — see `doc/UI-SPEC.md` for the UI inventory.
@@ -52,6 +53,11 @@ renderer (§6), which ships on Android inside the current UI before any redesign
 important sequencing decision in the plan. Building the redesign as Android-only Compose and porting
 it later would mean doing the UI work twice. Building it in `commonMain` with `expect`/`actual` seams
 for platform bits costs very little extra *if planned up front*, and is expensive to retrofit.
+
+The same argument, applied once more, is why the UI work is two phases rather than one: **port to
+Compose Multiplatform first, restyle second** (§7, §9). Restyling while porting would make every
+difference ambiguous — a screen that looks wrong could be either — and would land the design on code
+that is not yet on both platforms, which is the two-passes problem again one level up.
 
 **The C core is the asset; treat its API as a product.** It has run for years and encodes a lot of
 hardware knowledge. Do not rewrite it. Give it a clean C API and never touch it again.
@@ -313,7 +319,7 @@ a frame-rate problem cannot be confused with a design problem.
 
 **What it turned into is not what was planned.** The plan was a Compose Multiplatform renderer over
 the character-cell model, with a glyph atlas built at runtime or bake time. Instead the emulator core
-rasterizes, and each host uploads one image. That answers **D1** and makes **D6** moot; see §9.
+rasterizes, and each host uploads one image. That answers **D1** and makes **D6** moot; see §10.
 
 The reason is a discovery rather than a preference: `trs_chars.c` already holds the authentic
 character generator ROMs — 2,302 lines, eleven charsets — compiled into every build and, until now,
@@ -405,81 +411,133 @@ comparing them by eye could never have settled it.
 
 ---
 
-## 7. Phase 3 — The redesign, in `commonMain`
+## 7. Phase 3 — Port the current UI to Compose Multiplatform
 
-*Android-only initially. Ships incrementally. This is the bulk of the work and where the redesign lands.*
+*Ships on Android as a release nobody notices, then on iOS. No redesign: the ported screens look and
+navigate exactly as they do today.*
 
-Build the redesigned screens as Compose Multiplatform composables in `commonMain`, replacing the old
-Views one screen at a time via Compose/View interop.
+This phase used to be the redesign. It was split in two after Phase 2, because porting and restyling
+are different risks and doing them at once makes every difference ambiguous — a screen that looks
+wrong could be the port or the design, and there is no way to tell which.
 
-The renderer and glyph pipeline are **already done by Phase 2** — that was the riskiest piece and
-the reason the original plan said to do it first. What is left here is everything that genuinely
-depends on the design.
+**The port's value is not in the composables.** It is that going to iOS forces out the whole non-UI
+iOS surface — storage `actual`s, content downloading, document pickers, a navigation model that is
+not Activities and Intents — which is what the old Phase 4 was mostly made of, and none of which the
+restyle touches. That work gets written once, here.
 
-### 7.1 The emulator surface: input and layout
+Three further reasons to port before restyling:
 
-The picture itself is **already done** (§6) and needs no design input — what is left here is
-everything around it.
+- **The current UI is an unambiguous specification.** It is running code, so "did the port change
+  behaviour?" is a question with an answer. The restyle has no specification until the design work
+  lands, which makes the port the part that is blocked on nothing.
+- **It ships to Play as a no-visible-change release**, which is §1.1's rule applied honestly: the
+  Compose migration reaches real users before any design change is riding on it.
+- **The restyle then happens once**, on multiplatform code, instead of being written Android-first
+  and ported afterwards.
 
-- **Keyboards**: the five input modes become composables. This is a rewrite regardless, and per the
-  UI spec it needs real design attention — the current 43 %-opacity labels fail contrast outright.
-  Note that the on-screen keyboards have never been verified on an emulator during this work, since
-  every AVD used had `hw.keyboard=yes` and therefore took the external-keyboard path.
-- **Landscape**: the spec's biggest open problem. The emulated picture is height-limited in
-  landscape, leaving no room for controls, which is why the action bar disappears entirely today.
-  The designer needs to solve this; the implementation follows.
+### 7.1 What moves to `commonMain` first
 
-### 7.2 The shell
+The screens are the thin part. Underneath them:
 
-Configuration list, editor, settings, RetroStore browse/detail, onboarding. Conventional Compose
-work, driven by the design. The UI spec's prioritized problem list is the brief.
+- `configuration/`, `io/` and `localstore/` — the domain. Their platform coupling is shallower than
+  it looks: `java.io.File`, `android.util.Log`, `SparseArray`, and a couple of `Bitmap` uses. okio
+  for files, an `expect` logger, and they are portable.
+- **`FileDownloader`** off `java.net.URL` and `java.util.zip.ZipInputStream`, onto Ktor plus okio.
+- **Storage `actual`s for iOS** — the other half of D8. `NSUserDefaults` behind
+  multiplatform-settings, and `appDataDirectory()` on the sandbox's Documents directory.
+- **Navigation.** Activities and `startActivityForResult` become one composable navigation model.
+  This is the part with no Android equivalent to copy, so it is worth designing rather than
+  transliterating — even though the *navigation itself* does not change.
 
-### 7.3 Finish the storage rework
+### 7.2 The screens
 
-Most of this lands earlier, under D8 — the app's own data is already app-scoped in `filesDir`, so
-the storage problem is narrower than the original audit implied. What remains for Phase 3 is the
-**import path**: `FileBrowserActivity` walks `Environment.getExternalStorageDirectory()`, which is
-fragile under scoped storage and has no iOS equivalent.
+Configuration list, configuration editor, settings, disk creation, onboarding, and the scaffolding
+around the emulator surface §6 already draws.
 
-Delete it in favour of **platform document pickers** (see D3), and drop the now-vestigial
-`WRITE_EXTERNAL_STORAGE` permission from the manifest. This removes the screen the UI spec identifies
-as the worst in the app, and it fixes real Android bugs today.
+**RetroStore is a second UI**, and easy to overlook: `retrostore/src/main/java/org/retrostore/android/`
+holds its own Activities, RecyclerView adapters and a Glide image loader — a browse screen, a detail
+screen, and async image loading. The client half is portable already (Wire messages over Ktor), but
+the module is still `com.android.library` and has to become KMP.
 
-**Done when:** the redesigned Android app is fully Compose, shipping from `commonMain`, with no
-Views left.
+**The keyboards are the one thing not to port faithfully.** Roughly 850 lines of custom Views across
+`Key`, `FireKey`, `JoystickView` and `KeyboardManager` — and per the UI spec the styling needs real
+attention, since the 43 %-opacity labels fail contrast outright. Port the *function*: the layouts are
+essentially data, and the key-matrix and hit-testing logic survives intact. Do not preserve the
+paint; that is Phase 5's job. Note also that the on-screen keyboards have never been verified on an
+emulator during this work, because every AVD used had `hw.keyboard=yes` and took the
+external-keyboard path.
+
+### 7.3 What is deliberately left behind
+
+Not ported — either Android-only, already condemned, or cheaper to rebuild once the restyle has
+happened:
+
+| Left out | Why |
+|---|---|
+| `cast/` and play-services-cast | Android-only, and wants a keep-or-drop decision of its own before Phase 5 |
+| `browser/FileBrowserActivity` | Already condemned; replaced by document pickers, not ported (see 7.4) |
+| `AnimationFactory` / `FlipAnimation` — the 3D flipping cards | 508 lines of Android view animation with no multiplatform equivalent, and the spec replaces the flip card anyway |
+| `drag/` reordering | Comes back in Phase 5, against the new design |
+| `GameController` | Android `InputDevice`. iOS has GameController.framework; a later job |
+| `Tutorial` | Rebuild against the redesigned UI rather than the current one |
+
+### 7.4 Finish the storage rework
+
+`FileBrowserActivity` walks `Environment.getExternalStorageDirectory()`, which is fragile under
+scoped storage and has no iOS equivalent. Delete it in favour of **platform document pickers** (D3),
+and drop the now-vestigial `WRITE_EXTERNAL_STORAGE` permission from the manifest. This removes the
+screen the UI spec identifies as the worst in the app, and it fixes real Android bugs today.
+
+**Done when:** both apps run the same screens from `commonMain`, Android has no Views left, and iOS
+does everything Android does.
 
 ---
 
 ## 8. Phase 4 — iOS as a shipping product
 
-*Small, because Phase 1c already proved the hard parts, Phase 2 built the renderer and Phase 3
-wrote the shell in `commonMain`.
-What is left is the difference between "a game runs" and "an app someone can install".*
+*Small, because §7 did the substance. What is left is the difference between "it runs" and "someone
+can install it".*
 
-The core build, cinterop and the audio sink are done by §5, and the renderer by §6. Remaining:
+The core build, cinterop and audio are done by §5, the renderer by §6, and the screens, storage and
+downloads by §7. Remaining:
 
-1. **iOS host app.** SwiftUI `App` wrapping `ComposeUIViewController`. The spike's throwaway
-   entry point is replaced by a real one.
-2. **Storage `actual`s for iOS** — the other half of D8. The spike sidestepped this by bundling
-   files; a real app needs the key-value store on `NSUserDefaults` and `appDataDirectory()` on the
-   sandbox's Documents directory.
-3. **Content acquisition.** `FileDownloader` is still JVM-only (`java.net.URL`,
-   `java.util.zip.ZipInputStream`) and has to move to Ktor plus okio. The RetroStore client is
-   already multiplatform-ready (D7).
-4. **Native document picking**, per D3.
-5. **App Store submission** — signing, metadata, and review. This is where the policy question in
-   §10 finally gets an answer, because it is the first point at which there is an app to ask about.
+1. **A real iOS host app.** SwiftUI `App` wrapping `ComposeUIViewController`, replacing the spike's
+   throwaway entry point, plus icon, launch screen and bundle configuration.
+2. **App Store submission** — signing, metadata, and review. This is where the policy question in
+   §11 finally gets an answer, because it is the first point at which there is an app to ask about.
 
-**Done when:** the iOS app is installable and does everything the Android app does.
+**Done when:** the iOS app is on the App Store.
 
-*Historical note:* items 1–3 of the original Phase 3 (core build, cinterop, audio) moved into
-Phase 1c and are done, and item 4 (the RetroStore client) was pulled all the way forward and is done. Item 6, the
-macOS CI runner, is done — though today it compiles only the Kotlin shared module, and Phase 1c
-extends it to the C core.
+*Historical note:* items 1–3 of the original Phase 3 (core build, cinterop, audio) moved into Phase
+1c and are done, and item 4 (the RetroStore client) was pulled all the way forward and is done. Item
+6, the macOS CI runner, is done. Storage, downloads and document picking moved *forward* into Phase 3
+when the port was split out, which is what left this phase so short.
 
 ---
 
-## 9. Decisions to make (and my recommendation)
+## 9. Phase 5 — The restyle
+
+*Both platforms at once, because by this point there is only one UI. Ships incrementally, screen by
+screen.*
+
+Everything here waits on the design work in §12, and none of it is structural — same screens, same
+navigation. That is what makes it safe to do last, and what made it worth separating from the port:
+a restyle landing on already-multiplatform code is written once and appears on both platforms.
+
+- **The screens.** The UI spec's prioritized problem list is the brief.
+- **The keyboards**, ported functionally in §7.2 with their styling deliberately not preserved. This
+  is where they get designed properly.
+- **Landscape** — the spec's biggest open problem and the one genuinely structural exception. The
+  emulated picture is height-limited in landscape, leaving no room for controls, which is why the
+  action bar vanishes entirely today. The designer solves it; the implementation follows.
+- **Restore what 7.3 left behind** — drag-to-reorder, the tutorial — against the new design rather
+  than the old one.
+
+**Done when:** the UI spec's problem list is addressed on both platforms.
+
+---
+
+## 10. Decisions to make (and my recommendation)
 
 **D1 — Screen model: keep character cells, or move rendering into C?** ✅ *Resolved in Phase 2 (§6):
 rendering moved into C, and the character buffer stayed.*
@@ -661,7 +719,7 @@ on design work.
 
 ---
 
-## 10. Risks
+## 11. Risks
 
 **RetroStore was the hidden iOS blocker** ✅ *retired.* It was easy to plan the whole port around the
 emulator and discover late that content acquisition did not exist on iOS. Pulled forward and done —
@@ -699,16 +757,20 @@ discipline in §1.1: if a phase cannot ship, it is too big.
 
 ---
 
-## 11. Parallel track: design
+## 12. Parallel track: design
 
 Design work does not block on any of this and should start now — `doc/UI-SPEC.md` is the brief.
-Phases 0 and 1 are invisible to users and can run underneath it. The specific things the designer
-must resolve before Phase 3 (§7) can start in earnest — the renderer in §6 needed none of it:
+Phases 0 through 4 are invisible to users, or deliberately identical to what shipped before, and all
+of them can run underneath it. Nothing before Phase 5 (§9) needs a single design decision, which is
+the main practical reason the port was split out of the redesign.
+
+The specific things the designer must resolve before Phase 5 can start in earnest:
 
 1. **Landscape controls for the emulator** — the picture leaves no room, and today the toolbar simply
    vanishes.
 2. **On-screen keyboard visual system** — contrast, press feedback, and how a keyboard coexists with
-   the picture it overlays.
+   the picture it overlays. Phase 3 ports these functionally and deliberately does not preserve their
+   current styling (§7.2), so this is the one item where the port leaves a visible gap on purpose.
 3. **What replaces the flip card**, which currently hides run/edit/delete/stop/share.
 4. **Onboarding**, including where the (genuinely good) built-in tutorial surfaces.
 5. **Whether the green-phosphor CRT identity extends to the whole app** or stays inside the emulator
@@ -716,7 +778,7 @@ must resolve before Phase 3 (§7) can start in earnest — the renderer in §6 n
 
 ---
 
-## 12. Summary
+## 13. Summary
 
 | Phase | Scope | Ships | User-visible |
 |---|---|---|---|
@@ -726,24 +788,30 @@ must resolve before Phase 3 (§7) can start in earnest — the renderer in §6 n
 | 1c ✅ | **iOS spike**: core for iOS, cinterop, audio, Z80 running in CI (§5) | No | No |
 | 1d ✅ | Storage: `androidx.preference`, namespaced store, legacy import (D8) | Android | No |
 | 1e ✅ | `KeyboardManager`'s mapping tables into `commonMain` | Android | No |
-| 2 | **The renderer** — rasterized in C (§6). **Android done**; iOS still to draw it | Android | Barely — same look, new engine |
-| 3 | Redesigned shell, keyboards, landscape (§7) | Android, incrementally | **Yes — the redesign** |
-| 4 | iOS host app, iOS storage, `FileDownloader`, submission (§8) | iOS beta | Yes — new platform |
+| 2 ✅ | **The renderer** — rasterized in C, drawn from `commonMain` on both platforms (§6) | Android | Barely — same look, new engine |
+| 3 | **Port the current UI** to Compose Multiplatform; iOS storage, downloads, pickers (§7) | Android, then iOS | No — deliberately identical |
+| 4 | iOS host app, App Store submission (§8) | iOS | Yes — new platform |
+| 5 | **The restyle** — screens, keyboards, landscape (§9) | Both, incrementally | **Yes — the redesign** |
 
 **Phase 1 is complete.** `commonMain` now holds the keyboard layout and mapping, `DirtyRect`,
 `ScreenBuffer`, `CellMetrics`, the storage keys and the legacy import — all compiling for iOS, with
 tests running on the simulator on every push. The emulator core itself builds for iOS and executes
 Z80 code under CI.
 
-**Phase 2 was deliberately placed between the spike and the redesign**, and that placement paid off.
-It is the only design-independent part of the UI and the only part whose performance was unknown, so
-doing it inside the existing Android UI meant a frame-rate problem could not be confused with a
+**Phase 2 is complete on both platforms.** Placing it between the spike and the UI work paid off: it
+is the only design-independent part of the UI and the only part whose performance was unknown, so
+building it inside the existing Android UI meant a frame-rate problem could not be confused with a
 design problem — and there was one, twice (§6.2). Both were caught because the app could be run and
-felt, which would not have been true inside a half-built redesign.
+felt, which would not have been true inside a half-built redesign. The same reasoning is why the
+redesign has since been split into a port (§7) and a restyle (§9).
 
-**What is left of Phase 2 is iOS drawing the mask**, which needs Compose Multiplatform in the build.
-The C half and the Kotlin bindings are done and tested.
+**Splitting Phase 3 changed what the phases are for.** The old Phase 3 was "redesign, on Android"
+and the old Phase 4 was "and now make it work on iOS". That ordering wrote the shell twice — once
+Android-first, once ported — and deferred every iOS unknown to the end. The port now carries the
+iOS work (storage, downloads, pickers, navigation), which the restyle does not touch, so it is
+written once; and the restyle lands on code that is already on both platforms. It also means the
+next phase depends on no design work at all, which the old Phase 3 could not have started without.
 
 Phases 0 and 1 are pure risk reduction and pay for themselves on Android alone. If the iOS ambition
-ever stalls, stopping after Phase 3 leaves a modern, native, fully redesigned Android app — which is
+ever stalls, stopping after Phase 5 leaves a modern, native, fully redesigned Android app — which is
 the asymmetry that made this the right option in the first place.
