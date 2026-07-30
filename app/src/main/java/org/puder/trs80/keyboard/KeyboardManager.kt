@@ -16,17 +16,12 @@
 
 package org.puder.trs80.keyboard
 
-import android.content.res.XmlResourceParser
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
-import org.puder.trs80.R
-import org.puder.trs80.TRS80Application
 import org.puder.trs80.XTRS
 import org.puder.trs80.shared.KeyMap
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import java.io.IOException
+import org.puder.trs80.shared.KeyboardMapping
 
 /**
  * Translates on-screen key presses, hardware key events and game controller buttons into the SDL
@@ -42,10 +37,10 @@ class KeyboardManager {
         private set
 
     /** @return The key map entry for the given `Key.TK_*` id. */
-    fun getKeyMap(id: Int): KeyMap = KEYBOARD_MAPPING[id]
+    fun getKeyMap(id: Int): KeyMap = KeyboardMapping[id]
 
     /** @return The key map entry with the given symbolic [name], or `null` if there is none. */
-    fun getKeyMap(name: String): KeyMap? = KEYBOARD_MAPPING.find { it.name == name }
+    fun getKeyMap(name: String): KeyMap? = KeyboardMapping.byName(name)
 
     /**
      * Types a single character, as if the matching on-screen key had been tapped. The key-up
@@ -232,53 +227,5 @@ class KeyboardManager {
         private const val SDL_KEYDOWN = 2
         private const val SDL_KEYUP = 3
 
-        /**
-         * Keys without a printable character (ENTER, SHIFT, the cursor keys, ...) are handed a
-         * synthetic key code, starting here so they cannot collide with the ASCII codes the
-         * printable keys use.
-         */
-        private const val FIRST_SYNTHETIC_KEY_CODE = 15
-
-        private val KEYBOARD_MAPPING: List<KeyMap> = parseKeyMap(R.xml.keymap_us)
-
-        /**
-         * Parses a keymap resource. The resource is part of the APK, so a malformed or unreadable
-         * one is a broken build rather than a runtime condition worth recovering from: it fails
-         * loudly here instead of leaving a half-built mapping behind that blows up much later with
-         * an out-of-bounds access on an arbitrary key press.
-         */
-        private fun parseKeyMap(keyMapLayout: Int): List<KeyMap> = try {
-            TRS80Application.getAppContext().resources.getXml(keyMapLayout).use { parser ->
-                val keyMap = mutableListOf<KeyMap>()
-                var nextSyntheticKeyCode = FIRST_SYNTHETIC_KEY_CODE
-                parser.next()
-                var eventType = parser.eventType
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    if (eventType == XmlPullParser.START_TAG && parser.name == "KeyMap") {
-                        val key = parser.requireAttribute("key")
-                        keyMap += KeyMap(
-                                label = parser.requireAttribute("label"),
-                                sym = parser.requireAttribute("sym").decode(),
-                                key = if (key == "NEXT_FREE") nextSyntheticKeyCode++ else key[0].code,
-                                name = parser.requireAttribute("name"),
-                                value = parser.requireAttribute("value").decode())
-                    }
-                    eventType = parser.next()
-                }
-                keyMap
-            }
-        } catch (e: XmlPullParserException) {
-            throw IllegalStateException("Malformed keymap resource.", e)
-        } catch (e: IOException) {
-            throw IllegalStateException("Unable to read keymap resource.", e)
-        }
-
-        private fun XmlResourceParser.requireAttribute(name: String): String =
-                requireNotNull(getAttributeValue(null, name)) {
-                    "<KeyMap> element is missing the '$name' attribute."
-                }
-
-        /** Decodes a decimal, hex (`0x...`) or octal literal, as the keymap uses all three. */
-        private fun String.decode(): Int = java.lang.Long.decode(this).toInt()
     }
 }
