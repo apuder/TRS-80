@@ -18,11 +18,11 @@ It is grounded in an audit of the current code — see `doc/UI-SPEC.md` for the 
 ```
 trs80/
 ├── core/                    C emulator, no platform coupling
-│   ├── include/trs80_core.h the entire host-facing API (~13 functions)
-│   └── src/                 z80.c, trs_disk.c, … (unchanged)
+│   ├── include/trs80_core.h the entire host-facing API (~20 functions)
+│   └── src/                 z80.c, trs_disk.c, trs80_render.c, …
 │
 ├── shared/                  Kotlin Multiplatform module
-│   ├── commonMain/          domain + emulator session + renderer + keyboards + ALL UI (Compose)
+│   ├── commonMain/          domain + emulator session + keyboards + ALL UI (Compose)
 │   ├── androidMain/         JNI binding, storage, Cast
 │   └── iosMain/             cinterop binding, storage, audio
 │
@@ -32,6 +32,12 @@ trs80/
 
 The goal is that `shared/commonMain` holds essentially the whole product, and the two app modules are
 a few hundred lines each.
+
+One thing moved the other way. **The renderer ended up in C, not in `commonMain`** — the core
+rasterizes the screen and each host uploads one image (§6). That was not the plan, and the reason is
+that the authentic character generator ROMs were already vendored in `trs_chars.c`, so the expensive
+part of doing it there was already written. Each host is left with a blit rather than a renderer,
+which is less shared Kotlin but less code overall.
 
 ### 1.1 Three principles that shape everything below
 
@@ -59,7 +65,7 @@ hardware knowledge. Do not rewrite it. Give it a clean C API and never touch it 
 | Emulator core | ~23,000 LOC C, of which only **~590 lines in 4 files** are Android-coupled | Port is mechanical, not a rewrite |
 | Native boundary | 13 coarse functions; screen is a **2 KB shared buffer**, zero copies per frame; audio is 100 % native | Interop is a non-issue on any toolkit |
 | Audio | OpenSL ES behind a **10-line interface** (`opensl.h`) | iOS needs one new implementation, nothing else |
-| Rendering | Glyph rasterization + blitting live in Java (`Hardware`, `RenderThread`, `DirtyRect` ≈ 330 LOC) | Must be rewritten — once, in `commonMain` |
+| Rendering | Glyph rasterization + blitting live in Java (`Hardware`, `RenderThread`, `DirtyRect` ≈ 330 LOC) | *(Phase 2: moved into C, which already had the character ROMs — see §6)* |
 | Protobuf | **271,000 vendored LOC** to serialize one 84-line state dump | *(Phase 0: removed — `libxtrs.so` 12.5 MB → 2.8 MB per ABI)* |
 | AndroidX | `com.android.support:*:33.0.0` substituted by AGP to **AndroidX 1.0.0** (2018), `enableJetifier` still on | Full dependency refresh needed — see §4.2 |
 | RetroStore | Client is a **JVM-only JAR** from a private Maven repo, and the app uses exactly **four** of its methods | **Blocks iOS** — retire and reimplement, see D7 |
@@ -132,7 +138,7 @@ standalone with no Android headers.
 
 ---
 
-## 4. Phase 1 — Kotlin, modern dependencies, KMP skeleton
+## 4. Phase 1 — Kotlin, modern dependencies, KMP skeleton ✅ DONE
 
 *Android-only. Ships. Still no user-visible change.*
 
@@ -231,9 +237,9 @@ Still to move, and this is all that is left of Phase 1:
 - **1e** — `KeyboardManager`'s mapping tables and the keymap currently in `res/xml/keymap_us.xml`.
   Small, and *not* blocked on storage, so it can go before, after or alongside 1d.
 
-`Hardware` is no longer listed here: its cell-metric arithmetic moves as part of the Phase 2 renderer
-(§6), since the glyph rasterization it is tangled with is replaced there outright. Splitting it twice
-would be wasted work.
+`Hardware` is no longer listed here. Phase 2 (§6) deleted its glyph rasterization outright — the core
+does that now — leaving only the cell-metric arithmetic, which is what the core is told. Moving what
+remains into `commonMain` is small and no longer urgent.
 
 **Done when:** the Android app runs entirely on `shared/`, still ships, and `commonMain` has no
 Android imports.
@@ -290,50 +296,81 @@ in §8.
 
 ---
 
-## 6. Phase 2 — The renderer
+## 6. Phase 2 — The renderer ✅ ANDROID DONE
 
-*Ships on Android. No redesign yet — the new renderer draws into the app exactly as it looks today.*
+*Ships on Android. No redesign — the new renderer draws into the app exactly as it looked before,
+only from a different source.*
 
-The emulated screen is drawn by `RenderThread` into a `SurfaceView` with `Canvas.drawBitmap`, 1024
-glyphs a frame. Replacing that with Compose Multiplatform is its own phase, for four reasons:
+Why this is its own phase, ahead of the redesign, is unchanged: the emulator surface is the only part
+of the UI whose geometry comes from the hardware rather than a designer, and the only part whose
+performance was unknown. Building it first means it can ship on Android inside the existing UI, where
+a frame-rate problem cannot be confused with a design problem.
 
-**It is the only part of the UI that is design-independent.** 64×16 character cells, 4:3,
-integer-only scaling — the geometry comes from the hardware, not from a designer. So it can be built
-before the design lands, and none of it is wasted when the design arrives.
+**What it turned into is not what was planned.** The plan was a Compose Multiplatform renderer over
+the character-cell model, with a glyph atlas built at runtime or bake time. Instead the emulator core
+rasterizes, and each host uploads one image. That answers **D1** and makes **D6** moot; see §9.
 
-**It is the only part whose performance is genuinely unknown.** Everything else in the app is a list
-and some forms. This is 60 fps of glyph blitting, and it is the one place where Compose
-Multiplatform might not be good enough.
+The reason is a discovery rather than a preference: `trs_chars.c` already holds the authentic
+character generator ROMs — 2,302 lines, eleven charsets — compiled into every build and, until now,
+entirely unused. The expensive part of "render in C" was supposed to be writing a glyph rasterizer,
+and it was already there.
 
-**It ships on Android on its own.** Compose interoperates with Views, so the new renderer can replace
-`RenderThread` inside the *current* UI and go out to real users on the platform that has them —
-before any redesign exists. If it were built inside the redesign instead, a performance problem and
-a design problem would be indistinguishable.
+### 6.1 What was built
 
-**Adding Compose Multiplatform is foundational, not exploratory.** Once it is in the build it stays.
-That does not belong in a phase whose purpose is to be thrown away, which is why this is no longer a
-step of §5.
+1. ✅ **`trs80_render()`** rasterizes video RAM into an 8-bit coverage mask that the host tints and
+   scales. It redraws only the cells that changed and reports whether anything did, so an idle screen
+   costs neither an upload nor a draw.
+2. ✅ **`trs80_set_cell_size()`.** The core rasterizes at the size the host actually draws a cell,
+   not at the ROM's 8×12. This is not an optimization — see 6.2.
+3. ✅ **The Android host** blits that mask once per frame, tinted, on a hardware canvas.
+4. ✅ **Pacing on the display's clock**, via a `Choreographer` on the render thread's own `Looper`.
+5. ✅ **`Hardware`'s glyph generation deleted** — 101 lines, both generators, the 256-entry font
+   array, and the `Bitmap`/`Canvas`/`Paint`/`Typeface` work behind them. What remains is the
+   arithmetic deciding cell size, which is what the core is now told.
 
-1. **Add Compose Multiplatform** to the shared module and the Android app.
-2. **Glyph rasterization.** Currently `Canvas.drawText` into 256 `Bitmap`s from bundled TTFs, plus
-   `generateGraphicsFont()` for the 2×3 block graphics. Compose has equivalent text APIs in common
-   code; alternatively bake the atlas at build time. Settles **D6**.
-3. **The renderer itself**, in `commonMain`: a Compose `Canvas` reading the shared 2 KB buffer at
-   60 fps. `DirtyRect`, `CellMetrics` and `ScreenBuffer` are already in `commonMain` and carry over
-   unchanged — `DirtyRect` is already exercised against the real native buffer on iOS by §5's tests.
-4. **Split `Hardware`.** The cell-metric arithmetic is pure and moves; the glyph rasterization
-   (`Bitmap`/`Canvas`/`Paint`/`AsyncTask`) is replaced outright by step 2. The seam already exists as
-   `Hardware.cellMetrics`.
-5. **Benchmark on both platforms, on real devices.** Worst case is 1024 draws per frame. If that
-   will not hold, the first fix is a batched atlas draw rather than a redesign.
-6. **Replace `RenderThread`** on Android via Compose/View interop, and ship it.
+Still to do: **draw the same mask on iOS.** `EmulatorCore.render()` and `pixelBuffer` exist and are
+covered by §5's tests; nothing consumes them yet, and that needs Compose Multiplatform in the build.
 
-**Done when:** both platforms draw the emulated screen from one `commonMain` renderer, with measured
-frame timings, and Android has shipped it.
+### 6.2 Three things that were only learned by measuring
 
-This phase is what makes **D1** decidable on evidence instead of guesswork. If the character-cell
-model will not hold 60 fps under Compose, moving rasterization into C stops being hypothetical — and
-that is much better learned here than during the redesign.
+Each of these was got wrong first, and none was visible from reasoning about the design.
+
+**`lockCanvas()` returns a *software* canvas.** Scaling the mask to the screen was therefore a CPU
+upscale of the whole picture every frame: 18.5 ms against a 16.7 ms vsync budget, so every frame that
+drew missed its deadline. Since most frames are idle, the cost landed precisely on the frames
+responding to a keypress, which is where it is felt. `lockHardwareCanvas()` moved the scale to the
+GPU and took the frame from 18.4–18.9 ms to 0.9–2.4 ms — from four times slower than the glyph
+blitting it replaced to three times faster. Note the frame overlay had been reporting 18 ms all along
+and was read as "the emulator is slow"; it took someone saying the app *felt* worse to look properly.
+
+**Scaling the mask after the fact ruins the glyphs.** At a 14×42 cell the scale is 1.75×, and a
+one-pixel stem then lands on two output pixels at five of the eight phases and one at the other
+three — visibly uneven strokes with columns missing. No filtering mode fixes it: bilinear turns the
+same stem into fringes of differing weight. Hence `trs80_set_cell_size()`: rasterize at the target
+size, blit one to one, never resample. Two details make the result match the old renderer rather than
+merely differ from the old bug — coverage is thresholded at a half rather than kept as a fraction,
+which is what font hinting does and what makes every stem the same width; and it is computed in
+integer arithmetic, because at 1.75× a stem's edge pixel is covered *exactly* half and floating point
+put that either side of the threshold depending on the glyph.
+
+**The block graphics needed the same treatment separately.** They are not glyphs, so fixing the glyph
+path left them scaled and uneven — six, seven or eight pixels for what should be half a cell. They
+are now computed at the cell size directly.
+
+### 6.3 Measured
+
+On a Pixel 9 Pro XL, via `dumpsys gfxinfo`:
+
+| | |
+|---|---|
+| Janky frames | **0 (0.00%)** |
+| 50th / 90th / 95th percentile | 5 / 5 / 5 ms |
+| 99th percentile | 9 ms |
+| Missed vsyncs, high-input-latency frames | 0, 0 |
+
+Stroke widths, measured rather than eyeballed: 293 stems, every one 7 px, against a spread of 6, 7
+and 8 before. The screenshots that prompted the investigation were macOS-rescaled and lossy, so
+comparing them by eye could never have settled it.
 
 ---
 
@@ -349,6 +386,9 @@ the reason the original plan said to do it first. What is left here is everythin
 depends on the design.
 
 ### 7.1 The emulator surface: input and layout
+
+The picture itself is **already done** (§6) and needs no design input — what is left here is
+everything around it.
 
 - **Keyboards**: the five input modes become composables. This is a rewrite regardless, and per the
   UI spec it needs real design attention — the current 43 %-opacity labels fail contrast outright.
@@ -410,12 +450,32 @@ extends it to the C core.
 
 ## 9. Decisions to make (and my recommendation)
 
-**D1 — Screen model: keep character cells, or move rendering into C?**
-Today C exposes one byte per character cell and the host rasterizes glyphs. The alternative is for C
-to render pixels into a shared RGBA framebuffer, making every host trivially simple *and* fixing the
-hi-res graphics modes for free, since those are inherently pixel-based.
-*Recommend:* keep character cells for the port — it works today and under Compose Multiplatform the
-renderer is written once anyway. Revisit only if you decide to support Grafyx/HRG.
+**D1 — Screen model: keep character cells, or move rendering into C?** ✅ *Resolved in Phase 2 (§6):
+rendering moved into C, and the character buffer stayed.*
+
+Both, as it turns out. The core still exposes one byte per cell — `trs80_screen_buffer()` is
+unchanged, and Cast still reads it — and it *additionally* rasterizes into a coverage mask through
+`trs80_render()`. Nothing was taken away, so the character model is still there for anything that
+wants characters rather than pixels.
+
+The original recommendation here was to keep the host rasterizing, on the grounds that under Compose
+Multiplatform the renderer would be written once anyway. That was reversed once `trs_chars.c` turned
+up: the authentic character generator ROMs were already vendored and compiled into every build, so
+the expensive half of moving rendering into C did not have to be written at all.
+
+Two of the arguments made for it beforehand did not survive contact:
+
+*"Fewer draw calls will be faster."* Not on its own. Trading 1024 small blits for one scaled blit was
+four times **slower** until the scale was moved off the CPU, which had nothing to do with draw-call
+count. See §6.2.
+
+*"The ROM is more authentic than the TrueType approximation."* Barely. The bundled fonts are
+kreativekorp's *replica* TRS-80 faces, and only 4.2 % of pixels differ between the two renderers on
+the same screen. This should have been checked by looking in `assets/fonts` before it was claimed.
+
+What did hold, and is what the decision now rests on: **one rasterizer instead of one per host**, no
+glyph machinery on iOS at all, and the hi-res graphics modes become representable, since a mask can
+carry pixels that a character buffer cannot.
 
 **D2 — Chromecast.** Android-only SDK, and the audio half of it is already dead code.
 *Recommend:* keep it Android-only behind an `expect` that no-ops on iOS, or drop it. Do not port it.
@@ -431,9 +491,12 @@ configuration form, so **decide before the design is finalized**, not after.
 **D5 — Protobuf.** *Resolved in Phase 0:* replaced with a hand-written encoder rather than nanopb —
 see §3.
 
-**D6 — Font pipeline.** Rasterize TTFs at runtime in `commonMain`, or bake a glyph atlas at build
-time. *Recommend:* decide during the Phase 2 renderer work (§6); build-time baking is simpler and the
-fonts never change.
+**D6 — Font pipeline.** ✅ *Moot, as of Phase 2 (§6).* There is no atlas to decide about: the glyphs
+come from the character generator ROMs already vendored in `trs_chars.c`, and the core rasterizes
+them. Neither runtime rasterization nor build-time baking is needed on either host.
+
+The bundled TrueType faces stay, but only for the tutorial's text (`Fonts.kt`) and the on-screen
+keyboard's key labels (`Key.kt`). The emulated screen no longer uses them.
 
 **D7 — The RetroStore JVM SDK** ✅ DONE (July 2026) (`github.com/shaeberling/retrostore-jvm-sdk`). The app depends on it
 as `org.retrostore:retrostore-client:0.2.13`, published to `maven.haberling.net`.
@@ -546,7 +609,7 @@ the old format, so it is fixed *by* the migration, not before it.
 `ConfigurationPersistence` hands out `android.preference.Preference` objects via
 `PreferenceFinder`/`PreferenceProvider`, and five UI files are `PreferenceFragment`s bound to the same
 keys. Storage and settings UI are two-way bound by key name — which looks like it forces the storage
-work to wait for the Compose rewrite in Phase 2.
+work to wait for the Compose rewrite of those screens, which is Phase 3 (§7).
 
 It does not. The deprecated `android.preference` has no way to redirect where a screen stores values,
 but **`androidx.preference` has `PreferenceDataStore`**, which exists precisely to back preference
@@ -559,8 +622,8 @@ screens with something other than SharedPreferences. The code already carries fi
 2. New namespaced store behind `PreferenceDataStore`, with the one-time migration. Existing screens
    read and write it directly.
 3. Domain classes move to `commonMain`.
-4. Compose replaces the preference screens in Phase 2, on its own schedule — and the string-encoded
-   ints die with them.
+4. Compose replaces the preference screens in Phase 3 (§7), on its own schedule — and the
+   string-encoded ints die with them.
 
 This turns one hard ordering dependency into two independent steps, and unblocks §4.5 without waiting
 on design work.
@@ -594,6 +657,12 @@ network stack, and it is decode-only.)
 **Hi-res graphics crash.** Grafyx/HRG `longjmp` out of the CPU loop. Not caused by the port, but it
 will look like a port regression the first time someone hits it.
 
+Phase 2 makes this *fixable* without making it fixed. The modes are inherently pixel-based, which is
+why a character buffer could never carry them; the core now rasterizes into a pixel mask, and
+`grafyx_unscaled` is already a pixel buffer sitting in C next to it. So the remaining work is
+compositing one into the other rather than inventing a representation. Still unclaimed, and still a
+latent crash until someone does it.
+
 **Scope creep between redesign and port.** Two large efforts at once. The mitigation is the shipping
 discipline in §1.1: if a phase cannot ship, it is too big.
 
@@ -603,7 +672,7 @@ discipline in §1.1: if a phase cannot ship, it is too big.
 
 Design work does not block on any of this and should start now — `doc/UI-SPEC.md` is the brief.
 Phases 0 and 1 are invisible to users and can run underneath it. The specific things the designer
-must resolve before Phase 2 can start in earnest:
+must resolve before Phase 3 (§7) can start in earnest — the renderer in §6 needed none of it:
 
 1. **Landscape controls for the emulator** — the picture leaves no room, and today the toolbar simply
    vanishes.
@@ -624,19 +693,25 @@ must resolve before Phase 2 can start in earnest:
 | 1a ✅ | JDK fix → AndroidX → AGP 9.1 / Gradle 9.5 → Kotlin 2.4 (§4.2–4.4) | Android | No |
 | 1b ✅ | Java→Kotlin, KMP skeleton, RetroStore client in `commonMain` (D7) | Android | No |
 | 1c ✅ | **iOS spike**: core for iOS, cinterop, audio, Z80 running in CI (§5) | No | No |
-| 1d | Storage: `androidx.preference` ✅ → namespaced store + migration (D8) | Android | No |
-| 1e | `KeyboardManager`'s mapping tables into `commonMain` — small, unblocked | Android | No |
-| 2 | **The renderer** in `commonMain`, replacing `RenderThread` (§6) | Android | Barely — same look, new engine |
+| 1d ✅ | Storage: `androidx.preference`, namespaced store, legacy import (D8) | Android | No |
+| 1e ✅ | `KeyboardManager`'s mapping tables into `commonMain` | Android | No |
+| 2 | **The renderer** — rasterized in C (§6). **Android done**; iOS still to draw it | Android | Barely — same look, new engine |
 | 3 | Redesigned shell, keyboards, landscape (§7) | Android, incrementally | **Yes — the redesign** |
 | 4 | iOS host app, iOS storage, `FileDownloader`, submission (§8) | iOS beta | Yes — new platform |
 
-**1c and 1d are independent and can run in parallel** — the spike bundles nothing and needs no
-storage, and the storage work needs no iOS.
+**Phase 1 is complete.** `commonMain` now holds the keyboard layout and mapping, `DirtyRect`,
+`ScreenBuffer`, `CellMetrics`, the storage keys and the legacy import — all compiling for iOS, with
+tests running on the simulator on every push. The emulator core itself builds for iOS and executes
+Z80 code under CI.
 
-**Phase 2 is deliberately between the spike and the redesign.** It is the only design-independent
-part of the UI and the only part whose performance is unknown, so it is the piece worth de-risking on
-its own — shipped on Android inside the existing UI, where a frame-rate problem cannot be confused
-with a design problem.
+**Phase 2 was deliberately placed between the spike and the redesign**, and that placement paid off.
+It is the only design-independent part of the UI and the only part whose performance was unknown, so
+doing it inside the existing Android UI meant a frame-rate problem could not be confused with a
+design problem — and there was one, twice (§6.2). Both were caught because the app could be run and
+felt, which would not have been true inside a half-built redesign.
+
+**What is left of Phase 2 is iOS drawing the mask**, which needs Compose Multiplatform in the build.
+The C half and the Kotlin bindings are done and tested.
 
 Phases 0 and 1 are pure risk reduction and pay for themselves on Android alone. If the iOS ambition
 ever stalls, stopping after Phase 3 leaves a modern, native, fully redesigned Android app — which is
