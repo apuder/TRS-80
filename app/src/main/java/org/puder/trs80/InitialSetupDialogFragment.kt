@@ -20,6 +20,7 @@
 
 package org.puder.trs80
 
+import org.puder.trs80.configuration.getOrInit
 import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
@@ -32,12 +33,12 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.puder.trs80.configuration.ConfigurationManager
-import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia
+import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.ConfigurationManager.ConfigMedia
 import org.puder.trs80.io.FileDownloader
-import org.puder.trs80.localstore.InitialDownloads
-import org.puder.trs80.localstore.InitialDownloads.Download
-import org.puder.trs80.localstore.RomManager
+import org.puder.trs80.shared.localstore.InitialDownloads
+import org.puder.trs80.shared.localstore.InitialDownloads.Download
+import org.puder.trs80.shared.localstore.RomManager
 import org.retrostore.android.RetrostoreApi
 import java.io.IOException
 
@@ -93,7 +94,7 @@ class InitialSetupDialogFragment : DialogFragment() {
         retainInstance = true
 
         val configurationManager = try {
-            ConfigurationManager.get(requireContext())
+            ConfigurationManager.getOrInit()
         } catch (e: IOException) {
             Log.e(TAG, "Cannot create ConfigurationManager: ${e.message}")
             return

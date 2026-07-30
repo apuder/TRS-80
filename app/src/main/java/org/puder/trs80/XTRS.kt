@@ -17,8 +17,8 @@
 package org.puder.trs80
 
 import android.util.Log
-import org.puder.trs80.configuration.Configuration
-import org.puder.trs80.configuration.EmulatorState
+import org.puder.trs80.shared.configuration.Configuration
+import org.puder.trs80.shared.configuration.EmulatorState
 import org.puder.trs80.shared.ScreenBuffer
 import java.nio.ByteBuffer
 

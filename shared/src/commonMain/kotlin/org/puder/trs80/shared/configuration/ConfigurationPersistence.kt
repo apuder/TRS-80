@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration
+package org.puder.trs80.shared.configuration
 
-import org.puder.trs80.shared.KeyboardLayout
-
-import androidx.preference.Preference
 import com.russhwolf.settings.Settings
+import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.shared.storage.StorageKeys
-import org.puder.trs80.storage.AppStorage
 
 private const val CONF_NAME = StorageKeys.CONFIG_NAME
 private const val CONF_MODEL = StorageKeys.CONFIG_MODEL
@@ -39,8 +36,12 @@ private const val KEY_CASSETTE_POSITION = StorageKeys.CONFIG_CASSETTE_POSITION
  * Values live in the one shared store under this configuration's namespace,
  * rather than in a preferences file of their own as they used to. Keys are the
  * legacy names prefixed by [StorageKeys.configurationPrefix], which is also what
- * lets the editor screen bind straight to them through a
+ * lets the Android editor screen bind straight to them through a
  * `SettingsPreferenceDataStore`.
+ *
+ * The `PreferenceFinder` that used to live here went to the Android side with
+ * the screen that uses it: `androidx.preference.Preference` is a View, and this
+ * class is now the platform-independent half.
  */
 class ConfigurationPersistence private constructor(
     private val settings: Settings,
@@ -49,11 +50,7 @@ class ConfigurationPersistence private constructor(
 
     companion object {
         /** Creates an instance for the configuration with the given ID. */
-        internal fun forId(configId: Int): ConfigurationPersistence =
-            forId(configId, AppStorage.get().settings)
-
-        /** Creates an instance backed by a specific store. Exists for tests. */
-        internal fun forId(configId: Int, settings: Settings): ConfigurationPersistence =
+        fun forId(configId: Int, settings: Settings): ConfigurationPersistence =
             ConfigurationPersistence(settings, StorageKeys.configurationPrefix(configId))
 
         private fun diskIdToKey(disk: Int): String? =
@@ -132,10 +129,6 @@ class ConfigurationPersistence private constructor(
         }
     }
 
-    /** @return A finder for the preferences of this configuration. */
-    fun forPreferenceProvider(provider: PreferenceProvider): PreferenceFinder =
-        PreferenceFinder(provider)
-
     /**
      * Stores [value], or removes the key when there is nothing to store.
      *
@@ -156,32 +149,4 @@ class ConfigurationPersistence private constructor(
     /** Writes a number as a string, matching how the preference screens store it. */
     private fun setInt(leaf: String, value: Int) =
         settings.putString(key(leaf), value.toString())
-
-    /**
-     * Finds preferences for configurations.
-     */
-    class PreferenceFinder(private val provider: PreferenceProvider) {
-        fun forModel(): Preference = provider.findPreference(CONF_MODEL)
-
-        fun forName(): Preference = provider.findPreference(CONF_NAME)
-
-        fun forCasette(): Preference = provider.findPreference(CONF_CASSETTE)
-
-        /** @param drive the zero-based drive index. */
-        fun forDisk(drive: Int): Preference =
-            provider.findPreference(StorageKeys.diskKey(drive))
-
-        fun forCharacterColor(): Preference = provider.findPreference(CONF_CHARACTER_COLOR)
-
-        fun forKeyboardPortrait(): Preference = provider.findPreference(CONF_KEYBOARD_PORTRAIT)
-
-        fun forKeyboardLandscape(): Preference = provider.findPreference(CONF_KEYBOARD_LANDSCAPE)
-    }
-
-    /**
-     * Classes implementing this interface provide preferences by name.
-     */
-    fun interface PreferenceProvider {
-        fun findPreference(name: String): Preference
-    }
 }

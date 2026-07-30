@@ -14,37 +14,31 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration
+package org.puder.trs80.shared.configuration
 
+import com.russhwolf.settings.Settings
 import org.puder.trs80.shared.KeyboardLayout
-
-import android.content.Context
-import android.graphics.Color
-import android.util.SparseArray
-import org.puder.trs80.Hardware
-
-private const val NUM_DISKS = 4
+import org.puder.trs80.shared.MODEL1
+import org.puder.trs80.shared.MODEL3
+import org.puder.trs80.shared.MODEL4
+import org.puder.trs80.shared.MODEL4P
+import org.puder.trs80.shared.MODEL_NONE
+import org.puder.trs80.shared.ScreenColors
+import org.puder.trs80.shared.storage.StorageKeys
 
 /**
- * Represents a single configuration, backed by [ConfigurationPersistence]. Every change is
- * written through to the persistence immediately.
+ * A configuration backed by [ConfigurationPersistence]. Every change is written
+ * through to storage immediately.
  */
 internal class ConfigurationImpl private constructor(
     override val id: Int,
-    private val persistence: ConfigurationPersistence
+    private val persistence: ConfigurationPersistence,
 ) : Configuration {
 
     companion object {
-        /**
-         * @return The configuration stored under the given [id].
-         *
-         * The context is no longer needed now that the values come from the
-         * shared store rather than a preferences file of their own. It is kept
-         * so the callers do not all change in this step.
-         */
-        @Suppress("UNUSED_PARAMETER")
-        fun fromId(id: Int, context: Context): Configuration =
-            ConfigurationImpl(id, ConfigurationPersistence.forId(id))
+        /** @return The configuration stored under the given [id]. */
+        fun fromId(id: Int, settings: Settings): Configuration =
+            ConfigurationImpl(id, ConfigurationPersistence.forId(id, settings))
     }
 
     override val name: String?
@@ -55,11 +49,11 @@ internal class ConfigurationImpl private constructor(
     // TODO: This should be an enum.
     override var model: Int
         get() = when (persistence.model?.toInt()) {
-            1 -> Hardware.MODEL1
-            3 -> Hardware.MODEL3
-            4 -> Hardware.MODEL4
-            5 -> Hardware.MODEL4P
-            else -> Hardware.MODEL_NONE
+            1 -> MODEL1
+            3 -> MODEL3
+            4 -> MODEL4
+            5 -> MODEL4P
+            else -> MODEL_NONE
         }
         set(value) = persistence.setModel(
             when (value) {
@@ -77,16 +71,10 @@ internal class ConfigurationImpl private constructor(
 
     override fun setDiskPath(disk: Int, path: String?) = persistence.setDiskPath(disk, path)
 
-    override var diskPaths: SparseArray<String?>
-        get() = SparseArray<String?>(NUM_DISKS).apply {
-            for (disk in 0 until NUM_DISKS) {
-                put(disk, persistence.getDiskPath(disk))
-            }
-        }
+    override var diskPaths: List<String?>
+        get() = List(StorageKeys.DRIVE_COUNT) { persistence.getDiskPath(it) }
         set(paths) {
-            for (disk in 0 until paths.size()) {
-                persistence.setDiskPath(disk, paths[disk])
-            }
+            paths.forEachIndexed { disk, path -> persistence.setDiskPath(disk, path) }
         }
 
     override var cassettePosition: Float
@@ -109,8 +97,8 @@ internal class ConfigurationImpl private constructor(
 
     override val characterColorAsRGB: Int
         get() = when (characterColor) {
-            0 -> Color.GREEN
-            else -> Color.WHITE
+            0 -> ScreenColors.GREEN
+            else -> ScreenColors.WHITE
         }
 
     override var characterColor: Int
@@ -118,7 +106,7 @@ internal class ConfigurationImpl private constructor(
         set(color) = persistence.setCharacterColor(color)
 
     override var screenColorAsRGB: Int
-        get() = Color.DKGRAY
+        get() = ScreenColors.DARK_GRAY
         set(color) {
             // TODO: Seems like we hard-coded a color for now. Make this persist if we care.
         }

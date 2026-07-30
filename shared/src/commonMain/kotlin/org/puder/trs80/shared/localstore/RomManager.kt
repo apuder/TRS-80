@@ -14,42 +14,43 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.localstore
+package org.puder.trs80.shared.localstore
 
 import com.russhwolf.settings.Settings
-import org.puder.trs80.Hardware
-import org.puder.trs80.StrUtil
-import org.puder.trs80.TRS80Application
-import org.puder.trs80.io.FileManager
+import okio.IOException
+import okio.Path.Companion.toPath
+import org.puder.trs80.shared.MODEL1
+import org.puder.trs80.shared.MODEL3
+import org.puder.trs80.shared.io.FileManager
+import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.storage.StorageKeys
-import org.puder.trs80.storage.AppStorage
-import java.io.File
-import java.io.IOException
 
 /**
- * Manages ROMs.
+ * The ROM images the emulator boots from.
+ *
+ * A ROM is a file on disk plus the path to it in the store; this keeps the two
+ * from drifting apart.
  */
 class RomManager private constructor(
-        private val settings: Settings,
-        private val fileManager: FileManager) {
+    private val settings: Settings,
+    private val fileManager: FileManager,
+) {
 
     /**
      * Adds a ROM to the local store.
      *
-     * @param model defines which model this entry is for. See [Hardware].
+     * @param model defines which model this entry is for.
      * @param filename the filename to use for the entry.
      * @param content the byte content of the entry.
      * @return Whether the file was successfully added.
      */
     fun addRom(model: Int, filename: String, content: ByteArray): Boolean {
-        settings.putString(
-                StorageKeys.romKey(model), fileManager.getAbsolutePathForFile(filename))
+        settings.putString(StorageKeys.romKey(model), fileManager.getAbsolutePathForFile(filename))
         return fileManager.writeFile(filename, content)
     }
 
     /** @return Whether the ROMs for both model I and model III are present. */
-    fun hasAllRoms(): Boolean =
-            hasRom(Hardware.MODEL1) && hasRom(Hardware.MODEL3)
+    fun hasAllRoms(): Boolean = hasRom(MODEL1) && hasRom(MODEL3)
 
     /**
      * @return Whether the ROM stored for [model] exists. If the file is gone, the
@@ -58,7 +59,7 @@ class RomManager private constructor(
     private fun hasRom(model: Int): Boolean {
         val key = StorageKeys.romKey(model)
         val filename = settings.getStringOrNull(key) ?: return false
-        if (File(filename).exists()) {
+        if (appFileSystem.exists(filename.toPath())) {
             return true
         }
         settings.remove(key)
@@ -72,16 +73,14 @@ class RomManager private constructor(
          * Initializes the singleton, unless it already exists.
          *
          * @return The singleton [RomManager] instance.
+         * @throws IOException if the app's storage directory could not be created.
          */
         @Throws(IOException::class)
-        fun init(fileManagerCreator: FileManager.Creator): RomManager =
-                instance ?: RomManager(
-                        AppStorage.get().settings,
-                        fileManagerCreator.forAppBaseDir()).also { instance = it }
+        fun init(fileManagerCreator: FileManager.Creator, settings: Settings): RomManager =
+            instance ?: RomManager(settings, fileManagerCreator.forAppBaseDir())
+                .also { instance = it }
 
-        /**
-         * @return The singleton [RomManager] instance.
-         */
+        /** @return The singleton [RomManager] instance. */
         fun get(): RomManager = checkNotNull(instance) { "Must call RomManager.init() first." }
     }
 }

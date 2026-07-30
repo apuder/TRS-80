@@ -16,6 +16,8 @@
 
 package org.puder.trs80
 
+import org.puder.trs80.configuration.getOrInit
+import org.puder.trs80.configuration.ConfigurationPreferenceFinder
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -26,8 +28,8 @@ import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.puder.trs80.browser.FileBrowserActivity
-import org.puder.trs80.configuration.ConfigurationManager
-import org.puder.trs80.configuration.ConfigurationPersistence
+import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.ConfigurationPersistence
 import org.puder.trs80.shared.storage.StorageKeys
 import org.puder.trs80.storage.AppStorage
 import org.puder.trs80.storage.SettingsPreferenceDataStore
@@ -97,8 +99,8 @@ class EditConfigurationFragment : PreferenceFragmentCompat() {
             AppStorage.get().settings,
             StorageKeys.configurationPrefix(configId),
         )
-        configPersistence = ConfigurationPersistence.forId(configId)
-        val prefFinder = configPersistence.forPreferenceProvider { name ->
+        configPersistence = ConfigurationPersistence.forId(configId, AppStorage.get().settings)
+        val prefFinder = ConfigurationPreferenceFinder { name ->
             requireNotNull(findPreference<Preference>(name)) { "No preference named '$name'." }
         }
         setPreferencesFromResource(R.xml.configuration, rootKey)
@@ -124,7 +126,7 @@ class EditConfigurationFragment : PreferenceFragmentCompat() {
                 File(currentPath).parent
             } else {
                 try {
-                    ConfigurationManager.get(requireContext())
+                    ConfigurationManager.getOrInit()
                         .getEmulatorState(configId).basePath
                 } catch (e: IOException) {
                     Log.w(TAG, "Could not get ConfigurationManager. Finishing activity.", e)

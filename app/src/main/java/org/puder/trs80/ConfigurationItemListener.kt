@@ -16,7 +16,7 @@
 
 package org.puder.trs80
 
-import org.puder.trs80.configuration.Configuration
+import org.puder.trs80.shared.configuration.Configuration
 
 /** Callbacks for the actions offered on a single configuration list item. */
 interface ConfigurationItemListener {

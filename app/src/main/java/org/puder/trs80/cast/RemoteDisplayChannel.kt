@@ -16,7 +16,7 @@
 
 package org.puder.trs80.cast
 
-import org.puder.trs80.configuration.Configuration
+import org.puder.trs80.shared.configuration.Configuration
 
 /**
  * Defines a protocol for communicating with a remote TRS80 display.

@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration
+package org.puder.trs80.shared.configuration
 
-import org.puder.trs80.shared.KeyboardLayout
-
-import android.content.Context
-import android.util.Log
 import com.russhwolf.settings.Settings
-import org.puder.trs80.Hardware
-import org.puder.trs80.io.FileManager
+import okio.IOException
+import org.puder.trs80.shared.Log
+import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.storage.StorageKeys
-import org.puder.trs80.storage.AppStorage
-import java.io.IOException
 
 private const val TAG = "ConfigManager"
 
@@ -33,72 +28,84 @@ private const val TAG = "ConfigManager"
 private const val MAX_DISKS = 4
 
 /**
- * This class manages the installed configurations.
+ * The installed configurations, in the order the user arranged them.
+ *
+ * Still a singleton, and still initialized once at start-up — but it is now
+ * handed its storage rather than reaching for a global `Context`, which is what
+ * lets it live here at all.
  */
 class ConfigurationManager private constructor(
     /** Creates the file managers that hold the configurations' storage. */
     private val fileManagerCreator: FileManager.Creator,
     /** All configurations, in the order the user arranged them. */
     private val configurations: MutableList<Configuration>,
+    private val settings: Settings,
     private val persistence: GlobalPersistence,
-    private val context: Context
 ) {
 
     companion object {
-        /** The singleton instance of the ConfigurationManager. */
         private var singleton: ConfigurationManager? = null
 
         /**
-         * @return The singleton [ConfigurationManager]. It is important that there is only a
-         * single instance in the app since the state needs to be shared.
-         */
-        @Throws(IOException::class)
-        fun get(context: Context): ConfigurationManager =
-            singleton ?: initDefault(FileManager.Creator.get(context.resources), context)
-
-        /**
-         * Initialize the default instance of the manager. This should be done exactly once.
+         * Initializes the singleton, unless it already exists. Call once at start-up.
          *
-         * @param fileManagerCreator creates file manager instances.
-         * @throws IOException if the manager could not be initialized.
+         * There is only ever one because the configuration list is shared state:
+         * two instances would each hold their own ordering and overwrite the
+         * other's.
+         *
+         * @throws IOException if the app's storage directory could not be created.
          */
         @Throws(IOException::class)
-        private fun initDefault(
+        fun init(
             fileManagerCreator: FileManager.Creator,
-            context: Context
+            settings: Settings,
         ): ConfigurationManager {
             singleton?.let {
                 Log.i(TAG, "ConfigurationManager singleton already initialized.")
                 return it
             }
-            // Makes sure the app's base directory exists.
-            fileManagerCreator.forAppBaseDir()
-            val settings = AppStorage.get().settings
-            return ConfigurationManager(
-                fileManagerCreator,
-                loadConfigurations(settings, context),
-                GlobalPersistence(settings),
-                context
-            ).also { singleton = it }
+            return create(fileManagerCreator, settings).also { singleton = it }
         }
 
-        private fun loadConfigurations(
+        /** @return the singleton, which [init] must have created. */
+        fun get(): ConfigurationManager =
+            checkNotNull(singleton) { "Must call ConfigurationManager.init() first." }
+
+        /**
+         * Builds an instance without touching the singleton.
+         *
+         * The app wants exactly one manager, but a test wants one per case, and
+         * [init] cannot give it that -- it hands back whatever the first call
+         * created, storage and all.
+         *
+         * @throws IOException if the storage directory could not be created.
+         */
+        @Throws(IOException::class)
+        internal fun create(
+            fileManagerCreator: FileManager.Creator,
             settings: Settings,
-            context: Context
-        ): MutableList<Configuration> =
+        ): ConfigurationManager {
+            fileManagerCreator.forAppBaseDir()
+            return ConfigurationManager(
+                fileManagerCreator,
+                loadConfigurations(settings),
+                settings,
+                GlobalPersistence(settings),
+            )
+        }
+
+        private fun loadConfigurations(settings: Settings): MutableList<Configuration> =
             settings.getStringOrNull(StorageKeys.CONFIGURATION_IDS).orEmpty()
                 .split(",")
                 .mapNotNull { it.trim().toIntOrNull() }
-                .mapTo(mutableListOf()) { ConfigurationImpl.fromId(it, context) }
+                .mapTo(mutableListOf()) { ConfigurationImpl.fromId(it, settings) }
     }
 
     /** The number of configurations. */
     val configCount: Int
         get() = configurations.size
 
-    /**
-     * @return The n-th configuration.
-     */
+    /** @return The n-th configuration. */
     fun getConfig(n: Int): Configuration = configurations[n]
 
     /**
@@ -122,9 +129,7 @@ class ConfigurationManager private constructor(
         }
     }
 
-    /**
-     * @return The configuration with the given ID, or null if it does not exist.
-     */
+    /** @return The configuration with the given ID, or null if it does not exist. */
     fun getConfigById(id: Int): Configuration? = configurations.firstOrNull { it.id == id }
 
     /**
@@ -136,7 +141,7 @@ class ConfigurationManager private constructor(
     /** Creates a new empty configuration. */
     fun newConfiguration(): Configuration {
         val nextId = persistence.incrementNextId()
-        val newConfig = ConfigurationImpl.fromId(nextId, context)
+        val newConfig = ConfigurationImpl.fromId(nextId, settings)
         configurations.add(newConfig)
         saveConfigurationIds()
         // Delete any state that might be present from a previous install of this app.
@@ -151,7 +156,7 @@ class ConfigurationManager private constructor(
 
     /** Writes the values of the given configuration back into its persisted storage. */
     fun persistConfig(configuration: Configuration) {
-        val toSave = ConfigurationImpl.fromId(configuration.id, context)
+        val toSave = ConfigurationImpl.fromId(configuration.id, settings)
         toSave.setName(configuration.name)
         toSave.model = configuration.model
         toSave.setCassettePath(configuration.cassettePath)
@@ -171,7 +176,7 @@ class ConfigurationManager private constructor(
     /**
      * Adds a new entry to the configuration manager.
      *
-     * @param model      defines which model this entry is for. See [Hardware].
+     * @param model      defines which model this entry is for.
      * @param configName the name of this new configuration.
      * @param disks      the disk images for this configuration.
      * @param cassette   the cassette image, or null, for this configuration.
@@ -181,7 +186,7 @@ class ConfigurationManager private constructor(
         model: Int,
         configName: String?,
         disks: List<ConfigMedia?>,
-        cassette: ConfigMedia?
+        cassette: ConfigMedia?,
     ): Configuration? {
         // Configurations automatically persist.
         val newConfig = newConfiguration()
@@ -231,17 +236,13 @@ class ConfigurationManager private constructor(
         return newConfig
     }
 
-    /**
-     * Moves the position of the configuration in the list.
-     */
+    /** Moves the position of the configuration in the list. */
     fun moveConfiguration(fromId: Int, toId: Int) {
         configurations.add(toId, configurations.removeAt(fromId))
         saveConfigurationIds()
     }
 
-    /**
-     * Creates an emulator state for the configuration with the given ID.
-     */
+    /** Creates an emulator state for the configuration with the given ID. */
     @Throws(IOException::class)
     fun getEmulatorState(configId: Int): EmulatorState =
         EmulatorState.forConfigId(configId, fileManagerCreator)

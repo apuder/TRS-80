@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.configuration
+package org.puder.trs80.shared.configuration
 
 import org.puder.trs80.shared.KeyboardLayout
 
-import android.util.SparseArray
-
 /**
- * Interface for a configuration.
+ * One emulator configuration: which machine, which media, and how it looks.
+ *
+ * Moved from `org.puder.trs80.configuration` unchanged, except that the disk
+ * paths are a [List] rather than an `android.util.SparseArray` — it always held
+ * exactly [DRIVE_COUNT] entries keyed 0..3, so a list says the same thing
+ * without the platform type.
  */
 interface Configuration {
     /** The ID that identifies this configuration and its storage. */
@@ -32,7 +35,7 @@ interface Configuration {
 
     fun setName(name: String?)
 
-    /** The emulated hardware model, one of the `MODEL*` constants of `Hardware`. */
+    /** The emulated hardware model, one of the `MODEL*` constants. */
     var model: Int
 
     /** The path of the cassette image, or null if none is configured. */
@@ -48,8 +51,8 @@ interface Configuration {
 
     fun setDiskPath(disk: Int, path: String?)
 
-    /** The image paths of all disk drives, keyed by the zero-based drive index. */
-    var diskPaths: SparseArray<String?>
+    /** The image paths of all disk drives, indexed by the zero-based drive number. */
+    var diskPaths: List<String?>
 
     /** The position the cassette is wound to. */
     var cassettePosition: Float
@@ -64,13 +67,13 @@ interface Configuration {
 
     fun setKeyboardLayoutLandscape(layout: KeyboardLayout?)
 
-    /** The character color as an Android color value. */
+    /** The character colour, as ARGB. */
     val characterColorAsRGB: Int
 
-    /** The character color as the index that is persisted. */
+    /** The character colour as the index that is persisted. */
     var characterColor: Int
 
-    /** The screen background color as an Android color value. */
+    /** The screen background colour, as ARGB. */
     var screenColorAsRGB: Int
 
     /** Whether the emulator's sound output is muted. */
@@ -79,8 +82,6 @@ interface Configuration {
     /** Removes all persisted data of this configuration. */
     fun delete()
 
-    /**
-     * @return An in-memory copy of this configuration.
-     */
+    /** @return An in-memory copy of this configuration. */
     fun createBackup(): Configuration
 }

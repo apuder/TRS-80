@@ -16,8 +16,8 @@
 
 package org.puder.trs80
 
-import org.puder.trs80.configuration.ConfigurationManager
-import org.puder.trs80.configuration.ConfigurationManager.ConfigMedia
+import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.ConfigurationManager.ConfigMedia
 import org.retrostore.android.AppPackage
 import org.retrostore.android.RetrostoreApi
 import org.retrostore.client.common.proto.App

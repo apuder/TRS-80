@@ -20,6 +20,7 @@
 
 package org.puder.trs80
 
+import org.puder.trs80.configuration.loadScreenshot
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.util.Log
@@ -32,9 +33,9 @@ import android.widget.ViewFlipper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.tekle.oss.android.animation.AnimationFactory
-import org.puder.trs80.configuration.Configuration
-import org.puder.trs80.configuration.ConfigurationManager
-import org.puder.trs80.configuration.EmulatorState
+import org.puder.trs80.shared.configuration.Configuration
+import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.EmulatorState
 import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.drag.ItemTouchHelperAdapter
 import java.io.IOException

@@ -17,7 +17,7 @@
 package org.puder.trs80
 
 import android.graphics.Rect
-import org.puder.trs80.configuration.Configuration
+import org.puder.trs80.shared.configuration.Configuration
 import org.puder.trs80.shared.CellMetrics
 import org.puder.trs80.shared.SCREEN_ASPECT_RATIO
 import org.puder.trs80.shared.SCREEN_COLUMNS
@@ -162,11 +162,13 @@ class Hardware(private val configuration: Configuration) {
         dp * TRS80Application.getAppContext().resources.displayMetrics.density
 
     companion object {
-        const val MODEL_NONE = 0
-        const val MODEL1 = 1
-        const val MODEL3 = 3
-        const val MODEL4 = 4
-        const val MODEL4P = 5
+        // Re-exported from `commonMain`, where the configuration code that
+        // reads and writes them now lives. Same values, one definition.
+        const val MODEL_NONE = org.puder.trs80.shared.MODEL_NONE
+        const val MODEL1 = org.puder.trs80.shared.MODEL1
+        const val MODEL3 = org.puder.trs80.shared.MODEL3
+        const val MODEL4 = org.puder.trs80.shared.MODEL4
+        const val MODEL4P = org.puder.trs80.shared.MODEL4P
     }
 }
 

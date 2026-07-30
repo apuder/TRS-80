@@ -21,7 +21,6 @@
     <string name="crash_dialog_comment_prompt">Which TRS-80 application did you try to run?</string>
     <string name="crash_dialog_ok_toast">Thank you!</string>
 
-    <string name="trs80_dir" translatable="false">TRS-80</string>
 
     <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>

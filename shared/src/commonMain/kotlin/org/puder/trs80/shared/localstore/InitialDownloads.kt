@@ -14,54 +14,55 @@
  * limitations under the License.
  */
 
-package org.puder.trs80.localstore
+package org.puder.trs80.shared.localstore
 
-import org.puder.trs80.Hardware
+import org.puder.trs80.shared.MODEL1
+import org.puder.trs80.shared.MODEL3
 
 /**
- * RomManager and entries to be downloaded initially when the app starts up.
+ * The ROMs and disk images fetched the first time the app is started.
  */
 object InitialDownloads {
 
     /** @return The ROMs and disk images to fetch when the app is started for the first time. */
     fun get(): Array<Download> = arrayOf(
-            Download(true, Hardware.MODEL1, null,
+            Download(true, MODEL1, null,
                     "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model1-level2.rom",
                     null, "model1.rom"),
             // Defunct download:
-            // Download(true, Hardware.MODEL3, null,
+            // Download(true, MODEL3, null,
             //         "http://www.classiccmp
             //         .org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
             //         null, "model3.rom"),
-            Download(true, Hardware.MODEL3, null,
+            Download(true, MODEL3, null,
                     "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model3.rom",
                     null, "model3.rom")
 
-            // Download(false, Hardware.MODEL1, "Model I - LDOS",
+            // Download(false, MODEL1, "Model I - LDOS",
             //         "http://www.tim-mann.org/trs80/ld1-531.zip", "ld1-531.dsk",
             //         "ldos-model1.dsk"),
 
-            // Download(false, Hardware.MODEL1, "Model I - NEWDOS/80",
+            // Download(false, MODEL1, "Model I - NEWDOS/80",
             //         "http://www.classiccmp
             //         .org/cpmarchives/trs80/Software/Model%201/N/NEWDOS-80%20v2.0%20(19xx)
             //         (Apparat%20Inc)%5bDSK%5d%5bMaster%5d.zip",
             //         "ND80MST.DSK", "newdos80-model1.dsk"),
 
-            // Download(false, Hardware.MODEL1, "Model I - NEWDOS/80",
+            // Download(false, MODEL1, "Model I - NEWDOS/80",
             //         "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2m1.zip",
             //         "ND80MST.DSK", "newdos80-model1.dsk"),
 
-            // Download(false, Hardware.MODEL3, "Model III - LDOS",
+            // Download(false, MODEL3, "Model III - LDOS",
             //         "http://www.tim-mann.org/trs80/ld3-531.zip", "ld3-531.dsk",
             //         "ldos-model3.dsk"),
 
-            // Download(false, Hardware.MODEL3, "Model III - NEWDOS/80",
+            // Download(false, MODEL3, "Model III - NEWDOS/80",
             //         "http://www.classiccmp
             //         .org/cpmarchives/trs80/Software/Model%20III/NEWDOS-80%20v2.0%20(19xx)
             //         (Apparat%20Inc)%5bDSK%5d.zip",
             //         "NEWDOS80.DSK", "newdos80-model3.dsk"),
 
-            // Download(false, Hardware.MODEL3, "Model III - NEWDOS/80",
+            // Download(false, MODEL3, "Model III - NEWDOS/80",
             //         "http://www.manmrk.net/tutorials/TRS80/Software/newdos/nd80v2d.zip",
             //         "nd80ira.dsk", "newdos80-model3.dsk"),
     )
@@ -70,7 +71,7 @@ object InitialDownloads {
      * A single item to download on first start-up.
      *
      * @property isROM whether the item is a ROM rather than a disk image.
-     * @property model the model this item is for. See [Hardware].
+     * @property model the model this item is for, one of the `MODEL*` constants.
      * @property configurationName the name of the configuration to create for a disk image.
      * @property url where to download the item from.
      * @property fileInZip the entry to extract, if the download is a ZIP file.

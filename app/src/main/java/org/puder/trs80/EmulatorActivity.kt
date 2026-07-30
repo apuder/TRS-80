@@ -16,6 +16,10 @@
 
 package org.puder.trs80
 
+import org.puder.trs80.configuration.getOrInit
+import org.puder.trs80.configuration.saveState
+import org.puder.trs80.configuration.saveScreenshot
+import org.puder.trs80.configuration.loadState
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.ActivityInfo
@@ -45,12 +49,12 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.snackbar.Snackbar
 import org.puder.trs80.cast.CastMessageSender
 import org.puder.trs80.cast.RemoteCastScreen
-import org.puder.trs80.configuration.Configuration
-import org.puder.trs80.configuration.ConfigurationManager
-import org.puder.trs80.configuration.EmulatorState
+import org.puder.trs80.shared.configuration.Configuration
+import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.EmulatorState
 import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.storage.AppStorage
-import org.puder.trs80.io.FileManager
+import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.keyboard.KeyboardManager
 import java.io.IOException
 
@@ -254,8 +258,8 @@ class EmulatorActivity : BaseActivity(), SensorEventListener, GameControllerList
      */
     private fun initEmulator(savedInstanceState: Bundle?, id: Int) {
         try {
-            emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get(resources))
-            val configManager = ConfigurationManager.get(applicationContext)
+            emulatorState = EmulatorState.forConfigId(id, FileManager.Creator.get())
+            val configManager = ConfigurationManager.getOrInit()
             val config = configManager.getConfigById(id)
             if (config == null) {
                 Log.e(TAG, "Configuration not found.")

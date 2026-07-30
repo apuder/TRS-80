@@ -16,7 +16,7 @@
 
 package org.puder.trs80.cast
 
-import org.puder.trs80.configuration.Configuration
+import org.puder.trs80.shared.configuration.Configuration
 import java.util.Locale
 
 private const val TYPE_START_SESSION = 1

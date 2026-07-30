@@ -21,6 +21,9 @@
 
 package org.puder.trs80
 
+import org.puder.trs80.storage.AppStorage
+import org.puder.trs80.configuration.getOrInit
+import org.puder.trs80.configuration.getSystemState
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -51,11 +54,11 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.puder.trs80.cast.CastMessageSender
-import org.puder.trs80.configuration.Configuration
-import org.puder.trs80.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.Configuration
+import org.puder.trs80.shared.configuration.ConfigurationManager
 import org.puder.trs80.drag.ConfigurationItemTouchHelperCallback
-import org.puder.trs80.io.FileManager
-import org.puder.trs80.localstore.RomManager
+import org.puder.trs80.shared.io.FileManager
+import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.storage.ImportResult
 import org.retrostore.android.RetrostoreActivity
 import org.retrostore.android.RetrostoreApi
@@ -125,10 +128,10 @@ class MainActivity : BaseActivity(), InitialSetupDialogFragment.DownloadCompleti
         drawer.setDrawerListener(toggle)
         findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
 
-        val fileManagerCreator = FileManager.Creator.get(resources)
+        val fileManagerCreator = FileManager.Creator.get()
         try {
-            configManager = ConfigurationManager.get(applicationContext)
-            romManager = RomManager.init(fileManagerCreator)
+            configManager = ConfigurationManager.getOrInit()
+            romManager = RomManager.init(fileManagerCreator, AppStorage.get().settings)
         } catch (e: IOException) {
             Log.e(TAG, "Cannot initialize RomManager / ConfigurationManager.", e)
             finish()
