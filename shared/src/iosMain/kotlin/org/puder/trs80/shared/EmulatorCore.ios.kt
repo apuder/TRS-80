@@ -33,6 +33,11 @@ import org.puder.trs80.core.trs80_config
 import org.puder.trs80.core.trs80_init
 import org.puder.trs80.core.trs80_is_expanded_mode
 import org.puder.trs80.core.trs80_reset
+import org.puder.trs80.core.TRS80_PIXEL_HEIGHT
+import org.puder.trs80.core.TRS80_PIXEL_WIDTH
+import org.puder.trs80.core.trs80_invalidate_render
+import org.puder.trs80.core.trs80_pixel_buffer
+import org.puder.trs80.core.trs80_render
 import org.puder.trs80.core.trs80_run
 import org.puder.trs80.core.trs80_screen_buffer
 import org.puder.trs80.core.trs80_set_running
@@ -59,6 +64,32 @@ object EmulatorCore {
     val screenBuffer: ScreenBuffer
         get() = NativeScreenBuffer(
             requireNotNull(trs80_screen_buffer()) { "The core has no screen buffer." }
+        )
+
+    /** The rasterized screen's dimensions, in pixels. */
+    val pixelWidth: Int get() = TRS80_PIXEL_WIDTH
+    val pixelHeight: Int get() = TRS80_PIXEL_HEIGHT
+
+    /**
+     * Rasterizes video RAM into the pixel buffer, redrawing only what changed.
+     *
+     * Must be called from the thread that reads [pixelBuffer], never from the one
+     * running [run].
+     *
+     * @return whether anything changed, so an unchanged screen costs no upload.
+     */
+    fun render(): Boolean = trs80_render() != 0
+
+    /** Makes the next [render] redraw the whole screen. */
+    fun invalidateRender() = trs80_invalidate_render()
+
+    /**
+     * The rasterized screen: one coverage byte per pixel, which the host tints
+     * and scales.
+     */
+    val pixelBuffer: ScreenBuffer
+        get() = NativeScreenBuffer(
+            requireNotNull(trs80_pixel_buffer()) { "The core has no pixel buffer." }
         )
 
     /**

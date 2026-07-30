@@ -30,6 +30,7 @@ import platform.posix.fopen
 import platform.posix.fwrite
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -93,6 +94,53 @@ class EmulatorCoreTest {
     }
 
     @Test
+    fun renderingProducesTheGlyphFromTheCharacterRom() = runBlocking {
+        val romPath = writeRom(SPIN_AT_VIDEO_RAM)
+        assertTrue(EmulatorCore.boot(model = 3, romPath = romPath), "The core refused to boot.")
+
+        val cpu = launch(Dispatchers.Default) { EmulatorCore.run() }
+        try {
+            withTimeout(RUN_TIMEOUT_MILLIS) {
+                while (EmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
+                    delay(POLL_INTERVAL_MILLIS)
+                }
+            }
+        } finally {
+            EmulatorCore.stop()
+            cpu.join()
+        }
+
+        assertTrue(EmulatorCore.render(), "Nothing was rasterized.")
+        assertEquals(512, EmulatorCore.pixelWidth)
+        assertEquals(192, EmulatorCore.pixelHeight)
+
+        // The top-left cell should now hold 'A' exactly as the Model III
+        // character generator ROM draws it, rather than merely being non-empty.
+        val actual = readCell(x = 0, y = 0)
+        assertEquals(A_GLYPH.joinToString("\n"), actual.joinToString("\n"))
+
+        // Nothing has changed since, so a second pass reports no work and the
+        // host can skip its upload.
+        assertFalse(EmulatorCore.render(), "An unchanged screen should report no change.")
+
+        // Invalidating forces a full redraw, which is what a reattached surface
+        // needs.
+        EmulatorCore.invalidateRender()
+        assertTrue(EmulatorCore.render(), "Invalidating should force a redraw.")
+    }
+
+    /** Reads one character cell out of the pixel buffer as rows of `#` and `.`. */
+    private fun readCell(x: Int, y: Int): List<String> {
+        val pixels = EmulatorCore.pixelBuffer
+        return (0 until CELL_HEIGHT).map { row ->
+            (0 until CELL_WIDTH).joinToString("") { col ->
+                val at = (y + row) * EmulatorCore.pixelWidth + x + col
+                if (pixels[at] != 0.toByte()) "#" else "."
+            }
+        }
+    }
+
+    @Test
     fun z80ExecutesAndWritesToVideoRam() = runBlocking {
         val romPath = writeRom(SPIN_AT_VIDEO_RAM)
         assertTrue(EmulatorCore.boot(model = 1, romPath = romPath), "The core refused to boot.")
@@ -153,5 +201,29 @@ class EmulatorCoreTest {
 
         const val RUN_TIMEOUT_MILLIS = 10_000L
         const val POLL_INTERVAL_MILLIS = 20L
+
+        /** One character cell, matching TRS80_CELL_WIDTH and TRS80_CELL_HEIGHT. */
+        const val CELL_WIDTH = 8
+        const val CELL_HEIGHT = 12
+
+        /**
+         * 'A' as the Model III character generator ROM stores it, transcribed
+         * from `trs_chars.c` CG 4. The last four rows are the leading between
+         * text lines and are always blank.
+         */
+        val A_GLYPH = listOf(
+            "...##...",
+            "..#..#..",
+            ".#....#.",
+            ".######.",
+            ".#....#.",
+            ".#....#.",
+            ".#....#.",
+            "........",
+            "........",
+            "........",
+            "........",
+            "........",
+        )
     }
 }

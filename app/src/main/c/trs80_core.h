@@ -23,6 +23,21 @@ extern "C" {
 /* Size of the shared character buffer; see trs80_screen_buffer(). */
 #define TRS80_SCREEN_BUFFER_SIZE 2048
 
+/* The emulated screen, in character cells. */
+#define TRS80_SCREEN_COLS 64
+#define TRS80_SCREEN_ROWS 16
+
+/*
+ * One character cell at the character ROM's own resolution. The glyphs occupy
+ * the top eight rows; the remaining four are the leading between text lines.
+ */
+#define TRS80_CELL_WIDTH  8
+#define TRS80_CELL_HEIGHT 12
+
+/* The rasterized screen; see trs80_pixel_buffer(). */
+#define TRS80_PIXEL_WIDTH  (TRS80_SCREEN_COLS * TRS80_CELL_WIDTH)
+#define TRS80_PIXEL_HEIGHT (TRS80_SCREEN_ROWS * TRS80_CELL_HEIGHT)
+
 /* Key event kinds accepted by trs80_add_key_event(), matching SDL 1.2. */
 #define TRS80_KEY_DOWN 2
 #define TRS80_KEY_UP   3
@@ -65,6 +80,40 @@ int trs80_init(const trs80_config *config);
  * The pointer is valid for the lifetime of the process.
  */
 unsigned char *trs80_screen_buffer(void);
+
+/*
+ * The rasterized screen: one byte of coverage per pixel, 0 for background and
+ * 255 for foreground, row-major with TRS80_PIXEL_WIDTH bytes per row. The host
+ * tints and scales it, so the emulated picture keeps its exact pixel geometry
+ * however large it is drawn.
+ *
+ * Only ever written by trs80_render(). The pointer is valid for the lifetime of
+ * the process.
+ */
+unsigned char *trs80_pixel_buffer(void);
+
+/*
+ * Rasterizes whatever the emulated machine currently has in video RAM into
+ * trs80_pixel_buffer(), redrawing only the cells that changed.
+ *
+ * Call this from the thread that reads the pixel buffer, and never from the
+ * thread running trs80_run(). It snapshots video RAM before rasterizing, so the
+ * only contention with the CPU thread is that copy - which can see a cell
+ * mid-change, exactly as reading trs80_screen_buffer() always could, and never
+ * a half-drawn character. Rasterizing on the CPU thread would both invert that
+ * property and steal time from the guest, which shows up as input latency.
+ *
+ * @return 1 if any pixels changed, 0 if the screen is identical to last time,
+ * in which case the host can skip its upload entirely.
+ */
+int trs80_render(void);
+
+/*
+ * Discards what trs80_render() believes is already on screen, so the next call
+ * redraws everything. Needed after anything that invalidates the host's copy,
+ * such as reattaching a surface.
+ */
+void trs80_invalidate_render(void);
 
 /*
  * Run the CPU. Blocks until trs80_set_running(0) is called from another

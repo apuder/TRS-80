@@ -28,6 +28,7 @@ add_compile_definitions(TRS80_EMBEDDED)
 # The platform-neutral core. No JNI, no Android headers, no audio backend.
 set(TRS80_CORE_SOURCES
         trs80_core.c
+        trs80_render.c
         blit.c
         trs_chars.c
         trs_printer.c
