@@ -11,6 +11,10 @@ buildscript {
         // Needed only by the :shared KMP module. The app and retrostore modules
         // use AGP's built-in Kotlin, which rejects the kotlin-android plugin.
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10'
+        // Compose Multiplatform, for the shared UI. The compiler plugin ships
+        // with Kotlin, so its version tracks Kotlin's rather than Compose's.
+        classpath 'org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.2.10'
+        classpath 'org.jetbrains.compose:compose-gradle-plugin:1.9.3'
         classpath 'com.google.gms:google-services:4.3.15'
         
 

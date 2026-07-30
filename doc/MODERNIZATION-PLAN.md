@@ -157,13 +157,18 @@ window is the binding constraint, not AGP's newest release.
 |---|---|---|---|
 | Gradle | 8.13 | **9.5.0** | Kotlin 2.4's maximum; satisfies AGP 9.x |
 | AGP | 8.13.2 | **9.1.0** | Kotlin 2.4's maximum — *not* 9.3.0 |
-| Kotlin | — | **2.4.0** | Latest stable (22 July 2026) |
-| Compose Multiplatform | — | **1.11.1** | Needs Kotlin ≥ 2.1; tracks latest Kotlin |
+| Kotlin | — | **2.2.10** | AGP 9.1's built-in; AGP rejects any other for KMP |
+| Compose Multiplatform | — | **1.9.3** | Highest that pairs with Kotlin 2.2.10 (below) |
 | JDK | 17 (CI) / 21 (pin) | **21 everywhere** | LTS, above AGP's minimum of 17 |
 
 Sources: [AGP releases](https://developer.android.com/build/releases/gradle-plugin),
 [KMP compatibility guide](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html),
 [CMP compatibility](https://kotlinlang.org/docs/multiplatform/compose-compatibility-and-versioning.html).
+
+*What actually landed:* Kotlin 2.2.10, not 2.4.0. AGP 9 supplies its own Kotlin and rejects a second
+Kotlin plugin alongside `com.android.kotlin.multiplatform.library`, so the KMP module has to use the
+one AGP ships — which pins Compose Multiplatform to 1.9.3 in turn. The reasoning above still holds;
+the binding constraint simply turned out to be tighter than it looked from the version tables.
 
 **Fix the JDK ambiguity first.** There are currently three answers in three places: CI provisions
 Temurin 17, `gradle/gradle-daemon-jvm.properties` demands JetBrains JDK 21, and Gradle papers over
@@ -207,7 +212,7 @@ across modules and source sets gets unpleasant without one.
 1. **Fix the JDK ambiguity** (§4.2). Isolated, low risk.
 2. **Migrate to real AndroidX**, drop jetifier, flip the R-class flags.
 3. **Then** AGP → 9.1.0 and Gradle → 9.5.0.
-4. **Then** Kotlin 2.4.0 and the Java→Kotlin conversion.
+4. **Then** the newest Kotlin AGP will accept, and the Java→Kotlin conversion.
 
 Step 2 must come **before** step 3. The AndroidX migration is the riskiest change here, and you want
 a working, testable app between "new libraries" and "new build system" rather than both failing at
@@ -296,10 +301,10 @@ in §8.
 
 ---
 
-## 6. Phase 2 — The renderer ✅ ANDROID DONE
+## 6. Phase 2 — The renderer ✅ DONE
 
 *Ships on Android. No redesign — the new renderer draws into the app exactly as it looked before,
-only from a different source.*
+only from a different source. The same mask now also draws on iOS, through Compose Multiplatform.*
 
 Why this is its own phase, ahead of the redesign, is unchanged: the emulator surface is the only part
 of the UI whose geometry comes from the hardware rather than a designer, and the only part whose
@@ -328,8 +333,20 @@ and it was already there.
    array, and the `Bitmap`/`Canvas`/`Paint`/`Typeface` work behind them. What remains is the
    arithmetic deciding cell size, which is what the core is now told.
 
-Still to do: **draw the same mask on iOS.** `EmulatorCore.render()` and `pixelBuffer` exist and are
-covered by §5's tests; nothing consumes them yet, and that needs Compose Multiplatform in the build.
+6. ✅ **The iOS host** draws the same mask, through Compose Multiplatform. `EmulatorScreen` in
+   `commonMain` is the whole renderer UI: it samples the machine on Compose's frame clock, skips a
+   frame entirely when the core reports nothing changed, and blits one image. What is
+   platform-specific is only `EmulatorScreenSource` — the copy into a Skia `Bitmap` on iOS, and an
+   `android.graphics.Bitmap` on Android — because turning a byte buffer into something the graphics
+   stack will draw is where the two genuinely differ. Both hold the mask alpha-only and tint it at
+   draw time; neither rasterizes.
+7. ✅ **The cell-size arithmetic moved to `commonMain`** (`fitCellSize`), since it is the one piece
+   of layout the core has to be told and both hosts need the same answer. `Hardware` now delegates
+   to it.
+
+Android still drives its own render thread rather than `EmulatorScreen`; it moves across in Phase 3,
+when the surrounding UI does. The composable is written and proven now so that the redesign inherits
+a renderer rather than starting one.
 
 ### 6.2 Three things that were only learned by measuring
 
@@ -352,6 +369,20 @@ merely differ from the old bug — coverage is thresholded at a half rather than
 which is what font hinting does and what makes every stem the same width; and it is computed in
 integer arithmetic, because at 1.75× a stem's edge pixel is covered *exactly* half and floating point
 put that either side of the threshold depending on the glyph.
+
+**Two Compose mistakes, both silent.** `mutableIntStateOf` without `remember` gives every
+recomposition a fresh counter, so the one the frame loop increments is never the one the canvas
+reads — it compiles, runs, and simply never redraws. And `Bitmap().apply { allocPixels(ImageInfo(width,
+height, ...)) }` resolves `width` and `height` to the *bitmap's* own, which are zero until it is
+allocated: `installPixels` then returns `true` on a 0×0 bitmap and nothing draws. Both presented
+identically — a blank screen with the emulator demonstrably running — and neither was findable
+without printing what the draw path actually saw.
+
+**Skia does tint an alpha-only image.** The blank screen above was first blamed on that, and the mask
+was expanded to full colour through a palette to work around it. It was not the cause: with the real
+bugs fixed, `ColorFilter.tint` over an `ALPHA_8` bitmap works exactly as it does on Android, and the
+expansion — 98 KB to 393 KB per frame, on the main thread — was pure waste. Worth remembering as the
+general shape of the error: a plausible mechanism, adopted before the actual one was located.
 
 **The block graphics needed the same treatment separately.** They are not glyphs, so fixing the glyph
 path left them scaled and uneven — six, seven or eight pixels for what should be half a cell. They

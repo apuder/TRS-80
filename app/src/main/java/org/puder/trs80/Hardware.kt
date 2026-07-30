@@ -19,6 +19,10 @@ package org.puder.trs80
 import android.graphics.Rect
 import org.puder.trs80.configuration.Configuration
 import org.puder.trs80.shared.CellMetrics
+import org.puder.trs80.shared.SCREEN_ASPECT_RATIO
+import org.puder.trs80.shared.SCREEN_COLUMNS
+import org.puder.trs80.shared.SCREEN_ROWS
+import org.puder.trs80.shared.fitCellSize
 import org.puder.trs80.shared.KeyboardLayout
 
 /** The largest a key "box" may get, in dp. */
@@ -26,10 +30,6 @@ private const val MAX_KEY_BOX_SIZE_DP = 55f
 
 /** Increment used when searching for the font size that fills a character cell. */
 private const val FONT_SIZE_DELTA = 0.1f
-
-private const val SCREEN_COLS = 64
-private const val SCREEN_ROWS = 16
-private const val SCREEN_ASPECT_RATIO = 3f
 
 /** Character codes in this range are pseudo-graphics, drawn by hand. */
 
@@ -95,7 +95,7 @@ class Hardware(private val configuration: Configuration) {
      */
     internal val screenConfiguration: ScreenConfiguration
         get() = when (model) {
-            MODEL1, MODEL3 -> ScreenConfiguration(SCREEN_COLS, SCREEN_ROWS, SCREEN_ASPECT_RATIO)
+            MODEL1, MODEL3 -> ScreenConfiguration(SCREEN_COLUMNS, SCREEN_ROWS, SCREEN_ASPECT_RATIO)
             else -> throw IllegalArgumentException("No screen configuration for model $model")
         }
 
@@ -125,30 +125,17 @@ class Hardware(private val configuration: Configuration) {
      */
     fun computeScreenDimensions(rect: Rect) {
         val screenConfig = screenConfiguration
-        val contentHeight = rect.bottom - rect.top
-        val contentWidth = rect.right
-        if (contentWidth / screenConfig.trsScreenCols * screenConfig.aspectRatio >
-            contentHeight / screenConfig.trsScreenRows
-        ) {
-            // Screen height is not sufficient to let the TRS80 screen span the whole width.
-            charHeight = contentHeight / screenConfig.trsScreenRows
-            // Make sure charHeight is divisible by 3.
-            while (charHeight % 3 != 0) {
-                charHeight--
-            }
-            screenHeight = charHeight * screenConfig.trsScreenRows
-            charWidth = (charHeight / screenConfig.aspectRatio).toInt()
-            screenWidth = charWidth * screenConfig.trsScreenCols
-        } else {
-            // Screen width is not sufficient to let the TRS80 screen span the whole height.
-            charWidth = contentWidth / screenConfig.trsScreenCols
-            while (charWidth % 2 != 0) {
-                charWidth--
-            }
-            screenWidth = charWidth * screenConfig.trsScreenCols
-            charHeight = (charWidth * screenConfig.aspectRatio).toInt()
-            screenHeight = charHeight * screenConfig.trsScreenRows
-        }
+        val metrics = fitCellSize(
+            availableWidth = rect.right,
+            availableHeight = rect.bottom - rect.top,
+            columns = screenConfig.trsScreenCols,
+            rows = screenConfig.trsScreenRows,
+            aspectRatio = screenConfig.aspectRatio,
+        )
+        charWidth = metrics.cellWidth
+        charHeight = metrics.cellHeight
+        screenWidth = metrics.cellWidth * metrics.columns
+        screenHeight = metrics.cellHeight * metrics.rows
     }
 
 

@@ -42,3 +42,6 @@ local_db.bin
 
 app/src/release
 app/src/debug
+
+# Kotlin build-session scratch, written by the Kotlin Gradle plugin.
+.kotlin/
