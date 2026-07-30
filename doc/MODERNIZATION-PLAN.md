@@ -2,8 +2,11 @@
 
 **Decision:** Kotlin Multiplatform with Compose Multiplatform for shared UI, keeping the existing C
 emulator core. Android ships continuously throughout. iOS is *proven* early with a throwaway spike
-(§5) and *shipped* last, so its unknowns are answered before anything is built on top of them. The UI
-is fully redesigned as part of the work, not ported.
+(§5) and *shipped* last, so its **technical** unknowns are answered before anything is built on top of
+them. The one unknown that cannot be retired early is App Store policy (§10) — App Review does not
+rule on apps that do not exist yet — so that risk is carried deliberately, and every phase before
+submission pays for itself on Android alone. The UI is fully redesigned as part of the work, not
+ported.
 
 This document says what has to happen, in what order, and what has to be decided along the way.
 It is grounded in an audit of the current code — see `doc/UI-SPEC.md` for the UI inventory.
@@ -216,21 +219,28 @@ CI on every push.* Migrated so far:
 - ✅ `DirtyRect`, plus the `ScreenBuffer` and `CellMetrics` types extracted to free it of
   `android.graphics.Rect`, `java.nio.ByteBuffer` and `Hardware`
 
-Still to move:
+Also done, though not a move: `EmulatorCore` and `NativeScreenBuffer` in `iosMain` (§5), which give
+the `ScreenBuffer` interface its second implementation and prove the abstraction holds.
 
-- `Hardware`'s cell-metric arithmetic — the seam already exists as `Hardware.cellMetrics`; the glyph
-  rasterization (Bitmap/Canvas/Paint) is replaced outright by the Phase 2 renderer (§6)
-- `KeyboardManager`'s mapping tables and the keymap currently in `res/xml/keymap_us.xml`
-- `Configuration`, `ConfigurationManager`, `ConfigurationPersistence`, `ConfigurationBackup`,
-  `ConfigurationImpl`, `EmulatorState`, `RomManager`, `FileManager` — **all blocked on D8**, which is
-  the next thing to settle
+Still to move, and this is all that is left of Phase 1:
+
+- **1d** — `Configuration`, `ConfigurationManager`, `ConfigurationPersistence`,
+  `ConfigurationBackup`, `ConfigurationImpl`, `EmulatorState`, `RomManager`, `FileManager`. **All
+  blocked on D8**, which is why the store and its migration are the whole of 1d: one decision
+  releases eight classes.
+- **1e** — `KeyboardManager`'s mapping tables and the keymap currently in `res/xml/keymap_us.xml`.
+  Small, and *not* blocked on storage, so it can go before, after or alongside 1d.
+
+`Hardware` is no longer listed here: its cell-metric arithmetic moves as part of the Phase 2 renderer
+(§6), since the glyph rasterization it is tangled with is replaced there outright. Splitting it twice
+would be wasted work.
 
 **Done when:** the Android app runs entirely on `shared/`, still ships, and `commonMain` has no
 Android imports.
 
 ---
 
-## 5. Phase 1c — Prove iOS end to end (the spike) ✅ MOSTLY DONE
+## 5. Phase 1c — Prove iOS end to end (the spike) ✅ DONE
 
 *Runs in parallel with 1d. Does not ship. Wholly throwaway — nothing here is an artifact we keep.*
 
@@ -267,14 +277,16 @@ otherwise have made an iOS build silently take the SDL rendering paths.
    covering the CMake build, cinterop, linking and execution in one step. A synthetic Z80 program
    is assembled in the test and run, so the CPU is proven to execute and to reach video RAM without
    bundling a copyrighted ROM or touching the network.
-5. **Ask Apple.** See §10: policy is now the *only* remaining App Store unknown, and answering it
-   costs nothing at this stage. **Outstanding, and not a code task.**
-
-**Done when:** the emulator core demonstrably executes on iOS under CI, and the App Store question
-has an answer.
+**Done when:** the emulator core demonstrably executes on iOS under CI. ✅
 
 Note what this phase deliberately does *not* prove: that anything is drawn. Seeing the screen needs
 the renderer, which is §6.
+
+Nor does it settle App Store policy. An earlier draft of this plan put "ask Apple" here on the
+argument that it was the cheapest moment to find a blocker. That argument does not survive contact
+with how App Review works: Apple does not issue advisory rulings on hypothetical apps, so the
+question cannot actually be answered until there is something to submit. It belongs with submission,
+in §8.
 
 ---
 
@@ -384,8 +396,8 @@ The core build, cinterop and the audio sink are done by §5, and the renderer by
    `java.util.zip.ZipInputStream`) and has to move to Ktor plus okio. The RetroStore client is
    already multiplatform-ready (D7).
 4. **Native document picking**, per D3.
-5. **App Store submission** proper — signing, review, metadata. The policy question was already
-   answered in Phase 1c.
+5. **App Store submission** — signing, metadata, and review. This is where the policy question in
+   §10 finally gets an answer, because it is the first point at which there is an app to ask about.
 
 **Done when:** the iOS app is installable and does everything the Android app does.
 
@@ -561,10 +573,16 @@ on design work.
 emulator and discover late that content acquisition did not exist on iOS. Pulled forward and done —
 see D7. `FileDownloader` is the remaining JVM-only piece of content acquisition (§8 item 3).
 
-**App Store review** — now the *only* remaining App Store unknown, and it is policy, not code.
-Apple has allowed retro *console* emulators since 2024; a home-computer emulator is adjacent but not
-squarely covered. **Answer it in Phase 1c**, before any iOS UI exists — that is the cheapest possible
-moment to discover a blocker.
+**App Store review** — the *only* remaining App Store unknown, and it is policy, not code. Apple has
+allowed retro *console* emulators since 2024; a home-computer emulator is adjacent but not squarely
+covered.
+
+This is the one risk in this plan with **no cheap early mitigation**, and it is worth being honest
+about that rather than pretending otherwise. An earlier draft scheduled "ask Apple" into Phase 1c on
+the grounds that finding a blocker early is cheapest. But App Review does not rule on apps that do
+not exist yet, so there is nothing to ask until §8. The risk is therefore carried, not retired — and
+the mitigation is structural instead: every phase before §8 pays for itself on Android alone, so a
+rejection costs the iOS host app and the iOS storage `actual`s, not the modernization.
 
 *Correction:* earlier versions of this plan also listed cleartext HTTP tripping App Transport
 Security. **That is no longer true.** Retiring the JVM SDK (D7) replaced the raw-socket client with
@@ -605,8 +623,9 @@ must resolve before Phase 2 can start in earnest:
 | 0 ✅ | Clean C API, kill dead code, drop protobuf runtime | Android | No |
 | 1a ✅ | JDK fix → AndroidX → AGP 9.1 / Gradle 9.5 → Kotlin 2.4 (§4.2–4.4) | Android | No |
 | 1b ✅ | Java→Kotlin, KMP skeleton, RetroStore client in `commonMain` (D7) | Android | No |
-| 1c | **iOS spike**: core for iOS ✅, cinterop ✅, audio ✅, CI ✅ — ask Apple outstanding (§5) | No | No |
+| 1c ✅ | **iOS spike**: core for iOS, cinterop, audio, Z80 running in CI (§5) | No | No |
 | 1d | Storage: `androidx.preference` ✅ → namespaced store + migration (D8) | Android | No |
+| 1e | `KeyboardManager`'s mapping tables into `commonMain` — small, unblocked | Android | No |
 | 2 | **The renderer** in `commonMain`, replacing `RenderThread` (§6) | Android | Barely — same look, new engine |
 | 3 | Redesigned shell, keyboards, landscape (§7) | Android, incrementally | **Yes — the redesign** |
 | 4 | iOS host app, iOS storage, `FileDownloader`, submission (§8) | iOS beta | Yes — new platform |
