@@ -302,7 +302,15 @@ void trs80_rewind_cassette(void)
 
 float trs80_cassette_position(void)
 {
-    return (float) trs_get_cassette_position() / (float) trs_get_cassette_length();
+    /* An empty or absent tape has no length, and 0/0 is NaN. Hosts persist this
+     * value, so returning NaN put it in the stored configuration, where it read
+     * as "not rewound" to anything that compares it with anything other than
+     * ">". Report the tape as rewound instead, which is what it is. */
+    int length = trs_get_cassette_length();
+    if (length <= 0) {
+        return 0.0f;
+    }
+    return (float) trs_get_cassette_position() / (float) length;
 }
 
 void trs80_set_sound_muted(int muted)
