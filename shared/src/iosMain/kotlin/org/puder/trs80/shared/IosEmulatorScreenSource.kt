@@ -40,6 +40,8 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
 
     private var bitmap = Bitmap()
     private var image: ImageBitmap? = null
+    /** Reused every frame; see [EmulatorCore.copyPixelsInto]. */
+    private var pixels = ByteArray(0)
     private var cellWidth = 0
     private var cellHeight = 0
 
@@ -73,6 +75,7 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
         // to the bitmap's own, which are zero until it has been allocated.
         bitmap = Bitmap()
         bitmap.allocPixels(ImageInfo(width, height, ColorType.ALPHA_8, ColorAlphaType.PREMUL))
+        pixels = ByteArray(width * height)
         image = null
         EmulatorCore.invalidateRender()
     }
@@ -86,7 +89,8 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
         if (!EmulatorCore.render()) {
             return false
         }
-        bitmap.installPixels(EmulatorCore.pixelBytes())
+        EmulatorCore.copyPixelsInto(pixels)
+        bitmap.installPixels(pixels)
         image = bitmap.asComposeImageBitmap()
         return true
     }

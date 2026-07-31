@@ -35,7 +35,10 @@ import org.puder.trs80.core.trs80_is_expanded_mode
 import org.puder.trs80.core.trs80_reset
 import org.puder.trs80.core.TRS80_CELL_HEIGHT
 import org.puder.trs80.core.TRS80_CELL_WIDTH
-import kotlinx.cinterop.readBytes
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.convert
+import kotlinx.cinterop.usePinned
+import platform.posix.memcpy
 import org.puder.trs80.core.trs80_invalidate_render
 import org.puder.trs80.core.trs80_pixel_buffer
 import org.puder.trs80.core.trs80_pixel_height
@@ -89,15 +92,22 @@ object EmulatorCore {
     fun setCellSize(width: Int, height: Int) = trs80_set_cell_size(width, height)
 
     /**
-     * The rasterized screen as bytes, for handing to a bitmap.
+     * Copies the rasterized screen into [destination], which must be at least
+     * [pixelWidth] * [pixelHeight] bytes.
      *
-     * This copies, unlike [pixelBuffer], because the graphics stack wants its own
-     * storage. It is one memcpy of the mask per drawn frame, which measured at
-     * 0.05 ms on Android for the same data.
+     * Takes a buffer rather than returning one, because the caller draws every
+     * frame and the mask is about a megabyte at a phone's screen size: returning
+     * a fresh array made a megabyte of garbage per frame, which measured at 75%
+     * of the process's CPU time. The copy itself is not the expensive part.
      */
-    fun pixelBytes(): ByteArray =
-        requireNotNull(trs80_pixel_buffer()) { "The core has no pixel buffer." }
-            .readBytes(pixelWidth * pixelHeight)
+    fun copyPixelsInto(destination: ByteArray) {
+        val source = requireNotNull(trs80_pixel_buffer()) { "The core has no pixel buffer." }
+        val bytes = pixelWidth * pixelHeight
+        require(destination.size >= bytes) {
+            "Destination holds ${destination.size} bytes, need $bytes."
+        }
+        destination.usePinned { memcpy(it.addressOf(0), source, bytes.convert()) }
+    }
 
     /**
      * Rasterizes video RAM into the pixel buffer, redrawing only what changed.

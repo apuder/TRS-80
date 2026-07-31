@@ -503,7 +503,20 @@ happened:
 | `GameController` | Android `InputDevice`. iOS has GameController.framework; a later job |
 | `Tutorial` | Rebuild against the redesigned UI rather than the current one |
 
-### 7.4 Finish the storage rework
+### 7.4 Stop storing absolute paths
+
+Configurations store the *absolute* path of every disk, cassette and ROM. That works on Android,
+where `filesDir` never moves. It does not work on iOS: the app's data container is a UUID that
+changes when the app is reinstalled, and Apple's guidance is explicitly not to persist paths into
+it. The symptom is a configuration that survives with every value intact and every file gone — the
+spike showed "You do not have a ROM image installed for Model 3" after a reinstall, with the ROM
+sitting right there under a different container.
+
+Store paths relative to `appDataDirectory()` and resolve them on read. The legacy Android data holds
+absolute paths, so the import (D8) has to translate them, and a path that is already relative has to
+stay relative — which is the usual reason to do this once, deliberately, rather than per screen.
+
+### 7.5 Finish the storage rework
 
 `FileBrowserActivity` walks `Environment.getExternalStorageDirectory()`, which is fragile under
 scoped storage and has no iOS equivalent. Delete it in favour of **platform document pickers** (D3),
