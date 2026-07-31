@@ -19,6 +19,7 @@ package org.puder.trs80
 import android.util.Log
 import org.puder.trs80.shared.configuration.Configuration
 import org.puder.trs80.shared.configuration.EmulatorState
+import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.ScreenBuffer
 import java.nio.ByteBuffer
 
@@ -69,14 +70,10 @@ object XTRS {
     @JvmStatic
     fun init(configuration: Configuration, emulatorState: EmulatorState): Int {
         val model = configuration.model
-        val romFile = when (model) {
-            Hardware.MODEL1 -> SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL1)
-            Hardware.MODEL3 -> SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL3)
-            Hardware.MODEL4 -> SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4)
-            Hardware.MODEL4P -> SettingsActivity.getSetting(SettingsActivity.CONF_ROM_MODEL4P)
-            // TODO return -1?
-            else -> null
-        }
+        // Through RomManager, which resolves what is stored -- ROM paths are now
+        // kept relative to the app's own directory. Reading the setting raw
+        // would give the stored form, not a path.
+        val romFile = RomManager.get().romPath(model)
 
         return initNative(
             model,

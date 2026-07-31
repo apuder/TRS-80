@@ -23,6 +23,8 @@ import org.puder.trs80.shared.MODEL1
 import org.puder.trs80.shared.MODEL3
 import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.appFileSystem
+import org.puder.trs80.shared.io.resolveStoredPath
+import org.puder.trs80.shared.io.toStoredPath
 import org.puder.trs80.shared.storage.StorageKeys
 
 /**
@@ -45,9 +47,16 @@ class RomManager private constructor(
      * @return Whether the file was successfully added.
      */
     fun addRom(model: Int, filename: String, content: ByteArray): Boolean {
-        settings.putString(StorageKeys.romKey(model), fileManager.getAbsolutePathForFile(filename))
+        settings.putString(
+            StorageKeys.romKey(model),
+            toStoredPath(fileManager.getAbsolutePathForFile(filename)),
+        )
         return fileManager.writeFile(filename, content)
     }
+
+    /** @return the absolute path of the ROM for [model], or null if there is none. */
+    fun romPath(model: Int): String? =
+        settings.getStringOrNull(StorageKeys.romKey(model))?.let(::resolveStoredPath)
 
     /** @return Whether the ROMs for both model I and model III are present. */
     fun hasAllRoms(): Boolean = hasRom(MODEL1) && hasRom(MODEL3)
@@ -57,12 +66,11 @@ class RomManager private constructor(
      * stale entry is removed so the next download replaces it.
      */
     private fun hasRom(model: Int): Boolean {
-        val key = StorageKeys.romKey(model)
-        val filename = settings.getStringOrNull(key) ?: return false
+        val filename = romPath(model) ?: return false
         if (appFileSystem.exists(filename.toPath())) {
             return true
         }
-        settings.remove(key)
+        settings.remove(StorageKeys.romKey(model))
         return false
     }
 

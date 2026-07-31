@@ -67,13 +67,14 @@ fun rememberNavigator(root: Destination = Destination.ConfigurationList): Naviga
 /**
  * The whole app: whatever the navigator's stack says should be on screen.
  *
- * Only the emulator exists so far. The rest of the screens arrive one at a time
- * (§7.2) and each is a line here — which is the point of having done the
+ * The configuration list and the emulator exist so far. The rest arrive one at a
+ * time (§7.2) and each is a line here — which is the point of having done the
  * navigation first.
  */
 @Composable
 fun Trs80App(
     navigator: Navigator,
+    configurationList: @Composable () -> Unit,
     emulator: @Composable (Destination.Emulator) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -82,6 +83,7 @@ fun Trs80App(
         onBack = { navigator.goBack() },
         modifier = modifier,
         entryProvider = entryProvider {
+            entry<Destination.ConfigurationList> { configurationList() }
             entry<Destination.Emulator> { emulator(it) }
         },
     )

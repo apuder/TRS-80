@@ -18,6 +18,8 @@ package org.puder.trs80.shared.configuration
 
 import com.russhwolf.settings.Settings
 import org.puder.trs80.shared.KeyboardLayout
+import org.puder.trs80.shared.io.resolveStoredPath
+import org.puder.trs80.shared.io.toStoredPath
 import org.puder.trs80.shared.storage.StorageKeys
 
 private const val CONF_NAME = StorageKeys.CONFIG_NAME
@@ -65,22 +67,23 @@ class ConfigurationPersistence private constructor(
 
     internal fun setModel(model: String?) = setStringOrRemove(CONF_MODEL, model)
 
-    /** The stored path of the cassette image, or null if none is stored. */
+    /** The path of the cassette image, or null if none is stored. */
     val casettePath: String?
-        get() = settings.getStringOrNull(key(CONF_CASSETTE))
+        get() = settings.getStringOrNull(key(CONF_CASSETTE))?.let(::resolveStoredPath)
 
-    fun setCasettePath(path: String?) = setStringOrRemove(CONF_CASSETTE, path)
+    fun setCasettePath(path: String?) =
+        setStringOrRemove(CONF_CASSETTE, path?.let(::toStoredPath))
 
     /**
      * @param disk the zero-based index of the disk drive.
      * @return The stored path of the image in that drive, or null if there is none.
      */
     fun getDiskPath(disk: Int): String? =
-        diskIdToKey(disk)?.let { settings.getStringOrNull(key(it)) }
+        diskIdToKey(disk)?.let { settings.getStringOrNull(key(it)) }?.let(::resolveStoredPath)
 
     fun setDiskPath(disk: Int, path: String?) {
         val key = diskIdToKey(disk) ?: return
-        setStringOrRemove(key, path)
+        setStringOrRemove(key, path?.let(::toStoredPath))
     }
 
     fun getCharacterColor(defaultValue: Int): Int = getInt(CONF_CHARACTER_COLOR, defaultValue)

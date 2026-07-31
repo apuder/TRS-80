@@ -485,6 +485,17 @@ with the shared ZIP and error handling unchanged either way.
 Configuration list, configuration editor, settings, disk creation, onboarding, and the scaffolding
 around the emulator surface §6 already draws.
 
+**The configuration list is ported**, and is what the iOS app now opens on: the cards, their two
+faces, the details and the actions, reading the shared domain and drawing the saved screenshot. The
+3D flip is gone — it was Android view animation with no multiplatform equivalent, and the spec
+replaces the flip card anyway — so turning a card over is a crossfade, which keeps the behaviour
+without inventing the design that replaces it. Actions the app cannot yet perform are not drawn at
+all rather than drawn dead, so the list grows buttons as the screens behind them land.
+
+`EmulatorScaffold` is the scaffolding around the emulator surface: a title and a way out. iOS needs
+it more than Android, which at least has a system Back — without it the emulator is a place the app
+can go and never leave.
+
 **Navigation 3 is in and proven on both platforms**, which was the first step and the one worth
 doing first. `Trs80App` renders the navigator's stack through a `NavDisplay`; `rememberNavigator`
 hands the stack to Nav3 so it survives the app being put away. The iOS spike now reaches the
@@ -525,7 +536,7 @@ happened:
 | `GameController` | Android `InputDevice`. iOS has GameController.framework; a later job |
 | `Tutorial` | Rebuild against the redesigned UI rather than the current one |
 
-### 7.4 Stop storing absolute paths
+### 7.4 Stop storing absolute paths ✅ DONE
 
 Configurations store the *absolute* path of every disk, cassette and ROM. That works on Android,
 where `filesDir` never moves. It does not work on iOS: the app's data container is a UUID that
@@ -534,9 +545,12 @@ it. The symptom is a configuration that survives with every value intact and eve
 spike showed "You do not have a ROM image installed for Model 3" after a reinstall, with the ROM
 sitting right there under a different container.
 
-Store paths relative to `appDataDirectory()` and resolve them on read. The legacy Android data holds
-absolute paths, so the import (D8) has to translate them, and a path that is already relative has to
-stay relative — which is the usual reason to do this once, deliberately, rather than per screen.
+Done. Paths inside the app's own directory are stored relative to it and made absolute again on the
+way out, in `ConfigurationPersistence` and `RomManager` — one seam, so nothing above them changed. A
+stored path that is already absolute is passed through untouched, which is what every configuration
+written before this holds and what keeps Android working; those are rewritten as relative the next
+time they are set. Verified by reinstalling the iOS app into a fresh container and booting the same
+configuration.
 
 ### 7.5 Finish the storage rework
 

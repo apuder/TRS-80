@@ -16,15 +16,25 @@
 
 package org.puder.trs80.shared
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
-import org.puder.trs80.shared.configuration.Configuration
 import org.puder.trs80.shared.configuration.ConfigurationManager
 import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.TRS80_DIRECTORY
@@ -34,8 +44,12 @@ import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.navigation.Destination
 import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
-import org.puder.trs80.shared.storage.StorageKeys
 import org.puder.trs80.shared.storage.appSettings
+import org.puder.trs80.shared.ui.ConfigurationCard
+import org.puder.trs80.shared.ui.ConfigurationListActions
+import org.puder.trs80.shared.ui.ConfigurationListScreen
+import org.puder.trs80.shared.ui.EmulatorScaffold
+import org.puder.trs80.shared.ui.toCards
 import platform.UIKit.UIViewController
 
 private const val TAG = "IosApp"
@@ -45,80 +59,120 @@ private val CHARACTER_COLOR = Color(0xFF77FB4D)
 private val SCREEN_COLOR = Color(0xFF444444)
 
 /**
- * The iOS entry point: a view controller showing the emulated screen.
+ * The iOS app: the configuration list, and a machine when one is running.
  *
- * Still a spike — there is no configuration list, no settings and no input, all
- * of which belong to the port proper. What it does do is run the *real* domain:
- * the ROM and disk are installed through [RomManager] and [ConfigurationManager]
- * into the app's own directory, and the machine boots from what those hand back.
- * That is the point of it at this stage. It exercises NSUserDefaults behind
- * `appSettings()`, the sandbox's Documents directory behind `appDataDirectory()`,
- * and okio underneath both, on the device rather than in a test.
+ * Still short of the Android app — there is no editor, no settings and no
+ * RetroStore, and those arrive as the rest of §7.2 lands. What it is no longer
+ * is a hard-coded jump into the emulator: it runs the shared domain, draws the
+ * shared list and navigates with the shared navigator, so everything it shows is
+ * code Android will run too.
  *
- * @param romPath a Model III ROM image and [diskPath] a disk, both inside the
- * app bundle, which is read-only — hence the copy into the app's own directory
- * on first run.
+ * @param romPath a Model III ROM image and [diskPath] a disk, both in the app
+ * bundle, seeded into the app's own storage on first run.
  */
-@OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class)
-fun EmulatorViewController(romPath: String, diskPath: String?): UIViewController {
-    val source = IosEmulatorScreenSource()
-    val configuration = installIfNeeded(romPath, diskPath)
-
-    EmulatorCore.boot(
-        model = configuration.model,
-        romPath = requireNotNull(romPathFor(configuration.model)) {
-            "No ROM stored for model ${configuration.model}."
-        },
-        diskPaths = configuration.diskPaths.filterNotNull(),
-    )
-    // A thread of its very own, not Dispatchers.Default. trs80_run() does not
-    // return until the machine is stopped, so on a shared pool it permanently
-    // occupies one of a handful of threads -- on Darwin that pool is a global
-    // dispatch queue, and taking a worker out of it for the life of the app
-    // breaks things far away from here.
-    //
-    // Rasterizing happens on whichever thread draws, never this one: doing it
-    // here would both steal time from the emulated machine and turn a torn read
-    // of video RAM from a stale character into a half-drawn one.
-    CoroutineScope(newSingleThreadContext("trs80-cpu")).launch { EmulatorCore.run() }
+@OptIn(ExperimentalForeignApi::class)
+fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
+    installIfNeeded(romPath, diskPath)
 
     return ComposeUIViewController {
-        // Through the navigator rather than straight to the screen, so that the
-        // whole path -- back stack, NavDisplay, restoration -- is exercised on a
-        // device from the moment it exists, rather than proven only by tests.
-        val navigator = rememberNavigator(root = Destination.Emulator(configuration.id))
-        Trs80App(
-            navigator = navigator,
-            emulator = {
-                EmulatorScreen(
-                    source = source,
-                    characterColor = CHARACTER_COLOR,
-                    screenColor = SCREEN_COLOR,
-                )
-            },
+        val navigator = rememberNavigator()
+        var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
+
+        // Reading the cards means reading files and decoding PNGs, so it happens
+        // off the main thread. Keyed on the destination, so coming back from a
+        // machine picks up its new screenshot and saved state.
+        LaunchedEffect(navigator.current) {
+            if (navigator.current is Destination.ConfigurationList) {
+                cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
+            }
+        }
+
+        MaterialTheme(colorScheme = darkColorScheme()) {
+            Trs80App(
+                navigator = navigator,
+                configurationList = {
+                    ConfigurationListScreen(
+                        cards = cards,
+                        // Edit, share, delete and add need screens and
+                        // confirmations that do not exist yet, so the list does
+                        // not offer them rather than offering nothing.
+                        actions = ConfigurationListActions(
+                            onRun = { navigator.goTo(Destination.Emulator(it)) },
+                        ),
+                    )
+                },
+                emulator = { RunningMachine(it.configurationId, onBack = { navigator.goBack() }) },
+            )
+        }
+    }
+}
+
+/**
+ * A machine, booted for as long as this is on screen.
+ *
+ * Boots on the way in and stops on the way out, so going back to the list stops
+ * the CPU rather than leaving it running behind the list.
+ */
+@OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class)
+@Composable
+private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
+    val source = remember(configurationId) { IosEmulatorScreenSource() }
+
+    DisposableEffect(configurationId) {
+        val configuration = ConfigurationManager.get().getConfigById(configurationId)
+        val rom = configuration?.let { romPathFor(it.model) }
+        if (configuration == null || rom == null) {
+            Log.e(TAG, "Cannot run configuration $configurationId: no configuration or no ROM.")
+        } else {
+            EmulatorCore.boot(
+                model = configuration.model,
+                romPath = rom,
+                diskPaths = configuration.diskPaths.filterNotNull(),
+            )
+        }
+        // A thread of its very own, not Dispatchers.Default. trs80_run() does not
+        // return until the machine is stopped, so on a shared pool it permanently
+        // occupies one of a handful of threads -- on Darwin that pool is a global
+        // dispatch queue, and taking a worker out of it for the life of the app
+        // breaks things far away from here.
+        val cpu = newSingleThreadContext("trs80-cpu")
+        CoroutineScope(cpu).launch { EmulatorCore.run() }
+        onDispose {
+            EmulatorCore.stop()
+            cpu.close()
+        }
+    }
+
+    val name = remember(configurationId) {
+        ConfigurationManager.get().getConfigById(configurationId)?.name.orEmpty()
+    }
+    EmulatorScaffold(title = name, onBack = onBack) {
+        EmulatorScreen(
+            source = source,
+            characterColor = CHARACTER_COLOR,
+            screenColor = SCREEN_COLOR,
         )
     }
 }
 
 /**
- * Installs the bundled ROM and disk on first run, and returns the configuration
- * to boot.
+ * Seeds the bundled ROM and disk on first run.
  *
- * Idempotent, because it is the app's whole start-up path: on later runs the
- * store already has the configuration and the files are already on disk, so this
- * finds them rather than copying them again.
+ * Idempotent: on later runs the store already has the configuration and the
+ * files are already there, so this finds them rather than copying again.
  */
-private fun installIfNeeded(romPath: String, diskPath: String?): Configuration {
+private fun installIfNeeded(romPath: String, diskPath: String?) {
     val settings = appSettings()
     val creator = FileManager.Creator(appDataDirectory() / TRS80_DIRECTORY)
     val manager = ConfigurationManager.init(creator, settings)
     RomManager.init(creator, settings)
 
     if (manager.configCount > 0) {
-        return manager.getConfig(0).also { Log.i(TAG, "Using existing configuration ${it.id}.") }
+        Log.i(TAG, "${manager.configCount} configuration(s) already installed.")
+        return
     }
 
-    val rom = requireNotNull(appFileSystem.read(romPath.toPath()) { readByteArray() })
+    val rom = appFileSystem.read(romPath.toPath()) { readByteArray() }
     RomManager.get().addRom(MODEL3, "model3.rom", rom)
 
     val disks = diskPath?.let {
@@ -130,11 +184,9 @@ private fun installIfNeeded(romPath: String, diskPath: String?): Configuration {
         )
     }.orEmpty()
 
-    return requireNotNull(
-        manager.addNewConfiguration(MODEL3, "Model III", disks, cassette = null)
-    ) { "Could not install the bundled configuration." }
+    manager.addNewConfiguration(MODEL3, "Model III", disks, cassette = null)
+        ?: Log.e(TAG, "Could not install the bundled configuration.")
 }
 
-/** @return the stored path of the ROM for [model], or null if there is none. */
-private fun romPathFor(model: Int): String? =
-    appSettings().getStringOrNull(StorageKeys.romKey(model))
+/** @return the path of the ROM for [model], or null if there is none. */
+private fun romPathFor(model: Int): String? = RomManager.get().romPath(model)
