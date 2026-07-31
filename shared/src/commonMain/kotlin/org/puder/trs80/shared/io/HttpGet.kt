@@ -31,3 +31,13 @@ package org.puder.trs80.shared.io
  * @throws okio.IOException if the request fails or the response is not a success.
  */
 expect suspend fun httpGetBytes(url: String): ByteArray
+
+/**
+ * POSTs [body] to [url] and returns the response body.
+ *
+ * The RetroStore client's only transport need: every call it makes is a POST of
+ * an encoded message that comes back as another one.
+ *
+ * @throws okio.IOException if the request fails or the response is not a success.
+ */
+expect suspend fun httpPostBytes(url: String, body: ByteArray): ByteArray

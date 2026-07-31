@@ -16,6 +16,7 @@
 
 package org.retrostore.android
 
+import org.puder.trs80.shared.store.retroStore
 import android.util.Log
 import org.retrostore.ApiException
 import org.retrostore.RetrostoreClient
@@ -28,7 +29,7 @@ private const val TAG = "RetrostoreApi"
  * Main API interface for an Android app to interface with the RetroStore Android components.
  */
 object RetrostoreApi {
-    private val retrostoreClient: RetrostoreClient = RetrostoreClient.default
+    private val retrostoreClient: RetrostoreClient = retroStore
     private var installListener: AppInstallListener? = null
 
     init {

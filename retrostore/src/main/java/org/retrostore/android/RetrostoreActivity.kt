@@ -16,6 +16,7 @@
 
 package org.retrostore.android
 
+import org.puder.trs80.shared.store.retroStore
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -48,7 +49,7 @@ class RetrostoreActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_retrostore)
-        fetcher = DataFetcher.initialize(RetrostoreClient.default)
+        fetcher = DataFetcher.initialize(retroStore)
         imageLoader = ImageLoader.get(applicationContext)
         recyclerView = findViewById<RecyclerView>(R.id.appList).apply {
             setHasFixedSize(true)

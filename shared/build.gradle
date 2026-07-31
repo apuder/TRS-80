@@ -4,12 +4,33 @@
 // Note this uses com.android.kotlin.multiplatform.library rather than
 // com.android.library. Since AGP 9.0 the ordinary Android library plugin is
 // incompatible with the Kotlin Multiplatform plugin in the same module.
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath 'com.squareup.wire:wire-gradle-plugin:6.4.5'
+    }
+}
+
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
     id 'com.android.kotlin.multiplatform.library'
     id 'org.jetbrains.kotlin.plugin.compose'
     id 'org.jetbrains.compose'
     id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+// Generates the RetroStore API messages from src/commonMain/proto. Applied the
+// classpath way rather than through the plugins block so it resolves from Maven
+// Central instead of the Gradle plugin portal.
+apply plugin: 'com.squareup.wire'
+
+wire {
+    sourcePath {
+        srcDir 'src/commonMain/proto'
+    }
+    // Kotlin data holders plus their ProtoAdapters, in commonMain so both
+    // platforms get them. The package comes from the proto's java_package.
+    kotlin {}
 }
 
 repositories {
@@ -144,6 +165,11 @@ kotlin {
                 // Files. api, not implementation: FileManager hands out okio
                 // Paths and takes a FileSystem, so callers need the types.
                 api 'com.squareup.okio:okio:3.18.1'
+
+                // The RetroStore messages. api, not implementation: they are part
+                // of this module's surface, so their Message supertype has to be
+                // on a consumer's compile classpath too.
+                api 'com.squareup.wire:wire-runtime:6.4.5'
 
 
                 // Compose Multiplatform: the emulator surface is drawn from

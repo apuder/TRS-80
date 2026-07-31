@@ -18,14 +18,7 @@ package org.retrostore
 
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.retrostore.client.common.proto.ApiResponseApps
 import org.retrostore.client.common.proto.ApiResponseDownloadSystemState
 import org.retrostore.client.common.proto.ApiResponseMediaImages
@@ -43,18 +36,29 @@ import org.retrostore.client.common.proto.UploadSystemStateParams
 private const val DEFAULT_SERVER_URL = "https://retrostore.org/api/%s"
 
 /**
+ * How a request is made: POST [body] to [url] and hand back what comes back.
+ *
+ * The one thing this client needs from a platform, and the only reason it would
+ * otherwise need an HTTP library of its own.
+ */
+typealias HttpPost = suspend (url: String, body: ByteArray) -> ByteArray
+
+/**
  * Talks to the RetroStore API.
  *
  * Every method POSTs the serialised params message to `<server>/<method>` and parses the body of
- * the response as the matching `ApiResponse*` message. The requests run on [Dispatchers.IO], so
- * they are safe to call from the main thread.
+ * the response as the matching `ApiResponse*` message.
+ *
+ * The transport is injected rather than built here. That keeps this dependency-free — the whole
+ * client is Wire messages and one POST — and it is what lets the same code run on both platforms
+ * without either an HTTP library that works on one of them or a second implementation.
  *
  * @param serverUrl the endpoint template, with a single `%s` for the method name.
- * @param httpClient the client used for the requests.
+ * @param post makes the request.
  */
 class RetrostoreClient(
         private val serverUrl: String = DEFAULT_SERVER_URL,
-        private val httpClient: HttpClient = defaultHttpClient()) {
+        private val post: HttpPost) {
 
     /**
      * @param appId the ID of the app to look up. Must not be empty.
@@ -132,25 +136,20 @@ class RetrostoreClient(
     private suspend fun <T : Any> post(
             method: String,
             params: Message<*, *>,
-            responseAdapter: ProtoAdapter<T>): T = withContext(Dispatchers.IO) {
-        try {
-            val content: ByteArray = httpClient.post(serverUrl.format(method)) {
-                setBody(params.encode())
-            }.body()
-            responseAdapter.decode(content)
+            responseAdapter: ProtoAdapter<T>): T {
+        val url = serverUrl.replace("%s", method)
+        val content = try {
+            post(url, params.encode())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             throw ApiException("Unable to make request to server.", e)
         }
-    }
-
-    companion object {
-        /**
-         * The shared client. Created lazily so the HTTP engine is only started once something
-         * actually talks to the store.
-         */
-        val default: RetrostoreClient by lazy { RetrostoreClient() }
+        return try {
+            responseAdapter.decode(content)
+        } catch (e: Exception) {
+            throw ApiException("Unable to parse the server's response.", e)
+        }
     }
 }
 
@@ -159,10 +158,4 @@ private fun checkSuccess(success: Boolean, message: String) {
     if (!success) {
         throw ApiException("Server reported error: '$message'")
     }
-}
-
-private fun defaultHttpClient() = HttpClient(OkHttp) {
-    // Makes a non-2xx response throw instead of handing back the error body, which is what the
-    // HttpURLConnection this client replaced used to do.
-    expectSuccess = true
 }

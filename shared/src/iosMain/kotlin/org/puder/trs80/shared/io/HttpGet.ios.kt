@@ -22,6 +22,11 @@ import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okio.IOException
 import platform.Foundation.NSData
+import platform.Foundation.NSMutableURLRequest
+import platform.Foundation.setHTTPBody
+import platform.Foundation.setHTTPMethod
+import platform.Foundation.create
+import platform.Foundation.dataTaskWithRequest
 import platform.Foundation.NSHTTPURLResponse
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLSession
@@ -74,4 +79,46 @@ private fun NSData.toByteArray(): ByteArray {
     return ByteArray(size).apply {
         usePinned { memcpy(it.addressOf(0), bytes, length) }
     }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun httpPostBytes(url: String, body: ByteArray): ByteArray =
+    suspendCancellableCoroutine { continuation ->
+        val target = NSURL.URLWithString(url)
+            ?: return@suspendCancellableCoroutine continuation.resumeWithException(
+                IOException("Not a URL: $url")
+            )
+        val request = NSMutableURLRequest.requestWithURL(target).apply {
+            setHTTPMethod("POST")
+            setHTTPBody(body.toNSData())
+        }
+
+        val task = NSURLSession.sharedSession.dataTaskWithRequest(request) { data, response, error ->
+            when {
+                error != null -> continuation.resumeWithException(
+                    IOException("POST $url failed: ${error.localizedDescription}")
+                )
+
+                else -> {
+                    val status = (response as? NSHTTPURLResponse)?.statusCode?.toInt() ?: 0
+                    if (status !in 200..299) {
+                        continuation.resumeWithException(
+                            IOException("POST $url failed with HTTP $status")
+                        )
+                    } else {
+                        continuation.resume(data?.toByteArray() ?: ByteArray(0))
+                    }
+                }
+            }
+        }
+        continuation.invokeOnCancellation { task.cancel() }
+        task.resume()
+    }
+
+/** Copies a Kotlin array into an [NSData] for the request body. */
+@OptIn(ExperimentalForeignApi::class)
+private fun ByteArray.toNSData(): NSData = if (isEmpty()) {
+    NSData()
+} else {
+    usePinned { NSData.create(bytes = it.addressOf(0), length = size.toULong()) }
 }

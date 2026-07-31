@@ -41,3 +41,24 @@ actual suspend fun httpGetBytes(url: String): ByteArray = withContext(Dispatcher
         connection.disconnect()
     }
 }
+
+actual suspend fun httpPostBytes(url: String, body: ByteArray): ByteArray =
+    withContext(Dispatchers.IO) {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.connectTimeout = CONNECT_TIMEOUT_MS
+        connection.readTimeout = READ_TIMEOUT_MS
+        connection.requestMethod = "POST"
+        connection.doOutput = true
+        try {
+            connection.outputStream.use { it.write(body) }
+            val status = connection.responseCode
+            if (status !in 200..299) {
+                throw IOException("POST $url failed with HTTP $status")
+            }
+            connection.inputStream.use { it.readBytes() }
+        } catch (e: java.io.IOException) {
+            throw IOException("POST $url failed", e)
+        } finally {
+            connection.disconnect()
+        }
+    }

@@ -521,8 +521,14 @@ destination means adding a line.
 
 **RetroStore is a second UI**, and easy to overlook: `retrostore/src/main/java/org/retrostore/android/`
 holds its own Activities, RecyclerView adapters and a Glide image loader — a browse screen, a detail
-screen, and async image loading. The client half is portable already (Wire messages over Ktor), but
-the module is still `com.android.library` and has to become KMP.
+screen, and async image loading.
+
+**Its client is now shared.** `RetrostoreClient`, `ApiException` and the Wire-generated messages moved
+into `:shared`, and the module that is left is the Android UI, depending on `:shared` for them. The
+client takes its transport as a parameter rather than building one: every call it makes is a POST of
+an encoded message that comes back as another, so it needs one function, not an HTTP library. That
+keeps it dependency-free, makes it testable without a network, and sidesteps Ktor — which still
+cannot be linked alongside Compose in the iOS framework (§7.1). What remains is the two screens.
 
 **The keyboards are ported functionally**, which is what unblocked everything else: a machine you
 cannot type at cannot be driven to a state worth saving, screenshotting or resuming. The two key
