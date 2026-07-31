@@ -51,6 +51,18 @@ object StorageKeys {
     const val CONFIG_MUTE_SOUND = "conf_mute_sound"
     const val CONFIG_CASSETTE_POSITION = "cassette_position"
 
+    /** When this configuration was last run, for ordering the library. */
+    const val CONFIG_LAST_USED = "conf_last_used"
+
+    /**
+     * Whether the user made or edited this configuration themselves.
+     *
+     * Drives the CUSTOM mark in the library: something installed from the store
+     * and left alone is an original, and anything the user has had a hand in is
+     * not.
+     */
+    const val CONFIG_IS_CUSTOM = "conf_is_custom"
+
     /** The number of disk drives a configuration has. */
     const val DRIVE_COUNT = 4
 
@@ -75,6 +87,8 @@ object StorageKeys {
         add(CONFIG_KEYBOARD_LANDSCAPE)
         add(CONFIG_MUTE_SOUND)
         add(CONFIG_CASSETTE_POSITION)
+        add(CONFIG_LAST_USED)
+        add(CONFIG_IS_CUSTOM)
         for (drive in 0 until DRIVE_COUNT) add(diskKey(drive))
     }
 

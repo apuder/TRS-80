@@ -42,6 +42,8 @@ internal class ConfigurationBackup private constructor(
     override val characterColorAsRGB: Int,
     screenColorAsRGB: Int,
     isSoundMuted: Boolean,
+    override val lastUsed: Long,
+    isCustom: Boolean,
 ) : Configuration {
 
     companion object {
@@ -59,6 +61,8 @@ internal class ConfigurationBackup private constructor(
             orig.characterColorAsRGB,
             orig.screenColorAsRGB,
             orig.isSoundMuted,
+            orig.lastUsed,
+            orig.isCustom,
         )
     }
 
@@ -79,6 +83,11 @@ internal class ConfigurationBackup private constructor(
 
     override var isSoundMuted: Boolean = isSoundMuted
         set(value) = immutable()
+
+    override var isCustom: Boolean = isCustom
+        set(value) = immutable()
+
+    override fun markUsed() = immutable()
 
     override fun getDiskPath(disk: Int): String? = diskPaths.getOrNull(disk)
 

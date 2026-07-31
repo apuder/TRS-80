@@ -35,9 +35,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface Destination : NavKey {
 
-    /** The list of configurations. Where the app starts, and the root of the stack. */
+    /**
+     * What the user has and what the store offers, on one screen. The root.
+     *
+     * Replaces the separate configuration list and store browser: the visual
+     * spec puts both on one screen, so they are one destination.
+     */
     @Serializable
-    data object ConfigurationList : Destination
+    data object Library : Destination
 
     /** A running machine. */
     @Serializable
@@ -59,10 +64,6 @@ sealed interface Destination : NavKey {
     /** The app's own settings. */
     @Serializable
     data object Settings : Destination
-
-    /** The RetroStore catalogue. */
-    @Serializable
-    data object RetroStore : Destination
 
     /** One app in the RetroStore catalogue. */
     @Serializable

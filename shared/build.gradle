@@ -178,6 +178,8 @@ kotlin {
                 implementation compose.foundation
                 implementation compose.ui
                 implementation compose.material3
+                // Fonts for the design system; see ui/theme.
+                implementation compose.components.resources
 
                 // Navigation 3. The back stack is ours (see the navigation
                 // package); this renders it and puts it away for us.

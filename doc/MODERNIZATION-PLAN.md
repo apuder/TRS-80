@@ -634,6 +634,19 @@ when the port was split out, which is what left this phase so short.
 
 ## 9. Phase 5 — The restyle
 
+**The first screen of it already exists.** The Library — the visual spec's merge of the
+configuration list and the store catalogue — was built ahead of the rest of the port, because it is
+what the spec settled first and because everything after it inherits the design system it brought:
+`Trs80Theme`, with the two registers, the four faces, the spacing scale and the small stroked
+components the spec's "accent is stroke only" rule implies. Screens built from here take the theme
+rather than inventing values, which is the point of doing it early.
+
+It also moved two things in the domain, because the design needs facts the app did not record: when
+a machine was last run (the default order), and whether the user made or edited a configuration
+(the CUSTOM mark). Both are stored per configuration and written where the events happen — the
+first when a machine starts, so a session that crashes still counts.
+
+
 *Both platforms at once, because by this point there is only one UI. Ships incrementally, screen by
 screen.*
 

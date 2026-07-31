@@ -24,6 +24,7 @@ import org.puder.trs80.shared.MODEL4
 import org.puder.trs80.shared.MODEL4P
 import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.ScreenColors
+import org.puder.trs80.shared.currentTimeMillis
 import org.puder.trs80.shared.storage.StorageKeys
 
 /**
@@ -115,6 +116,19 @@ internal class ConfigurationImpl private constructor(
         get() = persistence.isSoundMuted
         set(muted) {
             persistence.isSoundMuted = muted
+        }
+
+    override val lastUsed: Long
+        get() = persistence.lastUsed
+
+    override fun markUsed() {
+        persistence.lastUsed = currentTimeMillis()
+    }
+
+    override var isCustom: Boolean
+        get() = persistence.isCustom
+        set(value) {
+            persistence.isCustom = value
         }
 
     override fun delete() = persistence.clear()

@@ -31,6 +31,8 @@ private const val CONF_KEYBOARD_LANDSCAPE = StorageKeys.CONFIG_KEYBOARD_LANDSCAP
 private const val CONF_MUTE_SOUND = StorageKeys.CONFIG_MUTE_SOUND
 
 private const val KEY_CASSETTE_POSITION = StorageKeys.CONFIG_CASSETTE_POSITION
+private const val CONF_LAST_USED = StorageKeys.CONFIG_LAST_USED
+private const val CONF_IS_CUSTOM = StorageKeys.CONFIG_IS_CUSTOM
 
 /**
  * Persisted data about a configuration.
@@ -118,6 +120,16 @@ class ConfigurationPersistence private constructor(
     internal var isSoundMuted: Boolean
         get() = settings.getBooleanOrNull(key(CONF_MUTE_SOUND)) ?: false
         set(muted) = settings.putBoolean(key(CONF_MUTE_SOUND), muted)
+
+    /** When this configuration was last run, or 0 if it never has been. */
+    internal var lastUsed: Long
+        get() = settings.getLongOrNull(key(CONF_LAST_USED)) ?: 0L
+        set(value) = settings.putLong(key(CONF_LAST_USED), value)
+
+    /** Whether the user made or edited this configuration. */
+    internal var isCustom: Boolean
+        get() = settings.getBooleanOrNull(key(CONF_IS_CUSTOM)) ?: false
+        set(value) = settings.putBoolean(key(CONF_IS_CUSTOM), value)
 
     /**
      * Removes all stored data of this configuration.

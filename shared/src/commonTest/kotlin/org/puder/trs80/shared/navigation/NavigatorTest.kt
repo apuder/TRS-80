@@ -28,8 +28,8 @@ class NavigatorTest {
     private val navigator = Navigator()
 
     @Test
-    fun startsAtTheConfigurationList() {
-        assertEquals(Destination.ConfigurationList, navigator.current)
+    fun startsAtTheLibrary() {
+        assertEquals(Destination.Library, navigator.current)
         assertFalse(navigator.canGoBack)
     }
 
@@ -41,14 +41,14 @@ class NavigatorTest {
         assertTrue(navigator.canGoBack)
 
         assertTrue(navigator.goBack())
-        assertEquals(Destination.ConfigurationList, navigator.current)
+        assertEquals(Destination.Library, navigator.current)
     }
 
     /** The host needs a false here to hand Back to the platform. */
     @Test
     fun goingBackFromTheRootDoesNothing() {
         assertFalse(navigator.goBack())
-        assertContentEquals(listOf(Destination.ConfigurationList), navigator.backStack)
+        assertContentEquals(listOf(Destination.Library), navigator.backStack)
     }
 
     @Test
@@ -86,7 +86,7 @@ class NavigatorTest {
 
         navigator.goBack(NavigationResult.ConfigurationEdited(configurationId = 3, isNew = true))
 
-        assertEquals(Destination.ConfigurationList, navigator.current)
+        assertEquals(Destination.Library, navigator.current)
         assertEquals(
             NavigationResult.ConfigurationEdited(3, isNew = true),
             navigator.takeResult(),
@@ -109,13 +109,12 @@ class NavigatorTest {
 
     @Test
     fun goingBackToTheRootDropsEverythingAbove() {
-        navigator.goTo(Destination.RetroStore)
         navigator.goTo(Destination.RetroStoreApp("sea-dragon"))
         navigator.goTo(Destination.EditConfiguration(2, isNew = true))
 
         navigator.goBackToRoot()
 
-        assertContentEquals(listOf(Destination.ConfigurationList), navigator.backStack)
+        assertContentEquals(listOf(Destination.Library), navigator.backStack)
         assertFalse(navigator.canGoBack)
     }
 
@@ -123,7 +122,7 @@ class NavigatorTest {
     fun goingBackToTheRootFromTheRootIsHarmless() {
         navigator.goBackToRoot()
 
-        assertContentEquals(listOf(Destination.ConfigurationList), navigator.backStack)
+        assertContentEquals(listOf(Destination.Library), navigator.backStack)
     }
 
     /**
@@ -137,19 +136,25 @@ class NavigatorTest {
 
         navigator.goBack(NavigationResult.ConfigurationEditCancelled(9))
 
-        assertEquals(Destination.ConfigurationList, navigator.current)
+        assertEquals(Destination.Library, navigator.current)
         assertEquals(NavigationResult.ConfigurationEditCancelled(9), navigator.takeResult())
     }
 
-    /** Browsing the store, opening an app and returning leaves the store showing. */
+    /**
+     * Opening a store app from the library and coming back lands on the library,
+     * which is now where the catalogue lives.
+     */
     @Test
     fun theRetroStoreBrowseFlow() {
-        navigator.goTo(Destination.RetroStore)
         navigator.goTo(Destination.RetroStoreApp("rear-guard"))
+        navigator.goTo(Destination.Emulator(4))
 
         navigator.goBack()
 
-        assertEquals(Destination.RetroStore, navigator.current)
+        assertEquals(Destination.RetroStoreApp("rear-guard"), navigator.current)
         assertTrue(navigator.canGoBack)
+
+        navigator.goBack()
+        assertEquals(Destination.Library, navigator.current)
     }
 }

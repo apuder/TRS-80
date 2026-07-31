@@ -49,6 +49,10 @@ data class ConfigurationCard(
     /** Whether there is a TRS-Xray dump, which is what offers Share. */
     val hasXrayState: Boolean,
     val screenshot: ImageBitmap?,
+    /** Whether the user made or edited this one; drives the CUSTOM mark. */
+    val isCustom: Boolean = false,
+    /** When it was last run, for ordering the library. */
+    val lastUsed: Long = 0L,
 )
 
 /**
@@ -75,6 +79,8 @@ fun ConfigurationManager.toCards(): List<ConfigurationCard> =
             hasSavedState = state?.hasState() == true,
             hasXrayState = state?.hasXrayState() == true,
             screenshot = state?.readScreenshot()?.let(::decodeImage),
+            isCustom = configuration.isCustom,
+            lastUsed = configuration.lastUsed,
         )
     }
 

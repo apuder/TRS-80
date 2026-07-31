@@ -167,6 +167,9 @@ class ConfigurationManager private constructor(
         toSave.characterColor = configuration.characterColor
         toSave.screenColorAsRGB = configuration.screenColorAsRGB
         toSave.isSoundMuted = configuration.isSoundMuted
+        // Editing something makes it the user's own, which is what the library's
+        // CUSTOM mark means.
+        toSave.isCustom = true
     }
 
     /** Stores the current list of configurations. */

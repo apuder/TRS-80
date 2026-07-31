@@ -41,7 +41,7 @@ import androidx.compose.runtime.setValue
 class Navigator(private val stack: MutableList<Destination>) {
 
     /** For tests and for hosts that do not need the stack restored. */
-    constructor(root: Destination = Destination.ConfigurationList) :
+    constructor(root: Destination = Destination.Library) :
         this(mutableStateListOf(root))
 
     private var result by mutableStateOf<NavigationResult?>(null)

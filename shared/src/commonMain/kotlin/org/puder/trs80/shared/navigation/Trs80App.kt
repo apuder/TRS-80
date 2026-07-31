@@ -43,11 +43,10 @@ import kotlinx.serialization.modules.subclass
 private val savedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
-            subclass(Destination.ConfigurationList::class, Destination.ConfigurationList.serializer())
+            subclass(Destination.Library::class, Destination.Library.serializer())
             subclass(Destination.Emulator::class, Destination.Emulator.serializer())
             subclass(Destination.EditConfiguration::class, Destination.EditConfiguration.serializer())
             subclass(Destination.Settings::class, Destination.Settings.serializer())
-            subclass(Destination.RetroStore::class, Destination.RetroStore.serializer())
             subclass(Destination.RetroStoreApp::class, Destination.RetroStoreApp.serializer())
             subclass(Destination.CreateDisk::class, Destination.CreateDisk.serializer())
         }
@@ -62,7 +61,7 @@ private val savedStateConfiguration = SavedStateConfiguration {
  * and ignoring a request to go where it already is.
  */
 @Composable
-fun rememberNavigator(root: Destination = Destination.ConfigurationList): Navigator {
+fun rememberNavigator(root: Destination = Destination.Library): Navigator {
     val backStack = rememberNavBackStack(savedStateConfiguration, root)
     @Suppress("UNCHECKED_CAST")
     return remember(backStack) { Navigator(backStack as MutableList<Destination>) }
@@ -71,16 +70,15 @@ fun rememberNavigator(root: Destination = Destination.ConfigurationList): Naviga
 /**
  * The whole app: whatever the navigator's stack says should be on screen.
  *
- * The configuration list and the emulator exist so far. The rest arrive one at a
+ * The library and the emulator exist so far. The rest arrive one at a
  * time (§7.2) and each is a line here — which is the point of having done the
  * navigation first.
  */
 @Composable
 fun Trs80App(
     navigator: Navigator,
-    configurationList: @Composable () -> Unit,
+    library: @Composable () -> Unit,
     emulator: @Composable (Destination.Emulator) -> Unit,
-    retroStore: (@Composable () -> Unit)? = null,
     retroStoreApp: (@Composable (Destination.RetroStoreApp) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -89,12 +87,11 @@ fun Trs80App(
         onBack = { navigator.goBack() },
         modifier = modifier,
         entryProvider = entryProvider {
-            entry<Destination.ConfigurationList> { configurationList() }
+            entry<Destination.Library> { library() }
             entry<Destination.Emulator> { emulator(it) }
             // Every destination needs an entry or NavDisplay has nothing to draw
             // for it, so a host that cannot show one says so rather than the app
             // navigating into a blank screen.
-            entry<Destination.RetroStore> { retroStore?.invoke() ?: Missing("RetroStore") }
             entry<Destination.RetroStoreApp> {
                 retroStoreApp?.invoke(it) ?: Missing("RetroStore app")
             }

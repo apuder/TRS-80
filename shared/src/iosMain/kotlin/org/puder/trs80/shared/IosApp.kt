@@ -16,8 +16,6 @@
 
 package org.puder.trs80.shared
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,11 +45,17 @@ import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.appSettings
 import org.puder.trs80.shared.ui.ConfigurationCard
-import org.puder.trs80.shared.ui.ConfigurationListActions
-import org.puder.trs80.shared.ui.ConfigurationListScreen
+import org.puder.trs80.shared.ui.LibraryActions
+import org.puder.trs80.shared.ui.LibraryScreen
+import org.puder.trs80.shared.ui.LibrarySort
+import org.puder.trs80.shared.ui.asCatalogue
+import org.puder.trs80.shared.ui.matching
+import org.puder.trs80.shared.ui.matchingEntries
+import org.puder.trs80.shared.ui.sortedFor
+import org.puder.trs80.shared.ui.theme.Trs80Theme
+import org.puder.trs80.shared.navigation.Navigator
 import org.puder.trs80.shared.ui.EmulatorScaffold
 import org.puder.trs80.shared.ui.RetroStoreAppScreen
-import org.puder.trs80.shared.ui.RetroStoreScreen
 import org.puder.trs80.shared.ui.StoreState
 import org.puder.trs80.shared.store.AppInstaller
 import org.puder.trs80.shared.store.retroStore
@@ -72,13 +76,11 @@ private val CHARACTER_COLOR = Color(0xFF77FB4D)
 private val SCREEN_COLOR = Color(0xFF444444)
 
 /**
- * The iOS app: the configuration list, and a machine when one is running.
+ * The iOS app: the library, and a machine when one is running.
  *
- * Still short of the Android app — there is no editor, no settings and no
- * RetroStore, and those arrive as the rest of §7.2 lands. What it is no longer
- * is a hard-coded jump into the emulator: it runs the shared domain, draws the
- * shared list and navigates with the shared navigator, so everything it shows is
- * code Android will run too.
+ * Still short of the Android app — there is no editor and no settings, and those
+ * arrive as the rest of §7.2 lands. Everything it does show is shared code, so
+ * Android will run the same screens when its own UI moves across.
  *
  * @param romPath a Model III ROM image and [diskPath] a disk, both in the app
  * bundle, seeded into the app's own storage on first run.
@@ -89,38 +91,12 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
 
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
-        var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
-
-        // Reading the cards means reading files and decoding PNGs, so it happens
-        // off the main thread. Keyed on the destination, so coming back from a
-        // machine picks up its new screenshot and saved state.
-        LaunchedEffect(navigator.current) {
-            if (navigator.current is Destination.ConfigurationList) {
-                cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
-            }
-        }
-
-        MaterialTheme(colorScheme = darkColorScheme()) {
+        Trs80Theme {
             Trs80App(
                 navigator = navigator,
-                configurationList = {
-                    ConfigurationListScreen(
-                        cards = cards,
-                        // Edit, share, delete and add need screens and
-                        // confirmations that do not exist yet, so the list does
-                        // not offer them rather than offering nothing.
-                        actions = ConfigurationListActions(
-                            onRun = { navigator.goTo(Destination.Emulator(it)) },
-                            onOpenStore = { navigator.goTo(Destination.RetroStore) },
-                        ),
-                    )
-                },
-                emulator = { RunningMachine(it.configurationId, onBack = { navigator.goBack() }) },
-                retroStore = {
-                    StoreBrowser(
-                        onOpen = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
-                        onBack = { navigator.goBack() },
-                    )
+                library = { Library(navigator) },
+                emulator = {
+                    RunningMachine(it.configurationId, onBack = { navigator.goBack() })
                 },
                 retroStoreApp = { destination ->
                     StoreApp(destination.appId, onBack = { navigator.goBack() })
@@ -138,21 +114,76 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
     )
 }
 
-/** The store's catalogue, fetched when it is first shown. */
+/**
+ * The library: the user's machines and the store's catalogue on one screen.
+ *
+ * Both halves are loaded here rather than inside the screen, so the screen stays
+ * a drawing of what it is handed — which is what keeps the sorting and filtering
+ * testable on their own, without a display.
+ */
 @Composable
-private fun StoreBrowser(onOpen: (App) -> Unit, onBack: () -> Unit) {
-    var state by remember { mutableStateOf<StoreState>(StoreState.Loading) }
+private fun Library(navigator: Navigator) {
+    var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
+    var apps by remember { mutableStateOf<StoreState>(StoreState.Loading) }
+    var query by remember { mutableStateOf("") }
+    var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
+    var expanded by remember { mutableStateOf(false) }
+    var installing by remember { mutableStateOf(emptySet<String>()) }
+    val scope = rememberCoroutineScope()
+
+    suspend fun reload() {
+        cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
+    }
+
+    // Re-read on every return, so a machine that has just run moves to the top
+    // and shows what it was last doing.
+    LaunchedEffect(navigator.current) {
+        if (navigator.current is Destination.Library) {
+            reload()
+        }
+    }
     LaunchedEffect(Unit) {
-        state = try {
-            // The catalogue is paged; this is the first page, as the Android
-            // screen shows. Paging belongs with the redesign.
-            StoreState.Loaded(withContext(Dispatchers.Default) { retroStore.fetchApps(0, 50) })
+        apps = try {
+            StoreState.Loaded(withContext(Dispatchers.Default) { retroStore.fetchApps(0, 100) })
         } catch (e: Exception) {
             Log.e(TAG, "Could not fetch the store catalogue.", e)
             StoreState.Failed(e.message.orEmpty())
         }
     }
-    RetroStoreScreen(state = state, onOpen = onOpen, onBack = onBack)
+
+    LibraryScreen(
+        yours = cards.matching(query).sortedFor(sort),
+        catalogue = ((apps as? StoreState.Loaded)?.apps.orEmpty())
+            .asCatalogue(cards, installing)
+            .matchingEntries(query),
+        catalogueState = apps,
+        query = query,
+        sort = sort,
+        expanded = expanded,
+        onQueryChange = { query = it },
+        onSortChange = { sort = it },
+        onExpandedChange = { expanded = it },
+        actions = LibraryActions(
+            onRun = { navigator.goTo(Destination.Emulator(it)) },
+            onOpenEntry = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
+            onInstall = { entry ->
+                installing = installing + entry.id
+                scope.launch {
+                    val installed = withContext(Dispatchers.Default) {
+                        runCatching {
+                            retroStore.getApp(entry.id)
+                                ?.let { AppInstaller(ConfigurationManager.get()).install(it) }
+                        }.onFailure { Log.e(TAG, "Could not install ${entry.title}.", it) }
+                            .getOrNull()
+                    }
+                    installing = installing - entry.id
+                    if (installed != null) {
+                        reload()
+                    }
+                }
+            },
+        ),
+    )
 }
 
 /** One app from the store, and installing it. */
@@ -211,6 +242,9 @@ private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
     DisposableEffect(configurationId) {
         val configuration = ConfigurationManager.get().getConfigById(configurationId)
         val rom = configuration?.let { romPathFor(it.model) }
+        // Recorded on the way in: the library orders by it, and a session that
+        // crashes still counts as the thing the user was last doing.
+        configuration?.markUsed()
         val state = runCatching {
             ConfigurationManager.get().getEmulatorState(configurationId)
         }.getOrNull()

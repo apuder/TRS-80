@@ -79,6 +79,26 @@ interface Configuration {
     /** Whether the emulator's sound output is muted. */
     var isSoundMuted: Boolean
 
+    /**
+     * When this was last run, in milliseconds since the epoch, or 0 if never.
+     *
+     * The library orders by this, so it is written every time a machine starts
+     * rather than when it stops: what the user is looking for is "the thing I
+     * was just doing", and a session that crashed still counts as used.
+     */
+    val lastUsed: Long
+
+    /** Records that this configuration is being run now. */
+    fun markUsed()
+
+    /**
+     * Whether the user made or edited this configuration themselves.
+     *
+     * Something installed from the store and left alone is an original; once it
+     * has been edited it is the user's own, and the library marks it.
+     */
+    var isCustom: Boolean
+
     /** Removes all persisted data of this configuration. */
     fun delete()
 
