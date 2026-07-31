@@ -1,0 +1,34 @@
+The TRS-80 App Authors
+======================
+
+The source files in this project carry a collective copyright notice reading
+"The TRS-80 App Authors". This file is what that refers to: the people who have
+contributed to the project, in the order they first did so.
+
+Arno Puder
+Sascha Haeberling
+Robert Corrigan
+
+Contributors are welcome to add themselves here as part of a contribution.
+The authoritative record of who wrote what is the git history; this file
+exists so the copyright notice points at named people rather than nobody.
+
+
+Third-party code
+----------------
+
+Parts of this repository are not covered by the notice above and keep the
+copyright notices of their own authors. Those notices must not be changed.
+They include, among others:
+
+  * The xtrs emulator core under `app/src/main/c`, by Timothy Mann, and the
+    Model I/III/4 emulation it builds on, by Clarendon Hill Software.
+  * SDL, by Sam Lantinga.
+  * Portions of the SDL interface layer, by Mark Grebe.
+  * cJSON, by Dave Gamble and contributors.
+  * The card flip animation under `app/src/main/java/com/tekle`, by
+    Ephraim Tekle.
+  * The drag-and-drop helpers under `app/src/main/java/org/puder/trs80/drag`,
+    by Paul Burke.
+
+See each file's own header for the applicable notice and licence.

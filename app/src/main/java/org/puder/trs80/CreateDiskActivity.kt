@@ -1,6 +1,5 @@
 /*
- * Copyright 2012-2013, Arno Puder
- * Copyright 2017, Robert Corrigan
+ * Copyright The TRS-80 App Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
