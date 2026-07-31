@@ -20,8 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ComposeUIViewController
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import okio.Path.Companion.toPath
 import org.puder.trs80.shared.configuration.Configuration
 import org.puder.trs80.shared.configuration.ConfigurationManager
@@ -55,7 +56,7 @@ private val SCREEN_COLOR = Color(0xFF444444)
  * app bundle, which is read-only — hence the copy into the app's own directory
  * on first run.
  */
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class)
 fun EmulatorViewController(romPath: String, diskPath: String?): UIViewController {
     val source = IosEmulatorScreenSource()
     val configuration = installIfNeeded(romPath, diskPath)
@@ -67,11 +68,16 @@ fun EmulatorViewController(romPath: String, diskPath: String?): UIViewController
         },
         diskPaths = configuration.diskPaths.filterNotNull(),
     )
-    // trs80_run() blocks, so the CPU gets a thread of its own. Rasterizing
-    // happens on whichever thread draws, never here: doing it on this one would
-    // both steal time from the emulated machine and turn a torn read of video RAM
-    // from a stale character into a half-drawn one.
-    CoroutineScope(Dispatchers.Default).launch { EmulatorCore.run() }
+    // A thread of its very own, not Dispatchers.Default. trs80_run() does not
+    // return until the machine is stopped, so on a shared pool it permanently
+    // occupies one of a handful of threads -- on Darwin that pool is a global
+    // dispatch queue, and taking a worker out of it for the life of the app
+    // breaks things far away from here.
+    //
+    // Rasterizing happens on whichever thread draws, never this one: doing it
+    // here would both steal time from the emulated machine and turn a torn read
+    // of video RAM from a stale character into a half-drawn one.
+    CoroutineScope(newSingleThreadContext("trs80-cpu")).launch { EmulatorCore.run() }
 
     return ComposeUIViewController {
         EmulatorScreen(

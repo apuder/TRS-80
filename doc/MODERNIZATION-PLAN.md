@@ -163,18 +163,23 @@ window is the binding constraint, not AGP's newest release.
 |---|---|---|---|
 | Gradle | 8.13 | **9.5.0** | Kotlin 2.4's maximum; satisfies AGP 9.x |
 | AGP | 8.13.2 | **9.1.0** | Kotlin 2.4's maximum — *not* 9.3.0 |
-| Kotlin | — | **2.2.10** | AGP 9.1's built-in; AGP rejects any other for KMP |
-| Compose Multiplatform | — | **1.9.3** | Highest that pairs with Kotlin 2.2.10 (below) |
+| Kotlin | — | **2.4.10** | Latest stable (14 July 2026); sets the AGP ceiling above |
+| Compose Multiplatform | — | **1.11.1** | Latest stable; always tracks the latest Kotlin |
 | JDK | 17 (CI) / 21 (pin) | **21 everywhere** | LTS, above AGP's minimum of 17 |
 
 Sources: [AGP releases](https://developer.android.com/build/releases/gradle-plugin),
 [KMP compatibility guide](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html),
 [CMP compatibility](https://kotlinlang.org/docs/multiplatform/compose-compatibility-and-versioning.html).
 
-*What actually landed:* Kotlin 2.2.10, not 2.4.0. AGP 9 supplies its own Kotlin and rejects a second
-Kotlin plugin alongside `com.android.kotlin.multiplatform.library`, so the KMP module has to use the
-one AGP ships — which pins Compose Multiplatform to 1.9.3 in turn. The reasoning above still holds;
-the binding constraint simply turned out to be tighter than it looked from the version tables.
+*A correction worth keeping.* This briefly ran on Kotlin 2.2.10 and Compose Multiplatform 1.9.3, on
+the belief that AGP 9 supplies its own Kotlin and the KMP module has to use it. That is wrong. AGP 9
+has a *runtime dependency* on KGP 2.2.10 and uses it when nothing else is present, but putting a
+newer KGP on the buildscript classpath overrides it for the whole build — which this project was
+already doing, just pinned low. Nothing forced the old versions, and pinning them cost real time
+before it was noticed. The table above is what the project is actually on.
+
+The binding constraint is the one the table already states: Kotlin 2.4.x supports AGP only up to
+9.1.0, so AGP stays there until Kotlin's window moves, not until AGP ships something newer.
 
 **Fix the JDK ambiguity first.** There are currently three answers in three places: CI provisions
 Temurin 17, `gradle/gradle-daemon-jvm.properties` demands JetBrains JDK 21, and Gradle papers over
@@ -451,16 +456,20 @@ The screens are the thin part. Underneath them:
   This is the part with no Android equivalent to copy, so it is worth designing rather than
   transliterating — even though the *navigation itself* does not change.
 
-**Ktor cannot go in this framework yet, and the reason is worth recording.** The plan said Ktor for
-content acquisition; it does not work here. From 3.4.0 on, Ktor's Kotlin/Native artifacts are built
-with Kotlin 2.3, whose klib ABI the 2.2.10 compiler AGP pins us to refuses to read — reported as
-"could not find" the klib, which is not what it means. And 3.3.x, which does link, **segfaults at
-start-up** inside Kotlin/Native's worker runtime init, before any Ktor code runs: merely linking
-`ktor-client-core` into the framework is enough, with no call to it anywhere. Bisected by removing
-the dependency and watching the crash disappear. Since the app makes exactly one kind of request —
-an unauthenticated GET of a whole file — `httpGetBytes` is an `expect`/`actual` over
-`HttpURLConnection` and `NSURLSession` instead. Roughly forty lines each, no dependency, no version
-pin, and the ZIP handling and error behaviour above it stay shared. Revisit when Kotlin moves.
+**On Ktor, and on a wrong conclusion that is worth recording.** The fetch is currently an
+`expect`/`actual` over `HttpURLConnection` and `NSURLSession` (`httpGetBytes`, about forty lines
+each) rather than Ktor. That was first justified by "Ktor does not work here", which was **wrong**,
+and wrong in an instructive way: the original symptom was Ktor's klibs failing to load, which was
+really the project sitting on Kotlin 2.2.10 for no reason (see §4.2). On the current stack Ktor 3.5.1
+resolves and links, and constructing an `HttpClient` passes in the iOS test target.
+
+What is *actually* still true is much narrower: linking `ktor-client-core` **together with Compose
+Multiplatform** into the iOS framework crashes the throwaway spike app at start-up, inside
+`ComposeUIViewController`. Dependency resolution is clean — one `kotlinx-coroutines` 1.11.0, one
+`atomicfu` — and the same framework is fine under XCTest, so the spike's hand-rolled `swiftc` bundle
+is itself a suspect. This is not worth chasing now: nothing needs Ktor until the RetroStore module
+becomes KMP (7.2), and by Phase 4 there is a real Xcode-built app to retest against. Decide it then,
+with the shared ZIP and error handling unchanged either way.
 
 ### 7.2 The screens
 

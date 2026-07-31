@@ -32,7 +32,6 @@ def iosMinVersion = '15.0'
 def iosTargets = [
         iosArm64         : [sdk: 'iphoneos', arch: 'arm64'],
         iosSimulatorArm64: [sdk: 'iphonesimulator', arch: 'arm64'],
-        iosX64           : [sdk: 'iphonesimulator', arch: 'x86_64'],
 ]
 
 // Where a given target's static library lands. A plain path, so both the
@@ -93,7 +92,10 @@ kotlin {
     }
 
     // Named so the produced framework is importable from Swift as `Shared`.
-    iosX64 { binaries.framework { baseName = 'Shared' } }
+    // No iosX64: Compose Multiplatform stopped publishing the Intel simulator
+    // target in 1.11, along with the other x64 Apple ones. Nothing here needs it
+    // -- the simulator on an Apple Silicon Mac is iosSimulatorArm64, which is
+    // what the tests have always actually run on.
     iosArm64 { binaries.framework { baseName = 'Shared' } }
     iosSimulatorArm64 { binaries.framework { baseName = 'Shared' } }
 
@@ -141,6 +143,7 @@ kotlin {
                 // Files. api, not implementation: FileManager hands out okio
                 // Paths and takes a FileSystem, so callers need the types.
                 api 'com.squareup.okio:okio:3.18.1'
+
 
                 // Compose Multiplatform: the emulator surface is drawn from
                 // commonMain so both hosts share it.
