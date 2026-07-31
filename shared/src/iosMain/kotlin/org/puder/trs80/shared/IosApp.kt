@@ -78,7 +78,7 @@ private val SCREEN_COLOR = Color(0xFF444444)
 fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
     installIfNeeded(romPath, diskPath)
 
-    return ComposeUIViewController {
+    val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
         var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
 
@@ -109,6 +109,14 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
             )
         }
     }
+
+    // A real keyboard has to be taken in UIKit, not in Compose; see
+    // KeyForwardingController.
+    return KeyForwardingController(
+        content = compose,
+        onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
+        onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+    )
 }
 
 /**

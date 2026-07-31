@@ -523,6 +523,13 @@ check it against. `KeyboardState` holds the behaviour and is tested without a sc
 behaviour is the surprising part: shift **latches** rather than being held, and is released by the
 next key, which is the only way one finger can type a shifted character.
 
+**A real keyboard reaches the machine too**, which on Android is free and on iOS was not. Compose's
+`onKeyEvent` does not fire on an emulator screen: focus works — the node reports itself focused — but
+iOS only delivers key presses to the *first responder*, and Compose's view becomes that when a text
+field takes focus. A screen with no text field never receives a key. So the presses are taken one
+level up in UIKit, in a `UIViewController` that wraps the Compose one — which is where Android takes
+them as well, in `dispatchKeyEvent` rather than in a view.
+
 The joystick and tilt layouts are *not* ported. They contain no keys at all — they are gesture
 surfaces with a fire button — and they are a different job from a key grid.
 
