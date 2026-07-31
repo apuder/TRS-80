@@ -16,9 +16,19 @@
 
 package org.puder.trs80.shared.ui
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 
 actual fun decodeImage(bytes: ByteArray): ImageBitmap? =
     BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+
+actual fun encodePng(image: ImageBitmap): ByteArray? =
+    java.io.ByteArrayOutputStream().use { out ->
+        if (!image.asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 90, out)) {
+            return null
+        }
+        out.toByteArray()
+    }

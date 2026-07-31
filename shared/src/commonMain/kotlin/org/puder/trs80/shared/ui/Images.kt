@@ -27,3 +27,10 @@ import androidx.compose.ui.graphics.ImageBitmap
  * the emulator can produce again.
  */
 expect fun decodeImage(bytes: ByteArray): ImageBitmap?
+
+/**
+ * Encodes [image] as a PNG, for the screenshot stored with a configuration.
+ *
+ * @return the bytes, or null if the image could not be encoded.
+ */
+expect fun encodePng(image: ImageBitmap): ByteArray?

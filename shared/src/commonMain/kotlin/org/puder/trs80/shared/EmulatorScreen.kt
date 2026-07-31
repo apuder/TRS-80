@@ -77,6 +77,17 @@ interface EmulatorScreenSource {
      * This carries no colour: it is an alpha-only image, tinted when drawn.
      */
     fun image(): ImageBitmap?
+
+    /**
+     * A copy of the current screen in colour, for storing as a screenshot.
+     *
+     * Separate from [image] because that one carries no colour — it is a mask,
+     * tinted when drawn — and a screenshot has to stand on its own in a list
+     * long after the machine that drew it has stopped.
+     *
+     * @return null when there is nothing drawn yet.
+     */
+    fun snapshot(characterColor: Color, screenColor: Color): ImageBitmap?
 }
 
 /**

@@ -492,6 +492,16 @@ replaces the flip card anyway — so turning a card over is a crossfade, which k
 without inventing the design that replaces it. Actions the app cannot yet perform are not drawn at
 all rather than drawn dead, so the list grows buttons as the screens behind them land.
 
+**Sessions are saved and resumed on iOS**, so the list stops saying "not run yet" and a machine
+picks up where it was left. `trs80_save_state` and `trs80_load_state` were already in the core API
+and only needed exposing; the screenshot needed a PNG encoder per platform and a colour copy of the
+screen, since what the renderer keeps is a colourless mask. That expansion happens once, when a
+machine is put away — doing it per frame is what cost 75% of a core before (§6.2).
+
+The session is written on the way *out* rather than in `onDispose`: the list reloads the moment the
+back stack pops, so writing afterwards means it reads the previous screenshot. Backgrounding the app
+does not save yet, which Android does in `onPause`.
+
 `EmulatorScaffold` is the scaffolding around the emulator surface: a title and a way out. iOS needs
 it more than Android, which at least has a system Back — without it the emulator is a place the app
 can go and never leave.

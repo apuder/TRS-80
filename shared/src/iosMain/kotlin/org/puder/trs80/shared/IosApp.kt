@@ -36,6 +36,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import org.puder.trs80.shared.configuration.ConfigurationManager
+import org.puder.trs80.shared.configuration.EmulatorState
 import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.TRS80_DIRECTORY
 import org.puder.trs80.shared.io.appDataDirectory
@@ -49,6 +50,7 @@ import org.puder.trs80.shared.ui.ConfigurationCard
 import org.puder.trs80.shared.ui.ConfigurationListActions
 import org.puder.trs80.shared.ui.ConfigurationListScreen
 import org.puder.trs80.shared.ui.EmulatorScaffold
+import org.puder.trs80.shared.ui.encodePng
 import org.puder.trs80.shared.ui.Keyboard
 import org.puder.trs80.shared.ui.KeyboardState
 import org.puder.trs80.shared.ui.ORIGINAL_KEYBOARD
@@ -129,10 +131,17 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
 @Composable
 private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
     val source = remember(configurationId) { IosEmulatorScreenSource() }
+    // Held so leaving can write to it. The session is put away on the way out
+    // rather than in onDispose, because the list reloads the moment the back
+    // stack pops -- writing afterwards means it reads the previous screenshot.
+    var emulatorState by remember(configurationId) { mutableStateOf<EmulatorState?>(null) }
 
     DisposableEffect(configurationId) {
         val configuration = ConfigurationManager.get().getConfigById(configurationId)
         val rom = configuration?.let { romPathFor(it.model) }
+        val state = runCatching {
+            ConfigurationManager.get().getEmulatorState(configurationId)
+        }.getOrNull()
         if (configuration == null || rom == null) {
             Log.e(TAG, "Cannot run configuration $configurationId: no configuration or no ROM.")
         } else {
@@ -141,6 +150,10 @@ private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
                 romPath = rom,
                 diskPaths = configuration.diskPaths.filterNotNull(),
             )
+            // Pick the session up where it was left, if there is one.
+            if (state?.hasState() == true) {
+                EmulatorCore.loadState(state.stateFilePath)
+            }
         }
         // A thread of its very own, not Dispatchers.Default. trs80_run() does not
         // return until the machine is stopped, so on a shared pool it permanently
@@ -149,6 +162,7 @@ private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
         // breaks things far away from here.
         val cpu = newSingleThreadContext("trs80-cpu")
         CoroutineScope(cpu).launch { EmulatorCore.run() }
+        emulatorState = state
         onDispose {
             EmulatorCore.stop()
             cpu.close()
@@ -173,7 +187,19 @@ private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
 
     EmulatorScaffold(
         title = configuration?.name.orEmpty(),
-        onBack = onBack,
+        onBack = {
+            // Stop, then write. The CPU thread tests a flag rather than being
+            // interrupted, so this keeps the same small race between the last
+            // instruction and the snapshot that the Android app has always had.
+            EmulatorCore.stop()
+            emulatorState?.let { state ->
+                EmulatorCore.saveState(state.stateFilePath)
+                source.snapshot(CHARACTER_COLOR, SCREEN_COLOR)
+                    ?.let(::encodePng)
+                    ?.let(state::writeScreenshot)
+            }
+            onBack()
+        },
         keyboard = { Keyboard(keyboard) },
     ) {
         EmulatorScreen(

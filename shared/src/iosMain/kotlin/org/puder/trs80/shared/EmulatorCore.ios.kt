@@ -33,6 +33,8 @@ import org.puder.trs80.core.trs80_config
 import org.puder.trs80.core.trs80_init
 import org.puder.trs80.core.trs80_is_expanded_mode
 import org.puder.trs80.core.trs80_reset
+import org.puder.trs80.core.trs80_save_state
+import org.puder.trs80.core.trs80_load_state
 import org.puder.trs80.core.TRS80_CELL_HEIGHT
 import org.puder.trs80.core.TRS80_CELL_WIDTH
 import kotlinx.cinterop.addressOf
@@ -176,6 +178,15 @@ object EmulatorCore {
     fun stop() = trs80_set_running(0)
 
     fun reset() = trs80_reset()
+
+    /**
+     * Writes the machine's whole state to [path], so the session can be picked
+     * up later exactly where it was left.
+     */
+    fun saveState(path: String) = trs80_save_state(path)
+
+    /** Reads back a state written by [saveState]. */
+    fun loadState(path: String) = trs80_load_state(path)
 
     fun setSoundMuted(muted: Boolean) = trs80_set_sound_muted(if (muted) 1 else 0)
 

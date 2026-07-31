@@ -18,11 +18,21 @@ package org.puder.trs80.shared.ui
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.asSkiaBitmap
+import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 
 actual fun decodeImage(bytes: ByteArray): ImageBitmap? = try {
     Image.makeFromEncoded(bytes).toComposeImageBitmap()
 } catch (e: Throwable) {
     // Skia throws rather than returning null on malformed input.
+    null
+}
+
+actual fun encodePng(image: ImageBitmap): ByteArray? = try {
+    Image.makeFromBitmap(image.asSkiaBitmap())
+        .encodeToData(EncodedImageFormat.PNG)
+        ?.bytes
+} catch (e: Throwable) {
     null
 }

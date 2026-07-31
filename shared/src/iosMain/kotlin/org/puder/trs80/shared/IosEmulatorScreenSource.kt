@@ -16,6 +16,7 @@
 
 package org.puder.trs80.shared
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -96,4 +97,43 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
     }
 
     override fun image(): ImageBitmap? = image
+
+    /**
+     * Expands the mask into a colour bitmap.
+     *
+     * Only for screenshots, which happen once when a machine is put away —
+     * doing this per frame is what made the app burn 75% of a core before, so
+     * the drawing path deliberately keeps the mask colourless and tints it.
+     */
+    override fun snapshot(characterColor: Color, screenColor: Color): ImageBitmap? {
+        if (width == 0 || height == 0 || image == null) {
+            return null
+        }
+        val foreground = characterColor.toN32()
+        val background = screenColor.toN32()
+        val coloured = ByteArray(width * height * 4)
+        var out = 0
+        for (i in pixels.indices) {
+            val argb = if (pixels[i] == 0.toByte()) background else foreground
+            coloured[out++] = (argb and 0xFF).toByte()
+            coloured[out++] = ((argb shr 8) and 0xFF).toByte()
+            coloured[out++] = ((argb shr 16) and 0xFF).toByte()
+            coloured[out++] = ((argb shr 24) and 0xFF).toByte()
+        }
+        val target = Bitmap()
+        target.allocPixels(ImageInfo(width, height, ColorType.N32, ColorAlphaType.OPAQUE))
+        if (!target.installPixels(coloured)) {
+            return null
+        }
+        return target.asComposeImageBitmap()
+    }
+}
+
+/** Repacks a colour into the byte order Skia's N32 expects on this platform. */
+private fun Color.toN32(): Int {
+    val a = (alpha * 255f).toInt() and 0xFF
+    val r = (red * 255f).toInt() and 0xFF
+    val g = (green * 255f).toInt() and 0xFF
+    val b = (blue * 255f).toInt() and 0xFF
+    return (a shl 24) or (b shl 16) or (g shl 8) or r
 }
