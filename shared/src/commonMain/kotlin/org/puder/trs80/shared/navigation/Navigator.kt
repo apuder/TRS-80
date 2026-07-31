@@ -38,9 +38,11 @@ import androidx.compose.runtime.setValue
  * extras that can silently be missing, and a result is delivered exactly once to
  * the caller rather than to whichever Activity instance happens to exist.
  */
-class Navigator(root: Destination = Destination.ConfigurationList) {
+class Navigator(private val stack: MutableList<Destination>) {
 
-    private val stack = mutableStateListOf(root)
+    /** For tests and for hosts that do not need the stack restored. */
+    constructor(root: Destination = Destination.ConfigurationList) :
+        this(mutableStateListOf(root))
 
     private var result by mutableStateOf<NavigationResult?>(null)
 
@@ -96,7 +98,7 @@ class Navigator(root: Destination = Destination.ConfigurationList) {
     /** Goes back to the root, discarding everything above it. */
     fun goBackToRoot() {
         if (canGoBack) {
-            stack.removeRange(1, stack.size)
+            stack.subList(1, stack.size).clear()
         }
     }
 

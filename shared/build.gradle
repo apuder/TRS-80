@@ -9,6 +9,7 @@ plugins {
     id 'com.android.kotlin.multiplatform.library'
     id 'org.jetbrains.kotlin.plugin.compose'
     id 'org.jetbrains.compose'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 repositories {
@@ -150,6 +151,12 @@ kotlin {
                 implementation compose.runtime
                 implementation compose.foundation
                 implementation compose.ui
+                implementation compose.material3
+
+                // Navigation 3. The back stack is ours (see the navigation
+                // package); this renders it and puts it away for us.
+                implementation 'org.jetbrains.androidx.navigation3:navigation3-ui:1.1.1'
+                implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0'
             }
         }
         commonTest {

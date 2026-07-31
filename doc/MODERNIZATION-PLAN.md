@@ -485,6 +485,19 @@ with the shared ZIP and error handling unchanged either way.
 Configuration list, configuration editor, settings, disk creation, onboarding, and the scaffolding
 around the emulator surface §6 already draws.
 
+**Navigation 3 is in and proven on both platforms**, which was the first step and the one worth
+doing first. `Trs80App` renders the navigator's stack through a `NavDisplay`; `rememberNavigator`
+hands the stack to Nav3 so it survives the app being put away. The iOS spike now reaches the
+emulator *through* that path rather than around it, so the whole chain is exercised on a device and
+not only by tests — the lesson from Ktor being that a passing test target proves less than it looks
+(§7.1).
+
+Two things learned in the process. Nav3's real packages are `androidx.navigation3.runtime.*`, not
+the `androidx.navigation3.*` the documentation shows. And every `Destination` has to be registered
+by hand in a `SavedStateConfiguration`: Kotlin/Native has no reflection to derive it from, so a
+destination that is missing there fails at restore time on iOS, not at compile time. Adding a
+destination means adding a line.
+
 **RetroStore is a second UI**, and easy to overlook: `retrostore/src/main/java/org/retrostore/android/`
 holds its own Activities, RecyclerView adapters and a Glide image loader — a browse screen, a detail
 screen, and async image loading. The client half is portable already (Wire messages over Ktor), but

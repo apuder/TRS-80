@@ -20,6 +20,9 @@ buildscript {
         // with Kotlin, so its version tracks Kotlin's rather than Compose's.
         classpath 'org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.4.10'
         classpath 'org.jetbrains.compose:compose-gradle-plugin:1.11.1'
+        // Navigation 3 needs its destinations serializable, so it can put the
+        // back stack away and get it back.
+        classpath 'org.jetbrains.kotlin:kotlin-serialization:2.4.10'
         classpath 'com.google.gms:google-services:4.3.15'
         
 

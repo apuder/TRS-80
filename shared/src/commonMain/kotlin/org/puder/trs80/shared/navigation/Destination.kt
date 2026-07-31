@@ -16,6 +16,9 @@
 
 package org.puder.trs80.shared.navigation
 
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
+
 /**
  * Everywhere the app can be.
  *
@@ -29,12 +32,15 @@ package org.puder.trs80.shared.navigation
  * the outward-facing intents — the Play Store, the community link, sharing —
  * which leave the app rather than navigating within it.
  */
-sealed interface Destination {
+@Serializable
+sealed interface Destination : NavKey {
 
     /** The list of configurations. Where the app starts, and the root of the stack. */
+    @Serializable
     data object ConfigurationList : Destination
 
     /** A running machine. */
+    @Serializable
     data class Emulator(val configurationId: Int) : Destination
 
     /**
@@ -44,21 +50,26 @@ sealed interface Destination {
      * decides whether the list animates an insertion or an update when this
      * returns.
      */
+    @Serializable
     data class EditConfiguration(
         val configurationId: Int,
         val isNew: Boolean = false,
     ) : Destination
 
     /** The app's own settings. */
+    @Serializable
     data object Settings : Destination
 
     /** The RetroStore catalogue. */
+    @Serializable
     data object RetroStore : Destination
 
     /** One app in the RetroStore catalogue. */
+    @Serializable
     data class RetroStoreApp(val appId: String) : Destination
 
     /** The blank-disk-image creator. */
+    @Serializable
     data object CreateDisk : Destination
 }
 

@@ -31,6 +31,9 @@ import org.puder.trs80.shared.io.TRS80_DIRECTORY
 import org.puder.trs80.shared.io.appDataDirectory
 import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.localstore.RomManager
+import org.puder.trs80.shared.navigation.Destination
+import org.puder.trs80.shared.navigation.Trs80App
+import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.StorageKeys
 import org.puder.trs80.shared.storage.appSettings
 import platform.UIKit.UIViewController
@@ -80,10 +83,19 @@ fun EmulatorViewController(romPath: String, diskPath: String?): UIViewController
     CoroutineScope(newSingleThreadContext("trs80-cpu")).launch { EmulatorCore.run() }
 
     return ComposeUIViewController {
-        EmulatorScreen(
-            source = source,
-            characterColor = CHARACTER_COLOR,
-            screenColor = SCREEN_COLOR,
+        // Through the navigator rather than straight to the screen, so that the
+        // whole path -- back stack, NavDisplay, restoration -- is exercised on a
+        // device from the moment it exists, rather than proven only by tests.
+        val navigator = rememberNavigator(root = Destination.Emulator(configuration.id))
+        Trs80App(
+            navigator = navigator,
+            emulator = {
+                EmulatorScreen(
+                    source = source,
+                    characterColor = CHARACTER_COLOR,
+                    screenColor = SCREEN_COLOR,
+                )
+            },
         )
     }
 }
