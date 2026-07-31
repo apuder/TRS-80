@@ -452,9 +452,18 @@ The screens are the thin part. Underneath them:
   note below.
 - **Storage `actual`s for iOS** — the other half of D8. `NSUserDefaults` behind
   multiplatform-settings, and `appDataDirectory()` on the sandbox's Documents directory.
-- **Navigation.** Activities and `startActivityForResult` become one composable navigation model.
-  This is the part with no Android equivalent to copy, so it is worth designing rather than
-  transliterating — even though the *navigation itself* does not change.
+- **Navigation.** Activities and `startActivityForResult` become one composable navigation model:
+  `Destination` (a sealed set of the screens the app already has), `NavigationResult` (the three
+  things that travel backwards) and `Navigator` (the back stack). Done, with tests.
+
+  **Navigation 3 is the intended renderer, and is deliberately not a dependency yet.** It is stable
+  for Compose Multiplatform at 1.1.1, needs Compose ≥ 1.10 (we are on 1.11.1) and publishes both of
+  our iOS targets. Its whole design is a *user-owned* back stack — an observable list the app keeps
+  and `NavDisplay` renders — so the model above is the deliverable either way, and adopting the
+  library is adding `NavDisplay`, `: NavKey`, and the serializer configuration Nav3 needs for state
+  restoration on non-JVM targets. Adding it now would be a dependency with nothing to render and
+  nothing to verify, which is how the Ktor and Compose pins went wrong (§4.2, §7.1). It goes in at
+  the start of 7.2, alongside the first screen, where it can actually be run on both platforms.
 
 **On Ktor, and on a wrong conclusion that is worth recording.** The fetch is currently an
 `expect`/`actual` over `HttpURLConnection` and `NSURLSession` (`httpGetBytes`, about forty lines
