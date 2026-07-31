@@ -17,6 +17,8 @@
 package org.puder.trs80.shared.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,6 +50,7 @@ fun EmulatorScaffold(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    keyboard: (@Composable () -> Unit)? = null,
     screen: @Composable () -> Unit,
 ) {
     Scaffold(
@@ -66,8 +69,14 @@ fun EmulatorScaffold(
             )
         },
     ) { insets ->
-        Box(Modifier.padding(insets).fillMaxSize()) {
-            screen()
+        Column(Modifier.padding(insets).fillMaxSize()) {
+            // The picture takes what the keyboard leaves. The emulated screen
+            // scales to whatever it is given, so this needs no arithmetic --
+            // the core is told the size and rasterizes to it.
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                screen()
+            }
+            keyboard?.invoke()
         }
     }
 }

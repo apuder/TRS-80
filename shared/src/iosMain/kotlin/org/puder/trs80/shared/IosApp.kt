@@ -49,6 +49,10 @@ import org.puder.trs80.shared.ui.ConfigurationCard
 import org.puder.trs80.shared.ui.ConfigurationListActions
 import org.puder.trs80.shared.ui.ConfigurationListScreen
 import org.puder.trs80.shared.ui.EmulatorScaffold
+import org.puder.trs80.shared.ui.Keyboard
+import org.puder.trs80.shared.ui.KeyboardState
+import org.puder.trs80.shared.ui.ORIGINAL_KEYBOARD
+import org.puder.trs80.shared.ui.keyboardFor
 import org.puder.trs80.shared.ui.toCards
 import platform.UIKit.UIViewController
 
@@ -143,10 +147,27 @@ private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
         }
     }
 
-    val name = remember(configurationId) {
-        ConfigurationManager.get().getConfigById(configurationId)?.name.orEmpty()
+    val configuration = remember(configurationId) {
+        ConfigurationManager.get().getConfigById(configurationId)
     }
-    EmulatorScaffold(title = name, onBack = onBack) {
+    // The layout the configuration asks for, falling back to the full keyboard.
+    // A machine with no way to type at it is not much use.
+    val definition = remember(configurationId) {
+        keyboardFor(configuration?.keyboardLayoutPortrait) ?: ORIGINAL_KEYBOARD
+    }
+    val keyboard = remember(definition) {
+        KeyboardState(
+            definition = definition,
+            onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
+            onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+        )
+    }
+
+    EmulatorScaffold(
+        title = configuration?.name.orEmpty(),
+        onBack = onBack,
+        keyboard = { Keyboard(keyboard) },
+    ) {
         EmulatorScreen(
             source = source,
             characterColor = CHARACTER_COLOR,

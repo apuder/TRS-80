@@ -514,7 +514,19 @@ holds its own Activities, RecyclerView adapters and a Glide image loader — a b
 screen, and async image loading. The client half is portable already (Wire messages over Ktor), but
 the module is still `com.android.library` and has to become KMP.
 
-**The keyboards are the one thing not to port faithfully.** Roughly 850 lines of custom Views across
+**The keyboards are ported functionally**, which is what unblocked everything else: a machine you
+cannot type at cannot be driven to a state worth saving, screenshotting or resuming. The two key
+grids -- the original and the two-page compact one, 123 keys -- were *extracted* from the Android
+layout XML rather than retyped, and every name verified to resolve against `KeyboardMapping` at
+extraction time; a single mistyped key would type the wrong character on a machine with nothing to
+check it against. `KeyboardState` holds the behaviour and is tested without a screen, because the
+behaviour is the surprising part: shift **latches** rather than being held, and is released by the
+next key, which is the only way one finger can type a shifted character.
+
+The joystick and tilt layouts are *not* ported. They contain no keys at all — they are gesture
+surfaces with a fire button — and they are a different job from a key grid.
+
+**Styling is deliberately not carried across.** Roughly 850 lines of custom Views across
 `Key`, `FireKey`, `JoystickView` and `KeyboardManager` — and per the UI spec the styling needs real
 attention, since the 43 %-opacity labels fail contrast outright. Port the *function*: the layouts are
 essentially data, and the key-matrix and hit-testing logic survives intact. Do not preserve the
