@@ -23,6 +23,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -76,6 +80,8 @@ fun Trs80App(
     navigator: Navigator,
     configurationList: @Composable () -> Unit,
     emulator: @Composable (Destination.Emulator) -> Unit,
+    retroStore: (@Composable () -> Unit)? = null,
+    retroStoreApp: (@Composable (Destination.RetroStoreApp) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     NavDisplay(
@@ -85,6 +91,21 @@ fun Trs80App(
         entryProvider = entryProvider {
             entry<Destination.ConfigurationList> { configurationList() }
             entry<Destination.Emulator> { emulator(it) }
+            // Every destination needs an entry or NavDisplay has nothing to draw
+            // for it, so a host that cannot show one says so rather than the app
+            // navigating into a blank screen.
+            entry<Destination.RetroStore> { retroStore?.invoke() ?: Missing("RetroStore") }
+            entry<Destination.RetroStoreApp> {
+                retroStoreApp?.invoke(it) ?: Missing("RetroStore app")
+            }
         },
     )
+}
+
+/** Stands in for a destination this host has no screen for yet. */
+@Composable
+private fun Missing(name: String) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("$name is not available here yet.")
+    }
 }

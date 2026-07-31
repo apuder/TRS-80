@@ -528,7 +528,18 @@ into `:shared`, and the module that is left is the Android UI, depending on `:sh
 client takes its transport as a parameter rather than building one: every call it makes is a POST of
 an encoded message that comes back as another, so it needs one function, not an HTTP library. That
 keeps it dependency-free, makes it testable without a network, and sidesteps Ktor — which still
-cannot be linked alongside Compose in the iOS framework (§7.1). What remains is the two screens.
+cannot be linked alongside Compose in the iOS framework (§7.1).
+
+**Both store screens are ported too**, and iOS can browse the catalogue and install from it. The
+installer came with them: it is small, and once the client was shared it needed nothing from Android
+but the wrapper it used to go through. What the screens did need was an image loader — every app has
+cover art over the network, Android uses Glide, and `commonMain` has nothing. `RemoteImage` is the
+part of Glide a list of covers actually uses: fetch once through the HTTP seam, decode off the main
+thread, keep it, and treat a failure as a blank box rather than an error, because a cover is
+decoration.
+
+What is left of RetroStore is Android's own screens, which still use the Activities in
+`retrostore/`, and paging — both screens fetch one page, as the Android list does.
 
 **The keyboards are ported functionally**, which is what unblocked everything else: a machine you
 cannot type at cannot be driven to a state worth saving, screenshotting or resuming. The two key

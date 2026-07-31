@@ -50,6 +50,13 @@ import org.puder.trs80.shared.ui.ConfigurationCard
 import org.puder.trs80.shared.ui.ConfigurationListActions
 import org.puder.trs80.shared.ui.ConfigurationListScreen
 import org.puder.trs80.shared.ui.EmulatorScaffold
+import org.puder.trs80.shared.ui.RetroStoreAppScreen
+import org.puder.trs80.shared.ui.RetroStoreScreen
+import org.puder.trs80.shared.ui.StoreState
+import org.puder.trs80.shared.store.AppInstaller
+import org.puder.trs80.shared.store.retroStore
+import org.retrostore.client.common.proto.App
+import androidx.compose.runtime.rememberCoroutineScope
 import org.puder.trs80.shared.ui.encodePng
 import org.puder.trs80.shared.ui.Keyboard
 import org.puder.trs80.shared.ui.KeyboardState
@@ -104,10 +111,20 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                         // not offer them rather than offering nothing.
                         actions = ConfigurationListActions(
                             onRun = { navigator.goTo(Destination.Emulator(it)) },
+                            onOpenStore = { navigator.goTo(Destination.RetroStore) },
                         ),
                     )
                 },
                 emulator = { RunningMachine(it.configurationId, onBack = { navigator.goBack() }) },
+                retroStore = {
+                    StoreBrowser(
+                        onOpen = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
+                        onBack = { navigator.goBack() },
+                    )
+                },
+                retroStoreApp = { destination ->
+                    StoreApp(destination.appId, onBack = { navigator.goBack() })
+                },
             )
         }
     }
@@ -118,6 +135,61 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
         content = compose,
         onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
         onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+    )
+}
+
+/** The store's catalogue, fetched when it is first shown. */
+@Composable
+private fun StoreBrowser(onOpen: (App) -> Unit, onBack: () -> Unit) {
+    var state by remember { mutableStateOf<StoreState>(StoreState.Loading) }
+    LaunchedEffect(Unit) {
+        state = try {
+            // The catalogue is paged; this is the first page, as the Android
+            // screen shows. Paging belongs with the redesign.
+            StoreState.Loaded(withContext(Dispatchers.Default) { retroStore.fetchApps(0, 50) })
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not fetch the store catalogue.", e)
+            StoreState.Failed(e.message.orEmpty())
+        }
+    }
+    RetroStoreScreen(state = state, onOpen = onOpen, onBack = onBack)
+}
+
+/** One app from the store, and installing it. */
+@Composable
+private fun StoreApp(appId: String, onBack: () -> Unit) {
+    var app by remember(appId) { mutableStateOf<App?>(null) }
+    var installing by remember(appId) { mutableStateOf(false) }
+    var installed by remember(appId) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(appId) {
+        app = try {
+            withContext(Dispatchers.Default) { retroStore.getApp(appId) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not fetch app $appId.", e)
+            null
+        }
+    }
+
+    RetroStoreAppScreen(
+        app = app,
+        installing = installing,
+        installed = installed,
+        onInstall = {
+            val toInstall = app ?: return@RetroStoreAppScreen
+            installing = true
+            scope.launch {
+                val configuration = withContext(Dispatchers.Default) {
+                    runCatching { AppInstaller(ConfigurationManager.get()).install(toInstall) }
+                        .onFailure { Log.e(TAG, "Could not install ${toInstall.name}.", it) }
+                        .getOrNull()
+                }
+                installing = false
+                installed = configuration != null
+            }
+        },
+        onBack = onBack,
     )
 }
 

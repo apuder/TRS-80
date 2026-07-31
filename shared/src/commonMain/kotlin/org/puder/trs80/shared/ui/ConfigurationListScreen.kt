@@ -68,6 +68,7 @@ data class ConfigurationListActions(
     val onStop: ((Int) -> Unit)? = null,
     val onShare: ((Int) -> Unit)? = null,
     val onAdd: (() -> Unit)? = null,
+    val onOpenStore: (() -> Unit)? = null,
 )
 
 /**
@@ -92,7 +93,16 @@ fun ConfigurationListScreen(
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text("TRS-80") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("TRS-80") },
+                actions = {
+                    actions.onOpenStore?.let { open ->
+                        TextButton(onClick = open) { Text("Store") }
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             actions.onAdd?.let { add ->
                 ExtendedFloatingActionButton(
