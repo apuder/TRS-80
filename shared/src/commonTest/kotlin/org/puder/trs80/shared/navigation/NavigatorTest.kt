@@ -73,11 +73,11 @@ class NavigatorTest {
     /** The same screen with different arguments is a different screen. */
     @Test
     fun theSameScreenWithOtherArgumentsStacks() {
-        navigator.goTo(Destination.RetroStoreApp("a"))
-        navigator.goTo(Destination.RetroStoreApp("b"))
+        navigator.goTo(Destination.EditConfiguration(1, isNew = false))
+        navigator.goTo(Destination.EditConfiguration(2, isNew = false))
 
         assertEquals(3, navigator.backStack.size)
-        assertEquals(Destination.RetroStoreApp("b"), navigator.current)
+        assertEquals(Destination.EditConfiguration(2, isNew = false), navigator.current)
     }
 
     @Test
@@ -109,7 +109,7 @@ class NavigatorTest {
 
     @Test
     fun goingBackToTheRootDropsEverythingAbove() {
-        navigator.goTo(Destination.RetroStoreApp("sea-dragon"))
+        navigator.goTo(Destination.EditConfiguration(7, isNew = false))
         navigator.goTo(Destination.EditConfiguration(2, isNew = true))
 
         navigator.goBackToRoot()
@@ -146,12 +146,12 @@ class NavigatorTest {
      */
     @Test
     fun theRetroStoreBrowseFlow() {
-        navigator.goTo(Destination.RetroStoreApp("rear-guard"))
+        navigator.goTo(Destination.EditConfiguration(9, isNew = false))
         navigator.goTo(Destination.Emulator(4))
 
         navigator.goBack()
 
-        assertEquals(Destination.RetroStoreApp("rear-guard"), navigator.current)
+        assertEquals(Destination.EditConfiguration(9, isNew = false), navigator.current)
         assertTrue(navigator.canGoBack)
 
         navigator.goBack()

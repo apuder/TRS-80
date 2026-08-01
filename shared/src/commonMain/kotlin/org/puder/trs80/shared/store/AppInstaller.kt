@@ -71,7 +71,8 @@ private fun toConfigMedia(image: MediaImage): ConfigMedia =
     ConfigMedia(image.filename, image.data_.toByteArray())
 
 /** @return the `MODEL*` constant matching the store's [model]. */
-private fun modelOf(model: Trs80Model?): Int = when (model) {
+/** The store's model, as this app numbers them. */
+fun modelOf(model: Trs80Model?): Int = when (model) {
     Trs80Model.MODEL_I -> MODEL1
     Trs80Model.MODEL_III -> MODEL3
     Trs80Model.MODEL_4 -> MODEL4

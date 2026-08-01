@@ -45,6 +45,16 @@ import org.puder.trs80.shared.navigation.Destination
 import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.appSettings
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import org.puder.trs80.shared.ui.CatalogueEntry
+import org.puder.trs80.shared.ui.DetailAction
+import org.puder.trs80.shared.ui.DetailContent
+import org.puder.trs80.shared.ui.DetailSheet
+import org.puder.trs80.shared.ui.mediaSummary
+import org.puder.trs80.shared.ui.modelLabel
+import org.puder.trs80.shared.store.modelOf
 import org.puder.trs80.shared.ui.ConfigurationCard
 import org.puder.trs80.shared.ui.LibraryActions
 import org.puder.trs80.shared.ui.LibraryScreen
@@ -62,7 +72,6 @@ import org.puder.trs80.shared.ui.SettingsScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import org.puder.trs80.shared.navigation.Navigator
 import org.puder.trs80.shared.ui.EmulatorScaffold
-import org.puder.trs80.shared.ui.RetroStoreAppScreen
 import org.puder.trs80.shared.ui.StoreState
 import org.puder.trs80.shared.store.AppInstaller
 import org.puder.trs80.shared.store.retroStore
@@ -118,9 +127,6 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                         capture = capture,
                         onBack = { navigator.goBack() },
                     )
-                },
-                retroStoreApp = { destination ->
-                    StoreApp(destination.appId, onBack = { navigator.goBack() })
                 },
                 settings = {
                     SettingsScreen(
@@ -228,10 +234,26 @@ private fun Library(navigator: Navigator) {
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
     var expanded by remember { mutableStateOf(false) }
     var installing by remember { mutableStateOf(emptySet<String>()) }
+    var selected by remember { mutableStateOf<CatalogueEntry?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun reload() {
         cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
+    }
+
+    fun install(app: App) {
+        installing = installing + app.id
+        scope.launch {
+            val configuration = withContext(Dispatchers.Default) {
+                runCatching { AppInstaller(ConfigurationManager.get()).install(app) }
+                    .onFailure { Log.e(TAG, "Could not install ${app.name}.", it) }
+                    .getOrNull()
+            }
+            installing = installing - app.id
+            if (configuration != null) {
+                reload()
+            }
+        }
     }
 
     // Re-read on every return, so a machine that has just run moves to the top
@@ -250,6 +272,8 @@ private fun Library(navigator: Navigator) {
         }
     }
 
+    val selectedEntry = selected
+    Box(Modifier.fillMaxSize()) {
     LibraryScreen(
         yours = cards.matching(query).sortedFor(sort),
         catalogue = ((apps as? StoreState.Loaded)?.apps.orEmpty())
@@ -264,7 +288,7 @@ private fun Library(navigator: Navigator) {
         onExpandedChange = { expanded = it },
         actions = LibraryActions(
             onRun = { navigator.goTo(Destination.Emulator(it)) },
-            onOpenEntry = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
+            onOpenEntry = { selected = it },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
             onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
             onAdd = {
@@ -272,62 +296,96 @@ private fun Library(navigator: Navigator) {
                 navigator.goTo(Destination.EditConfiguration(fresh.id, isNew = true))
             },
             onInstall = { entry ->
-                installing = installing + entry.id
-                scope.launch {
-                    val installed = withContext(Dispatchers.Default) {
-                        runCatching {
-                            retroStore.getApp(entry.id)
-                                ?.let { AppInstaller(ConfigurationManager.get()).install(it) }
-                        }.onFailure { Log.e(TAG, "Could not install ${entry.title}.", it) }
-                            .getOrNull()
-                    }
-                    installing = installing - entry.id
-                    if (installed != null) {
-                        reload()
-                    }
-                }
+                (apps as? StoreState.Loaded)?.apps?.firstOrNull { it.id == entry.id }
+                    ?.let(::install)
             },
         ),
     )
+
+        val selectedApp = (apps as? StoreState.Loaded)?.apps?.firstOrNull {
+            it.id == selectedEntry?.id
+        }
+        if (selectedEntry != null && selectedApp != null) {
+            Detail(
+                entry = selectedEntry,
+                app = selectedApp,
+                installing = selectedEntry.id in installing,
+                onInstall = { install(selectedApp) },
+                onRun = { navigator.goTo(Destination.Emulator(it)) },
+                onCopied = { scope.launch { reload() } },
+                onDismiss = { selected = null },
+            )
+        }
+    }
 }
 
-/** One app from the store, and installing it. */
+/**
+ * The sheet for one catalogue entry.
+ *
+ * The record is filled in from what is actually on the device: the store hands
+ * over a program's media only by sending all of it, so the size of something
+ * not yet downloaded is not a thing this app can know without downloading it.
+ */
 @Composable
-private fun StoreApp(appId: String, onBack: () -> Unit) {
-    var app by remember(appId) { mutableStateOf<App?>(null) }
-    var installing by remember(appId) { mutableStateOf(false) }
-    var installed by remember(appId) { mutableStateOf(false) }
+private fun Detail(
+    entry: CatalogueEntry,
+    app: App,
+    installing: Boolean,
+    onInstall: () -> Unit,
+    onRun: (Int) -> Unit,
+    onCopied: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(appId) {
-        app = try {
-            withContext(Dispatchers.Default) { retroStore.getApp(appId) }
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not fetch app $appId.", e)
-            null
+    val installedId = entry.installedId
+    val media = remember(installedId) {
+        installedId?.let { id ->
+            val disks = ConfigurationManager.get().getConfigById(id)
+                ?.diskPaths.orEmpty().filterNotNull()
+            mediaSummary(disks.size, disks.sumOf { sizeOf(it) })
         }
     }
 
-    RetroStoreAppScreen(
-        app = app,
-        installing = installing,
-        installed = installed,
-        onInstall = {
-            val toInstall = app ?: return@RetroStoreAppScreen
-            installing = true
-            scope.launch {
-                val configuration = withContext(Dispatchers.Default) {
-                    runCatching { AppInstaller(ConfigurationManager.get()).install(toInstall) }
-                        .onFailure { Log.e(TAG, "Could not install ${toInstall.name}.", it) }
-                        .getOrNull()
-                }
-                installing = false
-                installed = configuration != null
+    DetailSheet(
+        content = DetailContent(
+            title = app.name,
+            author = app.author,
+            year = app.release_year,
+            coverUrl = app.screenshot_url.firstOrNull(),
+            screenshotUrls = app.screenshot_url,
+            description = app.description,
+            machine = modelLabel(modelOf(app.ext_trs80?.model)),
+            media = media,
+            source = "RetroStore",
+        ),
+        action = when {
+            installing -> DetailAction.Downloading
+            entry.installed -> DetailAction.Play
+            else -> DetailAction.Download
+        },
+        onPrimary = {
+            val id = entry.installedId
+            when {
+                installing -> Unit
+                id != null -> { onDismiss(); onRun(id) }
+                else -> onInstall()
             }
         },
-        onBack = onBack,
+        onCopy = {
+            val id = entry.installedId ?: return@DetailSheet
+            scope.launch {
+                withContext(Dispatchers.Default) { ConfigurationManager.get().duplicate(id) }
+                onCopied()
+                onDismiss()
+            }
+        },
+        onDismiss = onDismiss,
     )
 }
+
+/** The size of a file on disk, or zero if it has gone. */
+private fun sizeOf(path: String): Long =
+    runCatching { appFileSystem.metadata(path.toPath()).size ?: 0L }.getOrDefault(0L)
 
 /**
  * A machine, booted for as long as this is on screen.

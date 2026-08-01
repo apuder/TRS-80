@@ -54,6 +54,7 @@ import org.puder.trs80.shared.ui.theme.StrokeIcon
 import org.puder.trs80.shared.ui.theme.Text
 import org.puder.trs80.shared.ui.theme.Trs80Icon
 import org.puder.trs80.shared.ui.theme.Trs80Theme
+import org.puder.trs80.shared.ui.theme.scanlines
 
 /** How many of the user's own machines the library shows before it offers the rest. */
 /**
@@ -74,11 +75,17 @@ data class CatalogueEntry(
     val author: String,
     val year: Int,
     val artUrl: String?,
-    /** Already installed, so it plays rather than downloads. */
-    val installed: Boolean = false,
+    /**
+     * The configuration this entry installed as, or null if it is not on the
+     * device — which is also what decides whether it plays or downloads.
+     */
+    val installedId: Int? = null,
     /** Being downloaded now. */
     val installing: Boolean = false,
-)
+) {
+    /** Whether the program is on the device. */
+    val installed: Boolean get() = installedId != null
+}
 
 /** What the library can be asked to do. */
 data class LibraryActions(
@@ -439,16 +446,3 @@ private fun Divider() {
     )
 }
 
-/** Scanlines over the glass, as the spec draws them. */
-private fun Modifier.scanlines(): Modifier = drawWithContent {
-    drawContent()
-    var y = 0f
-    while (y < size.height) {
-        drawRect(
-            color = Color.Black.copy(alpha = 0.22f),
-            topLeft = Offset(0f, y),
-            size = androidx.compose.ui.geometry.Size(size.width, 1f),
-        )
-        y += 3f
-    }
-}

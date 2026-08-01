@@ -47,7 +47,6 @@ private val savedStateConfiguration = SavedStateConfiguration {
             subclass(Destination.Emulator::class, Destination.Emulator.serializer())
             subclass(Destination.EditConfiguration::class, Destination.EditConfiguration.serializer())
             subclass(Destination.Settings::class, Destination.Settings.serializer())
-            subclass(Destination.RetroStoreApp::class, Destination.RetroStoreApp.serializer())
             subclass(Destination.CreateDisk::class, Destination.CreateDisk.serializer())
         }
     }
@@ -79,7 +78,6 @@ fun Trs80App(
     navigator: Navigator,
     library: @Composable () -> Unit,
     emulator: @Composable (Destination.Emulator) -> Unit,
-    retroStoreApp: (@Composable (Destination.RetroStoreApp) -> Unit)? = null,
     settings: (@Composable () -> Unit)? = null,
     editConfiguration: (@Composable (Destination.EditConfiguration) -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -97,9 +95,6 @@ fun Trs80App(
             entry<Destination.Settings> { settings?.invoke() ?: Missing("Settings") }
             entry<Destination.EditConfiguration> {
                 editConfiguration?.invoke(it) ?: Missing("The editor")
-            }
-            entry<Destination.RetroStoreApp> {
-                retroStoreApp?.invoke(it) ?: Missing("RetroStore app")
             }
         },
     )

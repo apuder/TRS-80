@@ -19,7 +19,9 @@ package org.puder.trs80.shared.configuration
 import com.russhwolf.settings.Settings
 import okio.IOException
 import org.puder.trs80.shared.Log
+import okio.Path.Companion.toPath
 import org.puder.trs80.shared.io.FileManager
+import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.storage.StorageKeys
 
 private const val TAG = "ConfigManager"
@@ -213,6 +215,47 @@ class ConfigurationManager private constructor(
             return null
         }
         return configFileManager.getAbsolutePathForFile(filename)
+    }
+
+    /**
+     * Makes an independent copy of a configuration.
+     *
+     * The disks are copied too, not shared: the point of a copy is that saving
+     * to it, or ejecting from it, leaves the original alone, and two
+     * configurations pointing at one file on disk would not manage that.
+     *
+     * @return the new configuration, or null if the original is gone or its
+     * files could not be copied.
+     */
+    fun duplicate(configurationId: Int): Configuration? {
+        val source = getConfigById(configurationId) ?: return null
+        val copy = newConfiguration()
+        copy.setName(source.name.orEmpty().ifEmpty { "Copy" } + " copy")
+        copy.model = source.model
+        copy.setKeyboardLayoutPortrait(source.keyboardLayoutPortrait)
+        copy.setKeyboardLayoutLandscape(source.keyboardLayoutLandscape)
+        copy.characterColor = source.characterColor
+        copy.isSoundMuted = source.isSoundMuted
+        // The user's own from the moment it exists: it is a copy they asked for,
+        // not something the catalogue put there.
+        copy.isCustom = true
+
+        val copied = source.diskPaths.map { path ->
+            if (path == null) return@map null
+            val bytes = runCatching {
+                appFileSystem.read(path.toPath()) { readByteArray() }
+            }.getOrElse {
+                Log.e(TAG, "Could not read $path while copying.", it)
+                deleteConfigWithId(copy.id)
+                return null
+            }
+            storeMedia(copy.id, path.toPath().name, bytes) ?: run {
+                deleteConfigWithId(copy.id)
+                return null
+            }
+        }
+        copy.diskPaths = copied
+        return copy
     }
 
     /** Stores the current list of configurations. */

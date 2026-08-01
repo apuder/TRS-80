@@ -56,7 +56,7 @@ fun List<App>.asCatalogue(
     installed: List<ConfigurationCard>,
     installing: Set<String> = emptySet(),
 ): List<CatalogueEntry> {
-    val names = installed.map { it.name.trim().lowercase() }.toSet()
+    val byName = installed.associateBy({ it.name.trim().lowercase() }, { it.id })
     return map { app ->
         CatalogueEntry(
             id = app.id,
@@ -64,7 +64,7 @@ fun List<App>.asCatalogue(
             author = app.author,
             year = app.release_year,
             artUrl = app.screenshot_url.firstOrNull(),
-            installed = app.name.trim().lowercase() in names,
+            installedId = byName[app.name.trim().lowercase()],
             installing = app.id in installing,
         )
     }

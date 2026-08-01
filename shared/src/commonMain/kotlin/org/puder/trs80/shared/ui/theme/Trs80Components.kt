@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -59,7 +60,7 @@ import kotlin.math.PI
  */
 enum class Trs80Icon {
     Plus, Overflow, Search, Download, Play, Stop, Settings,
-    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info,
+    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy,
 }
 
 /**
@@ -237,6 +238,22 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
             drawCircle(color, w * 0.42f, Offset(w / 2, h / 2), style = stroke)
             drawLine(color, Offset(w / 2, h * 0.44f), Offset(w / 2, h * 0.7f), stroke.width)
             drawCircle(color, w * 0.055f, Offset(w / 2, h * 0.31f))
+        }
+
+        Trs80Icon.Copy -> {
+            // Two sheets, the back one showing at the corner.
+            drawRect(
+                color,
+                topLeft = Offset(w * 0.16f, h * 0.16f),
+                size = Size(w * 0.5f, h * 0.5f),
+                style = stroke,
+            )
+            drawRect(
+                color,
+                topLeft = Offset(w * 0.34f, h * 0.34f),
+                size = Size(w * 0.5f, h * 0.5f),
+                style = stroke,
+            )
         }
 
         Trs80Icon.Stop -> {
@@ -595,5 +612,25 @@ fun DestructiveButton(
             Spacer(Modifier.width(10.dp))
             StrokeIcon(icon, color = content, size = 17.dp)
         }
+    }
+}
+
+/**
+ * Scanlines over the glass.
+ *
+ * Every surface showing what the machine drew gets these — the library's
+ * plates and the detail sheet's screens alike — so a picture of a TRS-80
+ * screen always reads as one.
+ */
+fun Modifier.scanlines(): Modifier = drawWithContent {
+    drawContent()
+    var y = 0f
+    while (y < size.height) {
+        drawRect(
+            color = Color.Black.copy(alpha = 0.22f),
+            topLeft = Offset(0f, y),
+            size = Size(size.width, 1f),
+        )
+        y += 3f
     }
 }

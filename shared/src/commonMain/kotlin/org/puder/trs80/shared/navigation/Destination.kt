@@ -66,8 +66,6 @@ sealed interface Destination : NavKey {
     data object Settings : Destination
 
     /** One app in the RetroStore catalogue. */
-    @Serializable
-    data class RetroStoreApp(val appId: String) : Destination
 
     /** The blank-disk-image creator. */
     @Serializable
