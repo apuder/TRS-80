@@ -12,19 +12,18 @@ resources, and what `shared/` actually contains as of this writing.
 
 ## 1. The running machine
 
-The largest gap. Android's emulator screen carries eight menu actions; the ported
-`EmulatorScaffold` carries one, Back.
+Mostly done. The controls live behind the overflow in the emulator's bar.
 
 | Feature | Android | Port | Notes |
 |---|---|---|---|
-| Pause / resume | `MENU_OPTION_PAUSE` | — | |
-| Reset | `MENU_OPTION_RESET` | — | `EmulatorCore.reset()` exists and nothing calls it |
-| Rewind cassette | `MENU_OPTION_REWIND` | — | `Configuration.cassettePosition` is already ported |
-| Paste | `MENU_OPTION_PASTE` | — | Clipboard text typed in; `CharMapping` supports it |
-| Sound on/off while running | `MENU_OPTION_SOUND_ON/OFF` | — | Port has it in the editor only, not live |
-| Tutorial | `MENU_OPTION_TUTORIAL` | — | See §5 |
-| Help | `MENU_OPTION_HELP` | — | |
-| Chromecast | `CastMessageSender`, 16 refs | — | Whether to keep this is a product call, not a porting one |
+| Pause / resume | `MENU_OPTION_PAUSE` | ✓ | Android's Pause is `finish()`; Back already is it |
+| Reset | `MENU_OPTION_RESET` | ✓ | |
+| Rewind cassette | `MENU_OPTION_REWIND` | ✓ | |
+| Paste | `MENU_OPTION_PASTE` | ✓ | Says so when the clipboard is empty |
+| Sound on/off while running | `MENU_OPTION_SOUND_ON/OFF` | ✓ | Session only; the editor is where it persists |
+| Help | `MENU_OPTION_HELP` | ✓ | Rewritten for this version, and translated |
+| Tutorial | `MENU_OPTION_TUTORIAL` | — | A hint framework, not a machine control; wants the tutorial app of §5 |
+| Chromecast | `CastMessageSender`, 16 refs | — | Deferred deliberately; whether it still works is unchecked |
 
 ## 2. The library
 
@@ -75,16 +74,14 @@ Not missing features — things that are there and imperfect.
   once those screens are ported.
 - RetroStore downloads report no progress: the store returns a whole program in one response, so
   there is nothing to report until the API offers a stream.
-- The document picker, disk drag-to-swap and tap-to-focus have never been exercised
-  interactively — they compile and their logic is tested, but no one has driven them.
+- The document picker, disk drag-to-swap, tap-to-focus and the screens viewer's swipe have never
+  been exercised interactively — they compile and their logic is tested, but no one has driven them.
 
 ---
 
 ## Suggested order
 
-1. **The running machine** (§1) — a machine you cannot pause, reset or paste into is the most
-   conspicuous gap, and every action is small on its own.
-2. **Keyboards** (§3) — or, immediately and for nothing, stop offering the four that cannot be
+1. **Keyboards** (§3) — or, immediately and for nothing, stop offering the four that cannot be
    drawn.
-3. **Create disk** and **legacy import** (§4) — the second matters most to anyone upgrading.
-4. The rest, by appetite.
+2. **Create disk** and **legacy import** (§4) — the second matters most to anyone upgrading.
+3. The rest, by appetite.
