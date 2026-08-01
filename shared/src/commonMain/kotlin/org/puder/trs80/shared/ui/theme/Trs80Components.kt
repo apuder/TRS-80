@@ -21,6 +21,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -79,6 +80,38 @@ fun StrokeIcon(
 
 /** The smallest thing a finger should be asked to hit. */
 val MinimumTouchTarget = 44.dp
+
+/**
+ * A word that is tapped rather than read — Back, Cancel, Show all.
+ *
+ * Carries the same [MinimumTouchTarget] rule as [StrokeIcon], and for the same
+ * reason: the type scale is sized to be read, so a word set in it is about 11pt
+ * tall. Hanging a `clickable` straight on the text gives a target that thin, and
+ * a thumb aimed squarely at the word misses it more often than not.
+ *
+ * [padding] is horizontal breathing room inside the target. Screens that want
+ * the label to sit flush with the screen edge should subtract it from their own
+ * padding rather than remove it here.
+ */
+@Composable
+fun TextAction(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = Trs80Theme.colors.accentText,
+    style: androidx.compose.ui.text.TextStyle = Trs80Theme.type.body,
+    padding: androidx.compose.ui.unit.Dp = 10.dp,
+) {
+    Box(
+        modifier
+            .heightIn(min = MinimumTouchTarget)
+            .clickable(onClick = onClick)
+            .padding(horizontal = padding),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, style = style, color = color)
+    }
+}
 
 private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
     val w = size.width

@@ -17,7 +17,6 @@
 package org.puder.trs80.shared.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.appVersion
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
+import org.puder.trs80.shared.ui.theme.TextAction
 import org.puder.trs80.shared.ui.theme.Text
 import org.puder.trs80.shared.ui.theme.ThemePreference
 import org.puder.trs80.shared.ui.theme.Trs80Theme
@@ -66,18 +66,15 @@ fun SettingsScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
         Row(
+            // The start edge is pulled in by the tap target's own padding, so
+            // the word still sits on the screen edge optically.
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = spacing.screenEdge, vertical = 12.dp),
+                .padding(start = spacing.screenEdge - 10.dp, end = spacing.screenEdge),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                "Back",
-                style = Trs80Theme.type.body,
-                color = colors.accentText,
-                modifier = Modifier.clickable(onClick = onBack),
-            )
-            Spacer(Modifier.width(14.dp))
+            TextAction("Back", onClick = onBack)
+            Spacer(Modifier.width(4.dp))
             Text("Settings", style = Trs80Theme.type.wordmark, color = colors.text)
         }
         Divider()
