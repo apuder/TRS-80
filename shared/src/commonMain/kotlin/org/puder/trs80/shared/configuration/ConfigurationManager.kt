@@ -192,6 +192,29 @@ class ConfigurationManager private constructor(
         toSave.isCustom = true
     }
 
+    /**
+     * Copies [content] into the configuration's own directory.
+     *
+     * A file the user picks lives outside the app, or in a temporary copy that
+     * will be swept up; a configuration has to point at something that stays.
+     *
+     * @return the absolute path of the stored file, or null if it could not be
+     * written.
+     */
+    fun storeMedia(configurationId: Int, filename: String, content: ByteArray): String? {
+        val configFileManager = try {
+            fileManagerCreator.createForAppSubDir(configurationId)
+        } catch (e: IOException) {
+            Log.e(TAG, "Could not open the configuration's directory.", e)
+            return null
+        }
+        if (!configFileManager.writeFile(filename, content)) {
+            Log.e(TAG, "Could not write $filename.")
+            return null
+        }
+        return configFileManager.getAbsolutePathForFile(filename)
+    }
+
     /** Stores the current list of configurations. */
     private fun saveConfigurationIds() =
         persistence.persistConfigurationIds(configurations.map { it.id })

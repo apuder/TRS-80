@@ -62,12 +62,16 @@ class RomManager private constructor(
     fun hasAllRoms(): Boolean = hasRom(MODEL1) && hasRom(MODEL3)
 
     /**
-     * @return The models that have a usable ROM, in the order they are offered.
+     * @return The models the editor should offer, in order.
      *
-     * The editor asks because choosing a model with no ROM produces a machine
-     * that cannot boot, which is not a choice worth showing.
+     * Model I and Model III are always among them: the app requires both ROMs
+     * before it will run anything, so they are not really optional, and leaving
+     * one out because its ROM has gone missing would quietly take away a choice
+     * the app has always had. Model 4 and 4P are genuinely optional and appear
+     * only once their ROMs are in place.
      */
-    fun modelsWithRoms(): List<Int> = StorageKeys.romModels.filter(::hasRom)
+    fun modelsToOffer(): List<Int> =
+        StorageKeys.romModels.filter { it == MODEL1 || it == MODEL3 || hasRom(it) }
 
     /**
      * @return Whether the ROM stored for [model] exists. If the file is gone, the

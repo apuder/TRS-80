@@ -540,30 +540,39 @@ fun Trs80TextField(
 }
 
 /**
- * A destructive control.
+ * A destructive control: outlined in [Trs80Colors.danger] with a trash glyph.
  *
- * Outlined in text colour with a trash glyph — never red, and never the accent.
- * The spec is explicit about this: red would make the accent mean danger
- * everywhere else it appears.
+ * The visual spec asks for text colour rather than red, on the grounds that red
+ * would compete with the accent. Overridden deliberately — deleting a machine
+ * takes its disks and its saved state with it, and that is worth the collision.
+ *
+ * @param filled draws it solid instead, for the confirming half of a pair where
+ * the outlined version is the one being confirmed.
  */
 @Composable
 fun DestructiveButton(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    filled: Boolean = false,
+    icon: Trs80Icon? = Trs80Icon.Trash,
 ) {
     val colors = Trs80Theme.colors
+    val content = if (filled) Color.White else colors.danger
     Row(
         modifier
-            .fillMaxWidth()
             .heightIn(min = MinimumTouchTarget)
-            .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.55f))
+            .background(if (filled) colors.danger else Color.Transparent)
+            .border(Trs80Theme.spacing.hairline, colors.danger)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = Trs80Theme.type.body, color = colors.text)
-        Spacer(Modifier.weight(1f))
-        StrokeIcon(Trs80Icon.Trash, color = colors.text, size = 17.dp)
+        Text(label, style = Trs80Theme.type.body, color = content)
+        if (icon != null) {
+            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.width(10.dp))
+            StrokeIcon(icon, color = content, size = 17.dp)
+        }
     }
 }

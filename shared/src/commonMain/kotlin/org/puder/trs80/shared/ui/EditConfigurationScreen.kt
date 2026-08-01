@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,7 @@ import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.shared.configuration.ConfigurationDraft
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
+import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.SettingRow
@@ -74,7 +78,8 @@ data class EditConfigurationActions(
     val onBack: () -> Unit = {},
     val onRevert: () -> Unit = {},
     val onDelete: () -> Unit = {},
-    val onAddDisk: (() -> Unit)? = null,
+    /** Puts a file in the given drive, replacing whatever is in it. */
+    val onChooseDisk: ((drive: Int) -> Unit)? = null,
     val onChooseCassette: (() -> Unit)? = null,
 )
 
@@ -102,11 +107,12 @@ fun EditConfigurationScreen(
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     var controlsOpen by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
 
+    Box(modifier.fillMaxSize().background(colors.ground)) {
     Column(
-        modifier
+        Modifier
             .fillMaxSize()
-            .background(colors.ground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
         Row(
@@ -161,14 +167,24 @@ fun EditConfigurationScreen(
                 )
             }
 
+            // The tally says how many drives there are, not just how many are
+            // in use: with only one empty drive on show, four slots is otherwise
+            // not something the screen ever admits to.
             SectionKicker(
                 "Disks",
-                count = draft.disks.size.toString(),
-                trailing = actions.onAddDisk?.let {
-                    { TextAction("ADD", onClick = it, style = Trs80Theme.type.kickerSmall) }
-                },
+                count = "${draft.disks.size} of ${draft.diskPaths.size}",
+                trailing = actions.onChooseDisk?.takeIf { draft.disks.size < draft.diskPaths.size }
+                    ?.let {
+                        {
+                            TextAction(
+                                "ADD",
+                                onClick = { it(draft.disks.size) },
+                                style = Trs80Theme.type.kickerSmall,
+                            )
+                        }
+                    },
             )
-            Disks(draft, onChange)
+            Disks(draft, onChange, actions.onChooseDisk)
 
             SectionKicker("Cassette")
             SettingRow(
@@ -211,9 +227,74 @@ fun EditConfigurationScreen(
             }
 
             SectionKicker("Remove")
-            DestructiveButton("Delete this entry", onClick = actions.onDelete)
-            Spacer(Modifier.width(spacing.screenEdge))
+            DestructiveButton(
+                "Delete this entry",
+                onClick = { confirmingDelete = true },
+                modifier = Modifier.fillMaxWidth(),
+            )
             Box(Modifier.padding(bottom = 24.dp))
+        }
+    }
+
+        if (confirmingDelete) {
+            ConfirmDelete(
+                name = draft.name,
+                onCancel = { confirmingDelete = false },
+                onConfirm = {
+                    confirmingDelete = false
+                    actions.onDelete()
+                },
+            )
+        }
+    }
+}
+
+/**
+ * Asks before deleting.
+ *
+ * Drawn over the editor rather than in a platform dialog, so it is the app's own
+ * type and palette and behaves the same on both platforms. The scrim swallows
+ * taps, which is what stops the screen behind it being operated blind.
+ */
+@Composable
+private fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
+    val colors = Trs80Theme.colors
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color(0xB3000000))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onCancel,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier
+                .padding(28.dp)
+                .background(colors.ground)
+                .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.25f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {},
+                )
+                .padding(20.dp),
+        ) {
+            Text("Delete ${name.ifEmpty { "this entry" }}?", style = Trs80Theme.type.title)
+            Spacer(Modifier.padding(top = 8.dp))
+            Text(
+                "Its disks and any saved state go with it. This cannot be undone.",
+                style = Trs80Theme.type.bodySmall,
+                color = colors.muted,
+            )
+            Spacer(Modifier.padding(top = 18.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextAction("CANCEL", onClick = onCancel, color = colors.muted, padding = 0.dp)
+                Spacer(Modifier.weight(1f))
+                DestructiveButton("Delete", onClick = onConfirm, filled = true, icon = null)
+            }
         }
     }
 }
@@ -251,7 +332,11 @@ private fun ForkBanner(name: String, onRevert: () -> Unit) {
 
 /** The drives, in order, with one empty drive shown when there is room. */
 @Composable
-private fun Disks(draft: ConfigurationDraft, onChange: (ConfigurationDraft) -> Unit) {
+private fun Disks(
+    draft: ConfigurationDraft,
+    onChange: (ConfigurationDraft) -> Unit,
+    onChooseDisk: ((Int) -> Unit)?,
+) {
     val colors = Trs80Theme.colors
     val disks = draft.disks
     val rowHeightPx = with(LocalDensity.current) { DISK_ROW_HEIGHT.toPx() }
@@ -267,6 +352,13 @@ private fun Disks(draft: ConfigurationDraft, onChange: (ConfigurationDraft) -> U
             Modifier
                 .fillMaxWidth()
                 .graphicsLayer { translationY = if (isDragging) dragOffset else 0f }
+                .then(
+                    if (onChooseDisk != null) {
+                        Modifier.clickable { onChooseDisk(drive) }
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -321,7 +413,17 @@ private fun Disks(draft: ConfigurationDraft, onChange: (ConfigurationDraft) -> U
             Hairline()
         }
         Row(
-            Modifier.fillMaxWidth().padding(vertical = 9.dp),
+            Modifier
+                .fillMaxWidth()
+                .then(
+                    if (onChooseDisk != null) {
+                        Modifier.clickable { onChooseDisk(disks.size) }
+                    } else {
+                        Modifier
+                    }
+                )
+                .heightIn(min = MinimumTouchTarget)
+                .padding(vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(Modifier.width(22.dp))
@@ -331,7 +433,11 @@ private fun Disks(draft: ConfigurationDraft, onChange: (ConfigurationDraft) -> U
                 color = colors.muted,
             )
             Spacer(Modifier.width(12.dp))
-            Text("Empty drive", style = Trs80Theme.type.body, color = colors.muted)
+            Text(
+                if (onChooseDisk != null) "Empty drive — choose a disk" else "Empty drive",
+                style = Trs80Theme.type.body,
+                color = colors.muted,
+            )
         }
     }
 }

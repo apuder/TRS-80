@@ -64,6 +64,8 @@ data class Trs80Colors(
     val hairline: Color,
     /** Secondary text: author lines, counts, captions. */
     val muted: Color,
+    /** Destructive actions. Deliberately a purer red than [accent]. */
+    val danger: Color,
     /** Inside a CRT plate — the glass, not the shell. */
     val crt: Color,
     /** The phosphor, for text drawn inside a plate. */
@@ -79,6 +81,7 @@ val LightColors = Trs80Colors(
     field = Color(0xFFFFFFFF),
     hairline = Color(0xFF16181C).copy(alpha = 0.13f),
     muted = Color(0xFF16181C).copy(alpha = 0.58f),
+    danger = Color(0xFFD22B1E),
     crt = Color(0xFF2E302D),
     phosphor = Color(0xFF5CE15C),
     isDark = false,
@@ -92,6 +95,7 @@ val DarkColors = Trs80Colors(
     field = Color(0xFFEFEAE1).copy(alpha = 0.06f),
     hairline = Color(0xFFEFEAE1).copy(alpha = 0.14f),
     muted = Color(0xFFEFEAE1).copy(alpha = 0.58f),
+    danger = Color(0xFFFF6C5C),
     crt = Color(0xFF2E302D),
     phosphor = Color(0xFF5CE15C),
     isDark = true,
@@ -163,6 +167,14 @@ object Trs80Theme {
  * resource is only reachable from a composition.
  */
 @Composable
+/**
+ * The type scale.
+ *
+ * A step up from the sizes in the visual spec: those are px in a phone mock
+ * viewed on a desktop, and they read small on a device held at arm's length.
+ * The smallest style carries the most weight here — it sets the model name on
+ * every plate and every label in a segmented control.
+ */
 private fun rememberTypography(): Trs80Typography {
     val spaceMono = FontFamily(
         Font(Res.font.SpaceMono_Regular, FontWeight.Normal),
@@ -179,34 +191,34 @@ private fun rememberTypography(): Trs80Typography {
         title = TextStyle(
             fontFamily = spaceMono,
             fontWeight = FontWeight.Medium,
-            fontSize = 16.sp,
-            lineHeight = 19.sp,
+            fontSize = 18.sp,
+            lineHeight = 22.sp,
             letterSpacing = (-0.02).em,
         ),
         titleSmall = TextStyle(
             fontFamily = spaceMono,
             fontWeight = FontWeight.Medium,
-            fontSize = 15.sp,
-            lineHeight = 17.sp,
+            fontSize = 17.sp,
+            lineHeight = 20.sp,
             letterSpacing = (-0.02).em,
         ),
-        body = TextStyle(fontFamily = archivo, fontSize = 13.sp, lineHeight = 18.sp),
-        bodySmall = TextStyle(fontFamily = archivo, fontSize = 11.5.sp, lineHeight = 16.sp),
+        body = TextStyle(fontFamily = archivo, fontSize = 15.sp, lineHeight = 21.sp),
+        bodySmall = TextStyle(fontFamily = archivo, fontSize = 13.sp, lineHeight = 18.sp),
         kicker = TextStyle(
             fontFamily = jetBrains,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 10.sp,
-            lineHeight = 10.sp,
+            fontSize = 11.5.sp,
+            lineHeight = 13.sp,
             letterSpacing = 0.14.em,
         ),
         kickerSmall = TextStyle(
             fontFamily = jetBrains,
-            fontSize = 9.sp,
-            lineHeight = 9.sp,
+            fontSize = 11.sp,
+            lineHeight = 13.sp,
             letterSpacing = 0.1.em,
         ),
-        screen = TextStyle(fontFamily = vt323, fontSize = 19.sp, lineHeight = 19.sp),
-        wordmark = TextStyle(fontFamily = jetBrains, fontSize = 15.sp, lineHeight = 15.sp),
+        screen = TextStyle(fontFamily = vt323, fontSize = 21.sp, lineHeight = 21.sp),
+        wordmark = TextStyle(fontFamily = jetBrains, fontSize = 17.sp, lineHeight = 17.sp),
     )
 }
 

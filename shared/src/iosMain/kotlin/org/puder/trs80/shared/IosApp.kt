@@ -39,6 +39,7 @@ import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.TRS80_DIRECTORY
 import org.puder.trs80.shared.io.appDataDirectory
 import org.puder.trs80.shared.io.appFileSystem
+import org.puder.trs80.shared.io.pickFile
 import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.navigation.Destination
 import org.puder.trs80.shared.navigation.Trs80App
@@ -166,7 +167,7 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
     // The configuration's own model belongs on the control even if its ROM has
     // gone missing, or the editor would show nothing selected.
     val models = remember(original.model) {
-        (RomManager.get().modelsWithRoms() + original.model).distinct().sorted()
+        (RomManager.get().modelsToOffer() + original.model).distinct().sorted()
     }
 
     EditConfigurationScreen(
@@ -184,6 +185,18 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
                     manager.deleteConfigWithId(configurationId)
                 }
                 navigator.goBack()
+            },
+            onChooseDisk = { drive ->
+                pickFile { name, content ->
+                    manager.storeMedia(configurationId, name, content)
+                        ?.let { draft = draft.withDiskIn(drive, it) }
+                }
+            },
+            onChooseCassette = {
+                pickFile { name, content ->
+                    manager.storeMedia(configurationId, name, content)
+                        ?.let { draft = draft.copy(cassettePath = it) }
+                }
             },
             onRevert = { draft = original },
             onDelete = {

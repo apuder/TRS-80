@@ -75,6 +75,25 @@ data class ConfigurationDraft(
         return copy(diskPaths = (remaining + path).padToDrives())
     }
 
+    /**
+     * Puts [path] in [drive], replacing whatever was there.
+     *
+     * The drive one past the last occupied one is the empty drive the editor
+     * shows, so choosing a file there fills it rather than replacing anything.
+     */
+    fun withDiskIn(drive: Int, path: String): ConfigurationDraft {
+        val remaining = disks.toMutableList()
+        if (drive < 0 || drive >= StorageKeys.DRIVE_COUNT || drive > remaining.size) {
+            return this
+        }
+        if (drive == remaining.size) {
+            remaining.add(path)
+        } else {
+            remaining[drive] = path
+        }
+        return copy(diskPaths = remaining.padToDrives())
+    }
+
     /** Moves the disk in drive [from] to drive [to], shifting the rest along. */
     fun withDiskMoved(from: Int, to: Int): ConfigurationDraft {
         val remaining = disks.toMutableList()

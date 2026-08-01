@@ -71,6 +71,29 @@ class ConfigurationDraftTest {
     }
 
     @Test
+    fun choosingReplacesWhatIsInThatDrive() {
+        val d = draft(listOf("a", "b", null, null)).withDiskIn(drive = 0, path = "c")
+
+        assertContentEquals(listOf("c", "b", null, null), d.diskPaths)
+    }
+
+    /** The drive past the last one is the empty row the editor shows. */
+    @Test
+    fun choosingInTheEmptyDriveFillsIt() {
+        val d = draft(listOf("a", null, null, null)).withDiskIn(drive = 1, path = "b")
+
+        assertContentEquals(listOf("a", "b", null, null), d.diskPaths)
+    }
+
+    @Test
+    fun choosingBeyondTheEmptyDriveChangesNothing() {
+        val d = draft(listOf("a", null, null, null))
+
+        assertEquals(d, d.withDiskIn(drive = 2, path = "b"))
+        assertEquals(d, d.withDiskIn(drive = 4, path = "b"))
+    }
+
+    @Test
     fun movingShiftsTheOthersAlong() {
         val d = draft(listOf("a", "b", "c", null)).withDiskMoved(from = 2, to = 0)
 
