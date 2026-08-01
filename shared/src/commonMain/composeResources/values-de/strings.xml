@@ -109,6 +109,8 @@ CLOAD und CSAVE lesen und schreiben die Kassette, die vor CLOAD zurückgespult w
 Disketten, Kassette und Tastaturen werden im Eintrags-Editor geändert, nicht hier.</string>
     <string name="done">FERTIG</string>
 
+    <string name="fire">FEUER</string>
+
     <!-- Keyboard layouts, abbreviated to fit a row -->
     <string name="keyboard_original">Orig</string>
     <string name="keyboard_compact">Komp</string>

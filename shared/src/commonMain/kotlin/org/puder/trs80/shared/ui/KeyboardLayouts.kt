@@ -55,24 +55,13 @@ fun keyboardFor(layout: KeyboardLayout?): KeyboardDefinition? = when (layout) {
 }
 
 /**
- * The layouts worth offering, which is the ones this app can draw.
+ * The layouts the editor offers, which is every one a player can choose.
  *
- * Derived from [keyboardFor] rather than listed again, so a layout starts
- * being offered the moment it can be drawn and never before. Offering the rest
- * meant picking Joystick or Tilt and getting the original keyboard anyway --
- * a choice that read as though it did something.
- *
- * External is not among them and should not be: on Android it is never a
- * choice either, it is what an attached hardware keyboard makes it.
- *
- * Deliberately lazy. The definitions it asks about are declared further down
- * this file, and a top-level val is initialized in declaration order -- so
- * computing this eagerly asked [keyboardFor] about keyboards that did not exist
- * yet and got an empty list, leaving the editor offering nothing.
+ * External is not among them and should not be: on Android it is never a choice
+ * either, it is what an attached hardware keyboard makes it.
  */
-val offeredKeyboardLayouts: List<KeyboardLayout> by lazy {
-    KeyboardLayout.entries.filter { keyboardFor(it) != null }
-}
+val offeredKeyboardLayouts: List<KeyboardLayout> =
+    KeyboardLayout.entries.filter { it != KeyboardLayout.KEYBOARD_EXTERNAL }
 
 /*
  * The two grids below were extracted from the Android layout XML rather than

@@ -89,6 +89,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import org.puder.trs80.shared.ui.encodePng
 import org.puder.trs80.shared.io.clipboardText
 import org.puder.trs80.shared.ui.MachineActions
+import org.puder.trs80.shared.io.GamepadInput
+import org.puder.trs80.shared.io.MotionInput
+import org.puder.trs80.shared.ui.DirectionKeys
+import org.puder.trs80.shared.ui.KEY_FIRE
+import org.puder.trs80.shared.ui.KeySender
+import org.puder.trs80.shared.ui.MachineKeyboard
 import org.puder.trs80.shared.ui.Keyboard
 import org.puder.trs80.shared.ui.KeyboardState
 import org.puder.trs80.shared.ui.ORIGINAL_KEYBOARD
@@ -521,6 +527,38 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
         )
     }
+    val layout = configuration?.keyboardLayoutPortrait
+    val sender = remember(configurationId) {
+        KeySender(
+            onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
+            onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+        )
+    }
+
+    // The two layouts steered by something other than a finger on glass. Both
+    // are stopped on the way out: an accelerometer left running costs battery
+    // for a machine nobody is looking at.
+    DisposableEffect(layout, sender) {
+        val directions = DirectionKeys(sender)
+        val motion = if (layout == KeyboardLayout.KEYBOARD_TILT) {
+            MotionInput { directions.set(it.left, it.right, it.up, it.down) }.also { it.start() }
+        } else {
+            null
+        }
+        val gamepad = if (layout == KeyboardLayout.KEYBOARD_GAME_CONTROLLER) {
+            GamepadInput(
+                onDirection = { directions.set(it.left, it.right, it.up, it.down) },
+                onFire = { if (it) sender.press(KEY_FIRE) else sender.release(KEY_FIRE) },
+            ).also { it.start() }
+        } else {
+            null
+        }
+        onDispose {
+            motion?.stop()
+            gamepad?.stop()
+            directions.releaseAll()
+        }
+    }
 
     EmulatorScaffold(
         title = configuration?.name?.takeIf { it.isNotBlank() }
@@ -552,7 +590,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
                 EmulatorCore.setSoundMuted(it)
             },
         ),
-        keyboard = { Keyboard(keyboard) },
+        keyboard = { MachineKeyboard(layout, keyboard, sender) },
     ) {
         EmulatorScreen(
             source = source,

@@ -108,6 +108,8 @@ CLOAD and CSAVE read and write the cassette, which has to be rewound before CLOA
 Disks, the cassette and the keyboards are changed in the entry editor, not here.</string>
     <string name="done">DONE</string>
 
+    <string name="fire">FIRE</string>
+
     <!-- Keyboard layouts, abbreviated to fit a row -->
     <string name="keyboard_original">Orig</string>
     <string name="keyboard_compact">Comp</string>

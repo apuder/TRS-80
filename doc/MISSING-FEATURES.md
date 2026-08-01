@@ -39,17 +39,14 @@ Settings is ported. The rest of the drawer is not.
 
 ## 3. Keyboards
 
-The app draws two of the six layouts: Original and Compact. The editor now offers only those,
-derived from `keyboardFor` so the two cannot drift apart.
+Done. All five choosable layouts work: Original and Compact as key grids, Joystick as an on-screen
+stick and fire button, Tilt as fire with the accelerometer steering, and Game controller as a
+physical gamepad with nothing on screen. External is not a gap: on Android it is never a choice
+either, it is what an attached hardware keyboard makes it.
 
-Still missing are the layouts themselves — Joystick as an on-screen control, and behind it the two
-hardware ones: `GameController` / `GameControllerListener` for a physical gamepad, and accelerometer
-tilt. External is not a gap: on Android it is never a choice either, it is what an attached
-hardware keyboard makes it.
-
-An earlier version of this file claimed choosing an undrawable layout left a machine with no
-keyboard at all. That was wrong — the emulator falls back to the original keyboard. What was
-actually wrong is that the editor offered choices which did nothing.
+Two of those are unexercised in practice. There is no accelerometer in the simulator and no
+gamepad attached to it, so tilt and the gamepad have been verified only as far as their logic,
+which is tested, and their wiring, which compiles and starts cleanly.
 
 ## 4. Screens that do not exist yet
 
@@ -76,14 +73,18 @@ Not missing features — things that are there and imperfect.
   once those screens are ported.
 - RetroStore downloads report no progress: the store returns a whole program in one response, so
   there is nothing to report until the API offers a stream.
-- The document picker, disk drag-to-swap, tap-to-focus and the screens viewer's swipe have never
-  been exercised interactively — they compile and their logic is tested, but no one has driven them.
+- The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the new
+  joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
+  their logic is tested, but no one has driven them.
+- **A saved emulator state can kill the app.** Entering a machine that has one makes the process
+  disappear about a second later, with no crash report and no exception on stderr. Deleting the
+  state file makes the same machine start normally. `trs_state_load` checks its banner and version
+  and returns quietly on a mismatch, so the fault is further in — most likely one of the
+  per-subsystem restores. Found while testing something else; not investigated further.
 
 ---
 
 ## Suggested order
 
-1. **Keyboards** (§3) — or, immediately and for nothing, stop offering the four that cannot be
-   drawn.
-2. **Create disk** and **legacy import** (§4) — the second matters most to anyone upgrading.
-3. The rest, by appetite.
+1. **Create disk** and **legacy import** (§4) — the second matters most to anyone upgrading.
+2. The rest, by appetite.
