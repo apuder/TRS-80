@@ -22,7 +22,6 @@ import okio.Path.Companion.toPath
 import org.puder.trs80.shared.MODEL1
 import org.puder.trs80.shared.MODEL3
 import org.puder.trs80.shared.io.FileManager
-import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.io.resolveStoredPath
 import org.puder.trs80.shared.io.toStoredPath
 import org.puder.trs80.shared.storage.StorageKeys
@@ -79,7 +78,9 @@ class RomManager private constructor(
      */
     fun hasRom(model: Int): Boolean {
         val filename = romPath(model) ?: return false
-        if (appFileSystem.exists(filename.toPath())) {
+        // Whatever storage this manager writes through, not the global one:
+        // otherwise a ROM added here is looked for somewhere else entirely.
+        if (fileManager.fileSystem.exists(filename.toPath())) {
             return true
         }
         settings.remove(StorageKeys.romKey(model))
@@ -99,6 +100,21 @@ class RomManager private constructor(
         fun init(fileManagerCreator: FileManager.Creator, settings: Settings): RomManager =
             instance ?: RomManager(settings, fileManagerCreator.forAppBaseDir())
                 .also { instance = it }
+
+        /**
+         * Builds a manager with its own storage, for tests.
+         *
+         * [init] cannot give a test that: it hands back whatever the first call
+         * created, storage and all, so tests would share a store and their
+         * order would start to matter.
+         *
+         * @throws IOException if the storage directory could not be created.
+         */
+        @Throws(IOException::class)
+        internal fun create(
+            fileManagerCreator: FileManager.Creator,
+            settings: Settings,
+        ): RomManager = RomManager(settings, fileManagerCreator.forAppBaseDir())
 
         /** @return The singleton [RomManager] instance. */
         fun get(): RomManager = checkNotNull(instance) { "Must call RomManager.init() first." }

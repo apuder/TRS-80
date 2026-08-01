@@ -52,6 +52,7 @@ import org.puder.trs80.shared.configuration.ConfigurationDraft
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
+import org.puder.trs80.shared.ui.theme.ModalPanel
 import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.SettingRow
@@ -259,42 +260,19 @@ fun EditConfigurationScreen(
 @Composable
 private fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
     val colors = Trs80Theme.colors
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Color(0xB3000000))
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onCancel,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            Modifier
-                .padding(28.dp)
-                .background(colors.ground)
-                .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.25f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {},
-                )
-                .padding(20.dp),
-        ) {
-            Text("Delete ${name.ifEmpty { "this entry" }}?", style = Trs80Theme.type.title)
-            Spacer(Modifier.padding(top = 8.dp))
-            Text(
-                "Its disks and any saved state go with it. This cannot be undone.",
-                style = Trs80Theme.type.bodySmall,
-                color = colors.muted,
-            )
-            Spacer(Modifier.padding(top = 18.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextAction("CANCEL", onClick = onCancel, color = colors.muted, padding = 0.dp)
-                Spacer(Modifier.weight(1f))
-                DestructiveButton("Delete", onClick = onConfirm, filled = true, icon = null)
-            }
+    ModalPanel(onDismiss = onCancel) {
+        Text("Delete ${name.ifEmpty { "this entry" }}?", style = Trs80Theme.type.title)
+        Spacer(Modifier.padding(top = 8.dp))
+        Text(
+            "Its disks and any saved state go with it. This cannot be undone.",
+            style = Trs80Theme.type.bodySmall,
+            color = colors.muted,
+        )
+        Spacer(Modifier.padding(top = 18.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextAction("CANCEL", onClick = onCancel, color = colors.muted, padding = 0.dp)
+            Spacer(Modifier.weight(1f))
+            DestructiveButton("Delete", onClick = onConfirm, filled = true, icon = null)
         }
     }
 }

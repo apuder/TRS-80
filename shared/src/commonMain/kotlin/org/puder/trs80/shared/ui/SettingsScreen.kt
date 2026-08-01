@@ -37,6 +37,12 @@ import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.appVersion
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.SectionKicker
+import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
+import org.puder.trs80.shared.ui.theme.StrokeIcon
+import org.puder.trs80.shared.ui.theme.Trs80Icon
+import androidx.compose.foundation.layout.size
+import org.puder.trs80.shared.ui.theme.ProgressRing
+import org.puder.trs80.shared.ui.theme.SettingRow
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.TextAction
 import org.puder.trs80.shared.ui.theme.Text
@@ -55,6 +61,12 @@ fun SettingsScreen(
     theme: ThemePreference,
     onThemeChange: (ThemePreference) -> Unit,
     onBack: () -> Unit,
+    roms: List<RomStatus> = emptyList(),
+    /** The models being fetched right now. */
+    romsDownloading: Set<Int> = emptySet(),
+    onDownloadRoms: (() -> Unit)? = null,
+    onChooseRom: ((Int) -> Unit)? = null,
+    onRedownloadRom: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val colors = Trs80Theme.colors
@@ -105,6 +117,60 @@ fun SettingsScreen(
                 style = Trs80Theme.type.bodySmall,
                 color = colors.muted,
             )
+
+            if (roms.isNotEmpty()) {
+                val missing = roms.count { !it.present }
+                SectionKicker(
+                    "ROM images",
+                    // Only offered when there is something to fetch: a control
+                    // that would do nothing is worse than no control.
+                    trailing = onDownloadRoms?.takeIf { missing > 0 }?.let {
+                        {
+                            TextAction(
+                                "GET ALL",
+                                onClick = it,
+                                style = Trs80Theme.type.kickerSmall,
+                            )
+                        }
+                    },
+                )
+                roms.forEach { rom ->
+                    SettingRow(
+                        label = rom.label,
+                        subtitle = rom.filename ?: "Not installed",
+                        onClick = onChooseRom?.let { choose -> { choose(rom.model) } },
+                    ) {
+                        // Fetching this one again, next to the row that opens a
+                        // file picker: the two ways to replace a ROM, one each.
+                        Box(
+                            Modifier.size(MinimumTouchTarget),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (rom.model in romsDownloading) {
+                                ProgressRing(progress = null, size = 17.dp)
+                            } else {
+                                onRedownloadRom?.let { again ->
+                                    StrokeIcon(
+                                        Trs80Icon.Refresh,
+                                        color = colors.accentText,
+                                        size = 17.dp,
+                                        onClick = { again(rom.model) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Hairline()
+                }
+                Text(
+                    "The machine cannot start without these, so the app fetches " +
+                        "them on first run. Tap a row to use a file of your own, " +
+                        "or the arrow to fetch that one again.",
+                    style = Trs80Theme.type.bodySmall,
+                    color = colors.muted,
+                    modifier = Modifier.padding(top = 10.dp),
+                )
+            }
         }
 
         // At the very foot, quiet: it is there to be read back when something

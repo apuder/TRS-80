@@ -69,6 +69,8 @@ import org.puder.trs80.shared.ui.theme.Trs80Theme
 import org.puder.trs80.shared.configuration.toDraft
 import org.puder.trs80.shared.ui.EditConfigurationActions
 import org.puder.trs80.shared.ui.EditConfigurationScreen
+import org.puder.trs80.shared.ui.RomSetupPanel
+import org.puder.trs80.shared.ui.Roms
 import org.puder.trs80.shared.ui.SettingsScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import org.puder.trs80.shared.navigation.Navigator
@@ -99,17 +101,25 @@ private val SCREEN_COLOR = Color(0xFF444444)
  * arrive as the rest of §7.2 lands. Everything it does show is shared code, so
  * Android will run the same screens when its own UI moves across.
  *
- * @param romPath a Model III ROM image and [diskPath] a disk, both in the app
- * bundle, seeded into the app's own storage on first run.
+ * @param diskPath a disk image in the app bundle, seeded into the app's own
+ * storage on first run. The ROMs are no longer among them: the app downloads
+ * those itself, as the Android app always has.
  */
 @OptIn(ExperimentalForeignApi::class)
-fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
-    installIfNeeded(romPath, diskPath)
+fun Trs80ViewController(diskPath: String?): UIViewController {
+    installIfNeeded(diskPath)
 
     val capture = KeyCapture()
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
         val catalogue = remember { Catalogue() }
+        val roms = remember { Roms(RomManager.get()) }
+        var setupDismissed by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+        // The machine cannot start without these, so they are fetched before
+        // anything asks for one. Failures leave the settings screen offering
+        // another go rather than stopping the app.
+        LaunchedEffect(roms) { roms.downloadMissing() }
         // The choice is read once and held here, so changing it repaints the
         // whole app rather than only the screen that changed it.
         var theme by remember { mutableStateOf(ThemePreference.from(appSettings())) }
@@ -120,6 +130,7 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                 ThemePreference.System -> isSystemInDarkTheme()
             },
         ) {
+            Box(Modifier.fillMaxSize()) {
             Trs80App(
                 navigator = navigator,
                 library = { Library(navigator, catalogue) },
@@ -138,10 +149,32 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                             it.storeIn(appSettings())
                         },
                         onBack = { navigator.goBack() },
+                        roms = roms.statuses,
+                        romsDownloading = roms.downloading,
+                        onDownloadRoms = { scope.launch { roms.downloadMissing() } },
+                        onChooseRom = { model ->
+                            pickFile { name, content -> roms.useFile(model, name, content) }
+                        },
+                        onRedownloadRom = { model ->
+                            scope.launch { roms.redownload(model) }
+                        },
                     )
                 },
                 editConfiguration = { Editor(it.configurationId, it.isNew, navigator) },
             )
+
+            // Over whatever is on screen: nothing the app offers works until
+            // these are here.
+            val settingUp = roms.busy || (roms.attempted && roms.missing.isNotEmpty())
+            if (settingUp && !setupDismissed) {
+                RomSetupPanel(
+                    downloading = roms.busy,
+                    missing = roms.missing,
+                    onRetry = { scope.launch { roms.downloadMissing() } },
+                    onDismiss = { setupDismissed = true },
+                )
+            }
+            }
         }
     }
 
@@ -486,7 +519,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
  * Idempotent: on later runs the store already has the configuration and the
  * files are already there, so this finds them rather than copying again.
  */
-private fun installIfNeeded(romPath: String, diskPath: String?) {
+private fun installIfNeeded(diskPath: String?) {
     val settings = appSettings()
     val creator = FileManager.Creator(appDataDirectory() / TRS80_DIRECTORY)
     val manager = ConfigurationManager.init(creator, settings)
@@ -496,9 +529,6 @@ private fun installIfNeeded(romPath: String, diskPath: String?) {
         Log.i(TAG, "${manager.configCount} configuration(s) already installed.")
         return
     }
-
-    val rom = appFileSystem.read(romPath.toPath()) { readByteArray() }
-    RomManager.get().addRom(MODEL3, "model3.rom", rom)
 
     val disks = diskPath?.let {
         listOf(

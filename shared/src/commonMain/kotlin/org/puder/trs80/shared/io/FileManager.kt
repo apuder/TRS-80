@@ -42,7 +42,8 @@ const val TRS80_DIRECTORY = "TRS-80"
  * a global `Context`.
  */
 class FileManager private constructor(
-    private val fileSystem: FileSystem,
+    /** Exposed so callers holding absolute paths can ask about the same storage. */
+    internal val fileSystem: FileSystem,
     private val baseDir: Path,
 ) {
 

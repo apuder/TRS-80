@@ -23,6 +23,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -673,5 +675,49 @@ fun Modifier.scanlines(): Modifier = drawWithContent {
             size = Size(size.width, 1f),
         )
         y += 3f
+    }
+}
+
+/**
+ * A panel over a dimmed screen: the app's own dialog.
+ *
+ * Drawn rather than handed to the platform, so it is the app's type and palette
+ * and behaves the same on both. The scrim swallows taps either way, which is
+ * what stops the screen behind being operated blind.
+ *
+ * @param onDismiss what tapping the scrim does, or null to make the panel
+ * insistent — for a question that has to be answered rather than avoided.
+ */
+@Composable
+fun ModalPanel(
+    onDismiss: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = Trs80Theme.colors
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.7f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { onDismiss?.invoke() },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier
+                .padding(28.dp)
+                .background(colors.ground)
+                .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.25f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {},
+                )
+                .padding(20.dp),
+            content = content,
+        )
     }
 }
