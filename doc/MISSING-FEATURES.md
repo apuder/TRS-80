@@ -39,15 +39,17 @@ Settings is ported. The rest of the drawer is not.
 
 ## 3. Keyboards
 
-**The editor currently offers six layouts and the app can draw two.** `keyboardFor` returns
-`ORIGINAL_KEYBOARD` and `COMPACT_KEYBOARD`, and `null` for everything else — so choosing Joystick,
-Tilt, Game controller or External leaves a machine with no keyboard at all.
+The app draws two of the six layouts: Original and Compact. The editor now offers only those,
+derived from `keyboardFor` so the two cannot drift apart.
 
-That is a defect introduced by the editor offering the full `KeyboardLayout` enum. Either draw the
-rest or stop offering them; the cheap honest fix is to offer only what can be drawn.
+Still missing are the layouts themselves — Joystick as an on-screen control, and behind it the two
+hardware ones: `GameController` / `GameControllerListener` for a physical gamepad, and accelerometer
+tilt. External is not a gap: on Android it is never a choice either, it is what an attached
+hardware keyboard makes it.
 
-Behind the two on-screen layouts sit two hardware ones: `GameController` /
-`GameControllerListener` for a physical gamepad, and accelerometer tilt.
+An earlier version of this file claimed choosing an undrawable layout left a machine with no
+keyboard at all. That was wrong — the emulator falls back to the original keyboard. What was
+actually wrong is that the editor offered choices which did nothing.
 
 ## 4. Screens that do not exist yet
 

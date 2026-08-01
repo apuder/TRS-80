@@ -461,7 +461,13 @@ private fun KeyboardChoice(
     layout: KeyboardLayout?,
     onChange: (KeyboardLayout) -> Unit,
 ) {
-    val options = KeyboardLayout.entries
+    // Whatever this machine is already set to stays on the control even if the
+    // app cannot draw it -- a configuration carried over from Android may name
+    // a layout this version does not have, and hiding it would show the wrong
+    // one as selected.
+    val options = remember(layout) {
+        (offeredKeyboardLayouts + listOfNotNull(layout)).distinct().sortedBy { it.ordinal }
+    }
     SettingRow(label) {
         SegmentedToggle(
             options = options.map { keyboardLabel(it).uppercase() },
