@@ -24,24 +24,24 @@ class MediaSummaryTest {
 
     @Test
     fun readsAsTheRecordTableStatesIt() {
-        assertEquals("2 disks · 37.5K", mediaSummary(2, 38400))
+        assertEquals("2 disks · 37.5K", mediaSummary("2 disks", 38400))
     }
 
     @Test
-    fun oneDiskIsNotPlural() {
-        assertEquals("1 disk · 180K", mediaSummary(1, 184320))
+    fun theWordingIsTakenAsGiven() {
+        assertEquals("1 disk · 180K", mediaSummary("1 disk", 184320))
     }
 
     /** Nothing to say about a machine with no disks in it. */
     @Test
     fun noDisksHasNoSummary() {
-        assertNull(mediaSummary(0, 0))
+        assertNull(mediaSummary("", 0))
     }
 
     /** The count is known before the files are; the size can wait. */
     @Test
     fun sizeIsLeftOutUntilItIsKnown() {
-        assertEquals("2 disks", mediaSummary(2, 0))
+        assertEquals("2 disks", mediaSummary("2 disks", 0))
     }
 
     @Test

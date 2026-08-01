@@ -49,6 +49,41 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.shared.configuration.ConfigurationDraft
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.add
+import trs_80.shared.generated.resources.boots_from_disk
+import trs_80.shared.generated.resources.cancel
+import trs_80.shared.generated.resources.cassette
+import trs_80.shared.generated.resources.cassette_none
+import trs_80.shared.generated.resources.choose
+import trs_80.shared.generated.resources.controls
+import trs_80.shared.generated.resources.delete
+import trs_80.shared.generated.resources.delete_consequence
+import trs_80.shared.generated.resources.delete_entry
+import trs_80.shared.generated.resources.delete_question
+import trs_80.shared.generated.resources.disks
+import trs_80.shared.generated.resources.disks_of
+import trs_80.shared.generated.resources.edit_entry
+import trs_80.shared.generated.resources.empty_drive
+import trs_80.shared.generated.resources.empty_drive_choose
+import trs_80.shared.generated.resources.fork_banner
+import trs_80.shared.generated.resources.green
+import trs_80.shared.generated.resources.keyboard
+import trs_80.shared.generated.resources.keyboard_summary
+import trs_80.shared.generated.resources.landscape
+import trs_80.shared.generated.resources.machine
+import trs_80.shared.generated.resources.name
+import trs_80.shared.generated.resources.portrait
+import trs_80.shared.generated.resources.remove
+import trs_80.shared.generated.resources.revert
+import trs_80.shared.generated.resources.save
+import trs_80.shared.generated.resources.screen
+import trs_80.shared.generated.resources.sound
+import trs_80.shared.generated.resources.this_entry
+import trs_80.shared.generated.resources.untitled
+import trs_80.shared.generated.resources.while_running
+import trs_80.shared.generated.resources.white
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
@@ -125,10 +160,10 @@ fun EditConfigurationScreen(
                 color = colors.accentText,
                 onClick = actions.onBack,
             )
-            Text("Edit entry", style = Trs80Theme.type.wordmark, color = colors.text)
+            Text(stringResource(Res.string.edit_entry), style = Trs80Theme.type.wordmark, color = colors.text)
             Spacer(Modifier.weight(1f))
             // Save lives in the header rather than floating over the content.
-            TextAction("SAVE", onClick = actions.onSave, style = Trs80Theme.type.kicker)
+            TextAction(stringResource(Res.string.save), onClick = actions.onSave, style = Trs80Theme.type.kicker)
         }
         Hairline()
 
@@ -142,14 +177,14 @@ fun EditConfigurationScreen(
                 ForkBanner(name = original.name, onRevert = actions.onRevert)
             }
 
-            SectionKicker("Name")
+            SectionKicker(stringResource(Res.string.name))
             Trs80TextField(
                 value = draft.name,
                 onValueChange = { onChange(draft.copy(name = it)) },
-                placeholder = "Untitled",
+                placeholder = stringResource(Res.string.untitled),
             )
 
-            SectionKicker("Machine")
+            SectionKicker(stringResource(Res.string.machine))
             SegmentedToggle(
                 options = models.map { modelLabel(it).uppercase() },
                 selected = models.indexOf(draft.model),
@@ -160,9 +195,9 @@ fun EditConfigurationScreen(
             Hairline()
             // Not in the visual spec, but the app has always had it and the
             // editor is the only place it can be reached.
-            SettingRow("Screen") {
+            SettingRow(stringResource(Res.string.screen)) {
                 SegmentedToggle(
-                    options = listOf("GREEN", "WHITE"),
+                    options = listOf(stringResource(Res.string.green), stringResource(Res.string.white)),
                     selected = draft.characterColor.coerceIn(0, 1),
                     onSelect = { onChange(draft.copy(characterColor = it)) },
                 )
@@ -172,13 +207,13 @@ fun EditConfigurationScreen(
             // in use: with only one empty drive on show, four slots is otherwise
             // not something the screen ever admits to.
             SectionKicker(
-                "Disks",
-                count = "${draft.disks.size} of ${draft.diskPaths.size}",
+                stringResource(Res.string.disks),
+                count = stringResource(Res.string.disks_of, draft.disks.size, draft.diskPaths.size),
                 trailing = actions.onChooseDisk?.takeIf { draft.disks.size < draft.diskPaths.size }
                     ?.let {
                         {
                             TextAction(
-                                "ADD",
+                                stringResource(Res.string.add),
                                 onClick = { it(draft.disks.size) },
                                 style = Trs80Theme.type.kickerSmall,
                             )
@@ -187,49 +222,52 @@ fun EditConfigurationScreen(
             )
             Disks(draft, onChange, actions.onChooseDisk)
 
-            SectionKicker("Cassette")
+            SectionKicker(stringResource(Res.string.cassette))
             SettingRow(
-                label = draft.cassettePath?.let(::fileName) ?: "None loaded",
+                label = draft.cassettePath?.let(::fileName) ?: stringResource(Res.string.cassette_none),
                 subtitle = if (draft.cassettePath == null) {
-                    "${modelLabel(draft.model)} boots from disk"
+                    stringResource(Res.string.boots_from_disk, modelLabel(draft.model))
                 } else {
                     null
                 },
             ) {
                 actions.onChooseCassette?.let {
-                    TextAction("CHOOSE", onClick = it, style = Trs80Theme.type.kickerSmall)
+                    TextAction(stringResource(Res.string.choose), onClick = it, style = Trs80Theme.type.kickerSmall)
                 }
             }
 
-            SectionKicker("Controls")
+            SectionKicker(stringResource(Res.string.controls))
             SettingRow(
-                label = "Keyboard",
-                subtitle = "${keyboardLabel(draft.keyboardPortrait)} portrait, " +
-                    "${keyboardLabel(draft.keyboardLandscape)} landscape",
+                label = stringResource(Res.string.keyboard),
+                subtitle = stringResource(
+                    Res.string.keyboard_summary,
+                    keyboardLabel(draft.keyboardPortrait),
+                    keyboardLabel(draft.keyboardLandscape),
+                ),
                 onClick = { controlsOpen = !controlsOpen },
             )
             if (controlsOpen) {
                 Hairline()
-                KeyboardChoice("Portrait", draft.keyboardPortrait) {
+                KeyboardChoice(stringResource(Res.string.portrait), draft.keyboardPortrait) {
                     onChange(draft.copy(keyboardPortrait = it))
                 }
                 Hairline()
-                KeyboardChoice("Landscape", draft.keyboardLandscape) {
+                KeyboardChoice(stringResource(Res.string.landscape), draft.keyboardLandscape) {
                     onChange(draft.copy(keyboardLandscape = it))
                 }
             }
 
-            SectionKicker("While running")
-            SettingRow("Sound") {
+            SectionKicker(stringResource(Res.string.while_running))
+            SettingRow(stringResource(Res.string.sound)) {
                 Toggle(
                     checked = !draft.soundMuted,
                     onCheckedChange = { onChange(draft.copy(soundMuted = !it)) },
                 )
             }
 
-            SectionKicker("Remove")
+            SectionKicker(stringResource(Res.string.remove))
             DestructiveButton(
-                "Delete this entry",
+                stringResource(Res.string.delete_entry),
                 onClick = { confirmingDelete = true },
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -261,18 +299,18 @@ fun EditConfigurationScreen(
 private fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
     val colors = Trs80Theme.colors
     ModalPanel(onDismiss = onCancel) {
-        Text("Delete ${name.ifEmpty { "this entry" }}?", style = Trs80Theme.type.title)
+        Text(stringResource(Res.string.delete_question, name.ifEmpty { stringResource(Res.string.this_entry) }), style = Trs80Theme.type.title)
         Spacer(Modifier.padding(top = 8.dp))
         Text(
-            "Its disks and any saved state go with it. This cannot be undone.",
+            stringResource(Res.string.delete_consequence),
             style = Trs80Theme.type.bodySmall,
             color = colors.muted,
         )
         Spacer(Modifier.padding(top = 18.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextAction("CANCEL", onClick = onCancel, color = colors.muted, padding = 0.dp)
+            TextAction(stringResource(Res.string.cancel), onClick = onCancel, color = colors.muted, padding = 0.dp)
             Spacer(Modifier.weight(1f))
-            DestructiveButton("Delete", onClick = onConfirm, filled = true, icon = null)
+            DestructiveButton(stringResource(Res.string.delete), onClick = onConfirm, filled = true, icon = null)
         }
     }
 }
@@ -297,14 +335,16 @@ private fun ForkBanner(name: String, onRevert: () -> Unit) {
         StrokeIcon(Trs80Icon.Info, color = colors.accentText, size = 16.dp)
         Spacer(Modifier.width(10.dp))
         Text(
-            "This is now your copy of ${name.ifEmpty { "this entry" }}. " +
-                "The catalogue original is untouched.",
+            stringResource(
+                Res.string.fork_banner,
+                name.ifEmpty { stringResource(Res.string.this_entry) },
+            ),
             style = Trs80Theme.type.bodySmall,
             color = colors.text,
             modifier = Modifier.weight(1f),
         )
         Spacer(Modifier.width(8.dp))
-        TextAction("REVERT", onClick = onRevert, style = Trs80Theme.type.kickerSmall, padding = 4.dp)
+        TextAction(stringResource(Res.string.revert), onClick = onRevert, style = Trs80Theme.type.kickerSmall, padding = 4.dp)
     }
 }
 
@@ -412,7 +452,11 @@ private fun Disks(
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                if (onChooseDisk != null) "Empty drive — choose a disk" else "Empty drive",
+                if (onChooseDisk != null) {
+                    stringResource(Res.string.empty_drive_choose)
+                } else {
+                    stringResource(Res.string.empty_drive)
+                },
                 style = Trs80Theme.type.body,
                 color = colors.muted,
             )

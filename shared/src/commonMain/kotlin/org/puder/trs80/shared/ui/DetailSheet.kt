@@ -64,6 +64,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.copy
+import trs_80.shared.generated.resources.download
+import trs_80.shared.generated.resources.downloading
+import trs_80.shared.generated.resources.from_retrostore
+import trs_80.shared.generated.resources.from_retrostore_plain
+import trs_80.shared.generated.resources.machine
+import trs_80.shared.generated.resources.media
+import trs_80.shared.generated.resources.play
+import trs_80.shared.generated.resources.record
+import trs_80.shared.generated.resources.screens
+import trs_80.shared.generated.resources.source
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.ProgressRing
@@ -222,13 +235,13 @@ fun DetailSheet(
                     )
                 }
                 if (content.screenshotUrls.isNotEmpty()) {
-                    SectionKicker("Screens")
+                    SectionKicker(stringResource(Res.string.screens))
                     Screens(content.screenshotUrls)
                 }
-                SectionKicker("Record")
-                RecordRow("Machine", content.machine)
-                content.media?.let { RecordRow("Media", it) }
-                RecordRow("Source", content.source)
+                SectionKicker(stringResource(Res.string.record))
+                RecordRow(stringResource(Res.string.machine), content.machine)
+                content.media?.let { RecordRow(stringResource(Res.string.media), it) }
+                RecordRow(stringResource(Res.string.source), content.source)
                 Spacer(Modifier.height(28.dp))
             }
         }
@@ -289,7 +302,7 @@ private fun Masthead(content: DetailContent) {
             // A credit, not a link: it states where this came from and is not
             // something to press.
             Text(
-                "FROM RETROSTORE",
+                stringResource(Res.string.from_retrostore),
                 style = Trs80Theme.type.kickerSmall,
                 color = colors.accentText,
             )
@@ -335,9 +348,9 @@ private fun Actions(action: DetailAction, onPrimary: () -> Unit, onCopy: () -> U
             Column {
                 Text(
                     when (action) {
-                        DetailAction.Download -> "DOWNLOAD"
-                        DetailAction.Downloading -> "DOWNLOADING"
-                        DetailAction.Play -> "PLAY"
+                        DetailAction.Download -> stringResource(Res.string.download)
+                        DetailAction.Downloading -> stringResource(Res.string.downloading)
+                        DetailAction.Play -> stringResource(Res.string.play)
                     },
                     style = Trs80Theme.type.kicker,
                     color = colors.accentText,
@@ -348,7 +361,7 @@ private fun Actions(action: DetailAction, onPrimary: () -> Unit, onCopy: () -> U
                     // program in one response, so there is no progress to report
                     // and saying so beats animating a guess.
                     Text(
-                        "from RetroStore",
+                        stringResource(Res.string.from_retrostore_plain),
                         style = Trs80Theme.type.bodySmall,
                         color = colors.muted,
                     )
@@ -372,7 +385,7 @@ private fun Actions(action: DetailAction, onPrimary: () -> Unit, onCopy: () -> U
                 size = 18.dp,
             )
             Spacer(Modifier.width(8.dp))
-            Text("COPY", style = Trs80Theme.type.kicker, color = colors.text.copy(alpha = alpha))
+            Text(stringResource(Res.string.copy), style = Trs80Theme.type.kicker, color = colors.text.copy(alpha = alpha))
         }
     }
 }

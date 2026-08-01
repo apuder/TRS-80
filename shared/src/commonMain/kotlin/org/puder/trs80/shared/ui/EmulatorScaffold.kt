@@ -27,6 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.back
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,7 +66,7 @@ fun EmulatorScaffold(
                     // A labelled button rather than a chevron: the icon pack is
                     // another dependency, and this is chrome the redesign
                     // replaces anyway.
-                    TextButton(onClick = onBack) { Text("Back") }
+                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(),
             )

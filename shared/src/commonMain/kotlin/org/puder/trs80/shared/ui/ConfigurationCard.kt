@@ -16,7 +16,16 @@
 
 package org.puder.trs80.shared.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.keyboard_compact
+import trs_80.shared.generated.resources.keyboard_external
+import trs_80.shared.generated.resources.keyboard_gamepad
+import trs_80.shared.generated.resources.keyboard_joystick
+import trs_80.shared.generated.resources.keyboard_original
+import trs_80.shared.generated.resources.keyboard_tilt
 import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.shared.MODEL1
 import org.puder.trs80.shared.MODEL3
@@ -42,8 +51,6 @@ data class ConfigurationCard(
     val diskCount: Int,
     val cassetteRewound: Boolean,
     val soundMuted: Boolean,
-    val keyboardPortrait: String,
-    val keyboardLandscape: String,
     /** Whether there is a session to resume, which is what offers Stop. */
     val hasSavedState: Boolean,
     /** Whether there is a TRS-Xray dump, which is what offers Share. */
@@ -74,8 +81,6 @@ fun ConfigurationManager.toCards(): List<ConfigurationCard> =
                 .count { !configuration.getDiskPath(it).isNullOrEmpty() },
             cassetteRewound = configuration.cassettePosition <= 0f,
             soundMuted = configuration.isSoundMuted,
-            keyboardPortrait = keyboardLabel(configuration.keyboardLayoutPortrait),
-            keyboardLandscape = keyboardLabel(configuration.keyboardLayoutLandscape),
             hasSavedState = state?.hasState() == true,
             hasXrayState = state?.hasXrayState() == true,
             screenshot = state?.readScreenshot()?.let(::decodeImage),
@@ -92,12 +97,13 @@ internal fun modelLabel(model: Int): String = when (model) {
     else -> NOT_SET
 }
 
+@Composable
 internal fun keyboardLabel(layout: KeyboardLayout?): String = when (layout) {
-    KeyboardLayout.KEYBOARD_LAYOUT_ORIGINAL -> "Orig"
-    KeyboardLayout.KEYBOARD_LAYOUT_COMPACT -> "Comp"
-    KeyboardLayout.KEYBOARD_LAYOUT_JOYSTICK -> "Joy"
-    KeyboardLayout.KEYBOARD_GAME_CONTROLLER -> "Ctrl"
-    KeyboardLayout.KEYBOARD_TILT -> "Tilt"
-    KeyboardLayout.KEYBOARD_EXTERNAL -> "Ext"
+    KeyboardLayout.KEYBOARD_LAYOUT_ORIGINAL -> stringResource(Res.string.keyboard_original)
+    KeyboardLayout.KEYBOARD_LAYOUT_COMPACT -> stringResource(Res.string.keyboard_compact)
+    KeyboardLayout.KEYBOARD_LAYOUT_JOYSTICK -> stringResource(Res.string.keyboard_joystick)
+    KeyboardLayout.KEYBOARD_GAME_CONTROLLER -> stringResource(Res.string.keyboard_gamepad)
+    KeyboardLayout.KEYBOARD_TILT -> stringResource(Res.string.keyboard_tilt)
+    KeyboardLayout.KEYBOARD_EXTERNAL -> stringResource(Res.string.keyboard_external)
     null -> NOT_SET
 }

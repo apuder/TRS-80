@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app's own text, in US English.
+
+  This is the default the app falls back to, so every string here has to read
+  correctly on its own. Translations live beside it in values-<language>.
+-->
+<resources>
+    <!-- Library -->
+    <string name="yours">Yours</string>
+    <string name="sort_last_used">LAST USED</string>
+    <string name="sort_alphabetical">A–Z</string>
+    <string name="catalog">Catalog</string>
+    <string name="loading">Loading…</string>
+    <string name="store_unreachable">Could not reach the store.</string>
+    <string name="search_entries">Search %1$d entries</string>
+    <string name="custom">CUSTOM</string>
+    <string name="show_fewer">Show fewer</string>
+    <string name="show_all">Show all %1$d</string>
+    <string name="never_run">Not run yet</string>
+
+    <!-- Catalog entry -->
+    <string name="screens">Screens</string>
+    <string name="record">Record</string>
+    <string name="machine">Machine</string>
+    <string name="media">Media</string>
+    <string name="source">Source</string>
+    <string name="from_retrostore">FROM RETROSTORE</string>
+    <string name="from_retrostore_plain">from RetroStore</string>
+    <string name="download">DOWNLOAD</string>
+    <string name="downloading">DOWNLOADING</string>
+    <string name="play">PLAY</string>
+    <string name="copy">COPY</string>
+    <string name="disk_one">1 disk</string>
+    <string name="disk_many">%1$d disks</string>
+
+    <!-- Editor -->
+    <string name="edit_entry">Edit entry</string>
+    <string name="save">SAVE</string>
+    <string name="name">Name</string>
+    <string name="untitled">Untitled</string>
+    <string name="screen">Screen</string>
+    <string name="green">GREEN</string>
+    <string name="white">WHITE</string>
+    <string name="disks">Disks</string>
+    <string name="disks_of">%1$d of %2$d</string>
+    <string name="add">ADD</string>
+    <string name="cassette">Cassette</string>
+    <string name="cassette_none">None loaded</string>
+    <string name="boots_from_disk">%1$s boots from disk</string>
+    <string name="choose">CHOOSE</string>
+    <string name="controls">Controls</string>
+    <string name="keyboard">Keyboard</string>
+    <string name="keyboard_summary">%1$s portrait, %2$s landscape</string>
+    <string name="portrait">Portrait</string>
+    <string name="landscape">Landscape</string>
+    <string name="while_running">While running</string>
+    <string name="sound">Sound</string>
+    <string name="remove">Remove</string>
+    <string name="delete_entry">Delete this entry</string>
+    <string name="delete_question">Delete %1$s?</string>
+    <string name="this_entry">this entry</string>
+    <string name="delete_consequence">Its disks and any saved state go with it. This cannot be undone.</string>
+    <string name="cancel">CANCEL</string>
+    <string name="delete">Delete</string>
+    <string name="fork_banner">This is now your copy of %1$s. The catalog original is untouched.</string>
+    <string name="revert">REVERT</string>
+    <string name="empty_drive">Empty drive</string>
+    <string name="empty_drive_choose">Empty drive — choose a disk</string>
+    <string name="back">Back</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="theme_light">LIGHT</string>
+    <string name="theme_system">SYSTEM</string>
+    <string name="theme_dark">DARK</string>
+    <string name="theme_hint">System follows the device. The emulated screen keeps its own colors either way — those belong to the machine.</string>
+
+    <!-- ROM images -->
+    <string name="rom_images">ROM images</string>
+    <string name="get_all">GET ALL</string>
+    <string name="not_installed">Not installed</string>
+    <string name="roms_hint">The machine cannot start without these, so the app fetches them on first run. Tap a row to use a file of your own, or the arrow to fetch that one again.</string>
+    <string name="getting_roms">Getting the ROM images</string>
+    <string name="getting_roms_why">A TRS-80 cannot start without them, and they are not ours to ship. This happens once.</string>
+    <string name="roms_failed">Could not get the ROM images</string>
+    <string name="roms_failed_detail">%1$s will not start until this succeeds. You can try again, or choose your own image in settings.</string>
+    <string name="not_now">NOT NOW</string>
+    <string name="try_again">TRY AGAIN</string>
+    <string name="and_joiner"> and </string>
+
+    <!-- Keyboard layouts, abbreviated to fit a row -->
+    <string name="keyboard_original">Orig</string>
+    <string name="keyboard_compact">Comp</string>
+    <string name="keyboard_joystick">Joy</string>
+    <string name="keyboard_gamepad">Ctrl</string>
+    <string name="keyboard_tilt">Tilt</string>
+    <string name="keyboard_external">Ext</string>
+</resources>

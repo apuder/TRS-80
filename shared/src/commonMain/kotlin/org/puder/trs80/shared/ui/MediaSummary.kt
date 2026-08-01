@@ -19,15 +19,17 @@ package org.puder.trs80.shared.ui
 /**
  * How the record table states what a program is made of: "2 disks · 37.5K".
  *
+ * The disk count arrives already worded, because how a language counts things
+ * is not something a formatter should be deciding.
+ *
  * Sizes are in the units the machine's own documentation used — K, and M only
  * when a number would otherwise run to four figures. Nothing here is ever
  * large enough to need more.
  */
-fun mediaSummary(diskCount: Int, totalBytes: Long): String? {
-    if (diskCount <= 0) {
+fun mediaSummary(disks: String, totalBytes: Long): String? {
+    if (disks.isEmpty()) {
         return null
     }
-    val disks = if (diskCount == 1) "1 disk" else "$diskCount disks"
     if (totalBytes <= 0) {
         return disks
     }

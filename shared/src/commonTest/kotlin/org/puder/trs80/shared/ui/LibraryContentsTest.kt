@@ -32,8 +32,6 @@ class LibraryContentsTest {
         diskCount = 1,
         cassetteRewound = true,
         soundMuted = false,
-        keyboardPortrait = "Orig",
-        keyboardLandscape = "Orig",
         hasSavedState = false,
         hasXrayState = false,
         screenshot = null,

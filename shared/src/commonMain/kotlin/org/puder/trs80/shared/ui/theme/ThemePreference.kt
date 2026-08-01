@@ -17,6 +17,11 @@
 package org.puder.trs80.shared.ui.theme
 
 import com.russhwolf.settings.Settings
+import org.jetbrains.compose.resources.StringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.theme_dark
+import trs_80.shared.generated.resources.theme_light
+import trs_80.shared.generated.resources.theme_system
 import org.puder.trs80.shared.storage.StorageKeys
 
 /**
@@ -30,6 +35,19 @@ enum class ThemePreference {
     Light,
     System,
     Dark;
+
+    /**
+     * How the choice is named on screen.
+     *
+     * Not the enum's own name: that is the storage key, which is deliberately
+     * stable and English, and has no business being shown to anyone.
+     */
+    val label: StringResource
+        get() = when (this) {
+            Light -> Res.string.theme_light
+            System -> Res.string.theme_system
+            Dark -> Res.string.theme_dark
+        }
 
     companion object {
         val Default = System

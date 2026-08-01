@@ -53,6 +53,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.catalog
+import trs_80.shared.generated.resources.custom
+import trs_80.shared.generated.resources.loading
+import trs_80.shared.generated.resources.search_entries
+import trs_80.shared.generated.resources.show_all
+import trs_80.shared.generated.resources.show_fewer
+import trs_80.shared.generated.resources.sort_alphabetical
+import trs_80.shared.generated.resources.sort_last_used
+import trs_80.shared.generated.resources.store_unreachable
+import trs_80.shared.generated.resources.yours
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.ProgressRing
 import org.puder.trs80.shared.ui.theme.SearchField
@@ -161,9 +173,9 @@ fun LibraryScreen(
             ),
         ) {
             item {
-                SectionHeader(label = "Yours", count = yours.size) {
+                SectionHeader(label = stringResource(Res.string.yours), count = yours.size) {
                     SegmentedToggle(
-                    options = listOf("LAST USED", "A\u2013Z"),
+                    options = listOf(stringResource(Res.string.sort_last_used), stringResource(Res.string.sort_alphabetical)),
                     selected = if (sort == LibrarySort.LastUsed) 0 else 1,
                     onSelect = {
                         onSortChange(if (it == 0) LibrarySort.LastUsed else LibrarySort.Alphabetical)
@@ -183,7 +195,7 @@ fun LibraryScreen(
             }
             item {
                 SectionHeader(
-                    label = "Catalogue",
+                    label = stringResource(Res.string.catalog),
                     count = catalogue.size.takeIf { it > 0 },
                     trailing = actions.onRefresh?.let {
                         { RefreshControl(refreshing = refreshing, onClick = it) }
@@ -191,8 +203,8 @@ fun LibraryScreen(
                 )
             }
             when (catalogueState) {
-                is StoreState.Loading -> item { CatalogueNote("Loading…") }
-                is StoreState.Failed -> item { CatalogueNote("Could not reach the store.") }
+                is StoreState.Loading -> item { CatalogueNote(stringResource(Res.string.loading)) }
+                is StoreState.Failed -> item { CatalogueNote(stringResource(Res.string.store_unreachable)) }
                 is StoreState.Loaded -> items(catalogue, key = { it.id }) { entry ->
                     CatalogueRow(entry, actions)
                 }
@@ -268,7 +280,7 @@ private fun SearchRow(query: String, onQueryChange: (String) -> Unit, total: Int
         SearchField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = "Search $total entries",
+            placeholder = stringResource(Res.string.search_entries, total),
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -356,7 +368,7 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onEdit: (() -> U
                         .background(colors.accent.copy(alpha = 0.9f))
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
-                    Text("CUSTOM", style = Trs80Theme.type.kickerSmall, color = Color.White)
+                    Text(stringResource(Res.string.custom), style = Trs80Theme.type.kickerSmall, color = Color.White)
                 }
             }
 
@@ -419,7 +431,7 @@ private fun ShowAll(expanded: Boolean, total: Int, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            if (expanded) "Show fewer" else "Show all $total",
+            if (expanded) stringResource(Res.string.show_fewer) else stringResource(Res.string.show_all, total),
             style = Trs80Theme.type.kicker,
             color = colors.accentText,
             modifier = Modifier.padding(vertical = 9.dp),

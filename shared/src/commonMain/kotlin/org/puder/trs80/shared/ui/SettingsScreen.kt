@@ -35,6 +35,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.appVersion
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.appearance
+import trs_80.shared.generated.resources.back
+import trs_80.shared.generated.resources.get_all
+import trs_80.shared.generated.resources.not_installed
+import trs_80.shared.generated.resources.rom_images
+import trs_80.shared.generated.resources.roms_hint
+import trs_80.shared.generated.resources.settings
+import trs_80.shared.generated.resources.theme
+import trs_80.shared.generated.resources.theme_hint
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
@@ -86,9 +97,9 @@ fun SettingsScreen(
                 .padding(start = spacing.screenEdge - 10.dp, end = spacing.screenEdge),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextAction("Back", onClick = onBack)
+            TextAction(stringResource(Res.string.back), onClick = onBack)
             Spacer(Modifier.width(4.dp))
-            Text("Settings", style = Trs80Theme.type.wordmark, color = colors.text)
+            Text(stringResource(Res.string.settings), style = Trs80Theme.type.wordmark, color = colors.text)
         }
         Hairline()
 
@@ -98,22 +109,21 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenEdge),
         ) {
-            SectionKicker("Appearance")
+            SectionKicker(stringResource(Res.string.appearance))
             Row(
                 Modifier.fillMaxWidth().padding(bottom = 18.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Theme", style = Trs80Theme.type.body, color = colors.text)
+                Text(stringResource(Res.string.theme), style = Trs80Theme.type.body, color = colors.text)
                 Spacer(Modifier.weight(1f))
                 SegmentedToggle(
-                    options = ThemePreference.entries.map { it.name.uppercase() },
+                    options = ThemePreference.entries.map { stringResource(it.label) },
                     selected = ThemePreference.entries.indexOf(theme),
                     onSelect = { onThemeChange(ThemePreference.entries[it]) },
                 )
             }
             Text(
-                "System follows the device. The emulated screen keeps its own " +
-                    "colours either way — those belong to the machine.",
+                stringResource(Res.string.theme_hint),
                 style = Trs80Theme.type.bodySmall,
                 color = colors.muted,
             )
@@ -121,13 +131,13 @@ fun SettingsScreen(
             if (roms.isNotEmpty()) {
                 val missing = roms.count { !it.present }
                 SectionKicker(
-                    "ROM images",
+                    stringResource(Res.string.rom_images),
                     // Only offered when there is something to fetch: a control
                     // that would do nothing is worse than no control.
                     trailing = onDownloadRoms?.takeIf { missing > 0 }?.let {
                         {
                             TextAction(
-                                "GET ALL",
+                                stringResource(Res.string.get_all),
                                 onClick = it,
                                 style = Trs80Theme.type.kickerSmall,
                             )
@@ -137,7 +147,7 @@ fun SettingsScreen(
                 roms.forEach { rom ->
                     SettingRow(
                         label = rom.label,
-                        subtitle = rom.filename ?: "Not installed",
+                        subtitle = rom.filename ?: stringResource(Res.string.not_installed),
                         onClick = onChooseRom?.let { choose -> { choose(rom.model) } },
                     ) {
                         // Fetching this one again, next to the row that opens a
@@ -163,9 +173,7 @@ fun SettingsScreen(
                     Hairline()
                 }
                 Text(
-                    "The machine cannot start without these, so the app fetches " +
-                        "them on first run. Tap a row to use a file of your own, " +
-                        "or the arrow to fetch that one again.",
+                    stringResource(Res.string.roms_hint),
                     style = Trs80Theme.type.bodySmall,
                     color = colors.muted,
                     modifier = Modifier.padding(top = 10.dp),

@@ -53,6 +53,10 @@ import org.puder.trs80.shared.ui.CatalogueEntry
 import org.puder.trs80.shared.ui.DetailAction
 import org.puder.trs80.shared.ui.DetailContent
 import org.puder.trs80.shared.ui.DetailSheet
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.disk_many
+import trs_80.shared.generated.resources.disk_one
 import org.puder.trs80.shared.ui.mediaSummary
 import org.puder.trs80.shared.ui.modelLabel
 import org.puder.trs80.shared.store.modelOf
@@ -366,13 +370,19 @@ private fun Detail(
 ) {
     val scope = rememberCoroutineScope()
     val installedId = entry.installedId
-    val media = remember(installedId) {
+    val disks = remember(installedId) {
         installedId?.let { id ->
-            val disks = ConfigurationManager.get().getConfigById(id)
-                ?.diskPaths.orEmpty().filterNotNull()
-            mediaSummary(disks.size, disks.sumOf { sizeOf(it) })
-        }
+            ConfigurationManager.get().getConfigById(id)?.diskPaths.orEmpty().filterNotNull()
+        }.orEmpty()
     }
+    val media = mediaSummary(
+        disks = when {
+            disks.isEmpty() -> ""
+            disks.size == 1 -> stringResource(Res.string.disk_one)
+            else -> stringResource(Res.string.disk_many, disks.size)
+        },
+        totalBytes = disks.sumOf { sizeOf(it) },
+    )
 
     DetailSheet(
         content = DetailContent(

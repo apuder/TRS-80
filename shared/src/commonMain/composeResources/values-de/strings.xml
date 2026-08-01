@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  German, in the formal register the Android app has always used.
+
+  Where the old app already had a word for something it is kept, so that a user
+  who knew the app before still recognises it: Laufwerke for drives, Kassette
+  for the tape deck, Tastatur for the keyboard, Einstellungen for settings.
+-->
+<resources>
+    <!-- Library -->
+    <string name="yours">Ihre</string>
+    <string name="sort_last_used">ZULETZT</string>
+    <string name="sort_alphabetical">A–Z</string>
+    <string name="catalog">Katalog</string>
+    <string name="loading">Wird geladen…</string>
+    <string name="store_unreachable">Store nicht erreichbar.</string>
+    <string name="search_entries">%1$d Einträge durchsuchen</string>
+    <string name="custom">EIGEN</string>
+    <string name="show_fewer">Weniger anzeigen</string>
+    <string name="show_all">Alle %1$d anzeigen</string>
+    <string name="never_run">Noch nicht gestartet</string>
+
+    <!-- Catalog entry -->
+    <string name="screens">Bildschirme</string>
+    <string name="record">Angaben</string>
+    <string name="machine">Modell</string>
+    <string name="media">Medien</string>
+    <string name="source">Quelle</string>
+    <string name="from_retrostore">VON RETROSTORE</string>
+    <string name="from_retrostore_plain">von RetroStore</string>
+    <string name="download">LADEN</string>
+    <string name="downloading">LÄDT</string>
+    <string name="play">STARTEN</string>
+    <string name="copy">KOPIE</string>
+    <string name="disk_one">1 Diskette</string>
+    <string name="disk_many">%1$d Disketten</string>
+
+    <!-- Editor -->
+    <string name="edit_entry">Eintrag bearbeiten</string>
+    <string name="save">SICHERN</string>
+    <string name="name">Name</string>
+    <string name="untitled">Ohne Namen</string>
+    <string name="screen">Bildschirm</string>
+    <string name="green">GRÜN</string>
+    <string name="white">WEISS</string>
+    <string name="disks">Laufwerke</string>
+    <string name="disks_of">%1$d von %2$d</string>
+    <string name="add">HINZU</string>
+    <string name="cassette">Kassette</string>
+    <string name="cassette_none">Keine eingelegt</string>
+    <string name="boots_from_disk">%1$s startet von Diskette</string>
+    <string name="choose">WÄHLEN</string>
+    <string name="controls">Steuerung</string>
+    <string name="keyboard">Tastatur</string>
+    <string name="keyboard_summary">%1$s Hochformat, %2$s Querformat</string>
+    <string name="portrait">Hochformat</string>
+    <string name="landscape">Querformat</string>
+    <string name="while_running">Im Betrieb</string>
+    <string name="sound">Ton</string>
+    <string name="remove">Entfernen</string>
+    <string name="delete_entry">Diesen Eintrag löschen</string>
+    <string name="delete_question">%1$s löschen?</string>
+    <string name="this_entry">Diesen Eintrag</string>
+    <string name="delete_consequence">Die Disketten und ein gesicherter Stand gehen mit verloren. Das lässt sich nicht rückgängig machen.</string>
+    <string name="cancel">ABBRECHEN</string>
+    <string name="delete">Löschen</string>
+    <string name="fork_banner">Dies ist jetzt Ihre Kopie von %1$s. Das Original im Katalog bleibt unverändert.</string>
+    <string name="revert">VERWERFEN</string>
+    <string name="empty_drive">Leeres Laufwerk</string>
+    <string name="empty_drive_choose">Leeres Laufwerk — Diskette wählen</string>
+    <string name="back">Zurück</string>
+
+    <!-- Settings -->
+    <string name="settings">Einstellungen</string>
+    <string name="appearance">Darstellung</string>
+    <string name="theme">Design</string>
+    <string name="theme_light">HELL</string>
+    <string name="theme_system">SYSTEM</string>
+    <string name="theme_dark">DUNKEL</string>
+    <string name="theme_hint">System folgt dem Gerät. Der emulierte Bildschirm behält in beiden Fällen seine eigenen Farben — die gehören der Maschine.</string>
+
+    <!-- ROM images -->
+    <string name="rom_images">ROM-Abbilder</string>
+    <string name="get_all">ALLE LADEN</string>
+    <string name="not_installed">Nicht installiert</string>
+    <string name="roms_hint">Ohne sie startet keine Maschine, deshalb lädt die App sie beim ersten Start. Tippen Sie eine Zeile an, um eine eigene Datei zu verwenden, oder den Pfeil, um dieses Abbild erneut zu laden.</string>
+    <string name="getting_roms">ROM-Abbilder werden geladen</string>
+    <string name="getting_roms_why">Ein TRS-80 startet ohne sie nicht, und wir dürfen sie nicht mitliefern. Das geschieht nur einmal.</string>
+    <string name="roms_failed">ROM-Abbilder konnten nicht geladen werden</string>
+    <string name="roms_failed_detail">%1$s startet nicht, solange das nicht gelingt. Sie können es erneut versuchen oder in den Einstellungen ein eigenes Abbild wählen.</string>
+    <string name="not_now">NICHT JETZT</string>
+    <string name="try_again">ERNEUT VERSUCHEN</string>
+    <string name="and_joiner"> und </string>
+
+    <!-- Keyboard layouts, abbreviated to fit a row -->
+    <string name="keyboard_original">Orig</string>
+    <string name="keyboard_compact">Komp</string>
+    <string name="keyboard_joystick">Joy</string>
+    <string name="keyboard_gamepad">Ctrl</string>
+    <string name="keyboard_tilt">Neig</string>
+    <string name="keyboard_external">Ext</string>
+</resources>

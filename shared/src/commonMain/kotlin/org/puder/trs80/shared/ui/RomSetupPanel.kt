@@ -24,6 +24,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import trs_80.shared.generated.resources.Res
+import trs_80.shared.generated.resources.and_joiner
+import trs_80.shared.generated.resources.getting_roms
+import trs_80.shared.generated.resources.getting_roms_why
+import trs_80.shared.generated.resources.not_now
+import trs_80.shared.generated.resources.roms_failed
+import trs_80.shared.generated.resources.roms_failed_detail
+import trs_80.shared.generated.resources.try_again
 import org.puder.trs80.shared.ui.theme.ModalPanel
 import org.puder.trs80.shared.ui.theme.ProgressRing
 import org.puder.trs80.shared.ui.theme.Text
@@ -57,32 +66,32 @@ fun RomSetupPanel(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ProgressRing(progress = null, size = 20.dp)
                 Spacer(Modifier.width(12.dp))
-                Text("Getting the ROM images", style = Trs80Theme.type.title)
+                Text(stringResource(Res.string.getting_roms), style = Trs80Theme.type.title)
             }
             Spacer(Modifier.padding(top = 8.dp))
             Text(
-                "A TRS-80 cannot start without them, and they are not ours to " +
-                    "ship. This happens once.",
+                stringResource(Res.string.getting_roms_why),
                 style = Trs80Theme.type.bodySmall,
                 color = colors.muted,
             )
             return@ModalPanel
         }
 
-        Text("Could not get the ROM images", style = Trs80Theme.type.title)
+        Text(stringResource(Res.string.roms_failed), style = Trs80Theme.type.title)
         Spacer(Modifier.padding(top = 8.dp))
         Text(
-            missing.joinToString(" and ") { it.label } +
-                " will not start until this succeeds. You can try again, or " +
-                "choose your own image in settings.",
+            stringResource(
+                Res.string.roms_failed_detail,
+                missing.joinToString(stringResource(Res.string.and_joiner)) { it.label },
+            ),
             style = Trs80Theme.type.bodySmall,
             color = colors.muted,
         )
         Spacer(Modifier.padding(top = 18.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextAction("NOT NOW", onClick = onDismiss, color = colors.muted, padding = 0.dp)
+            TextAction(stringResource(Res.string.not_now), onClick = onDismiss, color = colors.muted, padding = 0.dp)
             Spacer(Modifier.weight(1f))
-            TextAction("TRY AGAIN", onClick = onRetry, padding = 0.dp)
+            TextAction(stringResource(Res.string.try_again), onClick = onRetry, padding = 0.dp)
         }
     }
 }
