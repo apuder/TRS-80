@@ -64,7 +64,7 @@ import kotlin.math.sin
  */
 enum class Trs80Icon {
     Plus, Overflow, Search, Download, Play, Stop, Settings,
-    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy, Refresh,
+    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy, Refresh, Close,
 }
 
 /**
@@ -297,6 +297,11 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
                 },
                 color,
             )
+        }
+
+        Trs80Icon.Close -> {
+            drawLine(color, Offset(w * 0.24f, h * 0.24f), Offset(w * 0.76f, h * 0.76f), stroke.width)
+            drawLine(color, Offset(w * 0.76f, h * 0.24f), Offset(w * 0.24f, h * 0.76f), stroke.width)
         }
 
         Trs80Icon.Stop -> {

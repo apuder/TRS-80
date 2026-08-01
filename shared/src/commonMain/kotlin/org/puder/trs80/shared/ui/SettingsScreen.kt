@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +37,6 @@ import org.puder.trs80.shared.appVersion
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.appearance
-import trs_80.shared.generated.resources.back
 import trs_80.shared.generated.resources.get_all
 import trs_80.shared.generated.resources.not_installed
 import trs_80.shared.generated.resources.rom_images
@@ -90,15 +88,10 @@ fun SettingsScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
         Row(
-            // The start edge is pulled in by the tap target's own padding, so
-            // the word still sits on the screen edge optically.
-            Modifier
-                .fillMaxWidth()
-                .padding(start = spacing.screenEdge - 10.dp, end = spacing.screenEdge),
+            Modifier.fillMaxWidth().padding(end = spacing.screenEdge),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextAction(stringResource(Res.string.back), onClick = onBack)
-            Spacer(Modifier.width(4.dp))
+            StrokeIcon(Trs80Icon.ChevronLeft, color = colors.accentText, onClick = onBack)
             Text(stringResource(Res.string.settings), style = Trs80Theme.type.wordmark, color = colors.text)
         }
         Hairline()

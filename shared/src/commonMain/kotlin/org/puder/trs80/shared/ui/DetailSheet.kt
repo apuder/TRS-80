@@ -146,6 +146,7 @@ fun DetailSheet(
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     val scope = rememberCoroutineScope()
+    var viewing by remember { mutableStateOf<Int?>(null) }
     // 0 is fully up, 1 is fully off the bottom. Held as a fraction of the
     // sheet's own height so nothing here needs to know how tall it ended up.
     val slide = remember { Animatable(1f) }
@@ -236,7 +237,7 @@ fun DetailSheet(
                 }
                 if (content.screenshotUrls.isNotEmpty()) {
                     SectionKicker(stringResource(Res.string.screens))
-                    Screens(content.screenshotUrls)
+                    Screens(content.screenshotUrls) { viewing = it }
                 }
                 SectionKicker(stringResource(Res.string.record))
                 RecordRow(stringResource(Res.string.machine), content.machine)
@@ -244,6 +245,15 @@ fun DetailSheet(
                 RecordRow(stringResource(Res.string.source), content.source)
                 Spacer(Modifier.height(28.dp))
             }
+        }
+
+        // Over the sheet, because at this size the picture is the whole screen.
+        viewing?.let { start ->
+            ScreensViewer(
+                urls = content.screenshotUrls,
+                startIndex = start,
+                onDismiss = { viewing = null },
+            )
         }
     }
 }
@@ -392,16 +402,17 @@ private fun Actions(action: DetailAction, onPrimary: () -> Unit, onCopy: () -> U
 
 /** The screens, matted like the library's plates so they read as one thing. */
 @Composable
-private fun Screens(urls: List<String>) {
+private fun Screens(urls: List<String>, onOpen: (Int) -> Unit) {
     val colors = Trs80Theme.colors
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
     ) {
-        urls.forEach { url ->
+        urls.forEachIndexed { index, url ->
             Box(
                 Modifier
                     .padding(end = Trs80Theme.spacing.gap)
                     .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.2f))
+                    .clickable { onOpen(index) }
                     .padding(Trs80Theme.spacing.mat),
             ) {
                 RemoteImage(
