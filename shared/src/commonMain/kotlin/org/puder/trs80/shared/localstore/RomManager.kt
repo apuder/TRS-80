@@ -62,10 +62,18 @@ class RomManager private constructor(
     fun hasAllRoms(): Boolean = hasRom(MODEL1) && hasRom(MODEL3)
 
     /**
+     * @return The models that have a usable ROM, in the order they are offered.
+     *
+     * The editor asks because choosing a model with no ROM produces a machine
+     * that cannot boot, which is not a choice worth showing.
+     */
+    fun modelsWithRoms(): List<Int> = StorageKeys.romModels.filter(::hasRom)
+
+    /**
      * @return Whether the ROM stored for [model] exists. If the file is gone, the
      * stale entry is removed so the next download replaces it.
      */
-    private fun hasRom(model: Int): Boolean {
+    fun hasRom(model: Int): Boolean {
         val filename = romPath(model) ?: return false
         if (appFileSystem.exists(filename.toPath())) {
             return true

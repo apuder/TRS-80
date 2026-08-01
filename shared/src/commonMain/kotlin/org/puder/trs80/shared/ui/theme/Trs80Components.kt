@@ -21,16 +21,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -48,7 +53,10 @@ import kotlin.math.PI
  * cost more than it saves — and the spec's rule that the accent is stroke only
  * makes drawing them directly the natural fit rather than a workaround.
  */
-enum class Trs80Icon { Plus, Overflow, Search, Download, Play, Stop, Settings }
+enum class Trs80Icon {
+    Plus, Overflow, Search, Download, Play, Stop, Settings,
+    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info,
+}
 
 /**
  * One of [Trs80Icon], stroked in [color].
@@ -187,6 +195,46 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
             drawCircle(color, w * 0.14f, Offset(cx, cy), style = stroke)
         }
 
+        Trs80Icon.Trash -> {
+            // Lid, then body: the outline alone reads as a bin at this size,
+            // and the spec keeps destructive controls in text colour.
+            drawLine(color, Offset(w * 0.2f, h * 0.26f), Offset(w * 0.8f, h * 0.26f), stroke.width)
+            drawLine(color, Offset(w * 0.41f, h * 0.26f), Offset(w * 0.41f, h * 0.17f), stroke.width)
+            drawLine(color, Offset(w * 0.59f, h * 0.26f), Offset(w * 0.59f, h * 0.17f), stroke.width)
+            drawLine(color, Offset(w * 0.41f, h * 0.17f), Offset(w * 0.59f, h * 0.17f), stroke.width)
+            drawLine(color, Offset(w * 0.28f, h * 0.26f), Offset(w * 0.33f, h * 0.83f), stroke.width)
+            drawLine(color, Offset(w * 0.72f, h * 0.26f), Offset(w * 0.67f, h * 0.83f), stroke.width)
+            drawLine(color, Offset(w * 0.33f, h * 0.83f), Offset(w * 0.67f, h * 0.83f), stroke.width)
+        }
+
+        Trs80Icon.Eject -> {
+            drawLine(color, Offset(w / 2, h * 0.62f), Offset(w / 2, h * 0.16f), stroke.width)
+            drawLine(color, Offset(w * 0.29f, h * 0.37f), Offset(w / 2, h * 0.16f), stroke.width)
+            drawLine(color, Offset(w * 0.71f, h * 0.37f), Offset(w / 2, h * 0.16f), stroke.width)
+            drawLine(color, Offset(w * 0.2f, h * 0.84f), Offset(w * 0.8f, h * 0.84f), stroke.width)
+        }
+
+        Trs80Icon.ChevronLeft -> {
+            drawLine(color, Offset(w * 0.62f, h * 0.2f), Offset(w * 0.36f, h * 0.5f), stroke.width)
+            drawLine(color, Offset(w * 0.36f, h * 0.5f), Offset(w * 0.62f, h * 0.8f), stroke.width)
+        }
+
+        Trs80Icon.ChevronRight -> {
+            drawLine(color, Offset(w * 0.38f, h * 0.2f), Offset(w * 0.64f, h * 0.5f), stroke.width)
+            drawLine(color, Offset(w * 0.64f, h * 0.5f), Offset(w * 0.38f, h * 0.8f), stroke.width)
+        }
+
+        Trs80Icon.DragHandle -> {
+            drawLine(color, Offset(w * 0.24f, h * 0.4f), Offset(w * 0.76f, h * 0.4f), stroke.width)
+            drawLine(color, Offset(w * 0.24f, h * 0.6f), Offset(w * 0.76f, h * 0.6f), stroke.width)
+        }
+
+        Trs80Icon.Info -> {
+            drawCircle(color, w * 0.42f, Offset(w / 2, h / 2), style = stroke)
+            drawLine(color, Offset(w / 2, h * 0.44f), Offset(w / 2, h * 0.7f), stroke.width)
+            drawCircle(color, w * 0.055f, Offset(w / 2, h * 0.31f))
+        }
+
         Trs80Icon.Stop -> {
             drawCircle(color, w * 0.42f, Offset(w / 2, h / 2), style = stroke)
             drawRect(
@@ -278,6 +326,7 @@ fun SegmentedToggle(
     selected: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    fill: Boolean = false,
 ) {
     val colors = Trs80Theme.colors
     Row(modifier.border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.18f))) {
@@ -285,11 +334,16 @@ fun SegmentedToggle(
             val isSelected = index == selected
             Box(
                 Modifier
+                    // Sized to their content by default, since most of these sit
+                    // at the right-hand end of a row; a control given the full
+                    // width shares it out instead.
+                    .then(if (fill) Modifier.weight(1f) else Modifier)
                     .clickable { onSelect(index) }
                     .background(
                         if (isSelected) colors.accent.copy(alpha = 0.16f) else Color.Transparent
                     )
                     .padding(horizontal = 7.dp, vertical = 5.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     label,
@@ -324,4 +378,192 @@ fun Text(
         maxLines = maxLines,
         overflow = overflow,
     )
+}
+
+/** A hairline rule, the app's only divider. */
+@Composable
+fun Hairline(modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(Trs80Theme.spacing.hairline)
+            .background(Trs80Theme.colors.hairline)
+    )
+}
+
+/**
+ * A section heading: the kicker, an optional count, and a hairline running out
+ * to the right edge.
+ *
+ * @param count shown next to the label in muted text — the spec uses it for the
+ * number of disks, where the heading is also the tally.
+ */
+@Composable
+fun SectionKicker(
+    label: String,
+    modifier: Modifier = Modifier,
+    count: String? = null,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val colors = Trs80Theme.colors
+    Row(
+        modifier.fillMaxWidth().padding(top = 18.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label.uppercase(), style = Trs80Theme.type.kicker, color = colors.accentText)
+        if (count != null) {
+            Spacer(Modifier.width(8.dp))
+            Text(count, style = Trs80Theme.type.kickerSmall, color = colors.muted)
+        }
+        Spacer(Modifier.width(10.dp))
+        Box(Modifier.weight(1f).height(Trs80Theme.spacing.hairline).background(colors.hairline))
+        if (trailing != null) {
+            Spacer(Modifier.width(10.dp))
+            trailing()
+        }
+    }
+}
+
+/**
+ * A settings row: label on the left, value on the right.
+ *
+ * The spec is firm that controls never get their own card, so this draws no
+ * background — only the row's own hairline, which the caller opts into. Rows
+ * that lead somewhere pass [onClick] and get a chevron.
+ */
+@Composable
+fun SettingRow(
+    label: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    onClick: (() -> Unit)? = null,
+    value: (@Composable () -> Unit)? = null,
+) {
+    val colors = Trs80Theme.colors
+    val clickable = if (onClick != null) {
+        modifier.heightIn(min = MinimumTouchTarget).clickable(onClick = onClick)
+    } else {
+        modifier
+    }
+    Row(
+        clickable.fillMaxWidth().padding(vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(label, style = Trs80Theme.type.body, color = colors.text)
+            if (subtitle != null) {
+                Text(subtitle, style = Trs80Theme.type.bodySmall, color = colors.muted)
+            }
+        }
+        if (value != null) {
+            Spacer(Modifier.width(12.dp))
+            value()
+        }
+        if (onClick != null) {
+            Spacer(Modifier.width(6.dp))
+            StrokeIcon(Trs80Icon.ChevronRight, color = colors.muted, size = 15.dp)
+        }
+    }
+}
+
+/**
+ * A switch.
+ *
+ * Off is a hairline track; on is an accent-tinted track with a solid accent
+ * knob. That solid knob is the one place the accent fills, which is why the
+ * track stays at a tint rather than matching it.
+ */
+@Composable
+fun Toggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = Trs80Theme.colors
+    Box(
+        modifier
+            .size(MinimumTouchTarget)
+            .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(width = 42.dp, height = 25.dp)
+                .clip(RoundedCornerShape(percent = 50))
+                .background(if (checked) colors.accent.copy(alpha = 0.16f) else Color.Transparent)
+                .border(
+                    Trs80Theme.spacing.hairline,
+                    if (checked) colors.accent else colors.text.copy(alpha = 0.22f),
+                    RoundedCornerShape(percent = 50),
+                )
+                .padding(3.dp),
+            contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
+        ) {
+            Box(
+                Modifier
+                    .size(19.dp)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(if (checked) colors.accent else colors.muted)
+            )
+        }
+    }
+}
+
+/** A single-line text field: a hairline box and nothing else. */
+@Composable
+fun Trs80TextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+) {
+    val colors = Trs80Theme.colors
+    Box(
+        modifier
+            .fillMaxWidth()
+            .background(colors.field)
+            .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.2f))
+            .padding(horizontal = 11.dp, vertical = 12.dp),
+    ) {
+        if (value.isEmpty()) {
+            Text(placeholder, style = Trs80Theme.type.body, color = colors.text.copy(alpha = 0.45f))
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = Trs80Theme.type.body.copy(color = colors.text),
+            cursorBrush = SolidColor(colors.accent),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/**
+ * A destructive control.
+ *
+ * Outlined in text colour with a trash glyph — never red, and never the accent.
+ * The spec is explicit about this: red would make the accent mean danger
+ * everywhere else it appears.
+ */
+@Composable
+fun DestructiveButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = Trs80Theme.colors
+    Row(
+        modifier
+            .fillMaxWidth()
+            .heightIn(min = MinimumTouchTarget)
+            .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.55f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = Trs80Theme.type.body, color = colors.text)
+        Spacer(Modifier.weight(1f))
+        StrokeIcon(Trs80Icon.Trash, color = colors.text, size = 17.dp)
+    }
 }

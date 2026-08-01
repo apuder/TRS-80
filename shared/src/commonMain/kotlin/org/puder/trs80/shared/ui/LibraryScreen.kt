@@ -76,6 +76,8 @@ data class LibraryActions(
     val onOpenEntry: (CatalogueEntry) -> Unit = {},
     val onInstall: (CatalogueEntry) -> Unit = {},
     val onAdd: (() -> Unit)? = null,
+    /** Opens the editor for one of the user's machines, from its overflow. */
+    val onEdit: ((Int) -> Unit)? = null,
     val onOpenSettings: (() -> Unit)? = null,
 )
 
@@ -139,7 +141,11 @@ fun LibraryScreen(
                 }
             }
             items(shown, key = { it.id }) { card ->
-                Plate(card, onClick = { actions.onRun(card.id) })
+                Plate(
+                    card,
+                    onClick = { actions.onRun(card.id) },
+                    onEdit = actions.onEdit?.let { edit -> { edit(card.id) } },
+                )
             }
             if (yours.size > COLLAPSED_PLATES) {
                 item { ShowAll(expanded, yours.size) { onExpandedChange(!expanded) } }
@@ -225,7 +231,7 @@ private fun SectionHeader(
  * screens rather than a list of names.
  */
 @Composable
-private fun Plate(card: ConfigurationCard, onClick: () -> Unit) {
+private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onEdit: (() -> Unit)?) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     Box(
@@ -287,24 +293,40 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit) {
                             listOf(Color(0x00181917), Color(0xE0181917)),
                         )
                     )
-                    .padding(start = 10.dp, end = 10.dp, top = 16.dp, bottom = 7.dp),
-                verticalAlignment = Alignment.Bottom,
+                    .padding(start = 10.dp, end = 4.dp, top = 12.dp),
+                // The caption keeps its own baseline while the overflow's touch
+                // target centres against it, rather than the target's height
+                // dragging the glyph up off the line.
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    card.name,
-                    style = Trs80Theme.type.titleSmall,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(7.dp))
-                Text(
-                    card.model.uppercase(),
-                    style = Trs80Theme.type.kickerSmall,
-                    color = Color.White.copy(alpha = 0.72f),
-                    modifier = Modifier.padding(bottom = 2.dp),
-                )
+                Row(
+                    Modifier.weight(1f).padding(bottom = 7.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Text(
+                        card.name,
+                        style = Trs80Theme.type.titleSmall,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(Modifier.width(7.dp))
+                    Text(
+                        card.model.uppercase(),
+                        style = Trs80Theme.type.kickerSmall,
+                        color = Color.White.copy(alpha = 0.72f),
+                        modifier = Modifier.padding(bottom = 2.dp),
+                    )
+                }
+                if (onEdit != null) {
+                    StrokeIcon(
+                        Trs80Icon.Overflow,
+                        color = Color.White.copy(alpha = 0.72f),
+                        size = 17.dp,
+                        onClick = onEdit,
+                    )
+                }
             }
         }
     }

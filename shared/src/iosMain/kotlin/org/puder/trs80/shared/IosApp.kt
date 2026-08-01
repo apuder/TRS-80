@@ -54,6 +54,9 @@ import org.puder.trs80.shared.ui.matchingEntries
 import org.puder.trs80.shared.ui.sortedFor
 import org.puder.trs80.shared.ui.theme.ThemePreference
 import org.puder.trs80.shared.ui.theme.Trs80Theme
+import org.puder.trs80.shared.configuration.toDraft
+import org.puder.trs80.shared.ui.EditConfigurationActions
+import org.puder.trs80.shared.ui.EditConfigurationScreen
 import org.puder.trs80.shared.ui.SettingsScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import org.puder.trs80.shared.navigation.Navigator
@@ -123,6 +126,7 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                         onBack = { navigator.goBack() },
                     )
                 },
+                editConfiguration = { Editor(it.configurationId, it.isNew, navigator) },
             )
         }
     }
@@ -133,6 +137,60 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
         content = compose,
         onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
         onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+    )
+}
+
+/**
+ * The configuration editor.
+ *
+ * The draft is read once, on the way in, and the screen edits that copy — so
+ * leaving without saving leaves the stored configuration as it was. Save is the
+ * only thing that writes.
+ *
+ * A machine created by the library's + is already persisted by the time it gets
+ * here, because that is the only way it can have an id; deleting it on the way
+ * back out is what makes Back behave as though it was never created.
+ */
+@Composable
+private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
+    val manager = ConfigurationManager.get()
+    val original = remember(configurationId) {
+        manager.getConfigById(configurationId)?.toDraft()
+    }
+    if (original == null) {
+        // The configuration went away underneath us; there is nothing to edit.
+        LaunchedEffect(configurationId) { navigator.goBack() }
+        return
+    }
+    var draft by remember(configurationId) { mutableStateOf(original) }
+    // The configuration's own model belongs on the control even if its ROM has
+    // gone missing, or the editor would show nothing selected.
+    val models = remember(original.model) {
+        (RomManager.get().modelsWithRoms() + original.model).distinct().sorted()
+    }
+
+    EditConfigurationScreen(
+        draft = draft,
+        original = original,
+        models = models,
+        onChange = { draft = it },
+        actions = EditConfigurationActions(
+            onSave = {
+                manager.persistDraft(draft)
+                navigator.goBack()
+            },
+            onBack = {
+                if (isNew) {
+                    manager.deleteConfigWithId(configurationId)
+                }
+                navigator.goBack()
+            },
+            onRevert = { draft = original },
+            onDelete = {
+                manager.deleteConfigWithId(configurationId)
+                navigator.goBack()
+            },
+        ),
     )
 }
 
@@ -189,6 +247,11 @@ private fun Library(navigator: Navigator) {
             onRun = { navigator.goTo(Destination.Emulator(it)) },
             onOpenEntry = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
+            onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
+            onAdd = {
+                val fresh = ConfigurationManager.get().newConfiguration()
+                navigator.goTo(Destination.EditConfiguration(fresh.id, isNew = true))
+            },
             onInstall = { entry ->
                 installing = installing + entry.id
                 scope.launch {

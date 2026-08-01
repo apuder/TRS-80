@@ -81,6 +81,7 @@ fun Trs80App(
     emulator: @Composable (Destination.Emulator) -> Unit,
     retroStoreApp: (@Composable (Destination.RetroStoreApp) -> Unit)? = null,
     settings: (@Composable () -> Unit)? = null,
+    editConfiguration: (@Composable (Destination.EditConfiguration) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     NavDisplay(
@@ -94,6 +95,9 @@ fun Trs80App(
             // for it, so a host that cannot show one says so rather than the app
             // navigating into a blank screen.
             entry<Destination.Settings> { settings?.invoke() ?: Missing("Settings") }
+            entry<Destination.EditConfiguration> {
+                editConfiguration?.invoke(it) ?: Missing("The editor")
+            }
             entry<Destination.RetroStoreApp> {
                 retroStoreApp?.invoke(it) ?: Missing("RetroStore app")
             }

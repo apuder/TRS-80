@@ -172,6 +172,26 @@ class ConfigurationManager private constructor(
         toSave.isCustom = true
     }
 
+    /**
+     * Writes an edited [draft] back into its persisted storage.
+     *
+     * Like [persistConfig] this marks the configuration custom: editing
+     * something makes it the user's own, which is what the library's CUSTOM
+     * mark means and what the editor's fork banner has just announced.
+     */
+    fun persistDraft(draft: ConfigurationDraft) {
+        val toSave = ConfigurationImpl.fromId(draft.id, settings)
+        toSave.setName(draft.name)
+        toSave.model = draft.model
+        toSave.setCassettePath(draft.cassettePath)
+        toSave.diskPaths = draft.diskPaths
+        toSave.setKeyboardLayoutPortrait(draft.keyboardPortrait)
+        toSave.setKeyboardLayoutLandscape(draft.keyboardLandscape)
+        toSave.characterColor = draft.characterColor
+        toSave.isSoundMuted = draft.soundMuted
+        toSave.isCustom = true
+    }
+
     /** Stores the current list of configurations. */
     private fun saveConfigurationIds() =
         persistence.persistConfigurationIds(configurations.map { it.id })

@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
@@ -36,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.appVersion
+import org.puder.trs80.shared.ui.theme.Hairline
+import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.TextAction
 import org.puder.trs80.shared.ui.theme.Text
@@ -77,7 +78,7 @@ fun SettingsScreen(
             Spacer(Modifier.width(4.dp))
             Text("Settings", style = Trs80Theme.type.wordmark, color = colors.text)
         }
-        Divider()
+        Hairline()
 
         Column(
             Modifier
@@ -85,7 +86,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = spacing.screenEdge),
         ) {
-            SettingsSection("Appearance")
+            SectionKicker("Appearance")
             Row(
                 Modifier.fillMaxWidth().padding(bottom = 18.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -121,25 +122,3 @@ fun SettingsScreen(
     }
 }
 
-@Composable
-private fun SettingsSection(label: String) {
-    val colors = Trs80Theme.colors
-    Row(
-        Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label.uppercase(), style = Trs80Theme.type.kicker, color = colors.accentText)
-        Spacer(Modifier.width(10.dp))
-        Box(Modifier.weight(1f).height(1.dp).background(colors.hairline))
-    }
-}
-
-@Composable
-private fun Divider() {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(Trs80Theme.spacing.hairline)
-            .background(Trs80Theme.colors.hairline)
-    )
-}

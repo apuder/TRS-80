@@ -84,7 +84,7 @@ fun ConfigurationManager.toCards(): List<ConfigurationCard> =
         )
     }
 
-private fun modelLabel(model: Int): String = when (model) {
+internal fun modelLabel(model: Int): String = when (model) {
     MODEL1 -> "Model I"
     MODEL3 -> "Model III"
     MODEL4 -> "Model 4"
@@ -92,7 +92,7 @@ private fun modelLabel(model: Int): String = when (model) {
     else -> NOT_SET
 }
 
-private fun keyboardLabel(layout: KeyboardLayout?): String = when (layout) {
+internal fun keyboardLabel(layout: KeyboardLayout?): String = when (layout) {
     KeyboardLayout.KEYBOARD_LAYOUT_ORIGINAL -> "Orig"
     KeyboardLayout.KEYBOARD_LAYOUT_COMPACT -> "Comp"
     KeyboardLayout.KEYBOARD_LAYOUT_JOYSTICK -> "Joy"
