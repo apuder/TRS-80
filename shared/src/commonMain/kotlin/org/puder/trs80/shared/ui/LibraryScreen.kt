@@ -76,7 +76,7 @@ data class LibraryActions(
     val onOpenEntry: (CatalogueEntry) -> Unit = {},
     val onInstall: (CatalogueEntry) -> Unit = {},
     val onAdd: (() -> Unit)? = null,
-    val onOverflow: (() -> Unit)? = null,
+    val onOpenSettings: (() -> Unit)? = null,
 )
 
 /** How the user's own machines are ordered. */
@@ -172,7 +172,9 @@ private fun LibraryTopBar(actions: LibraryActions) {
             StrokeIcon(Trs80Icon.Plus, color = colors.muted, onClick = it)
             Spacer(Modifier.width(14.dp))
         }
-        actions.onOverflow?.let { StrokeIcon(Trs80Icon.Overflow, color = colors.muted, onClick = it) }
+        actions.onOpenSettings?.let {
+            StrokeIcon(Trs80Icon.Settings, color = colors.muted, onClick = it)
+        }
     }
     Divider()
 }

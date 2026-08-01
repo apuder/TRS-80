@@ -46,9 +46,15 @@ import androidx.compose.ui.unit.dp
  * cost more than it saves — and the spec's rule that the accent is stroke only
  * makes drawing them directly the natural fit rather than a workaround.
  */
-enum class Trs80Icon { Plus, Overflow, Search, Download, Play, Stop }
+enum class Trs80Icon { Plus, Overflow, Search, Download, Play, Stop, Settings }
 
-/** One of [Trs80Icon], stroked in [color]. */
+/**
+ * One of [Trs80Icon], stroked in [color].
+ *
+ * A tappable icon gets a touch target of at least [MinimumTouchTarget]
+ * regardless of how large the glyph is drawn. The spec's icons are 17-19px,
+ * which is a fine size to look at and far too small to hit.
+ */
 @Composable
 fun StrokeIcon(
     icon: Trs80Icon,
@@ -57,9 +63,22 @@ fun StrokeIcon(
     size: androidx.compose.ui.unit.Dp = 19.dp,
     onClick: (() -> Unit)? = null,
 ) {
-    val clickable = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
-    Canvas(clickable.size(size)) { drawIcon(icon, color) }
+    if (onClick == null) {
+        Canvas(modifier.size(size)) { drawIcon(icon, color) }
+        return
+    }
+    Box(
+        modifier
+            .size(MinimumTouchTarget)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(size)) { drawIcon(icon, color) }
+    }
 }
+
+/** The smallest thing a finger should be asked to hit. */
+val MinimumTouchTarget = 44.dp
 
 private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
     val w = size.width
@@ -100,6 +119,26 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
                 close()
             }
             drawPath(path, color)
+        }
+
+        Trs80Icon.Settings -> {
+            // A gear as a ring with teeth: filling it would break the spec's
+            // stroke-only rule, and an outline reads at this size.
+            drawCircle(color, w * 0.19f, Offset(w / 2, h / 2), style = stroke)
+            val teeth = 8
+            repeat(teeth) { i ->
+                val angle = (i * 2f * 3.14159f / teeth)
+                val inner = w * 0.29f
+                val outer = w * 0.42f
+                val cx = w / 2
+                val cy = h / 2
+                drawLine(
+                    color,
+                    Offset(cx + inner * kotlin.math.cos(angle), cy + inner * kotlin.math.sin(angle)),
+                    Offset(cx + outer * kotlin.math.cos(angle), cy + outer * kotlin.math.sin(angle)),
+                    stroke.width,
+                )
+            }
         }
 
         Trs80Icon.Stop -> {

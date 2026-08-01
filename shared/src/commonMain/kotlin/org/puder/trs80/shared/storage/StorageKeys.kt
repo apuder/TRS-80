@@ -114,6 +114,9 @@ object StorageKeys {
     /** The counter the next configuration's ID comes from. */
     const val NEXT_CONFIGURATION_ID = APP_PREFIX + "nextId"
 
+    /** Which register the app draws in: see `ThemePreference`. */
+    const val APP_THEME = APP_PREFIX + "theme"
+
     /**
      * The ROM image for an emulated model. The leaf keeps its legacy name for
      * the same reason as the per-configuration keys: the settings screen binds

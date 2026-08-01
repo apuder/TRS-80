@@ -80,6 +80,7 @@ fun Trs80App(
     library: @Composable () -> Unit,
     emulator: @Composable (Destination.Emulator) -> Unit,
     retroStoreApp: (@Composable (Destination.RetroStoreApp) -> Unit)? = null,
+    settings: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     NavDisplay(
@@ -92,6 +93,7 @@ fun Trs80App(
             // Every destination needs an entry or NavDisplay has nothing to draw
             // for it, so a host that cannot show one says so rather than the app
             // navigating into a blank screen.
+            entry<Destination.Settings> { settings?.invoke() ?: Missing("Settings") }
             entry<Destination.RetroStoreApp> {
                 retroStoreApp?.invoke(it) ?: Missing("RetroStore app")
             }

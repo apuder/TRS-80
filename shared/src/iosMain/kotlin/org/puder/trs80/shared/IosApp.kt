@@ -52,7 +52,10 @@ import org.puder.trs80.shared.ui.asCatalogue
 import org.puder.trs80.shared.ui.matching
 import org.puder.trs80.shared.ui.matchingEntries
 import org.puder.trs80.shared.ui.sortedFor
+import org.puder.trs80.shared.ui.theme.ThemePreference
 import org.puder.trs80.shared.ui.theme.Trs80Theme
+import org.puder.trs80.shared.ui.SettingsScreen
+import androidx.compose.foundation.isSystemInDarkTheme
 import org.puder.trs80.shared.navigation.Navigator
 import org.puder.trs80.shared.ui.EmulatorScaffold
 import org.puder.trs80.shared.ui.RetroStoreAppScreen
@@ -91,7 +94,16 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
 
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
-        Trs80Theme {
+        // The choice is read once and held here, so changing it repaints the
+        // whole app rather than only the screen that changed it.
+        var theme by remember { mutableStateOf(ThemePreference.from(appSettings())) }
+        Trs80Theme(
+            dark = when (theme) {
+                ThemePreference.Light -> false
+                ThemePreference.Dark -> true
+                ThemePreference.System -> isSystemInDarkTheme()
+            },
+        ) {
             Trs80App(
                 navigator = navigator,
                 library = { Library(navigator) },
@@ -100,6 +112,16 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                 },
                 retroStoreApp = { destination ->
                     StoreApp(destination.appId, onBack = { navigator.goBack() })
+                },
+                settings = {
+                    SettingsScreen(
+                        theme = theme,
+                        onThemeChange = {
+                            theme = it
+                            it.storeIn(appSettings())
+                        },
+                        onBack = { navigator.goBack() },
+                    )
                 },
             )
         }
@@ -166,6 +188,7 @@ private fun Library(navigator: Navigator) {
         actions = LibraryActions(
             onRun = { navigator.goTo(Destination.Emulator(it)) },
             onOpenEntry = { navigator.goTo(Destination.RetroStoreApp(it.id)) },
+            onOpenSettings = { navigator.goTo(Destination.Settings) },
             onInstall = { entry ->
                 installing = installing + entry.id
                 scope.launch {
