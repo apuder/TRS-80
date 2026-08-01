@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.ProgressRing
 import org.puder.trs80.shared.ui.theme.SearchField
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
@@ -55,6 +56,15 @@ import org.puder.trs80.shared.ui.theme.Trs80Icon
 import org.puder.trs80.shared.ui.theme.Trs80Theme
 
 /** How many of the user's own machines the library shows before it offers the rest. */
+/**
+ * How large the control at the end of a catalogue row is drawn.
+ *
+ * Bigger than the icons elsewhere: this is the row's one action, and at the
+ * size the rest of the set uses it reads as a status mark rather than a thing
+ * to press.
+ */
+private val ROW_CONTROL = 24.dp
+
 private const val COLLAPSED_PLATES = 3
 
 /** One entry in the catalogue, and what the app can do with it. */
@@ -390,16 +400,23 @@ private fun CatalogueRow(entry: CatalogueEntry, actions: LibraryActions) {
             )
         }
         Spacer(Modifier.width(10.dp))
-        // Always the same position: download, then progress, then play.
-        when {
-            entry.installing -> ProgressRing(progress = null)
-            entry.installed -> StrokeIcon(Trs80Icon.Play, color = colors.accentText, size = 17.dp)
-            else -> StrokeIcon(
-                Trs80Icon.Download,
-                color = colors.accentText,
-                size = 17.dp,
-                onClick = { actions.onInstall(entry) },
-            )
+        // One reserved slot for all three states, so the glyph lands in the same
+        // place whatever it is. Only the download is tappable, and a tappable
+        // icon carries a touch target the others do not — left to size
+        // themselves they would each sit at a different distance from the edge.
+        Box(Modifier.size(MinimumTouchTarget), contentAlignment = Alignment.Center) {
+            when {
+                entry.installing -> ProgressRing(progress = null, size = ROW_CONTROL)
+                entry.installed ->
+                    StrokeIcon(Trs80Icon.Play, color = colors.accentText, size = ROW_CONTROL)
+
+                else -> StrokeIcon(
+                    Trs80Icon.Download,
+                    color = colors.accentText,
+                    size = ROW_CONTROL,
+                    onClick = { actions.onInstall(entry) },
+                )
+            }
         }
     }
     Divider()

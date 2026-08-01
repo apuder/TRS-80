@@ -96,6 +96,7 @@ private val SCREEN_COLOR = Color(0xFF444444)
 fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
     installIfNeeded(romPath, diskPath)
 
+    val capture = KeyCapture()
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
         // The choice is read once and held here, so changing it repaints the
@@ -112,7 +113,11 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
                 navigator = navigator,
                 library = { Library(navigator) },
                 emulator = {
-                    RunningMachine(it.configurationId, onBack = { navigator.goBack() })
+                    RunningMachine(
+                        it.configurationId,
+                        capture = capture,
+                        onBack = { navigator.goBack() },
+                    )
                 },
                 retroStoreApp = { destination ->
                     StoreApp(destination.appId, onBack = { navigator.goBack() })
@@ -136,6 +141,7 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
     // KeyForwardingController.
     return KeyForwardingController(
         content = compose,
+        capture = capture,
         onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
         onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
     )
@@ -331,12 +337,18 @@ private fun StoreApp(appId: String, onBack: () -> Unit) {
  */
 @OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class)
 @Composable
-private fun RunningMachine(configurationId: Int, onBack: () -> Unit) {
+private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: () -> Unit) {
     val source = remember(configurationId) { IosEmulatorScreenSource() }
     // Held so leaving can write to it. The session is put away on the way out
     // rather than in onDispose, because the list reloads the moment the back
     // stack pops -- writing afterwards means it reads the previous screenshot.
     var emulatorState by remember(configurationId) { mutableStateOf<EmulatorState?>(null) }
+
+    // The machine takes the hardware keyboard for as long as it is on screen.
+    DisposableEffect(capture) {
+        capture.enabled = true
+        onDispose { capture.enabled = false }
+    }
 
     DisposableEffect(configurationId) {
         val configuration = ConfigurationManager.get().getConfigById(configurationId)

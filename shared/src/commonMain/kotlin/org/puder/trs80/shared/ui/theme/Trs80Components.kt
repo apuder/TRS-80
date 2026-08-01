@@ -20,6 +20,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,9 +34,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -291,10 +295,19 @@ fun SearchField(
     modifier: Modifier = Modifier,
 ) {
     val colors = Trs80Theme.colors
+    val focus = remember { FocusRequester() }
     Row(
         modifier
             .background(colors.field)
             .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.2f))
+            // A text field is only as tall as its line of text, so the box drawn
+            // around it — border, padding, the space beside the icon — is not
+            // part of it and a tap there did nothing. It looked like the target
+            // without being one, which reads as a field that cannot be typed in.
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+            ) { focus.requestFocus() }
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -310,10 +323,12 @@ fun SearchField(
                 singleLine = true,
                 textStyle = Trs80Theme.type.body.copy(color = colors.text),
                 cursorBrush = SolidColor(colors.accent),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
             )
         }
     }
 }
+
 
 /**
  * A two-option segmented control, stroked.
@@ -518,11 +533,17 @@ fun Trs80TextField(
     placeholder: String = "",
 ) {
     val colors = Trs80Theme.colors
+    val focus = remember { FocusRequester() }
     Box(
         modifier
             .fillMaxWidth()
             .background(colors.field)
             .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.2f))
+            // As in SearchField: the drawn box has to be the target too.
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+            ) { focus.requestFocus() }
             .padding(horizontal = 11.dp, vertical = 12.dp),
     ) {
         if (value.isEmpty()) {
@@ -534,7 +555,7 @@ fun Trs80TextField(
             singleLine = true,
             textStyle = Trs80Theme.type.body.copy(color = colors.text),
             cursorBrush = SolidColor(colors.accent),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().focusRequester(focus),
         )
     }
 }

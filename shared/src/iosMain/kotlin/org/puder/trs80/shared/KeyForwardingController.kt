@@ -51,9 +51,19 @@ import platform.UIKit.didMoveToParentViewController
 @OptIn(ExperimentalForeignApi::class)
 class KeyForwardingController(
     private val content: UIViewController,
+    private val capture: KeyCapture,
     private val onKeyDown: (KeyMap) -> Unit,
     private val onKeyUp: (KeyMap) -> Unit,
 ) : UIViewController(nibName = null, bundle = null) {
+
+    init {
+        // Only hold the keyboard while a machine is running. Every other screen
+        // has something that wants it more -- a search box, a name field -- and
+        // first responder is not shared.
+        capture.onChanged = { running ->
+            if (running) becomeFirstResponder() else resignFirstResponder()
+        }
+    }
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -70,21 +80,21 @@ class KeyForwardingController(
 
     override fun viewDidAppear(animated: Boolean) {
         super.viewDidAppear(animated)
-        // Nothing else wants to be first responder on this screen, so this can
-        // simply take it and keep it.
-        becomeFirstResponder()
+        if (capture.enabled) {
+            becomeFirstResponder()
+        }
     }
 
     override fun canBecomeFirstResponder(): Boolean = true
 
     override fun pressesBegan(presses: Set<*>, withEvent: UIPressesEvent?) {
-        if (!forward(presses, onKeyDown)) {
+        if (!capture.enabled || !forward(presses, onKeyDown)) {
             super.pressesBegan(presses, withEvent)
         }
     }
 
     override fun pressesEnded(presses: Set<*>, withEvent: UIPressesEvent?) {
-        if (!forward(presses, onKeyUp)) {
+        if (!capture.enabled || !forward(presses, onKeyUp)) {
             super.pressesEnded(presses, withEvent)
         }
     }
@@ -103,6 +113,24 @@ class KeyForwardingController(
 }
 
 /** @return what a physical key means to the machine, or null if nothing. */
+/**
+ * Whether the machine currently wants the hardware keyboard.
+ *
+ * The emulator screen turns this on while it is up. Off, the keys go where
+ * UIKit would have sent them anyway, which is whatever text field has focus.
+ */
+class KeyCapture {
+    internal var onChanged: ((Boolean) -> Unit)? = null
+
+    var enabled: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                onChanged?.invoke(value)
+            }
+        }
+}
+
 @OptIn(ExperimentalForeignApi::class)
 private fun entryFor(key: UIKey): KeyMap? {
     when (key.keyCode) {
