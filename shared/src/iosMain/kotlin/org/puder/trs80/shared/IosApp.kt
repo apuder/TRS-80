@@ -48,6 +48,7 @@ import org.puder.trs80.shared.storage.appSettings
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import org.puder.trs80.shared.ui.Catalogue
 import org.puder.trs80.shared.ui.CatalogueEntry
 import org.puder.trs80.shared.ui.DetailAction
 import org.puder.trs80.shared.ui.DetailContent
@@ -108,6 +109,7 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
     val capture = KeyCapture()
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
+        val catalogue = remember { Catalogue() }
         // The choice is read once and held here, so changing it repaints the
         // whole app rather than only the screen that changed it.
         var theme by remember { mutableStateOf(ThemePreference.from(appSettings())) }
@@ -120,7 +122,7 @@ fun Trs80ViewController(romPath: String, diskPath: String?): UIViewController {
         ) {
             Trs80App(
                 navigator = navigator,
-                library = { Library(navigator) },
+                library = { Library(navigator, catalogue) },
                 emulator = {
                     RunningMachine(
                         it.configurationId,
@@ -227,9 +229,8 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
  * testable on their own, without a display.
  */
 @Composable
-private fun Library(navigator: Navigator) {
+private fun Library(navigator: Navigator, catalogue: Catalogue) {
     var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
-    var apps by remember { mutableStateOf<StoreState>(StoreState.Loading) }
     var query by remember { mutableStateOf("") }
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
     var expanded by remember { mutableStateOf(false) }
@@ -263,23 +264,18 @@ private fun Library(navigator: Navigator) {
             reload()
         }
     }
-    LaunchedEffect(Unit) {
-        apps = try {
-            StoreState.Loaded(withContext(Dispatchers.Default) { retroStore.fetchApps(0, 100) })
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not fetch the store catalogue.", e)
-            StoreState.Failed(e.message.orEmpty())
-        }
-    }
+    LaunchedEffect(catalogue) { catalogue.loadOnce() }
+
+    val listed = (catalogue.state as? StoreState.Loaded)?.apps.orEmpty()
+    val entries = listed.asCatalogue(cards, installing)
 
     val selectedEntry = selected
     Box(Modifier.fillMaxSize()) {
     LibraryScreen(
         yours = cards.matching(query).sortedFor(sort),
-        catalogue = ((apps as? StoreState.Loaded)?.apps.orEmpty())
-            .asCatalogue(cards, installing)
-            .matchingEntries(query),
-        catalogueState = apps,
+        catalogue = entries.matchingEntries(query),
+        catalogueState = catalogue.state,
+        refreshing = catalogue.refreshing,
         query = query,
         sort = sort,
         expanded = expanded,
@@ -290,21 +286,20 @@ private fun Library(navigator: Navigator) {
             onRun = { navigator.goTo(Destination.Emulator(it)) },
             onOpenEntry = { selected = it },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
+            onRefresh = { scope.launch { catalogue.refresh() } },
             onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
             onAdd = {
                 val fresh = ConfigurationManager.get().newConfiguration()
                 navigator.goTo(Destination.EditConfiguration(fresh.id, isNew = true))
             },
             onInstall = { entry ->
-                (apps as? StoreState.Loaded)?.apps?.firstOrNull { it.id == entry.id }
+                listed.firstOrNull { it.id == entry.id }
                     ?.let(::install)
             },
         ),
     )
 
-        val selectedApp = (apps as? StoreState.Loaded)?.apps?.firstOrNull {
-            it.id == selectedEntry?.id
-        }
+        val selectedApp = listed.firstOrNull { it.id == selectedEntry?.id }
         if (selectedEntry != null && selectedApp != null) {
             Detail(
                 entry = selectedEntry,

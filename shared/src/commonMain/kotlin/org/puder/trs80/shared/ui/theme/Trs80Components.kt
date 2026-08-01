@@ -50,6 +50,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * The strokes the app draws instead of an icon pack.
@@ -60,7 +62,7 @@ import kotlin.math.PI
  */
 enum class Trs80Icon {
     Plus, Overflow, Search, Download, Play, Stop, Settings,
-    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy,
+    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy, Refresh,
 }
 
 /**
@@ -253,6 +255,45 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
                 topLeft = Offset(w * 0.34f, h * 0.34f),
                 size = Size(w * 0.5f, h * 0.5f),
                 style = stroke,
+            )
+        }
+
+        Trs80Icon.Refresh -> {
+            // The conventional circular arrow: a nearly closed ring with a
+            // solid head at the end of the stroke. The head is a filled
+            // triangle rather than two barbs, which is what makes it read as
+            // the icon everyone already knows -- and Play sets the precedent
+            // for a solid triangle sitting on a stroked arc.
+            val cx = w / 2
+            val cy = h / 2
+            val radius = w * 0.33f
+            val tail = 350f
+            val sweep = 310f
+            drawArc(
+                color = color,
+                startAngle = tail,
+                sweepAngle = sweep,
+                useCenter = false,
+                topLeft = Offset(cx - radius, cy - radius),
+                size = Size(radius * 2, radius * 2),
+                style = stroke,
+            )
+            val head = (tail + sweep) * PI.toFloat() / 180f
+            val onArc = Offset(cx + radius * cos(head), cy + radius * sin(head))
+            // Clockwise tangent, which is the way the stroke was travelling.
+            val along = Offset(-sin(head), cos(head))
+            // Radially outward, which is how the base straddles the stroke.
+            val across = Offset(cos(head), sin(head))
+            val reach = w * 0.23f
+            val halfBase = w * 0.125f
+            drawPath(
+                androidx.compose.ui.graphics.Path().apply {
+                    moveTo(onArc.x + along.x * reach, onArc.y + along.y * reach)
+                    lineTo(onArc.x + across.x * halfBase, onArc.y + across.y * halfBase)
+                    lineTo(onArc.x - across.x * halfBase, onArc.y - across.y * halfBase)
+                    close()
+                },
+                color,
             )
         }
 

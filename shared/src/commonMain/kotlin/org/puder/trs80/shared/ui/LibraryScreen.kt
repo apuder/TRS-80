@@ -37,6 +37,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -65,6 +72,9 @@ import org.puder.trs80.shared.ui.theme.scanlines
  * to press.
  */
 private val ROW_CONTROL = 24.dp
+
+/** One turn of the refresh control while the store is being asked. */
+private const val SPIN_MILLIS = 900
 
 private const val COLLAPSED_PLATES = 3
 
@@ -95,6 +105,8 @@ data class LibraryActions(
     val onAdd: (() -> Unit)? = null,
     /** Opens the editor for one of the user's machines, from its overflow. */
     val onEdit: ((Int) -> Unit)? = null,
+    /** Asks the store for the catalogue again. */
+    val onRefresh: (() -> Unit)? = null,
     val onOpenSettings: (() -> Unit)? = null,
 )
 
@@ -114,6 +126,8 @@ fun LibraryScreen(
     yours: List<ConfigurationCard>,
     catalogue: List<CatalogueEntry>,
     catalogueState: StoreState,
+    /** Whether the store is being asked again, which the refresh control shows. */
+    refreshing: Boolean = false,
     query: String,
     sort: LibrarySort,
     expanded: Boolean,
@@ -167,7 +181,15 @@ fun LibraryScreen(
             if (yours.size > COLLAPSED_PLATES) {
                 item { ShowAll(expanded, yours.size) { onExpandedChange(!expanded) } }
             }
-            item { SectionHeader(label = "Catalogue", count = catalogue.size.takeIf { it > 0 }) }
+            item {
+                SectionHeader(
+                    label = "Catalogue",
+                    count = catalogue.size.takeIf { it > 0 },
+                    trailing = actions.onRefresh?.let {
+                        { RefreshControl(refreshing = refreshing, onClick = it) }
+                    },
+                )
+            }
             when (catalogueState) {
                 is StoreState.Loading -> item { CatalogueNote("Loading…") }
                 is StoreState.Failed -> item { CatalogueNote("Could not reach the store.") }
@@ -175,6 +197,43 @@ fun LibraryScreen(
                     CatalogueRow(entry, actions)
                 }
             }
+        }
+    }
+}
+
+/**
+ * Asks the store again.
+ *
+ * Turns into the ring while it is asking, in the same place and at the same
+ * size, so the control does not move or vanish under the finger that pressed it.
+ */
+@Composable
+private fun RefreshControl(refreshing: Boolean, onClick: () -> Unit) {
+    val colors = Trs80Theme.colors
+    // One reserved slot either way, so the control does not move or resize
+    // under the finger that pressed it.
+    Box(Modifier.size(MinimumTouchTarget), contentAlignment = Alignment.Center) {
+        if (refreshing) {
+            // The spin is only composed while it is spinning: an infinite
+            // transition redraws every frame for as long as it exists, and this
+            // sits on a screen the app spends most of its life on.
+            val spin = rememberInfiniteTransition(label = "refresh")
+            val angle by spin.animateFloat(
+                initialValue = 0f,
+                targetValue = 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(SPIN_MILLIS, easing = LinearEasing),
+                ),
+                label = "angle",
+            )
+            StrokeIcon(
+                Trs80Icon.Refresh,
+                color = colors.accentText,
+                size = 17.dp,
+                modifier = Modifier.graphicsLayer { rotationZ = angle },
+            )
+        } else {
+            StrokeIcon(Trs80Icon.Refresh, color = colors.accentText, size = 17.dp, onClick = onClick)
         }
     }
 }
