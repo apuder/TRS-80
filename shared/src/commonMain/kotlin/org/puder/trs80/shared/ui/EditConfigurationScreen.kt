@@ -48,10 +48,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.KeyboardLayout
+import org.puder.trs80.shared.ScreenColor
 import org.puder.trs80.shared.configuration.ConfigurationDraft
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.add
+import trs_80.shared.generated.resources.amber
 import trs_80.shared.generated.resources.boots_from_disk
 import trs_80.shared.generated.resources.cancel
 import trs_80.shared.generated.resources.cassette
@@ -196,10 +198,21 @@ fun EditConfigurationScreen(
             // Not in the visual spec, but the app has always had it and the
             // editor is the only place it can be reached.
             SettingRow(stringResource(Res.string.screen)) {
+                val phosphors = ScreenColor.entries
                 SegmentedToggle(
-                    options = listOf(stringResource(Res.string.green), stringResource(Res.string.white)),
-                    selected = draft.characterColor.coerceIn(0, 1),
-                    onSelect = { onChange(draft.copy(characterColor = it)) },
+                    options = phosphors.map {
+                        stringResource(
+                            when (it) {
+                                ScreenColor.Green -> Res.string.green
+                                ScreenColor.Amber -> Res.string.amber
+                                ScreenColor.White -> Res.string.white
+                            }
+                        )
+                    },
+                    selected = phosphors.indexOf(ScreenColor.of(draft.characterColor)),
+                    onSelect = {
+                        onChange(draft.copy(characterColor = phosphors[it].stored))
+                    },
                 )
             }
 

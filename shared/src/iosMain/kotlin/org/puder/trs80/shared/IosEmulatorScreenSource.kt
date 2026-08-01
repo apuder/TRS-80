@@ -114,11 +114,8 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
         val coloured = ByteArray(width * height * 4)
         var out = 0
         for (i in pixels.indices) {
-            val argb = if (pixels[i] == 0.toByte()) background else foreground
-            coloured[out++] = (argb and 0xFF).toByte()
-            coloured[out++] = ((argb shr 8) and 0xFF).toByte()
-            coloured[out++] = ((argb shr 16) and 0xFF).toByte()
-            coloured[out++] = ((argb shr 24) and 0xFF).toByte()
+            writeN32(coloured, out, if (pixels[i] == 0.toByte()) background else foreground)
+            out += 4
         }
         val target = Bitmap()
         target.allocPixels(ImageInfo(width, height, ColorType.N32, ColorAlphaType.OPAQUE))
@@ -129,11 +126,26 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
     }
 }
 
-/** Repacks a colour into the byte order Skia's N32 expects on this platform. */
-private fun Color.toN32(): Int {
+/** A colour as a plain ARGB int. */
+internal fun Color.toN32(): Int {
     val a = (alpha * 255f).toInt() and 0xFF
     val r = (red * 255f).toInt() and 0xFF
     val g = (green * 255f).toInt() and 0xFF
     val b = (blue * 255f).toInt() and 0xFF
-    return (a shl 24) or (b shl 16) or (g shl 8) or r
+    return (a shl 24) or (r shl 16) or (g shl 8) or b
+}
+
+/**
+ * Writes [color] into [out] at [at], in the order Skia wants it.
+ *
+ * N32 is BGRA in memory on Apple platforms — blue first, alpha last. Getting
+ * this backwards is invisible in green and in white, since both survive a red
+ * and blue swap unchanged; amber was the first colour to show it, arriving on
+ * screen correctly and in the saved screenshot as blue.
+ */
+internal fun writeN32(out: ByteArray, at: Int, color: Int) {
+    out[at] = (color and 0xFF).toByte()
+    out[at + 1] = ((color shr 8) and 0xFF).toByte()
+    out[at + 2] = ((color shr 16) and 0xFF).toByte()
+    out[at + 3] = ((color ushr 24) and 0xFF).toByte()
 }

@@ -17,6 +17,7 @@
 package org.puder.trs80.shared.configuration
 
 import org.puder.trs80.shared.MODEL3
+import org.puder.trs80.shared.ScreenColor
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -24,6 +25,29 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ConfigurationDraftTest {
+
+    /**
+     * The numbering already written into every configuration on every device.
+     * Amber was added afterwards and had to take the next free number, not the
+     * next position.
+     */
+    @Test
+    fun theStoredScreenColoursKeepTheirOldNumbers() {
+        assertEquals(0, ScreenColor.Green.stored)
+        assertEquals(1, ScreenColor.White.stored)
+        assertEquals(2, ScreenColor.Amber.stored)
+        assertEquals(ScreenColor.White, ScreenColor.of(1))
+        assertEquals(ScreenColor.Green, ScreenColor.of(99))
+    }
+
+    /** The editor offers the two phosphors together, then white. */
+    @Test
+    fun theyAreOfferedInPhosphorOrder() {
+        assertContentEquals(
+            listOf(ScreenColor.Green, ScreenColor.Amber, ScreenColor.White),
+            ScreenColor.entries,
+        )
+    }
 
     private fun draft(
         disks: List<String?> = listOf(null, null, null, null),

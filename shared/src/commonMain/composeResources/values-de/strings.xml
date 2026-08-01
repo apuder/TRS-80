@@ -42,6 +42,7 @@
     <string name="untitled">Ohne Namen</string>
     <string name="screen">Bildschirm</string>
     <string name="green">GRÜN</string>
+    <string name="amber">BERNSTEIN</string>
     <string name="white">WEISS</string>
     <string name="disks">Laufwerke</string>
     <string name="disks_of">%1$d von %2$d</string>

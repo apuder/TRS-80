@@ -23,6 +23,7 @@ import org.puder.trs80.shared.MODEL3
 import org.puder.trs80.shared.MODEL4
 import org.puder.trs80.shared.MODEL4P
 import org.puder.trs80.shared.MODEL_NONE
+import org.puder.trs80.shared.ScreenColor
 import org.puder.trs80.shared.ScreenColors
 import org.puder.trs80.shared.currentTimeMillis
 import org.puder.trs80.shared.storage.StorageKeys
@@ -97,10 +98,7 @@ internal class ConfigurationImpl private constructor(
     }
 
     override val characterColorAsRGB: Int
-        get() = when (characterColor) {
-            0 -> ScreenColors.GREEN
-            else -> ScreenColors.WHITE
-        }
+        get() = ScreenColor.of(characterColor).rgb
 
     override var characterColor: Int
         get() = persistence.getCharacterColor(0)

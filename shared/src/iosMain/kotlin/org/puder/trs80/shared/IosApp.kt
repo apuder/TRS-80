@@ -75,6 +75,7 @@ import org.puder.trs80.shared.ui.EditConfigurationActions
 import org.puder.trs80.shared.ui.EditConfigurationScreen
 import org.puder.trs80.shared.ui.RomSetupPanel
 import org.puder.trs80.shared.ui.Roms
+import org.puder.trs80.shared.ScreenColors
 import org.puder.trs80.shared.ui.SettingsScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import org.puder.trs80.shared.navigation.Navigator
@@ -94,8 +95,7 @@ import platform.UIKit.UIViewController
 
 private const val TAG = "IosApp"
 
-/** Green on dark, as the emulated machine's phosphor and glass. */
-private val CHARACTER_COLOR = Color(0xFF77FB4D)
+/** The glass behind the phosphor. The machine had one; it is not a choice. */
 private val SCREEN_COLOR = Color(0xFF444444)
 
 /**
@@ -439,6 +439,15 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     // rather than in onDispose, because the list reloads the moment the back
     // stack pops -- writing afterwards means it reads the previous screenshot.
     var emulatorState by remember(configurationId) { mutableStateOf<EmulatorState?>(null) }
+    // The machine's own phosphor, which until now was a constant: the colour
+    // was being stored and edited and then quietly ignored at the point it
+    // mattered.
+    val characterColor = remember(configurationId) {
+        val argb = ConfigurationManager.get().getConfigById(configurationId)
+            ?.characterColorAsRGB
+            ?: ScreenColors.GREEN
+        Color(argb)
+    }
 
     // The machine takes the hardware keyboard for as long as it is on screen.
     DisposableEffect(capture) {
@@ -507,7 +516,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             EmulatorCore.stop()
             emulatorState?.let { state ->
                 EmulatorCore.saveState(state.stateFilePath)
-                source.snapshot(CHARACTER_COLOR, SCREEN_COLOR)
+                source.snapshot(characterColor, SCREEN_COLOR)
                     ?.let(::encodePng)
                     ?.let(state::writeScreenshot)
             }
@@ -517,7 +526,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     ) {
         EmulatorScreen(
             source = source,
-            characterColor = CHARACTER_COLOR,
+            characterColor = characterColor,
             screenColor = SCREEN_COLOR,
         )
     }

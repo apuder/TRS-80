@@ -40,4 +40,26 @@ object ScreenColors {
 
     /** Was `android.graphics.Color.DKGRAY`. */
     const val DARK_GRAY = 0xFF444444.toInt()
+
+    /** The other phosphor these machines were sold with. */
+    const val AMBER = 0xFFFFB000.toInt()
+}
+
+/**
+ * The colour a machine draws its characters in.
+ *
+ * Declared in the order the editor offers them — the two phosphors together,
+ * then white — while [stored] keeps the numbering already written into every
+ * existing configuration. Green and white were 0 and 1 long before amber
+ * existed, and renumbering them would repaint every machine on the device.
+ */
+enum class ScreenColor(val stored: Int, val rgb: Int) {
+    Green(0, ScreenColors.GREEN),
+    Amber(2, ScreenColors.AMBER),
+    White(1, ScreenColors.WHITE);
+
+    companion object {
+        /** @return the colour [stored] names, or green for anything unrecognised. */
+        fun of(stored: Int): ScreenColor = entries.firstOrNull { it.stored == stored } ?: Green
+    }
 }
