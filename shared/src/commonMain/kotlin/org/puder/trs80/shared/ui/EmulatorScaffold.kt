@@ -16,70 +16,96 @@
 
 package org.puder.trs80.shared.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import org.jetbrains.compose.resources.stringResource
-import trs_80.shared.generated.resources.Res
-import trs_80.shared.generated.resources.back
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import org.puder.trs80.shared.ui.theme.Hairline
+import org.puder.trs80.shared.ui.theme.StrokeIcon
+import org.puder.trs80.shared.ui.theme.Text
+import org.puder.trs80.shared.ui.theme.Trs80Icon
+import org.puder.trs80.shared.ui.theme.Trs80Theme
 
 /**
- * The chrome around a running machine: a way out, and a name.
+ * The chrome around a running machine: a way out, a name, and the controls.
  *
  * The Android app has this as an action bar and has always needed it, since a
  * machine fills the screen and there is otherwise nothing to press. iOS needs it
  * more: there is no system Back at all, so without this the emulator is a place
  * the app can go and never leave.
  *
- * Deliberately plain. What belongs here — the reset and sound controls, the
- * keyboards, and what any of it does in landscape, where the picture leaves no
- * room — is the redesign's business (§9), and inventing it now would be
- * inventing the thing the designer is meant to decide.
+ * Drawn in the app's own palette. It was a Material scaffold with default
+ * colors, and those follow a MaterialTheme this app never sets — so the bar
+ * stayed light while the rest of the app went dark.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmulatorScaffold(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     keyboard: (@Composable () -> Unit)? = null,
+    /** What the machine can be asked to do while it runs; null offers nothing. */
+    machine: MachineActions? = null,
     screen: @Composable () -> Unit,
 ) {
-    Scaffold(
-        modifier = modifier,
-        containerColor = Color.Black,
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    // A labeled button rather than a chevron: the icon pack is
-                    // another dependency, and this is chrome the redesign
-                    // replaces anyway.
-                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(),
-            )
-        },
-    ) { insets ->
-        Column(Modifier.padding(insets).fillMaxSize()) {
-            // The picture takes what the keyboard leaves. The emulated screen
-            // scales to whatever it is given, so this needs no arithmetic --
-            // the core is told the size and rasterizes to it.
-            Box(Modifier.weight(1f).fillMaxWidth()) {
+    val colors = Trs80Theme.colors
+    var controlsOpen by remember { mutableStateOf(false) }
+
+    Box(modifier.fillMaxSize().background(colors.ground)) {
+        Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+            Row(
+                Modifier.fillMaxWidth().padding(end = Trs80Theme.spacing.screenEdge),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StrokeIcon(Trs80Icon.ChevronLeft, color = colors.accentText, onClick = onBack)
+                Text(
+                    title,
+                    style = Trs80Theme.type.wordmark,
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                if (machine != null) {
+                    Spacer(Modifier.width(Trs80Theme.spacing.gap))
+                    MachineControlsButton(onClick = { controlsOpen = true })
+                }
+            }
+            Hairline()
+
+            // The picture takes what the keyboard leaves, on the machine's own
+            // dark surround rather than the app's ground: what sits around a
+            // screen belongs to the screen. The emulated display scales to
+            // whatever it is given, so this needs no arithmetic -- the core is
+            // told the size and rasterizes to it.
+            Box(
+                Modifier.weight(1f).fillMaxWidth().background(colors.crt),
+                contentAlignment = Alignment.Center,
+            ) {
                 screen()
             }
             keyboard?.invoke()
+        }
+
+        // At the root, so the scrim covers the machine and not just the bar.
+        if (controlsOpen && machine != null) {
+            MachinePanel(machine, onDismiss = { controlsOpen = false })
         }
     }
 }

@@ -32,7 +32,10 @@ import org.puder.trs80.core.trs80_add_key_event
 import org.puder.trs80.core.trs80_config
 import org.puder.trs80.core.trs80_init
 import org.puder.trs80.core.trs80_is_expanded_mode
+import org.puder.trs80.core.trs80_cassette_position
+import org.puder.trs80.core.trs80_paste
 import org.puder.trs80.core.trs80_reset
+import org.puder.trs80.core.trs80_rewind_cassette
 import org.puder.trs80.core.trs80_save_state
 import org.puder.trs80.core.trs80_load_state
 import org.puder.trs80.core.TRS80_CELL_HEIGHT
@@ -189,6 +192,20 @@ object EmulatorCore {
     fun loadState(path: String) = trs80_load_state(path)
 
     fun setSoundMuted(muted: Boolean) = trs80_set_sound_muted(if (muted) 1 else 0)
+
+    /**
+     * Types [text] into the machine as if it had been typed at the keyboard.
+     *
+     * The length is in bytes rather than characters, which is what the core
+     * asks for and what a UTF-8 string actually occupies.
+     */
+    fun paste(text: String) = trs80_paste(text, text.encodeToByteArray().size)
+
+    /** Winds the tape back to the start, which CLOAD needs before it can read. */
+    fun rewindCassette() = trs80_rewind_cassette()
+
+    /** How far through the tape the machine is, 0 to 1. */
+    fun cassettePosition(): Float = trs80_cassette_position()
 
     /** Queues a key press. [sym] and [key] are the SDL codes the core expects. */
     fun keyDown(sym: Int, key: Int) =

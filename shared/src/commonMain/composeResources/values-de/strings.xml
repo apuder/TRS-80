@@ -93,6 +93,23 @@
     <string name="try_again">ERNEUT VERSUCHEN</string>
     <string name="and_joiner"> und </string>
 
+    <!-- The running machine -->
+    <string name="machine_controls">Maschine</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="reset_detail">Startet sie neu, als wäre der Strom aus- und wieder eingeschaltet worden. Alles, was nicht auf einer Diskette steht, geht verloren.</string>
+    <string name="rewind_cassette">Zurückspulen</string>
+    <string name="rewind_cassette_detail">CLOAD liest ab der aktuellen Bandstelle; das Band muss vorher zurückgespult werden.</string>
+    <string name="paste">Einfügen</string>
+    <string name="paste_detail">Tippt den Inhalt der Zwischenablage ein, als käme er von der Tastatur.</string>
+    <string name="paste_empty">Nichts in der Zwischenablage</string>
+    <string name="help">Hilfe</string>
+    <string name="help_emulator">Beim Verlassen wird der Zustand der Maschine gesichert; beim nächsten Start läuft sie dort weiter.
+
+CLOAD und CSAVE lesen und schreiben die Kassette, die vor CLOAD zurückgespult werden muss.
+
+Disketten, Kassette und Tastaturen werden im Eintrags-Editor geändert, nicht hier.</string>
+    <string name="done">FERTIG</string>
+
     <!-- Keyboard layouts, abbreviated to fit a row -->
     <string name="keyboard_original">Orig</string>
     <string name="keyboard_compact">Komp</string>

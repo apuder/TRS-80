@@ -86,6 +86,8 @@ import org.puder.trs80.shared.store.retroStore
 import org.retrostore.client.common.proto.App
 import androidx.compose.runtime.rememberCoroutineScope
 import org.puder.trs80.shared.ui.encodePng
+import org.puder.trs80.shared.io.clipboardText
+import org.puder.trs80.shared.ui.MachineActions
 import org.puder.trs80.shared.ui.Keyboard
 import org.puder.trs80.shared.ui.KeyboardState
 import org.puder.trs80.shared.ui.ORIGINAL_KEYBOARD
@@ -442,6 +444,13 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     // The machine's own phosphor, which until now was a constant: the color
     // was being stored and edited and then quietly ignored at the point it
     // mattered.
+    // Muting here lasts for this session only; the configuration's own setting
+    // is what it starts from and the editor is where it is changed for good.
+    var soundMuted by remember(configurationId) {
+        mutableStateOf(
+            ConfigurationManager.get().getConfigById(configurationId)?.isSoundMuted == true
+        )
+    }
     val characterColor = remember(configurationId) {
         val argb = ConfigurationManager.get().getConfigById(configurationId)
             ?.characterColorAsRGB
@@ -524,6 +533,20 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             }
             onBack()
         },
+        machine = MachineActions(
+            onReset = { EmulatorCore.reset() },
+            onRewindCassette = { EmulatorCore.rewindCassette() },
+            onPaste = {
+                // The machine ends a line with a carriage return, which is what
+                // its own keyboard would have sent.
+                clipboardText()?.replace('\n', '\r')?.also(EmulatorCore::paste) != null
+            },
+            soundMuted = soundMuted,
+            onSoundMutedChange = {
+                soundMuted = it
+                EmulatorCore.setSoundMuted(it)
+            },
+        ),
         keyboard = { Keyboard(keyboard) },
     ) {
         EmulatorScreen(

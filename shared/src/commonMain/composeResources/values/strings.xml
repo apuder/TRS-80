@@ -92,6 +92,23 @@
     <string name="try_again">TRY AGAIN</string>
     <string name="and_joiner"> and </string>
 
+    <!-- The running machine -->
+    <string name="machine_controls">Machine</string>
+    <string name="reset">Reset</string>
+    <string name="reset_detail">Restarts it as if the power had been cycled. Anything not saved to a disk is lost.</string>
+    <string name="rewind_cassette">Rewind cassette</string>
+    <string name="rewind_cassette_detail">CLOAD reads from where the tape is; it has to be wound back first.</string>
+    <string name="paste">Paste</string>
+    <string name="paste_detail">Types what is on the clipboard, as if at the keyboard.</string>
+    <string name="paste_empty">Nothing on the clipboard</string>
+    <string name="help">Help</string>
+    <string name="help_emulator">Leaving stores the machine as it is, and running it again picks it up there.
+
+CLOAD and CSAVE read and write the cassette, which has to be rewound before CLOAD will find anything.
+
+Disks, the cassette and the keyboards are changed in the entry editor, not here.</string>
+    <string name="done">DONE</string>
+
     <!-- Keyboard layouts, abbreviated to fit a row -->
     <string name="keyboard_original">Orig</string>
     <string name="keyboard_compact">Comp</string>
