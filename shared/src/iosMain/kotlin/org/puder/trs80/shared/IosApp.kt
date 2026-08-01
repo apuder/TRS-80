@@ -56,6 +56,7 @@ import org.puder.trs80.shared.ui.DetailSheet
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.disk_many
+import trs_80.shared.generated.resources.untitled
 import trs_80.shared.generated.resources.disk_one
 import org.puder.trs80.shared.ui.mediaSummary
 import org.puder.trs80.shared.ui.modelLabel
@@ -274,7 +275,10 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
     var expanded by remember { mutableStateOf(false) }
     var installing by remember { mutableStateOf(emptySet<String>()) }
-    var selected by remember { mutableStateOf<CatalogEntry?>(null) }
+    // The id, not the entry: an entry is a snapshot of what the catalog looked
+    // like when it was tapped, so holding one leaves the sheet showing DOWNLOAD
+    // for something that has since finished downloading.
+    var selectedId by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun reload() {
@@ -308,7 +312,7 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
     val listed = (catalog.state as? StoreState.Loaded)?.apps.orEmpty()
     val entries = listed.asCatalog(cards, installing)
 
-    val selectedEntry = selected
+    val selectedEntry = selectedId?.let { id -> entries.firstOrNull { it.id == id } }
     Box(Modifier.fillMaxSize()) {
     LibraryScreen(
         yours = cards.matching(query).sortedFor(sort),
@@ -323,7 +327,7 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
         onExpandedChange = { expanded = it },
         actions = LibraryActions(
             onRun = { navigator.goTo(Destination.Emulator(it)) },
-            onOpenEntry = { selected = it },
+            onOpenEntry = { selectedId = it.id },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
             onRefresh = { scope.launch { catalog.refresh() } },
             onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
@@ -347,7 +351,7 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
                 onInstall = { install(selectedApp) },
                 onRun = { navigator.goTo(Destination.Emulator(it)) },
                 onCopied = { scope.launch { reload() } },
-                onDismiss = { selected = null },
+                onDismiss = { selectedId = null },
             )
         }
     }
@@ -519,7 +523,8 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     }
 
     EmulatorScaffold(
-        title = configuration?.name.orEmpty(),
+        title = configuration?.name?.takeIf { it.isNotBlank() }
+            ?: stringResource(Res.string.untitled),
         onBack = {
             // Stop, then write. The CPU thread tests a flag rather than being
             // interrupted, so this keeps the same small race between the last
@@ -583,7 +588,7 @@ private fun installIfNeeded(diskPath: String?) {
         )
     }.orEmpty()
 
-    manager.addNewConfiguration(MODEL3, "Model III", disks, cassette = null)
+    manager.addNewConfiguration(MODEL3, "Bundled sample", disks, cassette = null)
         ?: Log.e(TAG, "Could not install the bundled configuration.")
 }
 
