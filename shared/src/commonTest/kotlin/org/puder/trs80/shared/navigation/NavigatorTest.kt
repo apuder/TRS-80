@@ -98,8 +98,8 @@ class NavigatorTest {
     @Test
     fun goingBackWithoutAResultClearsTheLastOne() {
         navigator.goTo(Destination.EditConfiguration(1))
-        navigator.goBack(NavigationResult.ConfigurationEditCancelled(1))
-        assertEquals(NavigationResult.ConfigurationEditCancelled(1), navigator.takeResult())
+        navigator.goBack(NavigationResult.ConfigurationEditCanceled(1))
+        assertEquals(NavigationResult.ConfigurationEditCanceled(1), navigator.takeResult())
 
         navigator.goTo(Destination.Settings)
         navigator.goBack()
@@ -134,15 +134,15 @@ class NavigatorTest {
         navigator.goTo(Destination.EditConfiguration(configurationId = 9, isNew = true))
         assertEquals(Destination.EditConfiguration(9, isNew = true), navigator.current)
 
-        navigator.goBack(NavigationResult.ConfigurationEditCancelled(9))
+        navigator.goBack(NavigationResult.ConfigurationEditCanceled(9))
 
         assertEquals(Destination.Library, navigator.current)
-        assertEquals(NavigationResult.ConfigurationEditCancelled(9), navigator.takeResult())
+        assertEquals(NavigationResult.ConfigurationEditCanceled(9), navigator.takeResult())
     }
 
     /**
      * Opening a store app from the library and coming back lands on the library,
-     * which is now where the catalogue lives.
+     * which is now where the catalog lives.
      */
     @Test
     fun theRetroStoreBrowseFlow() {

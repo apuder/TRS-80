@@ -83,7 +83,7 @@ fun Keyboard(
                 horizontalArrangement = Arrangement.spacedBy(KEY_SPACING),
             ) {
                 val units = row.sumOf { it.size }
-                // Rows narrower than the widest are centred, as they were.
+                // Rows narrower than the widest are centered, as they were.
                 if (units < widest) {
                     Box(Modifier.weight((widest - units) / 2f))
                 }

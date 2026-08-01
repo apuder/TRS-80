@@ -67,13 +67,13 @@ interface Configuration {
 
     fun setKeyboardLayoutLandscape(layout: KeyboardLayout?)
 
-    /** The character colour, as ARGB. */
+    /** The character color, as ARGB. */
     val characterColorAsRGB: Int
 
-    /** The character colour as the index that is persisted. */
+    /** The character color as the index that is persisted. */
     var characterColor: Int
 
-    /** The screen background colour, as ARGB. */
+    /** The screen background color, as ARGB. */
     var screenColorAsRGB: Int
 
     /** Whether the emulator's sound output is muted. */

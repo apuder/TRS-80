@@ -18,7 +18,7 @@ package org.puder.trs80.shared.ui
 
 import org.retrostore.client.common.proto.App
 
-/** What the catalogue is showing, so it can say so rather than sitting blank. */
+/** What the catalog is showing, so it can say so rather than sitting blank. */
 sealed interface StoreState {
     data object Loading : StoreState
     data class Failed(val message: String) : StoreState

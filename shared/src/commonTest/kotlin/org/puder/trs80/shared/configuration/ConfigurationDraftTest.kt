@@ -32,7 +32,7 @@ class ConfigurationDraftTest {
      * next position.
      */
     @Test
-    fun theStoredScreenColoursKeepTheirOldNumbers() {
+    fun theStoredScreenColorsKeepTheirOldNumbers() {
         assertEquals(0, ScreenColor.Green.stored)
         assertEquals(1, ScreenColor.White.stored)
         assertEquals(2, ScreenColor.Amber.stored)
@@ -132,9 +132,9 @@ class ConfigurationDraftTest {
         assertEquals(d, d.withDiskMoved(from = 0, to = 0))
     }
 
-    /** The banner speaks only for something that came from the catalogue. */
+    /** The banner speaks only for something that came from the catalog. */
     @Test
-    fun aCatalogueEntryIsForkedOnceItDiffers() {
+    fun aCatalogEntryIsForkedOnceItDiffers() {
         val original = draft()
 
         assertFalse(original.isForkedFrom(original))

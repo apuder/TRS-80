@@ -44,7 +44,7 @@ fun List<ConfigurationCard>.matching(query: String): List<ConfigurationCard> {
 }
 
 /**
- * Turns the store's apps into catalogue entries, marking the ones already
+ * Turns the store's apps into catalog entries, marking the ones already
  * installed.
  *
  * "Already installed" is matched on name, which is what the app has to go on:
@@ -52,13 +52,13 @@ fun List<ConfigurationCard>.matching(query: String): List<ConfigurationCard> {
  * Matching on the store's ID would be exact, and wants a field on the
  * configuration that does not exist yet.
  */
-fun List<App>.asCatalogue(
+fun List<App>.asCatalog(
     installed: List<ConfigurationCard>,
     installing: Set<String> = emptySet(),
-): List<CatalogueEntry> {
+): List<CatalogEntry> {
     val byName = installed.associateBy({ it.name.trim().lowercase() }, { it.id })
     return map { app ->
-        CatalogueEntry(
+        CatalogEntry(
             id = app.id,
             title = app.name,
             author = app.author,
@@ -70,8 +70,8 @@ fun List<App>.asCatalogue(
     }
 }
 
-/** Keeps the catalogue entries matching [query]; everything when it is blank. */
-fun List<CatalogueEntry>.matchingEntries(query: String): List<CatalogueEntry> {
+/** Keeps the catalog entries matching [query]; everything when it is blank. */
+fun List<CatalogEntry>.matchingEntries(query: String): List<CatalogEntry> {
     val trimmed = query.trim()
     if (trimmed.isEmpty()) {
         return this

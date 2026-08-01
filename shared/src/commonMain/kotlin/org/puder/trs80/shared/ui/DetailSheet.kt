@@ -100,7 +100,7 @@ private const val DISMISS_FRACTION = 0.33f
 /** A downward flick past this, in pixels per second, sends it away regardless. */
 private const val FLING_AWAY = 900f
 
-/** Everything the sheet draws about one catalogue entry. */
+/** Everything the sheet draws about one catalog entry. */
 data class DetailContent(
     val title: String,
     val author: String,
@@ -124,7 +124,7 @@ data class DetailContent(
 enum class DetailAction { Download, Downloading, Play }
 
 /**
- * A catalogue entry, as a sheet over the library.
+ * A catalog entry, as a sheet over the library.
  *
  * A sheet rather than a screen because the entry is a thing you look into and
  * come back from, not somewhere you go — the list stays visible behind it and

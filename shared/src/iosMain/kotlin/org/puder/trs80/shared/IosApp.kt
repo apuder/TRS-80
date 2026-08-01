@@ -48,8 +48,8 @@ import org.puder.trs80.shared.storage.appSettings
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import org.puder.trs80.shared.ui.Catalogue
-import org.puder.trs80.shared.ui.CatalogueEntry
+import org.puder.trs80.shared.ui.Catalog
+import org.puder.trs80.shared.ui.CatalogEntry
 import org.puder.trs80.shared.ui.DetailAction
 import org.puder.trs80.shared.ui.DetailContent
 import org.puder.trs80.shared.ui.DetailSheet
@@ -64,7 +64,7 @@ import org.puder.trs80.shared.ui.ConfigurationCard
 import org.puder.trs80.shared.ui.LibraryActions
 import org.puder.trs80.shared.ui.LibraryScreen
 import org.puder.trs80.shared.ui.LibrarySort
-import org.puder.trs80.shared.ui.asCatalogue
+import org.puder.trs80.shared.ui.asCatalog
 import org.puder.trs80.shared.ui.matching
 import org.puder.trs80.shared.ui.matchingEntries
 import org.puder.trs80.shared.ui.sortedFor
@@ -116,7 +116,7 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
     val capture = KeyCapture()
     val compose = ComposeUIViewController {
         val navigator = rememberNavigator()
-        val catalogue = remember { Catalogue() }
+        val catalog = remember { Catalog() }
         val roms = remember { Roms(RomManager.get()) }
         var setupDismissed by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
@@ -137,7 +137,7 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
             Box(Modifier.fillMaxSize()) {
             Trs80App(
                 navigator = navigator,
-                library = { Library(navigator, catalogue) },
+                library = { Library(navigator, catalog) },
                 emulator = {
                     RunningMachine(
                         it.configurationId,
@@ -259,20 +259,20 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
 }
 
 /**
- * The library: the user's machines and the store's catalogue on one screen.
+ * The library: the user's machines and the store's catalog on one screen.
  *
  * Both halves are loaded here rather than inside the screen, so the screen stays
  * a drawing of what it is handed — which is what keeps the sorting and filtering
  * testable on their own, without a display.
  */
 @Composable
-private fun Library(navigator: Navigator, catalogue: Catalogue) {
+private fun Library(navigator: Navigator, catalog: Catalog) {
     var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
     var query by remember { mutableStateOf("") }
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
     var expanded by remember { mutableStateOf(false) }
     var installing by remember { mutableStateOf(emptySet<String>()) }
-    var selected by remember { mutableStateOf<CatalogueEntry?>(null) }
+    var selected by remember { mutableStateOf<CatalogEntry?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun reload() {
@@ -301,18 +301,18 @@ private fun Library(navigator: Navigator, catalogue: Catalogue) {
             reload()
         }
     }
-    LaunchedEffect(catalogue) { catalogue.loadOnce() }
+    LaunchedEffect(catalog) { catalog.loadOnce() }
 
-    val listed = (catalogue.state as? StoreState.Loaded)?.apps.orEmpty()
-    val entries = listed.asCatalogue(cards, installing)
+    val listed = (catalog.state as? StoreState.Loaded)?.apps.orEmpty()
+    val entries = listed.asCatalog(cards, installing)
 
     val selectedEntry = selected
     Box(Modifier.fillMaxSize()) {
     LibraryScreen(
         yours = cards.matching(query).sortedFor(sort),
-        catalogue = entries.matchingEntries(query),
-        catalogueState = catalogue.state,
-        refreshing = catalogue.refreshing,
+        catalog = entries.matchingEntries(query),
+        catalogState = catalog.state,
+        refreshing = catalog.refreshing,
         query = query,
         sort = sort,
         expanded = expanded,
@@ -323,7 +323,7 @@ private fun Library(navigator: Navigator, catalogue: Catalogue) {
             onRun = { navigator.goTo(Destination.Emulator(it)) },
             onOpenEntry = { selected = it },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
-            onRefresh = { scope.launch { catalogue.refresh() } },
+            onRefresh = { scope.launch { catalog.refresh() } },
             onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
             onAdd = {
                 val fresh = ConfigurationManager.get().newConfiguration()
@@ -352,7 +352,7 @@ private fun Library(navigator: Navigator, catalogue: Catalogue) {
 }
 
 /**
- * The sheet for one catalogue entry.
+ * The sheet for one catalog entry.
  *
  * The record is filled in from what is actually on the device: the store hands
  * over a program's media only by sending all of it, so the size of something
@@ -360,7 +360,7 @@ private fun Library(navigator: Navigator, catalogue: Catalogue) {
  */
 @Composable
 private fun Detail(
-    entry: CatalogueEntry,
+    entry: CatalogEntry,
     app: App,
     installing: Boolean,
     onInstall: () -> Unit,
@@ -439,7 +439,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     // rather than in onDispose, because the list reloads the moment the back
     // stack pops -- writing afterwards means it reads the previous screenshot.
     var emulatorState by remember(configurationId) { mutableStateOf<EmulatorState?>(null) }
-    // The machine's own phosphor, which until now was a constant: the colour
+    // The machine's own phosphor, which until now was a constant: the color
     // was being stored and edited and then quietly ignored at the point it
     // mattered.
     val characterColor = remember(configurationId) {

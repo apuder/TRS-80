@@ -32,8 +32,8 @@ private val SHIFT_KEYS = setOf("key_SHIFT_LEFT", "key_SHIFT_RIGHT")
  * What the on-screen keyboard is doing: which page is showing, whether shift is
  * latched, and which keys are held.
  *
- * Separate from the drawing so the behaviour can be tested without a screen —
- * and the behaviour is the part worth testing, because it is not what a keyboard
+ * Separate from the drawing so the behavior can be tested without a screen —
+ * and the behavior is the part worth testing, because it is not what a keyboard
  * usually does. Shift *latches*: tapping it holds it down and lights the shifted
  * labels, and it is released by the next key rather than by lifting a finger.
  * That is how the Android app has always worked, and it is the only way a

@@ -46,7 +46,7 @@ typealias HttpPost = suspend (url: String, body: ByteArray) -> ByteArray
 /**
  * Talks to the RetroStore API.
  *
- * Every method POSTs the serialised params message to `<server>/<method>` and parses the body of
+ * Every method POSTs the serialized params message to `<server>/<method>` and parses the body of
  * the response as the matching `ApiResponse*` message.
  *
  * The transport is injected rather than built here. That keeps this dependency-free — the whole

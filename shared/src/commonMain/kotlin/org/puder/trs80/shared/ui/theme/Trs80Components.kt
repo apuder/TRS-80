@@ -206,7 +206,7 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
 
         Trs80Icon.Trash -> {
             // Lid, then body: the outline alone reads as a bin at this size,
-            // and the spec keeps destructive controls in text colour.
+            // and the spec keeps destructive controls in text color.
             drawLine(color, Offset(w * 0.2f, h * 0.26f), Offset(w * 0.8f, h * 0.26f), stroke.width)
             drawLine(color, Offset(w * 0.41f, h * 0.26f), Offset(w * 0.41f, h * 0.17f), stroke.width)
             drawLine(color, Offset(w * 0.59f, h * 0.26f), Offset(w * 0.59f, h * 0.17f), stroke.width)
@@ -623,7 +623,7 @@ fun Trs80TextField(
 /**
  * A destructive control: outlined in [Trs80Colors.danger] with a trash glyph.
  *
- * The visual spec asks for text colour rather than red, on the grounds that red
+ * The visual spec asks for text color rather than red, on the grounds that red
  * would compete with the accent. Overridden deliberately — deleting a machine
  * takes its disks and its saved state with it, and that is worth the collision.
  *

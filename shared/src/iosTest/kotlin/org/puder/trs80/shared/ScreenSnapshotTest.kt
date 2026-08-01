@@ -29,7 +29,7 @@ class ScreenSnapshotTest {
     /**
      * Blue first, alpha last, as N32 is on Apple platforms.
      *
-     * Amber is the colour that catches this: red and blue at opposite ends, so
+     * Amber is the color that catches this: red and blue at opposite ends, so
      * writing them the wrong way round turns it blue.
      */
     @Test

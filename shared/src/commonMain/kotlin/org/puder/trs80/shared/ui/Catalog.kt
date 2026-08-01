@@ -25,30 +25,30 @@ import org.puder.trs80.shared.Log
 import org.puder.trs80.shared.store.retroStore
 import org.retrostore.client.common.proto.App
 
-private const val TAG = "Catalogue"
+private const val TAG = "Catalog"
 
 /**
  * How many entries to ask the store for.
  *
- * The whole catalogue is a few dozen programs and fits comfortably; if it ever
+ * The whole catalog is a few dozen programs and fits comfortably; if it ever
  * outgrows this the list will simply stop at the limit, so raise it or page.
  */
-private const val CATALOGUE_LIMIT = 500
+private const val CATALOG_LIMIT = 500
 
 /**
- * The store's catalogue, held for as long as the app is running.
+ * The store's catalog, held for as long as the app is running.
  *
  * Held above the library rather than inside it, because the library is
  * composed and disposed every time a machine is run and come back from —
  * fetching there meant a network round trip and a visibly empty list on every
- * return, for a catalogue that changes perhaps monthly.
+ * return, for a catalog that changes perhaps monthly.
  *
- * @param fetch how to get the catalogue; replaceable so this can be tested
+ * @param fetch how to get the catalog; replaceable so this can be tested
  * without a network.
  */
-class Catalogue(
+class Catalog(
     private val fetch: suspend () -> List<App> = {
-        retroStore.fetchApps(0, CATALOGUE_LIMIT)
+        retroStore.fetchApps(0, CATALOG_LIMIT)
     },
 ) {
     var state: StoreState by mutableStateOf(StoreState.Loading)
@@ -79,8 +79,8 @@ class Catalogue(
         try {
             state = StoreState.Loaded(withContext(Dispatchers.Default) { fetch() })
         } catch (e: Exception) {
-            Log.e(TAG, "Could not fetch the store catalogue.", e)
-            // A catalogue already on screen stays there. Losing the list because
+            Log.e(TAG, "Could not fetch the store catalog.", e)
+            // A catalog already on screen stays there. Losing the list because
             // the network dropped for a moment would be worse than showing one
             // that is a few minutes old, and the machines the user has installed
             // are read from the device and never depended on this at all.

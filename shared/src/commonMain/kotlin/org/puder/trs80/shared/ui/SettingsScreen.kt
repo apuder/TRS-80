@@ -64,7 +64,7 @@ import org.puder.trs80.shared.ui.theme.Trs80Theme
  * The app's own settings, as opposed to a machine's.
  *
  * Only appearance so far. What else belongs here — the ROM images, the default
- * keyboard, the cassette behaviour — is on the Android settings screen and
+ * keyboard, the cassette behavior — is on the Android settings screen and
  * arrives with the rest of the port; this is the shell those land in.
  */
 @Composable

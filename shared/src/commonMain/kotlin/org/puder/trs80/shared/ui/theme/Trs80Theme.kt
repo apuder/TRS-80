@@ -41,7 +41,7 @@ import trs_80.shared.generated.resources.SpaceMono_Regular
 import trs_80.shared.generated.resources.VT323_Regular
 
 /**
- * The colours of the app, in one register.
+ * The colors of the app, in one register.
  *
  * Straight from the visual spec. The two registers differ only in ground,
  * hairline and accent step — everything else about a screen is the same in
@@ -141,7 +141,7 @@ data class Trs80Spacing(
     val screenEdge: Dp = 18.dp,
     /** A plate's glass. */
     val plateHeight: Dp = 104.dp,
-    /** Catalogue row artwork. */
+    /** Catalog row artwork. */
     val rowArt: Dp = 42.dp,
 )
 

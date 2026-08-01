@@ -77,7 +77,7 @@ import org.puder.trs80.shared.ui.theme.scanlines
 
 /** How many of the user's own machines the library shows before it offers the rest. */
 /**
- * How large the control at the end of a catalogue row is drawn.
+ * How large the control at the end of a catalog row is drawn.
  *
  * Bigger than the icons elsewhere: this is the row's one action, and at the
  * size the rest of the set uses it reads as a status mark rather than a thing
@@ -90,8 +90,8 @@ private const val SPIN_MILLIS = 900
 
 private const val COLLAPSED_PLATES = 3
 
-/** One entry in the catalogue, and what the app can do with it. */
-data class CatalogueEntry(
+/** One entry in the catalog, and what the app can do with it. */
+data class CatalogEntry(
     val id: String,
     val title: String,
     val author: String,
@@ -112,12 +112,12 @@ data class CatalogueEntry(
 /** What the library can be asked to do. */
 data class LibraryActions(
     val onRun: (Int) -> Unit = {},
-    val onOpenEntry: (CatalogueEntry) -> Unit = {},
-    val onInstall: (CatalogueEntry) -> Unit = {},
+    val onOpenEntry: (CatalogEntry) -> Unit = {},
+    val onInstall: (CatalogEntry) -> Unit = {},
     val onAdd: (() -> Unit)? = null,
     /** Opens the editor for one of the user's machines, from its overflow. */
     val onEdit: ((Int) -> Unit)? = null,
-    /** Asks the store for the catalogue again. */
+    /** Asks the store for the catalog again. */
     val onRefresh: (() -> Unit)? = null,
     val onOpenSettings: (() -> Unit)? = null,
 )
@@ -131,13 +131,13 @@ enum class LibrarySort { LastUsed, Alphabetical }
  * This is the shape the visual spec settles on, and it is a real change from
  * what the app did before — the store used to be somewhere you went, and it is
  * now the second half of the first screen. The user's own machines come first
- * as plates, capped so that the catalogue always starts above the fold.
+ * as plates, capped so that the catalog always starts above the fold.
  */
 @Composable
 fun LibraryScreen(
     yours: List<ConfigurationCard>,
-    catalogue: List<CatalogueEntry>,
-    catalogueState: StoreState,
+    catalog: List<CatalogEntry>,
+    catalogState: StoreState,
     /** Whether the store is being asked again, which the refresh control shows. */
     refreshing: Boolean = false,
     query: String,
@@ -162,7 +162,7 @@ fun LibraryScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
         LibraryTopBar(actions)
-        SearchRow(query, onQueryChange, yours.size + catalogue.size)
+        SearchRow(query, onQueryChange, yours.size + catalog.size)
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -196,17 +196,17 @@ fun LibraryScreen(
             item {
                 SectionHeader(
                     label = stringResource(Res.string.catalog),
-                    count = catalogue.size.takeIf { it > 0 },
+                    count = catalog.size.takeIf { it > 0 },
                     trailing = actions.onRefresh?.let {
                         { RefreshControl(refreshing = refreshing, onClick = it) }
                     },
                 )
             }
-            when (catalogueState) {
-                is StoreState.Loading -> item { CatalogueNote(stringResource(Res.string.loading)) }
-                is StoreState.Failed -> item { CatalogueNote(stringResource(Res.string.store_unreachable)) }
-                is StoreState.Loaded -> items(catalogue, key = { it.id }) { entry ->
-                    CatalogueRow(entry, actions)
+            when (catalogState) {
+                is StoreState.Loading -> item { CatalogNote(stringResource(Res.string.loading)) }
+                is StoreState.Failed -> item { CatalogNote(stringResource(Res.string.store_unreachable)) }
+                is StoreState.Loaded -> items(catalog, key = { it.id }) { entry ->
+                    CatalogRow(entry, actions)
                 }
             }
         }
@@ -383,7 +383,7 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onEdit: (() -> U
                     )
                     .padding(start = 10.dp, end = 4.dp, top = 12.dp),
                 // The caption keeps its own baseline while the overflow's touch
-                // target centres against it, rather than the target's height
+                // target centers against it, rather than the target's height
                 // dragging the glyph up off the line.
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -440,7 +440,7 @@ private fun ShowAll(expanded: Boolean, total: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CatalogueRow(entry: CatalogueEntry, actions: LibraryActions) {
+private fun CatalogRow(entry: CatalogEntry, actions: LibraryActions) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     Row(
@@ -501,7 +501,7 @@ private fun CatalogueRow(entry: CatalogueEntry, actions: LibraryActions) {
 }
 
 @Composable
-private fun CatalogueNote(text: String) {
+private fun CatalogNote(text: String) {
     Box(Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
         Text(text, style = Trs80Theme.type.body, color = Trs80Theme.colors.muted)
     }

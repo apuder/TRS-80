@@ -65,7 +65,7 @@ sealed interface Destination : NavKey {
     @Serializable
     data object Settings : Destination
 
-    /** One app in the RetroStore catalogue. */
+    /** One app in the RetroStore catalog. */
 
     /** The blank-disk-image creator. */
     @Serializable
@@ -95,10 +95,10 @@ sealed interface NavigationResult {
      * The caller restores the backup it took before opening the editor. It has
      * to, because the editor writes every change straight into storage as it is
      * made: there is nothing to *not* commit. That is worth fixing when the
-     * editor is redesigned, but it is the behaviour being ported, so it is the
-     * behaviour modelled here.
+     * editor is redesigned, but it is the behavior being ported, so it is the
+     * behavior modeled here.
      */
-    data class ConfigurationEditCancelled(val configurationId: Int) : NavigationResult
+    data class ConfigurationEditCanceled(val configurationId: Int) : NavigationResult
 
     /** A blank disk image was created at this path. */
     data class DiskCreated(val path: String) : NavigationResult

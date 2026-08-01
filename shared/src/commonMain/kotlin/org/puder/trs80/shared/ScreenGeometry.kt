@@ -39,7 +39,7 @@ const val SCREEN_ASPECT_RATIO = 3f
  * divide a cell into 2x3 quadrants — also land on whole pixels. Since the cell is
  * three times as tall as it is wide, that makes the height a multiple of six
  * either way round. The result is usually a little smaller than the area given;
- * centring it is the caller's business.
+ * centering it is the caller's business.
  */
 fun fitCellSize(
     availableWidth: Int,

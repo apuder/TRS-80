@@ -74,14 +74,14 @@ interface EmulatorScreenSource {
      * The current screen as a coverage mask, ready to draw, or null before the
      * first [refresh]. Valid until the next one.
      *
-     * This carries no colour: it is an alpha-only image, tinted when drawn.
+     * This carries no color: it is an alpha-only image, tinted when drawn.
      */
     fun image(): ImageBitmap?
 
     /**
-     * A copy of the current screen in colour, for storing as a screenshot.
+     * A copy of the current screen in color, for storing as a screenshot.
      *
-     * Separate from [image] because that one carries no colour — it is a mask,
+     * Separate from [image] because that one carries no color — it is a mask,
      * tinted when drawn — and a screenshot has to stand on its own in a list
      * long after the machine that drew it has stopped.
      *
@@ -91,7 +91,7 @@ interface EmulatorScreenSource {
 }
 
 /**
- * Draws the emulated screen, centred.
+ * Draws the emulated screen, centered.
  *
  * Samples the machine once per display frame, using Compose's frame clock —
  * which is the display's own signal on both platforms. That is the right rate
@@ -142,7 +142,7 @@ fun EmulatorScreen(
     }
 }
 
-/** Fills the background and draws the screen centred, one image pixel per screen pixel. */
+/** Fills the background and draws the screen centered, one image pixel per screen pixel. */
 private fun DrawScope.drawEmulatedScreen(
     source: EmulatorScreenSource,
     characterColor: Color,

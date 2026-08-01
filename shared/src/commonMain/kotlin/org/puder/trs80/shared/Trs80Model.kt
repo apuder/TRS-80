@@ -30,7 +30,7 @@ const val MODEL3 = 3
 const val MODEL4 = 4
 const val MODEL4P = 5
 
-/** The colours a configuration can be drawn in, as ARGB. */
+/** The colors a configuration can be drawn in, as ARGB. */
 object ScreenColors {
     /** Was `android.graphics.Color.GREEN`. */
     const val GREEN = 0xFF00FF00.toInt()
@@ -46,7 +46,7 @@ object ScreenColors {
 }
 
 /**
- * The colour a machine draws its characters in.
+ * The color a machine draws its characters in.
  *
  * Declared in the order the editor offers them — the two phosphors together,
  * then white — while [stored] keeps the numbering already written into every
@@ -59,7 +59,7 @@ enum class ScreenColor(val stored: Int, val rgb: Int) {
     White(1, ScreenColors.WHITE);
 
     companion object {
-        /** @return the colour [stored] names, or green for anything unrecognised. */
+        /** @return the color [stored] names, or green for anything unrecognized. */
         fun of(stored: Int): ScreenColor = entries.firstOrNull { it.stored == stored } ?: Green
     }
 }

@@ -63,7 +63,7 @@ fun EmulatorScaffold(
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                    // A labelled button rather than a chevron: the icon pack is
+                    // A labeled button rather than a chevron: the icon pack is
                     // another dependency, and this is chrome the redesign
                     // replaces anyway.
                     TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }

@@ -331,7 +331,7 @@ private fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> U
 /**
  * States what the first edit did.
  *
- * Only for something that came from the catalogue: it explains why editing did
+ * Only for something that came from the catalog: it explains why editing did
  * not change what everyone else sees, and offers the way back.
  */
 @Composable

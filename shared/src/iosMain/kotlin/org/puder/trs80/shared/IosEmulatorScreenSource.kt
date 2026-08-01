@@ -30,8 +30,8 @@ import org.jetbrains.skia.ImageInfo
  *
  * The core rasterizes the screen into a coverage mask -- one byte per pixel, zero
  * where the background shows through -- so this is a copy into a Skia bitmap and
- * nothing more. The mask has no colour of its own; that is applied when it is
- * drawn, which is what lets the same mask serve any phosphor colour.
+ * nothing more. The mask has no color of its own; that is applied when it is
+ * drawn, which is what lets the same mask serve any phosphor color.
  *
  * The counterpart on Android is `RenderThread`, doing the same through an
  * `ALPHA_8` `android.graphics.Bitmap`. Neither host rasterizes anything.
@@ -99,11 +99,11 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
     override fun image(): ImageBitmap? = image
 
     /**
-     * Expands the mask into a colour bitmap.
+     * Expands the mask into a color bitmap.
      *
      * Only for screenshots, which happen once when a machine is put away —
      * doing this per frame is what made the app burn 75% of a core before, so
-     * the drawing path deliberately keeps the mask colourless and tints it.
+     * the drawing path deliberately keeps the mask colorless and tints it.
      */
     override fun snapshot(characterColor: Color, screenColor: Color): ImageBitmap? {
         if (width == 0 || height == 0 || image == null) {
@@ -111,22 +111,22 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
         }
         val foreground = characterColor.toN32()
         val background = screenColor.toN32()
-        val coloured = ByteArray(width * height * 4)
+        val colored = ByteArray(width * height * 4)
         var out = 0
         for (i in pixels.indices) {
-            writeN32(coloured, out, if (pixels[i] == 0.toByte()) background else foreground)
+            writeN32(colored, out, if (pixels[i] == 0.toByte()) background else foreground)
             out += 4
         }
         val target = Bitmap()
         target.allocPixels(ImageInfo(width, height, ColorType.N32, ColorAlphaType.OPAQUE))
-        if (!target.installPixels(coloured)) {
+        if (!target.installPixels(colored)) {
             return null
         }
         return target.asComposeImageBitmap()
     }
 }
 
-/** A colour as a plain ARGB int. */
+/** A color as a plain ARGB int. */
 internal fun Color.toN32(): Int {
     val a = (alpha * 255f).toInt() and 0xFF
     val r = (red * 255f).toInt() and 0xFF
@@ -140,7 +140,7 @@ internal fun Color.toN32(): Int {
  *
  * N32 is BGRA in memory on Apple platforms — blue first, alpha last. Getting
  * this backwards is invisible in green and in white, since both survive a red
- * and blue swap unchanged; amber was the first colour to show it, arriving on
+ * and blue swap unchanged; amber was the first color to show it, arriving on
  * screen correctly and in the saved screenshot as blue.
  */
 internal fun writeN32(out: ByteArray, at: Int, color: Int) {

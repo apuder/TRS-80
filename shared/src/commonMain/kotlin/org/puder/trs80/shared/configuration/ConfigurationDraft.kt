@@ -105,9 +105,9 @@ data class ConfigurationDraft(
     }
 
     /**
-     * Whether editing has forked this from the catalogue's copy.
+     * Whether editing has forked this from the catalog's copy.
      *
-     * True only for something that arrived from the catalogue and has since been
+     * True only for something that arrived from the catalog and has since been
      * changed, which is exactly when the banner has something to say.
      */
     fun isForkedFrom(original: ConfigurationDraft): Boolean =

@@ -35,7 +35,7 @@ const val TRS80_DIRECTORY = "TRS-80"
 /**
  * File I/O for the app, rooted at one directory.
  *
- * Was `org.puder.trs80.io.FileManager` and is unchanged in behaviour: the same
+ * Was `org.puder.trs80.io.FileManager` and is unchanged in behavior: the same
  * base-directory-plus-filename model, the same swallow-and-log error handling.
  * What changed is that it is written against okio rather than `java.io.File`,
  * and that the base directory arrives as a [Path] instead of being fetched from

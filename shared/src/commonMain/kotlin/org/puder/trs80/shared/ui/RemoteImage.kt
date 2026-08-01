@@ -37,7 +37,7 @@ private const val TAG = "RemoteImage"
 /**
  * The images fetched so far, so scrolling a list back does not fetch again.
  *
- * Deliberately small and deliberately never evicted from: the store's catalogue
+ * Deliberately small and deliberately never evicted from: the store's catalog
  * is a few dozen covers, and the alternative is a cache with a policy nobody has
  * measured. If it ever holds enough to matter, that is the point to give it one.
  */

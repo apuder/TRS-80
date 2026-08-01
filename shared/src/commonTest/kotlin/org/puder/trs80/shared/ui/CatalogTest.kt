@@ -23,76 +23,76 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-class CatalogueTest {
+class CatalogTest {
 
     private fun app(name: String) = App(id = name, name = name)
 
     @Test
     fun fetchesOnceAndReusesWhatItGot() = runTest {
         var calls = 0
-        val catalogue = Catalogue { calls++; listOf(app("Sea Dragon")) }
+        val catalog = Catalog { calls++; listOf(app("Sea Dragon")) }
 
-        catalogue.loadOnce()
-        catalogue.loadOnce()
+        catalog.loadOnce()
+        catalog.loadOnce()
 
         assertEquals(1, calls)
-        assertEquals(listOf("Sea Dragon"), assertIs<StoreState.Loaded>(catalogue.state).apps.map { it.name })
+        assertEquals(listOf("Sea Dragon"), assertIs<StoreState.Loaded>(catalog.state).apps.map { it.name })
     }
 
     @Test
     fun refreshingAsksAgain() = runTest {
         var calls = 0
-        val catalogue = Catalogue { calls++; listOf(app("Sea Dragon")) }
+        val catalog = Catalog { calls++; listOf(app("Sea Dragon")) }
 
-        catalogue.loadOnce()
-        catalogue.refresh()
+        catalog.loadOnce()
+        catalog.refresh()
 
         assertEquals(2, calls)
     }
 
     @Test
     fun aFailedFirstLoadSaysSo() = runTest {
-        val catalogue = Catalogue { throw RuntimeException("no network") }
+        val catalog = Catalog { throw RuntimeException("no network") }
 
-        catalogue.loadOnce()
+        catalog.loadOnce()
 
-        assertEquals("no network", assertIs<StoreState.Failed>(catalogue.state).message)
+        assertEquals("no network", assertIs<StoreState.Failed>(catalog.state).message)
     }
 
     /**
-     * Losing the catalogue because the network dropped for a moment is worse
+     * Losing the catalog because the network dropped for a moment is worse
      * than showing one a few minutes old.
      */
     @Test
-    fun aFailedRefreshKeepsTheCatalogueItAlreadyHas() = runTest {
+    fun aFailedRefreshKeepsTheCatalogItAlreadyHas() = runTest {
         var fail = false
-        val catalogue = Catalogue {
+        val catalog = Catalog {
             if (fail) throw RuntimeException("dropped") else listOf(app("Sea Dragon"))
         }
 
-        catalogue.loadOnce()
+        catalog.loadOnce()
         fail = true
-        catalogue.refresh()
+        catalog.refresh()
 
         assertEquals(
             listOf("Sea Dragon"),
-            assertIs<StoreState.Loaded>(catalogue.state).apps.map { it.name },
+            assertIs<StoreState.Loaded>(catalog.state).apps.map { it.name },
         )
     }
 
     @Test
     fun aFailedLoadCanBeRetried() = runTest {
         var fail = true
-        val catalogue = Catalogue {
+        val catalog = Catalog {
             if (fail) throw RuntimeException("dropped") else listOf(app("Sea Dragon"))
         }
 
-        catalogue.loadOnce()
-        assertIs<StoreState.Failed>(catalogue.state)
+        catalog.loadOnce()
+        assertIs<StoreState.Failed>(catalog.state)
 
         fail = false
-        catalogue.refresh()
+        catalog.refresh()
 
-        assertTrue(catalogue.state is StoreState.Loaded)
+        assertTrue(catalog.state is StoreState.Loaded)
     }
 }

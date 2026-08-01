@@ -75,8 +75,8 @@ class LibraryContentsTest {
     }
 
     @Test
-    fun searchMatchesCatalogueByTitleOrAuthor() {
-        val entries = listOf(app("Sea Dragon"), app("Breakdown")).asCatalogue(emptyList())
+    fun searchMatchesCatalogByTitleOrAuthor() {
+        val entries = listOf(app("Sea Dragon"), app("Breakdown")).asCatalog(emptyList())
 
         assertContentEquals(listOf("Sea Dragon"), entries.matchingEntries("sea").map { it.title })
         assertEquals(2, entries.matchingEntries("someone").size)
@@ -84,18 +84,18 @@ class LibraryContentsTest {
 
     /** An app already installed offers play rather than download. */
     @Test
-    fun catalogueMarksWhatIsAlreadyInstalled() {
+    fun catalogMarksWhatIsAlreadyInstalled() {
         val entries = listOf(app("Breakdown"), app("Cosmic Fighter"))
-            .asCatalogue(installed = listOf(card("breakdown ")))
+            .asCatalog(installed = listOf(card("breakdown ")))
 
         assertTrue(entries.single { it.title == "Breakdown" }.installed)
         assertFalse(entries.single { it.title == "Cosmic Fighter" }.installed)
     }
 
     @Test
-    fun catalogueMarksWhatIsDownloadingNow() {
+    fun catalogMarksWhatIsDownloadingNow() {
         val entries = listOf(app("Breakdown", id = "b"))
-            .asCatalogue(installed = emptyList(), installing = setOf("b"))
+            .asCatalog(installed = emptyList(), installing = setOf("b"))
 
         assertTrue(entries.single().installing)
     }

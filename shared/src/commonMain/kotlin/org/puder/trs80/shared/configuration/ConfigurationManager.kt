@@ -237,7 +237,7 @@ class ConfigurationManager private constructor(
         copy.characterColor = source.characterColor
         copy.isSoundMuted = source.isSoundMuted
         // The user's own from the moment it exists: it is a copy they asked for,
-        // not something the catalogue put there.
+        // not something the catalog put there.
         copy.isCustom = true
 
         val copied = source.diskPaths.map { path ->
