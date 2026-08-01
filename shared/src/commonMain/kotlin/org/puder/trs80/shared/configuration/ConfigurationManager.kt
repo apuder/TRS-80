@@ -21,7 +21,6 @@ import okio.IOException
 import org.puder.trs80.shared.Log
 import okio.Path.Companion.toPath
 import org.puder.trs80.shared.io.FileManager
-import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.storage.StorageKeys
 
 private const val TAG = "ConfigManager"
@@ -169,6 +168,7 @@ class ConfigurationManager private constructor(
         toSave.characterColor = configuration.characterColor
         toSave.screenColorAsRGB = configuration.screenColorAsRGB
         toSave.isSoundMuted = configuration.isSoundMuted
+        toSave.setStoreId(configuration.storeId)
         // Editing something makes it the user's own, which is what the library's
         // CUSTOM mark means.
         toSave.isCustom = true
@@ -177,12 +177,15 @@ class ConfigurationManager private constructor(
     /**
      * Writes an edited [draft] back into its persisted storage.
      *
-     * Like [persistConfig] this marks the configuration custom: editing
-     * something makes it the user's own, which is what the library's CUSTOM
-     * mark means and what the editor's fork banner has just announced.
+     * Marks the configuration custom only if the draft actually differs from
+     * what is stored. Opening the editor and saving without changing anything is
+     * not editing, and it matters more than it looks: a machine that is still
+     * the catalog's copy is the one its entry offers as Play, so marking it
+     * would quietly cost the user that copy and download a second one next time.
      */
     fun persistDraft(draft: ConfigurationDraft) {
         val toSave = ConfigurationImpl.fromId(draft.id, settings)
+        val changed = toSave.toDraft() != draft
         toSave.setName(draft.name)
         toSave.model = draft.model
         toSave.setCassettePath(draft.cassettePath)
@@ -191,7 +194,9 @@ class ConfigurationManager private constructor(
         toSave.setKeyboardLayoutLandscape(draft.keyboardLandscape)
         toSave.characterColor = draft.characterColor
         toSave.isSoundMuted = draft.soundMuted
-        toSave.isCustom = true
+        if (changed) {
+            toSave.isCustom = true
+        }
     }
 
     /**
@@ -220,9 +225,13 @@ class ConfigurationManager private constructor(
     /**
      * Makes an independent copy of a configuration.
      *
-     * The disks are copied too, not shared: the point of a copy is that saving
-     * to it, or ejecting from it, leaves the original alone, and two
-     * configurations pointing at one file on disk would not manage that.
+     * The media is copied too, not shared: the point of a copy is that saving to
+     * it, or ejecting from it, leaves the original alone, and two configurations
+     * pointing at one file on disk would not manage that.
+     *
+     * The copy keeps the original's [Configuration.storeId], so it shows up
+     * under the catalog entry it descends from — which is the whole point of
+     * copying a machine rather than downloading the program twice.
      *
      * @return the new configuration, or null if the original is gone or its
      * files could not be copied.
@@ -236,26 +245,85 @@ class ConfigurationManager private constructor(
         copy.setKeyboardLayoutLandscape(source.keyboardLayoutLandscape)
         copy.characterColor = source.characterColor
         copy.isSoundMuted = source.isSoundMuted
+        copy.setStoreId(source.storeId)
         // The user's own from the moment it exists: it is a copy they asked for,
         // not something the catalog put there.
         copy.isCustom = true
 
         val copied = source.diskPaths.map { path ->
             if (path == null) return@map null
-            val bytes = runCatching {
-                appFileSystem.read(path.toPath()) { readByteArray() }
-            }.getOrElse {
-                Log.e(TAG, "Could not read $path while copying.", it)
-                deleteConfigWithId(copy.id)
-                return null
-            }
-            storeMedia(copy.id, path.toPath().name, bytes) ?: run {
+            copyMedia(path, copy.id) ?: run {
                 deleteConfigWithId(copy.id)
                 return null
             }
         }
         copy.diskPaths = copied
+        source.cassettePath?.let { path ->
+            val stored = copyMedia(path, copy.id) ?: run {
+                deleteConfigWithId(copy.id)
+                return null
+            }
+            copy.setCassettePath(stored)
+            copy.cassettePosition = source.cassettePosition
+        }
         return copy
+    }
+
+    /**
+     * Copies the file at [path] into [configurationId]'s own directory.
+     *
+     * Reads through the same file system it writes to, rather than the app's
+     * global one: the source is a file this app stored, so there is only one
+     * storage involved and asking a second one about it is how this stopped
+     * working under a fake.
+     *
+     * @return the new path, or null if it could not be copied.
+     */
+    private fun copyMedia(path: String, configurationId: Int): String? {
+        val target = try {
+            fileManagerCreator.createForAppSubDir(configurationId)
+        } catch (e: IOException) {
+            Log.e(TAG, "Could not open the configuration's directory.", e)
+            return null
+        }
+        val bytes = runCatching {
+            target.fileSystem.read(path.toPath()) { readByteArray() }
+        }.getOrElse {
+            Log.e(TAG, "Could not read $path while copying.", it)
+            return null
+        }
+        val filename = path.toPath().name
+        if (!target.writeFile(filename, bytes)) {
+            Log.e(TAG, "Could not write $filename while copying.")
+            return null
+        }
+        return target.getAbsolutePathForFile(filename)
+    }
+
+    /**
+     * Records where machines came from, for machines installed before the app
+     * kept a record.
+     *
+     * Matched on the name, which is all there is to go on and is exactly the
+     * guess this field exists to stop making — so it is made once, here, and
+     * only where the answer is unambiguous: a name the catalog uses for two
+     * different programs is left alone rather than resolved arbitrarily.
+     *
+     * @param storeIdsByName the catalog's IDs, keyed by trimmed lower-case name.
+     * @return whether anything was adopted.
+     */
+    fun adoptStoreIds(storeIdsByName: Map<String, String>): Boolean {
+        var adopted = false
+        for (configuration in configurations) {
+            if (configuration.storeId != null) {
+                continue
+            }
+            val name = configuration.name?.trim()?.lowercase() ?: continue
+            val storeId = storeIdsByName[name] ?: continue
+            configuration.setStoreId(storeId)
+            adopted = true
+        }
+        return adopted
     }
 
     /** Stores the current list of configurations. */
@@ -269,6 +337,8 @@ class ConfigurationManager private constructor(
      * @param configName the name of this new configuration.
      * @param disks      the disk images for this configuration.
      * @param cassette   the cassette image, or null, for this configuration.
+     * @param storeId    the catalog program this came from, or null if it came
+     *                   from nowhere.
      * @return The new configuration, or null if it could not be added.
      */
     fun addNewConfiguration(
@@ -276,11 +346,13 @@ class ConfigurationManager private constructor(
         configName: String?,
         disks: List<ConfigMedia?>,
         cassette: ConfigMedia?,
+        storeId: String? = null,
     ): Configuration? {
         // Configurations automatically persist.
         val newConfig = newConfiguration()
         newConfig.setName(configName)
         newConfig.model = model
+        newConfig.setStoreId(storeId)
 
         val configFileManager = try {
             fileManagerCreator.createForAppSubDir(newConfig.id)

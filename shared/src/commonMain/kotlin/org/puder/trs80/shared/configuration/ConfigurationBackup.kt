@@ -44,6 +44,7 @@ internal class ConfigurationBackup private constructor(
     isSoundMuted: Boolean,
     override val lastUsed: Long,
     isCustom: Boolean,
+    override val storeId: String?,
 ) : Configuration {
 
     companion object {
@@ -63,6 +64,7 @@ internal class ConfigurationBackup private constructor(
             orig.isSoundMuted,
             orig.lastUsed,
             orig.isCustom,
+            orig.storeId,
         )
     }
 
@@ -100,6 +102,8 @@ internal class ConfigurationBackup private constructor(
     override fun setKeyboardLayoutPortrait(layout: KeyboardLayout?) = immutable()
 
     override fun setKeyboardLayoutLandscape(layout: KeyboardLayout?) = immutable()
+
+    override fun setStoreId(storeId: String?) = immutable()
 
     override fun delete() = immutable()
 

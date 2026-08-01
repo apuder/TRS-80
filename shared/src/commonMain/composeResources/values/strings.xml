@@ -18,6 +18,9 @@
     <string name="show_fewer">Show fewer</string>
     <string name="show_all">Show all %1$d</string>
     <string name="never_run">Not run yet</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="duplicate_detail">Makes a copy with disks of its own. Changing one leaves the other alone.</string>
+    <string name="edit_entry_detail">Its name, model, disks and controls.</string>
 
     <!-- Catalog entry -->
     <string name="screens">Screens</string>
@@ -27,10 +30,11 @@
     <string name="source">Source</string>
     <string name="from_retrostore">FROM RETROSTORE</string>
     <string name="from_retrostore_plain">from RetroStore</string>
-    <string name="download">DOWNLOAD</string>
     <string name="downloading">DOWNLOADING</string>
     <string name="play">PLAY</string>
-    <string name="copy">COPY</string>
+    <string name="play_fresh">A fresh machine, as the catalog has it</string>
+    <string name="download_failed">Could not download it</string>
+    <string name="your_versions">Your versions</string>
     <string name="disk_one">1 disk</string>
     <string name="disk_many">%1$d disks</string>
 

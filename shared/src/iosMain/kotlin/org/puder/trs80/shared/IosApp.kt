@@ -281,9 +281,10 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
     var expanded by remember { mutableStateOf(false) }
     var installing by remember { mutableStateOf(emptySet<String>()) }
+    var failed by remember { mutableStateOf(emptySet<String>()) }
     // The id, not the entry: an entry is a snapshot of what the catalog looked
-    // like when it was tapped, so holding one leaves the sheet showing DOWNLOAD
-    // for something that has since finished downloading.
+    // like when it was tapped, so holding one leaves the sheet offering to
+    // download something that has since arrived.
     var selectedId by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -291,8 +292,10 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
         cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
     }
 
-    fun install(app: App) {
+    /** Fetches [app] and, if [thenRun], starts the machine it becomes. */
+    fun install(app: App, thenRun: Boolean) {
         installing = installing + app.id
+        failed = failed - app.id
         scope.launch {
             val configuration = withContext(Dispatchers.Default) {
                 runCatching { AppInstaller(ConfigurationManager.get()).install(app) }
@@ -300,10 +303,39 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
                     .getOrNull()
             }
             installing = installing - app.id
-            if (configuration != null) {
-                reload()
+            if (configuration == null) {
+                // Said rather than swallowed: a Play that quietly does nothing
+                // cannot be told from a tap that missed.
+                failed = failed + app.id
+                return@launch
+            }
+            reload()
+            if (thenRun) {
+                selectedId = null
+                navigator.goTo(Destination.Emulator(configuration.id))
             }
         }
+    }
+
+    /**
+     * Plays a catalog entry, fetching it first if this is the first time.
+     *
+     * Always the entry's clean machine, never one the user has since changed:
+     * those are listed separately and started by name, so that "play this
+     * program" keeps meaning the program as the catalog has it.
+     */
+    fun playEntry(entry: CatalogEntry) {
+        if (entry.installing) {
+            return
+        }
+        val clean = entry.cleanId
+        if (clean != null) {
+            selectedId = null
+            navigator.goTo(Destination.Emulator(clean))
+            return
+        }
+        (catalog.state as? StoreState.Loaded)?.apps?.firstOrNull { it.id == entry.id }
+            ?.let { install(it, thenRun = true) }
     }
 
     // Re-read on every return, so a machine that has just run moves to the top
@@ -316,7 +348,28 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
     LaunchedEffect(catalog) { catalog.loadOnce() }
 
     val listed = (catalog.state as? StoreState.Loaded)?.apps.orEmpty()
+
+    // Machines installed before the app recorded where they came from have to be
+    // matched on their name once, or they would each show up as a program the
+    // user has never played. Only unambiguous names: a name two catalog programs
+    // share is left alone rather than guessed at.
+    LaunchedEffect(listed) {
+        if (listed.isEmpty()) {
+            return@LaunchedEffect
+        }
+        val byName = listed.groupBy { it.name.trim().lowercase() }
+            .filterValues { it.size == 1 }
+            .mapValues { (_, apps) -> apps.single().id }
+        val adopted = withContext(Dispatchers.Default) {
+            ConfigurationManager.get().adoptStoreIds(byName)
+        }
+        if (adopted) {
+            reload()
+        }
+    }
+
     val entries = listed.asCatalog(cards, installing)
+        .map { it.copy(failed = it.id in failed) }
 
     val selectedEntry = selectedId?.let { id -> entries.firstOrNull { it.id == id } }
     Box(Modifier.fillMaxSize()) {
@@ -337,14 +390,25 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
             onOpenSettings = { navigator.goTo(Destination.Settings) },
             onRefresh = { scope.launch { catalog.refresh() } },
             onEdit = { navigator.goTo(Destination.EditConfiguration(it, isNew = false)) },
+            onDuplicate = { id ->
+                scope.launch {
+                    withContext(Dispatchers.Default) { ConfigurationManager.get().duplicate(id) }
+                    reload()
+                }
+            },
+            onDelete = { id ->
+                scope.launch {
+                    withContext(Dispatchers.Default) {
+                        ConfigurationManager.get().deleteConfigWithId(id)
+                    }
+                    reload()
+                }
+            },
             onAdd = {
                 val fresh = ConfigurationManager.get().newConfiguration()
                 navigator.goTo(Destination.EditConfiguration(fresh.id, isNew = true))
             },
-            onInstall = { entry ->
-                listed.firstOrNull { it.id == entry.id }
-                    ?.let(::install)
-            },
+            onPlayEntry = ::playEntry,
         ),
     )
 
@@ -353,10 +417,8 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
             Detail(
                 entry = selectedEntry,
                 app = selectedApp,
-                installing = selectedEntry.id in installing,
-                onInstall = { install(selectedApp) },
-                onRun = { navigator.goTo(Destination.Emulator(it)) },
-                onCopied = { scope.launch { reload() } },
+                onPlay = { playEntry(selectedEntry) },
+                onRun = { selectedId = null; navigator.goTo(Destination.Emulator(it)) },
                 onDismiss = { selectedId = null },
             )
         }
@@ -374,16 +436,15 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
 private fun Detail(
     entry: CatalogEntry,
     app: App,
-    installing: Boolean,
-    onInstall: () -> Unit,
+    onPlay: () -> Unit,
     onRun: (Int) -> Unit,
-    onCopied: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val installedId = entry.installedId
-    val disks = remember(installedId) {
-        installedId?.let { id ->
+    // The clean machine describes the program; failing that, the version the
+    // user reached for most recently. Either is a copy of the same media.
+    val describes = entry.cleanId ?: entry.versions.firstOrNull()?.id
+    val disks = remember(describes) {
+        describes?.let { id ->
             ConfigurationManager.get().getConfigById(id)?.diskPaths.orEmpty().filterNotNull()
         }.orEmpty()
     }
@@ -409,27 +470,14 @@ private fun Detail(
             source = "RetroStore",
         ),
         action = when {
-            installing -> DetailAction.Downloading
-            entry.installed -> DetailAction.Play
-            else -> DetailAction.Download
+            entry.installing -> DetailAction.Downloading
+            entry.failed -> DetailAction.Failed
+            else -> DetailAction.Play
         },
-        onPrimary = {
-            val id = entry.installedId
-            when {
-                installing -> Unit
-                id != null -> { onDismiss(); onRun(id) }
-                else -> onInstall()
-            }
-        },
-        onCopy = {
-            val id = entry.installedId ?: return@DetailSheet
-            scope.launch {
-                withContext(Dispatchers.Default) { ConfigurationManager.get().duplicate(id) }
-                onCopied()
-                onDismiss()
-            }
-        },
+        onPrimary = onPlay,
         onDismiss = onDismiss,
+        versions = entry.versions,
+        onPlayVersion = onRun,
     )
 }
 

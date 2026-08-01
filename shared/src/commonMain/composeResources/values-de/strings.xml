@@ -19,6 +19,9 @@
     <string name="show_fewer">Weniger anzeigen</string>
     <string name="show_all">Alle %1$d anzeigen</string>
     <string name="never_run">Noch nicht gestartet</string>
+    <string name="duplicate">Duplizieren</string>
+    <string name="duplicate_detail">Erstellt eine Kopie mit eigenen Disketten. Änderungen an der einen lassen die andere unberührt.</string>
+    <string name="edit_entry_detail">Name, Modell, Disketten und Steuerung.</string>
 
     <!-- Catalog entry -->
     <string name="screens">Bildschirme</string>
@@ -28,10 +31,11 @@
     <string name="source">Quelle</string>
     <string name="from_retrostore">VON RETROSTORE</string>
     <string name="from_retrostore_plain">von RetroStore</string>
-    <string name="download">LADEN</string>
     <string name="downloading">LÄDT</string>
     <string name="play">STARTEN</string>
-    <string name="copy">KOPIE</string>
+    <string name="play_fresh">Ein frischer Rechner, wie im Katalog</string>
+    <string name="download_failed">Konnte nicht geladen werden</string>
+    <string name="your_versions">Ihre Versionen</string>
     <string name="disk_one">1 Diskette</string>
     <string name="disk_many">%1$d Disketten</string>
 

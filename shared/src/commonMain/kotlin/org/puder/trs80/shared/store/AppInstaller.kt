@@ -63,6 +63,9 @@ class AppInstaller(
             configName = app.name,
             disks = disks,
             cassette = cassette,
+            // What ties the machine back to the entry it came from, for as long
+            // as it stays unedited. Renaming it does not break the link.
+            storeId = app.id,
         )
     }
 }

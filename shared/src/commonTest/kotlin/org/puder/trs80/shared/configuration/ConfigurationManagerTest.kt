@@ -195,6 +195,88 @@ class ConfigurationManagerTest {
         persistence(1).setModel("3")
         assertEquals(MODEL3, configuration(1).model)
     }
+
+    @Test
+    fun addingAConfigurationRecordsWhereItCameFrom() {
+        val manager = ConfigurationManager.create(creator, settings)
+
+        val config = manager.addNewConfiguration(
+            model = MODEL3,
+            configName = "Breakdown",
+            disks = emptyList(),
+            cassette = null,
+            storeId = "app-7",
+        )
+
+        assertEquals("app-7", config?.storeId)
+        // A machine the user builds themselves came from nowhere.
+        assertNull(manager.newConfiguration().storeId)
+    }
+
+    /** A copy belongs to the same catalog entry, and is the user's own at once. */
+    @Test
+    fun aCopyKeepsItsProvenanceAndTakesItsOwnMedia() {
+        val manager = ConfigurationManager.create(creator, settings)
+        val source = manager.addNewConfiguration(
+            model = MODEL3,
+            configName = "Breakdown",
+            disks = listOf(ConfigurationManager.ConfigMedia("boot.dsk", byteArrayOf(1, 2, 3))),
+            cassette = ConfigurationManager.ConfigMedia("tape.cas", byteArrayOf(4, 5)),
+            storeId = "app-7",
+        )!!
+
+        val copy = manager.duplicate(source.id)!!
+
+        assertEquals("app-7", copy.storeId)
+        assertTrue(copy.isCustom)
+        assertEquals("Breakdown copy", copy.name)
+        // Its own files, or ejecting from one would empty the other.
+        assertTrue(copy.getDiskPath(0)!!.endsWith("/${copy.id}/boot.dsk"))
+        assertTrue(fileSystem.exists(copy.getDiskPath(0)!!.toPath()))
+        assertTrue(copy.cassettePath!!.endsWith("/${copy.id}/tape.cas"))
+        assertTrue(fileSystem.exists(copy.cassettePath!!.toPath()))
+    }
+
+    /**
+     * Saving an untouched draft must leave the machine the catalog's copy: that
+     * is what its entry offers as Play, and marking it would cost the user it.
+     */
+    @Test
+    fun savingWithoutChangingAnythingIsNotEditing() {
+        val manager = ConfigurationManager.create(creator, settings)
+        val config = manager.newConfiguration().apply {
+            setName("Breakdown")
+            model = MODEL3
+            setStoreId("app-7")
+        }
+
+        manager.persistDraft(config.toDraft())
+        assertFalse(configuration(config.id).isCustom)
+
+        manager.persistDraft(config.toDraft().copy(name = "Breakdown, my way"))
+        assertTrue(configuration(config.id).isCustom)
+    }
+
+    @Test
+    fun adoptingFillsInOnlyWhatIsMissing() {
+        val manager = ConfigurationManager.create(creator, settings)
+        val unknown = manager.newConfiguration().apply { setName(" Breakdown ") }
+        val known = manager.newConfiguration().apply {
+            setName("Cosmic Fighter")
+            setStoreId("already-known")
+        }
+        val stranger = manager.newConfiguration().apply { setName("My own machine") }
+
+        val adopted = manager.adoptStoreIds(
+            mapOf("breakdown" to "app-7", "cosmic fighter" to "app-9")
+        )
+
+        assertTrue(adopted)
+        assertEquals("app-7", unknown.storeId)
+        assertEquals("already-known", known.storeId)
+        assertNull(stranger.storeId)
+        assertFalse(manager.adoptStoreIds(mapOf("breakdown" to "app-7")))
+    }
 }
 
 /** A file system that makes directories but refuses to write files. */

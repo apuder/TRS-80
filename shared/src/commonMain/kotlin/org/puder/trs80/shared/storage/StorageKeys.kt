@@ -63,6 +63,16 @@ object StorageKeys {
      */
     const val CONFIG_IS_CUSTOM = "conf_is_custom"
 
+    /**
+     * The store's ID for the program this configuration was made from.
+     *
+     * Absent for machines the user built themselves. Recorded because the link
+     * back to the catalog cannot be inferred: it used to be matched on the name,
+     * which picks an arbitrary one of two machines called the same thing and
+     * breaks outright the moment a machine is renamed.
+     */
+    const val CONFIG_STORE_ID = "conf_store_id"
+
     /** The number of disk drives a configuration has. */
     const val DRIVE_COUNT = 4
 
@@ -89,6 +99,7 @@ object StorageKeys {
         add(CONFIG_CASSETTE_POSITION)
         add(CONFIG_LAST_USED)
         add(CONFIG_IS_CUSTOM)
+        add(CONFIG_STORE_ID)
         for (drive in 0 until DRIVE_COUNT) add(diskKey(drive))
     }
 

@@ -54,15 +54,11 @@ import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.amber
 import trs_80.shared.generated.resources.boots_from_disk
-import trs_80.shared.generated.resources.cancel
 import trs_80.shared.generated.resources.cassette
 import trs_80.shared.generated.resources.cassette_none
 import trs_80.shared.generated.resources.choose
 import trs_80.shared.generated.resources.controls
-import trs_80.shared.generated.resources.delete
-import trs_80.shared.generated.resources.delete_consequence
 import trs_80.shared.generated.resources.delete_entry
-import trs_80.shared.generated.resources.delete_question
 import trs_80.shared.generated.resources.disks
 import trs_80.shared.generated.resources.disks_of
 import trs_80.shared.generated.resources.edit_entry
@@ -88,7 +84,6 @@ import trs_80.shared.generated.resources.white
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
-import org.puder.trs80.shared.ui.theme.ModalPanel
 import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.SettingRow
@@ -290,33 +285,6 @@ fun EditConfigurationScreen(
                     actions.onDelete()
                 },
             )
-        }
-    }
-}
-
-/**
- * Asks before deleting.
- *
- * Drawn over the editor rather than in a platform dialog, so it is the app's own
- * type and palette and behaves the same on both platforms. The scrim swallows
- * taps, which is what stops the screen behind it being operated blind.
- */
-@Composable
-private fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
-    val colors = Trs80Theme.colors
-    ModalPanel(onDismiss = onCancel) {
-        Text(stringResource(Res.string.delete_question, name.ifEmpty { stringResource(Res.string.this_entry) }), style = Trs80Theme.type.title)
-        Spacer(Modifier.padding(top = 8.dp))
-        Text(
-            stringResource(Res.string.delete_consequence),
-            style = Trs80Theme.type.bodySmall,
-            color = colors.muted,
-        )
-        Spacer(Modifier.padding(top = 18.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextAction(stringResource(Res.string.cancel), onClick = onCancel, color = colors.muted, padding = 0.dp)
-            Spacer(Modifier.weight(1f))
-            DestructiveButton(stringResource(Res.string.delete), onClick = onConfirm, filled = true, icon = null)
         }
     }
 }

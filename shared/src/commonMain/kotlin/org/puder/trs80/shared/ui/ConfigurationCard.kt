@@ -60,6 +60,8 @@ data class ConfigurationCard(
     val isCustom: Boolean = false,
     /** When it was last run, for ordering the library. */
     val lastUsed: Long = 0L,
+    /** The catalog program this was made from, or null if the user built it. */
+    val storeId: String? = null,
 )
 
 /**
@@ -86,6 +88,7 @@ fun ConfigurationManager.toCards(): List<ConfigurationCard> =
             screenshot = state?.readScreenshot()?.let(::decodeImage),
             isCustom = configuration.isCustom,
             lastUsed = configuration.lastUsed,
+            storeId = configuration.storeId,
         )
     }
 

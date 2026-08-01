@@ -44,27 +44,44 @@ fun List<ConfigurationCard>.matching(query: String): List<ConfigurationCard> {
 }
 
 /**
- * Turns the store's apps into catalog entries, marking the ones already
- * installed.
+ * Turns the store's apps into catalog entries, each carrying the machines the
+ * user has made from it.
  *
- * "Already installed" is matched on name, which is what the app has to go on:
- * a configuration records what it was made from only by the name it was given.
- * Matching on the store's ID would be exact, and wants a field on the
- * configuration that does not exist yet.
+ * Matched on the store's ID, which every machine installed from the catalog now
+ * records. Names were what this used to match on, and they cannot answer the
+ * question: two machines called the same thing resolve to whichever came last,
+ * and renaming one breaks the link entirely.
+ *
+ * The split is what the entry's screen is built on. Exactly one machine can be
+ * the entry's clean copy — carrying its ID and never edited — and every other
+ * machine carrying that ID is a version of the user's own. Editing the clean one
+ * makes it a version and leaves the entry without a clean copy, which is what
+ * lets the next Play make a fresh one rather than handing back a modified
+ * machine.
  */
 fun List<App>.asCatalog(
     installed: List<ConfigurationCard>,
     installing: Set<String> = emptySet(),
 ): List<CatalogEntry> {
-    val byName = installed.associateBy({ it.name.trim().lowercase() }, { it.id })
+    val mine = installed.filter { it.storeId != null }.groupBy { it.storeId }
     return map { app ->
+        val fromThis = mine[app.id].orEmpty()
         CatalogEntry(
             id = app.id,
             title = app.name,
             author = app.author,
             year = app.release_year,
             artUrl = app.screenshot_url.firstOrNull(),
-            installedId = byName[app.name.trim().lowercase()],
+            // Normally there is at most one, since a clean machine is only ever
+            // made when the entry has none. Adopting older installs can leave
+            // two, so the most recently used wins rather than the first found.
+            cleanId = fromThis.filterNot { it.isCustom }.maxByOrNull { it.lastUsed }?.id,
+            versions = fromThis.filter { it.isCustom }
+                .sortedWith(
+                    compareByDescending<ConfigurationCard> { it.lastUsed }
+                        .thenBy { it.name.lowercase() }
+                )
+                .map { CatalogVersion(id = it.id, name = it.name, model = it.model) },
             installing = app.id in installing,
         )
     }

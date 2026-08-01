@@ -20,12 +20,17 @@ import org.retrostore.client.common.proto.App
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class LibraryContentsTest {
 
-    private fun card(name: String, lastUsed: Long = 0L) = ConfigurationCard(
+    private fun card(
+        name: String,
+        lastUsed: Long = 0L,
+        storeId: String? = null,
+        isCustom: Boolean = false,
+    ) = ConfigurationCard(
         id = name.hashCode(),
         name = name,
         model = "Model III",
@@ -35,7 +40,9 @@ class LibraryContentsTest {
         hasSavedState = false,
         hasXrayState = false,
         screenshot = null,
+        isCustom = isCustom,
         lastUsed = lastUsed,
+        storeId = storeId,
     )
 
     private fun app(name: String, id: String = name) =
@@ -82,14 +89,71 @@ class LibraryContentsTest {
         assertEquals(2, entries.matchingEntries("someone").size)
     }
 
-    /** An app already installed offers play rather than download. */
     @Test
-    fun catalogMarksWhatIsAlreadyInstalled() {
-        val entries = listOf(app("Breakdown"), app("Cosmic Fighter"))
-            .asCatalog(installed = listOf(card("breakdown ")))
+    fun catalogFindsTheCleanMachineByStoreId() {
+        val entries = listOf(app("Breakdown", id = "b"), app("Cosmic Fighter", id = "c"))
+            .asCatalog(installed = listOf(card("Breakdown", storeId = "b")))
 
-        assertTrue(entries.single { it.title == "Breakdown" }.installed)
-        assertFalse(entries.single { it.title == "Cosmic Fighter" }.installed)
+        assertEquals("Breakdown".hashCode(), entries.single { it.id == "b" }.cleanId)
+        assertNull(entries.single { it.id == "c" }.cleanId)
+    }
+
+    /** The whole reason the ID is stored: a rename must not break the link. */
+    @Test
+    fun renamingAMachineKeepsItLinkedToItsEntry() {
+        val entries = listOf(app("Breakdown", id = "b"))
+            .asCatalog(installed = listOf(card("Breakdown, my way", storeId = "b")))
+
+        assertEquals("Breakdown, my way".hashCode(), entries.single().cleanId)
+    }
+
+    /** A machine with the same name but from nowhere is not the entry's. */
+    @Test
+    fun aMachineWithoutAStoreIdIsNobodysCopy() {
+        val entries = listOf(app("Breakdown", id = "b"))
+            .asCatalog(installed = listOf(card("Breakdown")))
+
+        assertNull(entries.single().cleanId)
+        assertTrue(entries.single().versions.isEmpty())
+    }
+
+    /** Editing a machine takes it out of the clean slot and into the list. */
+    @Test
+    fun anEditedMachineBecomesAVersionRatherThanTheCleanCopy() {
+        val entries = listOf(app("Breakdown", id = "b"))
+            .asCatalog(installed = listOf(card("Breakdown", storeId = "b", isCustom = true)))
+
+        val entry = entries.single()
+        assertNull(entry.cleanId)
+        assertContentEquals(listOf("Breakdown"), entry.versions.map { it.name })
+    }
+
+    @Test
+    fun versionsComeMostRecentlyUsedFirst() {
+        val entry = listOf(app("Breakdown", id = "b")).asCatalog(
+            installed = listOf(
+                card("Old", 100, storeId = "b", isCustom = true),
+                card("Newest", 300, storeId = "b", isCustom = true),
+                card("Middle", 200, storeId = "b", isCustom = true),
+                card("Clean", 400, storeId = "b"),
+            )
+        ).single()
+
+        assertEquals("Clean".hashCode(), entry.cleanId)
+        assertContentEquals(listOf("Newest", "Middle", "Old"), entry.versions.map { it.name })
+    }
+
+    /** Adopting older installs can leave two clean machines; one has to win. */
+    @Test
+    fun theMostRecentlyUsedCleanMachineWins() {
+        val entry = listOf(app("Breakdown", id = "b")).asCatalog(
+            installed = listOf(
+                card("First", 100, storeId = "b"),
+                card("Later", 900, storeId = "b"),
+            )
+        ).single()
+
+        assertEquals("Later".hashCode(), entry.cleanId)
     }
 
     @Test

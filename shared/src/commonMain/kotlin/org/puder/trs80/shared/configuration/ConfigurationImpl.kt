@@ -129,6 +129,11 @@ internal class ConfigurationImpl private constructor(
             persistence.isCustom = value
         }
 
+    override val storeId: String?
+        get() = persistence.storeId
+
+    override fun setStoreId(storeId: String?) = persistence.setStoreId(storeId)
+
     override fun delete() = persistence.clear()
 
     override fun createBackup(): Configuration = ConfigurationBackup.from(this)

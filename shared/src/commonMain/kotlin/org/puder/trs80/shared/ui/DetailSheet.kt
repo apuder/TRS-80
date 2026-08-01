@@ -66,17 +66,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
-import trs_80.shared.generated.resources.copy
-import trs_80.shared.generated.resources.download
+import trs_80.shared.generated.resources.download_failed
 import trs_80.shared.generated.resources.downloading
 import trs_80.shared.generated.resources.from_retrostore
 import trs_80.shared.generated.resources.from_retrostore_plain
 import trs_80.shared.generated.resources.machine
 import trs_80.shared.generated.resources.media
 import trs_80.shared.generated.resources.play
+import trs_80.shared.generated.resources.play_fresh
 import trs_80.shared.generated.resources.record
 import trs_80.shared.generated.resources.screens
 import trs_80.shared.generated.resources.source
+import trs_80.shared.generated.resources.try_again
+import trs_80.shared.generated.resources.your_versions
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.ProgressRing
@@ -120,8 +122,15 @@ data class DetailContent(
  *
  * Three states in the same position rather than three controls: at no point are
  * there two things to press, so there is never a question of which one is meant.
+ *
+ * There is no Download among them. Downloading is what happens on the way to
+ * playing something for the first time, and it is quick — so the slot says what
+ * the user came for and shows the wait when there is one. [Failed] is the reason
+ * this is still three states and not a boolean: a Play that silently does
+ * nothing is worse than a Download that visibly fails, because there is no way
+ * to tell it from a missed tap.
  */
-enum class DetailAction { Download, Downloading, Play }
+enum class DetailAction { Play, Downloading, Failed }
 
 /**
  * A catalog entry, as a sheet over the library.
@@ -133,15 +142,23 @@ enum class DetailAction { Download, Downloading, Play }
  * The controls section the visual spec puts between Screens and Record is
  * deliberately absent: it edits the entry, and editing belongs in the editor.
  *
+ * Copying is absent for the same kind of reason. A copy is made of a machine,
+ * not of a program, so it belongs on the machine — in the library, where the
+ * user's own machines live.
+ *
+ * @param versions the user's own machines made from this entry, most recently
+ * used first. Listed rather than folded into the primary control: choosing one
+ * of your own variants is a deliberate act, and the user knows which one.
  */
 @Composable
 fun DetailSheet(
     content: DetailContent,
     action: DetailAction,
     onPrimary: () -> Unit,
-    onCopy: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    versions: List<CatalogVersion> = emptyList(),
+    onPlayVersion: (Int) -> Unit = {},
 ) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
@@ -224,7 +241,16 @@ fun DetailSheet(
             ) {
                 Masthead(content)
                 Spacer(Modifier.height(14.dp))
-                Actions(action, onPrimary, onCopy)
+                PrimaryAction(action, onPrimary)
+                if (versions.isNotEmpty()) {
+                    SectionKicker(
+                        stringResource(Res.string.your_versions),
+                        count = versions.size.toString(),
+                    )
+                    versions.forEach { version ->
+                        VersionRow(version) { onPlayVersion(version.id) }
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 Hairline()
                 if (content.description.isNotEmpty()) {
@@ -321,83 +347,86 @@ private fun Masthead(content: DetailContent) {
 }
 
 /**
- * The primary slot, and the copy beside it.
+ * The one thing this screen is for.
  *
- * Copy dims until the program is on the device, because there is nothing to
- * copy before that.
+ * Full width, because there is nothing beside it to balance against: whatever
+ * else the user might do with the entry, they came here to play it.
  */
 @Composable
-private fun Actions(action: DetailAction, onPrimary: () -> Unit, onCopy: () -> Unit) {
+private fun PrimaryAction(action: DetailAction, onPrimary: () -> Unit) {
     val colors = Trs80Theme.colors
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Row(
-            Modifier
-                .weight(1f)
-                .heightIn(min = MinimumTouchTarget)
-                .border(Trs80Theme.spacing.hairline, colors.accent)
-                .background(colors.accent.copy(alpha = 0.08f))
-                .clickable(onClick = onPrimary)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            when (action) {
-                DetailAction.Downloading -> ProgressRing(progress = null, size = 22.dp)
-                DetailAction.Play -> StrokeIcon(
-                    Trs80Icon.Play,
-                    color = colors.accentText,
-                    size = 22.dp,
-                )
-
-                DetailAction.Download -> StrokeIcon(
-                    Trs80Icon.Download,
-                    color = colors.accentText,
-                    size = 22.dp,
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    when (action) {
-                        DetailAction.Download -> stringResource(Res.string.download)
-                        DetailAction.Downloading -> stringResource(Res.string.downloading)
-                        DetailAction.Play -> stringResource(Res.string.play)
-                    },
-                    style = Trs80Theme.type.kicker,
-                    color = colors.accentText,
-                )
-                if (action == DetailAction.Downloading) {
-                    Spacer(Modifier.height(2.dp))
+    val failed = action == DetailAction.Failed
+    val edge = if (failed) colors.danger else colors.accent
+    val label = if (failed) colors.danger else colors.accentText
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = MinimumTouchTarget)
+            .border(Trs80Theme.spacing.hairline, edge)
+            .background(edge.copy(alpha = 0.08f))
+            .clickable(onClick = onPrimary)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        when (action) {
+            DetailAction.Downloading -> ProgressRing(progress = null, size = 22.dp)
+            DetailAction.Failed -> StrokeIcon(Trs80Icon.Refresh, color = label, size = 22.dp)
+            DetailAction.Play -> StrokeIcon(Trs80Icon.Play, color = label, size = 22.dp)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(
+                when (action) {
+                    DetailAction.Downloading -> stringResource(Res.string.downloading)
+                    DetailAction.Failed -> stringResource(Res.string.try_again)
+                    DetailAction.Play -> stringResource(Res.string.play)
+                },
+                style = Trs80Theme.type.kicker,
+                color = label,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                when (action) {
                     // No total to count towards: the store hands over the whole
                     // program in one response, so there is no progress to report
                     // and saying so beats animating a guess.
-                    Text(
-                        stringResource(Res.string.from_retrostore_plain),
-                        style = Trs80Theme.type.bodySmall,
-                        color = colors.muted,
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.width(10.dp))
-        val enabled = action == DetailAction.Play
-        Row(
-            Modifier
-                .heightIn(min = MinimumTouchTarget)
-                .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.22f))
-                .then(if (enabled) Modifier.clickable(onClick = onCopy) else Modifier)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val alpha = if (enabled) 1f else 0.45f
-            StrokeIcon(
-                Trs80Icon.Copy,
-                color = colors.text.copy(alpha = alpha),
-                size = 18.dp,
+                    DetailAction.Downloading -> stringResource(Res.string.from_retrostore_plain)
+                    DetailAction.Failed -> stringResource(Res.string.download_failed)
+                    DetailAction.Play -> stringResource(Res.string.play_fresh)
+                },
+                style = Trs80Theme.type.bodySmall,
+                color = colors.muted,
             )
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(Res.string.copy), style = Trs80Theme.type.kicker, color = colors.text.copy(alpha = alpha))
         }
     }
+}
+
+/** One of the user's own machines from this entry, and a way to start it. */
+@Composable
+private fun VersionRow(version: CatalogVersion, onPlay: () -> Unit) {
+    val colors = Trs80Theme.colors
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = MinimumTouchTarget)
+            .clickable(onClick = onPlay)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                version.name,
+                style = Trs80Theme.type.body,
+                color = colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(version.model, style = Trs80Theme.type.bodySmall, color = colors.muted)
+        }
+        Spacer(Modifier.width(10.dp))
+        StrokeIcon(Trs80Icon.Play, color = colors.accentText, size = 20.dp)
+    }
+    Hairline()
 }
 
 /** The screens, matted like the library's plates so they read as one thing. */

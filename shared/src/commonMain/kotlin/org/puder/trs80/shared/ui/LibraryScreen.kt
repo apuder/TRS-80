@@ -39,6 +39,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.infiniteRepeatable
@@ -57,6 +60,12 @@ import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.catalog
 import trs_80.shared.generated.resources.custom
+import trs_80.shared.generated.resources.delete_entry
+import trs_80.shared.generated.resources.done
+import trs_80.shared.generated.resources.duplicate
+import trs_80.shared.generated.resources.duplicate_detail
+import trs_80.shared.generated.resources.edit_entry
+import trs_80.shared.generated.resources.edit_entry_detail
 import trs_80.shared.generated.resources.loading
 import trs_80.shared.generated.resources.search_entries
 import trs_80.shared.generated.resources.show_all
@@ -65,12 +74,18 @@ import trs_80.shared.generated.resources.sort_alphabetical
 import trs_80.shared.generated.resources.sort_last_used
 import trs_80.shared.generated.resources.store_unreachable
 import trs_80.shared.generated.resources.yours
+import org.puder.trs80.shared.ui.theme.DestructiveButton
+import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
+import org.puder.trs80.shared.ui.theme.ModalPanel
 import org.puder.trs80.shared.ui.theme.ProgressRing
 import org.puder.trs80.shared.ui.theme.SearchField
+import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
+import org.puder.trs80.shared.ui.theme.SettingRow
 import org.puder.trs80.shared.ui.theme.StrokeIcon
 import org.puder.trs80.shared.ui.theme.Text
+import org.puder.trs80.shared.ui.theme.TextAction
 import org.puder.trs80.shared.ui.theme.Trs80Icon
 import org.puder.trs80.shared.ui.theme.Trs80Theme
 import org.puder.trs80.shared.ui.theme.scanlines
@@ -90,6 +105,9 @@ private const val SPIN_MILLIS = 900
 
 private const val COLLAPSED_PLATES = 3
 
+/** One of the user's own machines made from a catalog entry. */
+data class CatalogVersion(val id: Int, val name: String, val model: String)
+
 /** One entry in the catalog, and what the app can do with it. */
 data class CatalogEntry(
     val id: String,
@@ -98,25 +116,40 @@ data class CatalogEntry(
     val year: Int,
     val artUrl: String?,
     /**
-     * The configuration this entry installed as, or null if it is not on the
-     * device — which is also what decides whether it plays or downloads.
+     * The unedited machine made from this entry, or null if there is none.
+     *
+     * What Play starts, and what Play creates when it is missing — which is what
+     * makes "play this program" always mean the program as the catalog has it,
+     * however much the user has since tinkered.
      */
-    val installedId: Int? = null,
+    val cleanId: Int? = null,
+    /** The user's own machines made from this entry, most recently used first. */
+    val versions: List<CatalogVersion> = emptyList(),
     /** Being downloaded now. */
     val installing: Boolean = false,
-) {
-    /** Whether the program is on the device. */
-    val installed: Boolean get() = installedId != null
-}
+    /** The last attempt to download it failed. */
+    val failed: Boolean = false,
+)
 
 /** What the library can be asked to do. */
 data class LibraryActions(
     val onRun: (Int) -> Unit = {},
     val onOpenEntry: (CatalogEntry) -> Unit = {},
-    val onInstall: (CatalogEntry) -> Unit = {},
+    /**
+     * Starts a catalog entry, downloading it first if this is the first time.
+     *
+     * One action rather than two, because downloading is not something the user
+     * wants -- it is what standing between them and playing, and it takes a
+     * moment.
+     */
+    val onPlayEntry: (CatalogEntry) -> Unit = {},
     val onAdd: (() -> Unit)? = null,
     /** Opens the editor for one of the user's machines, from its overflow. */
     val onEdit: ((Int) -> Unit)? = null,
+    /** Copies one of the user's machines, from its overflow. */
+    val onDuplicate: ((Int) -> Unit)? = null,
+    /** Deletes one of the user's machines, once the user has confirmed it. */
+    val onDelete: ((Int) -> Unit)? = null,
     /** Asks the store for the catalog again. */
     val onRefresh: (() -> Unit)? = null,
     val onOpenSettings: (() -> Unit)? = null,
@@ -152,11 +185,20 @@ fun LibraryScreen(
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     val shown = if (expanded) yours else yours.take(COLLAPSED_PLATES)
+    // Which machine's overflow is open. Held here rather than in the plate so
+    // the panel is laid out against the whole screen: a modal opened from inside
+    // a list item is scrimmed to that item and nothing else.
+    var menuFor by remember { mutableStateOf<ConfigurationCard?>(null) }
+    // Whether the menu has given way to the question. Cancelling puts the menu
+    // back, since that is where the user was.
+    var confirmingDelete by remember { mutableStateOf(false) }
+    val hasMenu = actions.onEdit != null || actions.onDuplicate != null ||
+        actions.onDelete != null
 
+    Box(modifier.fillMaxSize().background(colors.ground)) {
     Column(
-        modifier
+        Modifier
             .fillMaxSize()
-            .background(colors.ground)
             // The ground runs edge to edge; the content does not. Without this
             // the wordmark sits under the status bar.
             .windowInsetsPadding(WindowInsets.safeDrawing),
@@ -187,7 +229,11 @@ fun LibraryScreen(
                 Plate(
                     card,
                     onClick = { actions.onRun(card.id) },
-                    onEdit = actions.onEdit?.let { edit -> { edit(card.id) } },
+                    onMenu = if (hasMenu) {
+                        { menuFor = card; confirmingDelete = false }
+                    } else {
+                        null
+                    },
                 )
             }
             if (yours.size > COLLAPSED_PLATES) {
@@ -209,6 +255,80 @@ fun LibraryScreen(
                     CatalogRow(entry, actions)
                 }
             }
+        }
+    }
+
+        menuFor?.let { card ->
+            // One panel at a time: the question replaces the menu rather than
+            // stacking on it, so there is never a scrim over a scrim.
+            if (confirmingDelete) {
+                ConfirmDelete(
+                    name = card.name,
+                    onCancel = { confirmingDelete = false },
+                    onConfirm = {
+                        confirmingDelete = false
+                        menuFor = null
+                        actions.onDelete?.invoke(card.id)
+                    },
+                )
+            } else {
+                PlateMenu(
+                    card = card,
+                    actions = actions,
+                    onDelete = { confirmingDelete = true },
+                    onDismiss = { menuFor = null },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * What can be done to one of the user's machines.
+ *
+ * Copying lives here rather than on the catalog entry, because a copy is made
+ * of a machine and not of a program: the thing worth copying is the one that has
+ * been set up the way the user wants it.
+ */
+@Composable
+private fun PlateMenu(
+    card: ConfigurationCard,
+    actions: LibraryActions,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalPanel(onDismiss = onDismiss) {
+        SectionKicker(card.name)
+        actions.onEdit?.let { edit ->
+            SettingRow(
+                label = stringResource(Res.string.edit_entry),
+                subtitle = stringResource(Res.string.edit_entry_detail),
+                onClick = { onDismiss(); edit(card.id) },
+            )
+            Hairline()
+        }
+        actions.onDuplicate?.let { duplicate ->
+            SettingRow(
+                label = stringResource(Res.string.duplicate),
+                subtitle = stringResource(Res.string.duplicate_detail),
+                onClick = { onDismiss(); duplicate(card.id) },
+            )
+            Hairline()
+        }
+        if (actions.onDelete != null) {
+            // Red, and the one control here that is not a row: deleting takes
+            // the machine's disks and its saved state with it, so it should not
+            // look like the things either side of it.
+            Spacer(Modifier.height(14.dp))
+            DestructiveButton(
+                stringResource(Res.string.delete_entry),
+                onClick = onDelete,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            TextAction(stringResource(Res.string.done), onClick = onDismiss, padding = 0.dp)
         }
     }
 }
@@ -319,7 +439,7 @@ private fun SectionHeader(
  * screens rather than a list of names.
  */
 @Composable
-private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onEdit: (() -> Unit)?) {
+private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> Unit)?) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
     Box(
@@ -407,12 +527,12 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onEdit: (() -> U
                         modifier = Modifier.padding(bottom = 2.dp),
                     )
                 }
-                if (onEdit != null) {
+                if (onMenu != null) {
                     StrokeIcon(
                         Trs80Icon.Overflow,
                         color = Color.White.copy(alpha = 0.72f),
                         size = 17.dp,
-                        onClick = onEdit,
+                        onClick = onMenu,
                     )
                 }
             }
@@ -478,21 +598,22 @@ private fun CatalogRow(entry: CatalogEntry, actions: LibraryActions) {
             )
         }
         Spacer(Modifier.width(10.dp))
-        // One reserved slot for all three states, so the glyph lands in the same
-        // place whatever it is. Only the download is tappable, and a tappable
-        // icon carries a touch target the others do not — left to size
-        // themselves they would each sit at a different distance from the edge.
+        // One reserved slot for either state, so the glyph lands in the same
+        // place whatever it is. A tappable icon carries a touch target the ring
+        // does not; left to size themselves they would sit at different
+        // distances from the edge.
         Box(Modifier.size(MinimumTouchTarget), contentAlignment = Alignment.Center) {
-            when {
-                entry.installing -> ProgressRing(progress = null, size = ROW_CONTROL)
-                entry.installed ->
-                    StrokeIcon(Trs80Icon.Play, color = colors.accentText, size = ROW_CONTROL)
-
-                else -> StrokeIcon(
-                    Trs80Icon.Download,
+            if (entry.installing) {
+                ProgressRing(progress = null, size = ROW_CONTROL)
+            } else {
+                // Play whether or not it is on the device. Downloading is a
+                // step on the way, not a thing to ask for: it takes a moment and
+                // nobody wants the file, they want the program.
+                StrokeIcon(
+                    Trs80Icon.Play,
                     color = colors.accentText,
                     size = ROW_CONTROL,
-                    onClick = { actions.onInstall(entry) },
+                    onClick = { actions.onPlayEntry(entry) },
                 )
             }
         }

@@ -99,6 +99,19 @@ interface Configuration {
      */
     var isCustom: Boolean
 
+    /**
+     * The store's ID for the program this was made from, or null if the user
+     * built it themselves.
+     *
+     * This and [isCustom] together are what tie a machine to a catalog entry:
+     * the one machine that has the ID and has not been touched is the entry's
+     * clean copy, and everything else carrying the ID is a version of the user's
+     * own.
+     */
+    val storeId: String?
+
+    fun setStoreId(storeId: String?)
+
     /** Removes all persisted data of this configuration. */
     fun delete()
 

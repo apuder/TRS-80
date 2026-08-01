@@ -33,6 +33,7 @@ private const val CONF_MUTE_SOUND = StorageKeys.CONFIG_MUTE_SOUND
 private const val KEY_CASSETTE_POSITION = StorageKeys.CONFIG_CASSETTE_POSITION
 private const val CONF_LAST_USED = StorageKeys.CONFIG_LAST_USED
 private const val CONF_IS_CUSTOM = StorageKeys.CONFIG_IS_CUSTOM
+private const val CONF_STORE_ID = StorageKeys.CONFIG_STORE_ID
 
 /**
  * Persisted data about a configuration.
@@ -130,6 +131,12 @@ class ConfigurationPersistence private constructor(
     internal var isCustom: Boolean
         get() = settings.getBooleanOrNull(key(CONF_IS_CUSTOM)) ?: false
         set(value) = settings.putBoolean(key(CONF_IS_CUSTOM), value)
+
+    /** The store's ID for the program this came from, or null if it came from nowhere. */
+    val storeId: String?
+        get() = settings.getStringOrNull(key(CONF_STORE_ID))
+
+    internal fun setStoreId(storeId: String?) = setStringOrRemove(CONF_STORE_ID, storeId)
 
     /**
      * Removes all stored data of this configuration.
