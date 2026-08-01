@@ -52,7 +52,6 @@ import org.puder.trs80.shared.ScreenColor
 import org.puder.trs80.shared.configuration.ConfigurationDraft
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
-import trs_80.shared.generated.resources.add
 import trs_80.shared.generated.resources.amber
 import trs_80.shared.generated.resources.boots_from_disk
 import trs_80.shared.generated.resources.cancel
@@ -221,17 +220,11 @@ fun EditConfigurationScreen(
             // not something the screen ever admits to.
             SectionKicker(
                 stringResource(Res.string.disks),
-                count = stringResource(Res.string.disks_of, draft.disks.size, draft.diskPaths.size),
-                trailing = actions.onChooseDisk?.takeIf { draft.disks.size < draft.diskPaths.size }
-                    ?.let {
-                        {
-                            TextAction(
-                                stringResource(Res.string.add),
-                                onClick = { it(draft.disks.size) },
-                                style = Trs80Theme.type.kickerSmall,
-                            )
-                        }
-                    },
+                count = stringResource(
+                    Res.string.disks_of,
+                    draft.diskCount,
+                    draft.diskPaths.size,
+                ),
             )
             Disks(draft, onChange, actions.onChooseDisk)
 
@@ -361,7 +354,14 @@ private fun ForkBanner(name: String, onRevert: () -> Unit) {
     }
 }
 
-/** The drives, in order, with one empty drive shown when there is room. */
+/**
+ * Every drive, whether or not it holds anything.
+ *
+ * All four are always shown, because all four are always there. The emulator
+ * takes one path per drive and a machine can perfectly well have a disk in
+ * drive 2 with drive 1 empty, so this cannot present them as a list that fills
+ * from the top.
+ */
 @Composable
 private fun Disks(
     draft: ConfigurationDraft,
@@ -369,12 +369,11 @@ private fun Disks(
     onChooseDisk: ((Int) -> Unit)?,
 ) {
     val colors = Trs80Theme.colors
-    val disks = draft.disks
     val rowHeightPx = with(LocalDensity.current) { DISK_ROW_HEIGHT.toPx() }
     var dragging by remember { mutableStateOf(-1) }
     var dragOffset by remember { mutableStateOf(0f) }
 
-    disks.forEachIndexed { drive, path ->
+    draft.diskPaths.forEachIndexed { drive, path ->
         if (drive > 0) {
             Hairline()
         }
@@ -390,89 +389,67 @@ private fun Disks(
                         Modifier
                     }
                 )
-                .padding(vertical = 9.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            StrokeIcon(
-                Trs80Icon.DragHandle,
-                color = colors.muted,
-                size = 16.dp,
-                modifier = Modifier.pointerInput(drive, disks.size) {
-                    detectDragGestures(
-                        onDragStart = { dragging = drive; dragOffset = 0f },
-                        onDragCancel = { dragging = -1; dragOffset = 0f },
-                        onDragEnd = {
-                            val moved = (dragOffset / rowHeightPx).toInt()
-                            dragging = -1
-                            dragOffset = 0f
-                            if (moved != 0) {
-                                onChange(
-                                    draft.withDiskMoved(
-                                        from = drive,
-                                        to = (drive + moved).coerceIn(0, disks.lastIndex),
-                                    )
-                                )
-                            }
-                        },
-                    ) { _, delta -> dragOffset += delta.y }
-                },
-            )
-            Spacer(Modifier.width(6.dp))
-            // The drive number is one of the two places the accent fills.
-            Text(
-                drive.toString(),
-                style = Trs80Theme.type.kickerSmall,
-                color = colors.accentText,
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                fileName(path),
-                style = Trs80Theme.type.body,
-                color = colors.text,
-                modifier = Modifier.weight(1f),
-            )
-            StrokeIcon(
-                Trs80Icon.Eject,
-                color = colors.muted,
-                size = 17.dp,
-                onClick = { onChange(draft.withDiskEjected(drive)) },
-            )
-        }
-    }
-    if (disks.size < draft.diskPaths.size) {
-        if (disks.isNotEmpty()) {
-            Hairline()
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .then(
-                    if (onChooseDisk != null) {
-                        Modifier.clickable { onChooseDisk(disks.size) }
-                    } else {
-                        Modifier
-                    }
-                )
                 .heightIn(min = MinimumTouchTarget)
                 .padding(vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(Modifier.width(22.dp))
+            if (path != null) {
+                StrokeIcon(
+                    Trs80Icon.DragHandle,
+                    color = colors.muted,
+                    size = 16.dp,
+                    modifier = Modifier.pointerInput(drive) {
+                        detectDragGestures(
+                            onDragStart = { dragging = drive; dragOffset = 0f },
+                            onDragCancel = { dragging = -1; dragOffset = 0f },
+                            onDragEnd = {
+                                val moved = (dragOffset / rowHeightPx).toInt()
+                                dragging = -1
+                                dragOffset = 0f
+                                if (moved != 0) {
+                                    onChange(
+                                        draft.withDiskMoved(
+                                            from = drive,
+                                            to = (drive + moved)
+                                                .coerceIn(0, draft.diskPaths.lastIndex),
+                                        )
+                                    )
+                                }
+                            },
+                        ) { _, delta -> dragOffset += delta.y }
+                    },
+                )
+            } else {
+                Spacer(Modifier.width(16.dp))
+            }
+            Spacer(Modifier.width(6.dp))
+            // The drive number is one of the two places the accent fills, and
+            // it is the drive's real number rather than its position in a list.
             Text(
-                disks.size.toString(),
+                drive.toString(),
                 style = Trs80Theme.type.kickerSmall,
-                color = colors.muted,
+                color = if (path != null) colors.accentText else colors.muted,
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                if (onChooseDisk != null) {
-                    stringResource(Res.string.empty_drive_choose)
-                } else {
-                    stringResource(Res.string.empty_drive)
-                },
+                path?.let(::fileName)
+                    ?: if (onChooseDisk != null) {
+                        stringResource(Res.string.empty_drive_choose)
+                    } else {
+                        stringResource(Res.string.empty_drive)
+                    },
                 style = Trs80Theme.type.body,
-                color = colors.muted,
+                color = if (path != null) colors.text else colors.muted,
+                modifier = Modifier.weight(1f),
             )
+            if (path != null) {
+                StrokeIcon(
+                    Trs80Icon.Eject,
+                    color = colors.muted,
+                    size = 17.dp,
+                    onClick = { onChange(draft.withDiskEjected(drive)) },
+                )
+            }
         }
     }
 }

@@ -66,25 +66,45 @@ class ConfigurationDraftTest {
     )
 
     @Test
-    fun addingPutsTheDiskInTheFirstFreeDrive() {
-        val d = draft().withDiskAdded("a.dsk").withDiskAdded("b.dsk")
+    fun choosingPutsTheDiskInThatDrive() {
+        val d = draft().withDiskIn(2, "c.dsk")
 
-        assertContentEquals(listOf("a.dsk", "b.dsk", null, null), d.diskPaths)
+        assertContentEquals(listOf(null, null, "c.dsk", null), d.diskPaths)
     }
 
     @Test
-    fun addingIsIgnoredWhenEveryDriveIsFull() {
-        val full = draft(listOf("a", "b", "c", "d"))
+    fun choosingReplacesWhatIsInThatDrive() {
+        val d = draft(listOf("a", "b", null, null)).withDiskIn(0, "c")
 
-        assertEquals(full, full.withDiskAdded("e"))
+        assertContentEquals(listOf("c", "b", null, null), d.diskPaths)
     }
 
-    /** A hole in the middle has no way to show itself in an ordered stack. */
     @Test
-    fun ejectingClosesTheGapBehindIt() {
+    fun choosingOutsideTheDrivesChangesNothing() {
+        val d = draft(listOf("a", null, null, null))
+
+        assertEquals(d, d.withDiskIn(4, "b"))
+        assertEquals(d, d.withDiskIn(-1, "b"))
+    }
+
+    /**
+     * Drives are fixed positions, not a list that closes up. The emulator takes
+     * one path per drive, so shuffling the others down would change which disk
+     * the machine boots from.
+     */
+    @Test
+    fun ejectingLeavesEveryOtherDriveWhereItIs() {
         val d = draft(listOf("a", "b", "c", null)).withDiskEjected(0)
 
-        assertContentEquals(listOf("b", "c", null, null), d.diskPaths)
+        assertContentEquals(listOf(null, "b", "c", null), d.diskPaths)
+    }
+
+    @Test
+    fun aGapInTheMiddleIsAnHonestConfiguration() {
+        val d = draft(listOf("a", "b", null, null)).withDiskEjected(1)
+
+        assertContentEquals(listOf("a", null, null, null), d.diskPaths)
+        assertEquals(1, d.diskCount)
     }
 
     @Test
@@ -92,43 +112,29 @@ class ConfigurationDraftTest {
         val d = draft(listOf("a", null, null, null))
 
         assertEquals(d, d.withDiskEjected(2))
+        assertEquals(d, d.withDiskEjected(9))
     }
 
+    /** Dragging onto drive 0 is asking for that disk to be the boot disk. */
     @Test
-    fun choosingReplacesWhatIsInThatDrive() {
-        val d = draft(listOf("a", "b", null, null)).withDiskIn(drive = 0, path = "c")
-
-        assertContentEquals(listOf("c", "b", null, null), d.diskPaths)
-    }
-
-    /** The drive past the last one is the empty row the editor shows. */
-    @Test
-    fun choosingInTheEmptyDriveFillsIt() {
-        val d = draft(listOf("a", null, null, null)).withDiskIn(drive = 1, path = "b")
-
-        assertContentEquals(listOf("a", "b", null, null), d.diskPaths)
-    }
-
-    @Test
-    fun choosingBeyondTheEmptyDriveChangesNothing() {
-        val d = draft(listOf("a", null, null, null))
-
-        assertEquals(d, d.withDiskIn(drive = 2, path = "b"))
-        assertEquals(d, d.withDiskIn(drive = 4, path = "b"))
-    }
-
-    @Test
-    fun movingShiftsTheOthersAlong() {
+    fun movingSwapsTheTwoDrives() {
         val d = draft(listOf("a", "b", "c", null)).withDiskMoved(from = 2, to = 0)
 
-        assertContentEquals(listOf("c", "a", "b", null), d.diskPaths)
+        assertContentEquals(listOf("c", "b", "a", null), d.diskPaths)
     }
 
     @Test
-    fun movingOutsideTheOccupiedDrivesChangesNothing() {
+    fun movingOntoAnEmptyDriveTakesTheDiskThere() {
+        val d = draft(listOf("a", null, null, null)).withDiskMoved(from = 0, to = 3)
+
+        assertContentEquals(listOf(null, null, null, "a"), d.diskPaths)
+    }
+
+    @Test
+    fun movingOutsideTheDrivesChangesNothing() {
         val d = draft(listOf("a", "b", null, null))
 
-        assertEquals(d, d.withDiskMoved(from = 0, to = 3))
+        assertEquals(d, d.withDiskMoved(from = 0, to = 4))
         assertEquals(d, d.withDiskMoved(from = 0, to = 0))
     }
 

@@ -470,7 +470,9 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             EmulatorCore.boot(
                 model = configuration.model,
                 romPath = rom,
-                diskPaths = configuration.diskPaths.filterNotNull(),
+                // Not filtered: the core takes one path per drive, and dropping
+                // the empty ones would shift every later disk down a drive.
+                diskPaths = configuration.diskPaths,
             )
             // Pick the session up where it was left, if there is one.
             if (state?.hasState() == true) {

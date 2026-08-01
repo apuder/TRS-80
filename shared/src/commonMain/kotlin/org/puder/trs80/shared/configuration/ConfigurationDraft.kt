@@ -48,60 +48,52 @@ data class ConfigurationDraft(
      */
     val wasCustom: Boolean,
 ) {
-    /** The drives holding a disk, in order. */
-    val disks: List<String> get() = diskPaths.filterNotNull()
+    /** How many drives have a disk in them. */
+    val diskCount: Int get() = diskPaths.count { it != null }
 
     /**
-     * Ejects the disk in [drive], closing the gap behind it.
+     * Empties [drive], leaving every other drive where it is.
      *
-     * Drives are compacted rather than left with a hole: the list is presented
-     * as an ordered stack with one empty drive at the end, and a gap in the
-     * middle would have no way to show itself in that shape.
+     * Drives are not a list that closes up: the emulator takes one path per
+     * drive and honors the gaps, so a machine with a disk in drive 2 and
+     * nothing in drive 1 is a real machine, and moving that disk down to drive
+     * 1 because drive 1 happens to be free would change what it boots.
      */
     fun withDiskEjected(drive: Int): ConfigurationDraft {
-        if (drive !in diskPaths.indices || diskPaths[drive] == null) {
+        if (drive !in diskPaths.indices) {
             return this
         }
-        val remaining = disks.toMutableList().also { it.removeAt(drive) }
-        return copy(diskPaths = remaining.padToDrives())
+        return copy(diskPaths = diskPaths.mapIndexed { i, p -> if (i == drive) null else p })
     }
 
-    /** Puts [path] in the first free drive, or returns this if they are all full. */
-    fun withDiskAdded(path: String): ConfigurationDraft {
-        val remaining = disks
-        if (remaining.size >= StorageKeys.DRIVE_COUNT) {
+    /** Puts [path] in [drive], replacing whatever was in that drive. */
+    fun withDiskIn(drive: Int, path: String): ConfigurationDraft {
+        if (drive !in diskPaths.indices) {
             return this
         }
-        return copy(diskPaths = (remaining + path).padToDrives())
+        return copy(diskPaths = diskPaths.mapIndexed { i, p -> if (i == drive) path else p })
     }
 
     /**
-     * Puts [path] in [drive], replacing whatever was there.
+     * Swaps what is in [from] with what is in [to].
      *
-     * The drive one past the last occupied one is the empty drive the editor
-     * shows, so choosing a file there fills it rather than replacing anything.
+     * A swap rather than an insertion, because the drives are fixed positions:
+     * dragging a disk onto drive 0 is asking for that disk to be the one the
+     * machine boots from, not asking for a reordering.
      */
-    fun withDiskIn(drive: Int, path: String): ConfigurationDraft {
-        val remaining = disks.toMutableList()
-        if (drive < 0 || drive >= StorageKeys.DRIVE_COUNT || drive > remaining.size) {
-            return this
-        }
-        if (drive == remaining.size) {
-            remaining.add(path)
-        } else {
-            remaining[drive] = path
-        }
-        return copy(diskPaths = remaining.padToDrives())
-    }
-
-    /** Moves the disk in drive [from] to drive [to], shifting the rest along. */
     fun withDiskMoved(from: Int, to: Int): ConfigurationDraft {
-        val remaining = disks.toMutableList()
-        if (from !in remaining.indices || to !in remaining.indices || from == to) {
+        if (from !in diskPaths.indices || to !in diskPaths.indices || from == to) {
             return this
         }
-        remaining.add(to, remaining.removeAt(from))
-        return copy(diskPaths = remaining.padToDrives())
+        return copy(
+            diskPaths = diskPaths.mapIndexed { i, p ->
+                when (i) {
+                    from -> diskPaths[to]
+                    to -> diskPaths[from]
+                    else -> p
+                }
+            }
+        )
     }
 
     /**
@@ -112,9 +104,6 @@ data class ConfigurationDraft(
      */
     fun isForkedFrom(original: ConfigurationDraft): Boolean =
         !wasCustom && this != original
-
-    private fun List<String>.padToDrives(): List<String?> =
-        List(StorageKeys.DRIVE_COUNT) { getOrNull(it) }
 }
 
 /** Reads a configuration into an editable draft. */
