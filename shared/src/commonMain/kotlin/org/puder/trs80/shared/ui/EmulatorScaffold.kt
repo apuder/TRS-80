@@ -89,13 +89,14 @@ fun EmulatorScaffold(
             }
             Hairline()
 
-            // The picture takes what the keyboard leaves, on the machine's own
-            // dark surround rather than the app's ground: what sits around a
-            // screen belongs to the screen. The emulated display scales to
-            // whatever it is given, so this needs no arithmetic -- the core is
-            // told the size and rasterizes to it.
+            // What surrounds the picture is the app's ground, the same as the
+            // library's. The machine's own glass sits close enough to the colour
+            // the emulated screen draws itself that the two ran together and the
+            // picture had no edge. The display scales to whatever it is given,
+            // so this needs no arithmetic -- the core is told the size and
+            // rasterizes to it.
             Box(
-                Modifier.weight(1f).fillMaxWidth().background(colors.crt),
+                Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
                 screen()

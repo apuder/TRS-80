@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -142,14 +144,12 @@ fun EmulatorScreen(
     }
 }
 
-/** Fills the background and draws the screen centered, one image pixel per screen pixel. */
+/** Draws the screen centered, one image pixel per screen pixel, on its glass. */
 private fun DrawScope.drawEmulatedScreen(
     source: EmulatorScreenSource,
     characterColor: Color,
     screenColor: Color,
 ) {
-    drawRect(color = screenColor)
-
     val image = source.image() ?: return
     if (image.width == 0 || image.height == 0) {
         return
@@ -168,15 +168,24 @@ private fun DrawScope.drawEmulatedScreen(
         drawnWidth = (image.width * scale).toInt()
         drawnHeight = (image.height * scale).toInt()
     }
+    val left = ((size.width - drawnWidth) / 2).toInt()
+    val top = ((size.height - drawnHeight) / 2).toInt()
+
+    // The glass goes behind the picture and nowhere else. Filling the whole
+    // canvas with it, as this used to, left the machine and the room around it
+    // in one flat colour with no edge between them -- and the surround is the
+    // app's, not the machine's.
+    drawRect(
+        color = screenColor,
+        topLeft = Offset(left.toFloat(), top.toFloat()),
+        size = Size(drawnWidth.toFloat(), drawnHeight.toFloat()),
+    )
 
     drawImage(
         image = image,
         srcOffset = IntOffset.Zero,
         srcSize = IntSize(image.width, image.height),
-        dstOffset = IntOffset(
-            ((size.width - drawnWidth) / 2).toInt(),
-            ((size.height - drawnHeight) / 2).toInt(),
-        ),
+        dstOffset = IntOffset(left, top),
         dstSize = IntSize(drawnWidth, drawnHeight),
         // The core rasterized at exactly this size, so there is nothing to
         // interpolate; smoothing here would only blur it back.
