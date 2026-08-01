@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
 
 /**
  * The strokes the app draws instead of an icon pack.
@@ -155,23 +156,35 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
         }
 
         Trs80Icon.Settings -> {
-            // A gear as a ring with teeth: filling it would break the spec's
-            // stroke-only rule, and an outline reads at this size.
-            drawCircle(color, w * 0.19f, Offset(w / 2, h / 2), style = stroke)
-            val teeth = 8
+            // One continuous cog outline: the teeth are part of the silhouette
+            // rather than spokes radiating from a hub, which is what separates a
+            // gear from a sun. Six teeth rather than eight, cut deep — at 19dp
+            // the gaps have to be wide enough to survive being drawn.
+            val cx = w / 2
+            val cy = h / 2
+            val outer = w * 0.47f
+            val root = w * 0.32f
+            val teeth = 6
+            val step = (2.0 * PI / teeth).toFloat()
+            // Fractions of a tooth's turn spent on the tip, the falling flank,
+            // the valley, and the rising flank.
+            val tip = 0.30f
+            val valleyStart = 0.45f
+            val valleyEnd = 0.85f
+            val path = androidx.compose.ui.graphics.Path()
             repeat(teeth) { i ->
-                val angle = (i * 2f * 3.14159f / teeth)
-                val inner = w * 0.29f
-                val outer = w * 0.42f
-                val cx = w / 2
-                val cy = h / 2
-                drawLine(
-                    color,
-                    Offset(cx + inner * kotlin.math.cos(angle), cy + inner * kotlin.math.sin(angle)),
-                    Offset(cx + outer * kotlin.math.cos(angle), cy + outer * kotlin.math.sin(angle)),
-                    stroke.width,
-                )
+                val base = i * step
+                listOf(0f to outer, tip to outer, valleyStart to root, valleyEnd to root)
+                    .forEach { (fraction, radius) ->
+                        val angle = base + fraction * step
+                        val x = cx + radius * kotlin.math.cos(angle)
+                        val y = cy + radius * kotlin.math.sin(angle)
+                        if (i == 0 && fraction == 0f) path.moveTo(x, y) else path.lineTo(x, y)
+                    }
             }
+            path.close()
+            drawPath(path, color, style = stroke)
+            drawCircle(color, w * 0.14f, Offset(cx, cy), style = stroke)
         }
 
         Trs80Icon.Stop -> {
