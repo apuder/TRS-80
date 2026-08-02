@@ -113,6 +113,25 @@ object XTRS {
     @JvmStatic
     external fun setRunning(run: Boolean)
 
+    /**
+     * Boots a machine from explicit values rather than a Configuration.
+     *
+     * [init] is the same call with the values read off a configuration; this is
+     * what the shared EmulatorCore contract asks for, and it cannot reach
+     * [initNative] itself -- that has to stay private, because Kotlin mangles
+     * the JVM name of an internal function and the JNI symbol is derived from
+     * it.
+     *
+     * @return 0 on success, a negative error code otherwise.
+     */
+    @JvmStatic
+    fun boot(
+        model: Int, romPath: String?, entryAddress: Int, cassettePath: String?,
+        disk0: String?, disk1: String?, disk2: String?, disk3: String?
+    ): Int = initNative(
+        model, romPath, entryAddress, cassettePath, disk0, disk1, disk2, disk3
+    )
+
     @JvmStatic
     private external fun initNative(
         model: Int, romFile: String?, entryAddr: Int, cassette: String?,
@@ -182,7 +201,7 @@ object XTRS {
     external fun rewindCassette()
 
     @JvmStatic
-    external fun addKeyEvent(event: Int, mod: Int, key: Int)
+    external fun addKeyEvent(event: Int, sym: Int, key: Int)
 
     @JvmStatic
     external fun paste(clipboard: String)
