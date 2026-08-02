@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.ui.theme.StrokeIcon
@@ -48,8 +47,12 @@ import org.puder.trs80.shared.ui.theme.Trs80Theme
  *
  * Swiped rather than scrolled: these are a handful of pictures of the same
  * machine, so what the reader wants is the next one whole, not a continuous
- * strip. Kept on black rather than the app's ground — at this size the picture
- * is the whole screen, and anything else framing it is a distraction.
+ * strip.
+ *
+ * Always the whole window, never part of one. That is why the two-pane library
+ * hands this to the window to draw rather than opening it inside the pane: a
+ * full-screen picture confined to half the screen, with the list still sitting
+ * beside it, is not a viewer.
  */
 @Composable
 fun ScreensViewer(
@@ -102,7 +105,10 @@ fun ScreensViewer(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Spacer(Modifier.weight(1f))
-                StrokeIcon(Trs80Icon.Close, color = Color.White, onClick = onDismiss)
+                // The theme's ink, not white. The ground here follows the
+                // theme, so chrome fixed at white is invisible in the light
+                // register — the same way the keyboard's labels were.
+                StrokeIcon(Trs80Icon.Close, color = Trs80Theme.colors.text, onClick = onDismiss)
             }
         }
 
@@ -110,7 +116,7 @@ fun ScreensViewer(
             Text(
                 "${pager.currentPage + 1} / ${urls.size}",
                 style = Trs80Theme.type.kickerSmall,
-                color = Color.White.copy(alpha = 0.7f),
+                color = Trs80Theme.colors.muted,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .windowInsetsPadding(WindowInsets.safeDrawing)

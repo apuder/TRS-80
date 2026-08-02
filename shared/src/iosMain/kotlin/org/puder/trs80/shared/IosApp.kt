@@ -354,6 +354,10 @@ private fun Library(
     // like when it was tapped, so holding one leaves the sheet offering to
     // download something that has since arrived.
     var selectedId by remember { mutableStateOf<String?>(null) }
+    // Which of the selected entry's screens is open, if any. Held here rather
+    // than in the pane, because the picture wants the window and the pane is
+    // half of it.
+    var viewingScreen by remember(selectedId) { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun reload() {
@@ -511,6 +515,7 @@ private fun Library(
                                 },
                                 onDismiss = { selectedId = null },
                                 asPane = true,
+                                onOpenScreen = { viewingScreen = it },
                             )
                         } else {
                             // The catalog was reloaded out from under the
@@ -537,6 +542,17 @@ private fun Library(
                 onDismiss = { selectedId = null },
             )
         }
+
+        // Over the list and the pane both. On a phone the sheet draws its own,
+        // because there a sheet already is the window.
+        val screens = selectedApp?.screenshot_url.orEmpty()
+        viewingScreen?.takeIf { screens.isNotEmpty() }?.let { start ->
+            ScreensViewer(
+                urls = screens,
+                startIndex = start,
+                onDismiss = { viewingScreen = null },
+            )
+        }
     }
 }
 
@@ -555,6 +571,8 @@ private fun Detail(
     onRun: (Int) -> Unit,
     onDismiss: () -> Unit,
     asPane: Boolean = false,
+    /** Opens the screens viewer, which only the window is big enough to draw. */
+    onOpenScreen: (Int) -> Unit = {},
 ) {
     // The clean machine describes the program; failing that, the version the
     // user reached for most recently. Either is a copy of the same media.
@@ -604,27 +622,22 @@ private fun Detail(
 
     // The same entry, standing in a pane. No scrim, no sheet to dismiss: the
     // list is beside it and stays live, which is the whole point of the layout.
-    var viewing by remember(entry.id) { mutableStateOf<Int?>(null) }
-    Box(Modifier.fillMaxSize()) {
-        EntryDetail(
-            content = detail,
-            action = action,
-            onPrimary = onPlay,
-            onOpenScreen = { viewing = it },
-            modifier = Modifier.fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
-            twoColumn = true,
-            versions = entry.versions,
-            onPlayVersion = onRun,
-        )
-        viewing?.let { start ->
-            ScreensViewer(
-                urls = detail.screenshotUrls,
-                startIndex = start,
-                onDismiss = { viewing = null },
-            )
-        }
-    }
+    //
+    // The viewer is not drawn here, unlike in the sheet. A sheet already covers
+    // the window, so one opened inside it covers the window too; a pane is half
+    // of one, and a full-screen picture confined to half the screen with the
+    // list still sitting beside it is not a viewer.
+    EntryDetail(
+        content = detail,
+        action = action,
+        onPrimary = onPlay,
+        onOpenScreen = onOpenScreen,
+        modifier = Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+        twoColumn = true,
+        versions = entry.versions,
+        onPlayVersion = onRun,
+    )
 }
 
 /** The size of a file on disk, or zero if it has gone. */

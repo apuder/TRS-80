@@ -35,8 +35,6 @@ The emulator and the library handle them; the rest do not.
   would gain. The editor is the one that would benefit: the spec puts it in the library's pane so
   a disk can be changed with the list in view, which means it stops being a navigation destination
   at wide widths. Left alone deliberately — see §5 for why that is not free.
-- **The screens viewer** would gain the most for the least: the pictures are wider than they are
-  tall, and it still letterboxes them into whatever it is given.
 - **The detail sheet** on a phone in landscape rises to a fixed inset from the top, leaving it
   nearly full height with a sliver of list showing. Wide windows do not use the sheet at all, so
   this is now only a phone-sideways problem.
@@ -84,7 +82,7 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **The screens viewer on a wide window** (§3) — the largest gain for the least work left.
+1. **The drawer's four links** (§1) — the last of Android's own screens, and the smallest.
 2. The rest, by appetite. Chromecast is the biggest single piece and the least certain to still
    work at all.
 
@@ -147,6 +145,10 @@ were done differently from Android and it is worth recording that they were a ch
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.
+- **The screens viewer on a wide window** — it was opening inside the pane, so a full-screen
+  picture covered half the screen with the list still beside it. The window draws it now. Its
+  close button and page counter were also fixed at white, which is invisible on the light ground;
+  they take the theme's ink like everything else.
 - **The machine always draws dark** — its own screen is dark glass with phosphor on it and can be
   nothing else, so the chrome around it stopped following the app's light register. That also fixed
   the on-screen keyboard, whose keys are white at a fifth strength with white labels: on the light
