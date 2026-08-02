@@ -26,12 +26,7 @@ actions per machine, and both now have somewhere obvious to go.
 
 Settings is ported. The rest of the drawer is not.
 
-## 2. Screens that do not exist yet
-
-- **Legacy import.** The code is in `shared` and tested, and nothing on iOS calls it. An upgrading
-  user's existing configurations are never picked up.
-
-## 3. The running machine
+## 2. The running machine
 
 Only two of `EmulatorActivity`'s options are left.
 
@@ -40,14 +35,14 @@ Only two of `EmulatorActivity`'s options are left.
 - **Tutorial.** `MENU_OPTION_TUTORIAL` is a hint framework rather than a machine control, and it
   wants the tutorial app below.
 
-## 4. Wider windows
+## 3. Wider windows
 
 The emulator and the library handle them; the rest do not.
 
 - **The editor** and **settings** are single columns of rows with nothing to fill the width they
   would gain. The editor is the one that would benefit: the spec puts it in the library's pane so
   a disk can be changed with the list in view, which means it stops being a navigation destination
-  at wide widths. Left alone deliberately — see §6 for why that is not free.
+  at wide widths. Left alone deliberately — see §5 for why that is not free.
 - **The screens viewer** would gain the most for the least: the pictures are wider than they are
   tall, and it still letterboxes them into whatever it is given.
 - **The detail sheet** on a phone in landscape rises to a fixed inset from the top, leaving it
@@ -56,7 +51,7 @@ The emulator and the library handle them; the rest do not.
 - **The library on a phone in landscape** is still the portrait column, deliberately: two panes
   need height as much as width, and a phone turned sideways has 440dp of it.
 
-## 5. Smaller gaps
+## 4. Smaller gaps
 
 - **Model 4 / 4P ROMs.** Settings lists only the two ROMs the app knows how to download, so there
   is no way to supply a Model 4 or 4P image — even though the editor offers those models as soon
@@ -65,7 +60,7 @@ The emulator and the library handle them; the rest do not.
   (`InitialSetupDialogFragment`, `TUTORIAL_APP_ID`). The port fetches ROMs only.
 - **Crash reporting.** `crash_dialog_*` strings and the reporting path have no equivalent.
 
-## 6. Known rough edges in what *is* ported
+## 5. Known rough edges in what *is* ported
 
 Not missing features — things that are there and imperfect.
 
@@ -98,8 +93,9 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **Legacy import** (§2) — it matters most to anyone upgrading from the Android app.
-2. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
+1. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
+2. **The keyboard in the light theme** (§5) — it is unusable rather than untidy, and a tablet
+   defaults to light.
 3. The rest, by appetite.
 
 ---
@@ -127,9 +123,21 @@ were done differently from Android and it is worth recording that they were a ch
   measured rather than proportioned, because a phone in landscape is the widest-aspect thing here
   and the least suited to two panes, while a foldable's inner screen is nearly square and the best.
   Not an Android feature — Android had one column at every size.
+- **Bringing an Android install's settings across** — listed here for a while as missing, wrongly.
+  `LegacyImport` has been live on Android since the storage was unified: `TRS80Application` runs it
+  before anything reads a configuration, and `MainActivity` tells the user if it failed. It covers
+  every per-configuration key the old preference screens wrote, the configuration list, the next-id
+  counter and the ROM paths; the three keys it does not carry (`conf_is_custom`, `conf_last_used`,
+  `conf_store_id`) do not appear in the Android sources at all, having been added during the port.
+  Disk paths survive because `resolveStoredPath` leaves an absolute legacy path alone, and on
+  Android the files directory does not move.
+
+  There was never anything for iOS to import: the legacy layout is Android SharedPreferences files,
+  and there was no previous iOS app. Moving a library *between* the two platforms is a real gap and
+  a different feature — an export both ends understand — and nobody has asked for it yet.
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
-  behind it are fixed; see §6 for what the fix chose.
+  behind it are fixed; see §5 for what the fix chose.
 - **Where a machine came from** — configurations record the catalog program they were installed
   from, so an entry knows which machines are its own. Not an Android feature: Android had the same
   name-matching guess and the same ways of getting it wrong.
