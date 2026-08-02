@@ -15,23 +15,17 @@ one place, so that this stays a list of work rather than a list of achievements.
 
 ## 1. The library
 
-Plates offer Run and an overflow menu with Edit, Duplicate and Delete. Android offers two more
-actions per machine, and both now have somewhere obvious to go.
-
-| Feature | Android | Notes |
-|---|---|---|
-| Rate / Help / Community / Share the app | drawer | `activity_main_drawer.xml` |
-
-Settings is ported. The rest of the drawer is not.
+Every per-machine action Android had is now in the plate's overflow. What is left is the drawer:
+**Rate**, **Help**, **Community** and **Share the app** (`activity_main_drawer.xml`). Settings was
+the only part of it worth porting on its own, and it is done; these four are links out of the app
+and want somewhere to live that is not a navigation drawer, since this UI has none.
 
 ## 2. The running machine
 
-Only two of `EmulatorActivity`'s options are left.
+One of `EmulatorActivity`'s options is left.
 
 - **Chromecast.** `CastMessageSender` and sixteen references to it. Deferred deliberately; whether
   it still works at all is unchecked.
-- **Tutorial.** `MENU_OPTION_TUTORIAL` is a hint framework rather than a machine control, and it
-  wants the tutorial app below.
 
 ## 3. Wider windows
 
@@ -51,11 +45,6 @@ The emulator and the library handle them; the rest do not.
 
 ## 4. Smaller gaps
 
-- **Model 4 / 4P ROMs.** Settings lists only the two ROMs the app knows how to download, so there
-  is no way to supply a Model 4 or 4P image — even though the editor offers those models as soon
-  as one exists. Android has all four in `settings_with_m4.xml`.
-- **Tutorial app.** Android downloads and installs it on first run
-  (`InitialSetupDialogFragment`, `TUTORIAL_APP_ID`). The port fetches ROMs only.
 - **Crash reporting.** `crash_dialog_*` strings and the reporting path have no equivalent.
 
 ## 5. Known rough edges in what *is* ported
@@ -99,9 +88,26 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **The keyboard in the light theme** (§5) — it is unusable rather than untidy, and a tablet
-   defaults to light.
-2. The rest, by appetite.
+1. **The keyboard in the light theme** (§5) — the only thing here that is unusable rather than
+   imperfect, and every tablet defaults to light.
+2. **The screens viewer on a wide window** (§3) — the largest gain for the least work left.
+3. The rest, by appetite. Chromecast is the biggest single piece and the least certain to still
+   work at all.
+
+---
+
+## Not gaps, though they look like ones
+
+Recorded because both were listed here for a while and one of them cost real time. Someone reading
+the Android sources will meet them again.
+
+- **Model 4 / 4P ROM settings.** `res/xml/settings_with_m4.xml` lists all four models and is never
+  loaded — `SettingsFragment` reads `R.xml.settings`, which has Model I and Model III only. Android
+  never shipped this, so it is not something the port is behind on. Nor does it leave a promise
+  unkept here: the editor offers a model only when `hasRom` finds an image for it, and without a
+  way to supply one it never does.
+- **The tutorial**, both halves — the app Android installs on first run and the hint framework in
+  the emulator that needs it. Not wanted for now, by decision rather than oversight.
 
 ---
 
@@ -142,8 +148,8 @@ were done differently from Android and it is worth recording that they were a ch
   a different feature — an export both ends understand — and nobody has asked for it yet.
 - **Stop and Share** — both in the plate's overflow. Stop discards the paused session and rewinds
   the tape, as Android's does, and asks first. Share is behind an experimental flag, found by
-  tapping the wordmark ten times and then switched on in settings: two gates, so finding the door
-  is not the same as walking through it.
+  tapping the version at the foot of settings ten times and then switched on there: two gates, so
+  finding the door is not the same as walking through it.
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.
