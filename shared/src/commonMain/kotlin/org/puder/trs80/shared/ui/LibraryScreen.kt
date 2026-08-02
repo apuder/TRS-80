@@ -622,7 +622,12 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> U
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
+                    // The middle of the screen, not the top of it. A plate is a
+                    // quarter as tall as the picture it shows, and a TRS-80
+                    // program puts its title in the middle and its status line
+                    // at the bottom -- the top band is the one most likely to be
+                    // empty.
+                    alignment = Alignment.Center,
                     filterQuality = androidx.compose.ui.graphics.FilterQuality.None,
                 )
             } else {
