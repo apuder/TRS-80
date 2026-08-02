@@ -8,9 +8,8 @@ Taken from the Android sources rather than from memory: `EmulatorActivity`'s men
 `MainActivity`'s options and drawer, `ConfigurationItemListener`, the `res/menu` and `res/xml`
 resources, and what `shared/` actually contains as of this writing.
 
-Anything that has since been ported is dropped from this file rather than ticked off — the point
-is what is left. The running machine's controls (reset, rewind, paste, sound, help), all five
-keyboard layouts, and making a blank disk image were here and are now done.
+What is left is above the line; what has been done since the first audit is listed at the end, in
+one place, so that this stays a list of work rather than a list of achievements.
 
 ---
 
@@ -102,3 +101,27 @@ Not missing features — things that are there and imperfect.
 2. **Legacy import** (§2) — it matters most to anyone upgrading from the Android app.
 3. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
 4. The rest, by appetite.
+
+---
+
+## Done since this audit was written
+
+Kept because the list above is otherwise hard to read progress from, and because a few of these
+were done differently from Android and it is worth recording that they were a choice.
+
+- **The running machine's controls** — reset, rewind cassette, paste, sound, help. Behind the
+  overflow in the emulator's bar. Android's Pause is `finish()`, so the scaffold's Back already is
+  it and there is no second control saying so.
+- **All five keyboard layouts** — Original and Compact as key grids, Joystick as an on-screen stick
+  and fire button, Tilt as fire with the accelerometer steering, Game controller as a physical
+  gamepad with nothing on screen. Tilt and the gamepad are tested as logic only; there is no
+  accelerometer or controller in the simulator.
+- **Making a blank disk image** — as a panel over the editor rather than Android's own screen, and
+  reached from the drive it will fill rather than from a file browser. `Destination.CreateDisk`
+  went with it.
+- **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
+  not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
+  behind it are fixed; see §6 for what the fix chose.
+- **Where a machine came from** — configurations record the catalog program they were installed
+  from, so an entry knows which machines are its own. Not an Android feature: Android had the same
+  name-matching guess and the same ways of getting it wrong.
