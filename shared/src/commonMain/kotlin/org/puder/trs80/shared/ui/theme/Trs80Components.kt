@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -368,9 +369,24 @@ fun SearchField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    /**
+     * Whether to take the keyboard as soon as this appears.
+     *
+     * For a field that is not there until it is asked for: the tap that reveals
+     * it was a request to type, and a revealed field that then has to be tapped
+     * again is two taps for one intention.
+     */
+    focusOnAppear: Boolean = false,
 ) {
     val colors = Trs80Theme.colors
     val focus = remember { FocusRequester() }
+    if (focusOnAppear) {
+        LaunchedEffect(Unit) {
+            // Not fatal if the node is not attached yet -- the field is on
+            // screen either way, and the user can tap it.
+            runCatching { focus.requestFocus() }
+        }
+    }
     Row(
         modifier
             .background(colors.field)

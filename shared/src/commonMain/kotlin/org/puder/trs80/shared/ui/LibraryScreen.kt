@@ -39,11 +39,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -111,6 +115,9 @@ private val ROW_CONTROL = 24.dp
 private const val SPIN_MILLIS = 900
 
 private const val COLLAPSED_PLATES = 3
+
+/** How long the search field takes to arrive; short enough not to be waited on. */
+private const val SEARCH_MILLIS = 140
 
 /**
  * How wide the list stands once there is a pane beside it.
@@ -235,6 +242,15 @@ fun LibraryScreen(
     // Same shape as the delete question, and asked for the same reason: what it
     // throws away cannot be got back.
     var confirmingStop by remember { mutableStateOf(false) }
+    // Whether the search field has been asked for. View state, and this screen's
+    // own: what is being searched for belongs to the host, but whether there is
+    // a field on screen does not outlive the screen.
+    //
+    // A field is also shown for a query that is already set, whoever set it --
+    // a list quietly filtered by something the user cannot see is worse than the
+    // space the field takes.
+    var searchAsked by rememberSaveable { mutableStateOf(false) }
+    val searching = searchAsked || query.isNotEmpty()
     val hasMenu = actions.onEdit != null || actions.onDuplicate != null ||
         actions.onDelete != null || actions.onStop != null || actions.onShare != null
 
@@ -245,8 +261,30 @@ fun LibraryScreen(
 
     val list: @Composable (Modifier) -> Unit = { listModifier ->
         Column(listModifier) {
-            LibraryTopBar(actions)
-            SearchRow(query, onQueryChange, yours.size + catalog.size)
+            LibraryTopBar(
+                actions = actions,
+                searching = searching,
+                onToggleSearch = {
+                    // Closing clears, so that the list is never filtered by
+                    // something with nothing on screen to explain it.
+                    if (searching) {
+                        onQueryChange("")
+                    }
+                    searchAsked = !searching
+                },
+            )
+            AnimatedVisibility(
+                visible = searching,
+                enter = expandVertically(tween(SEARCH_MILLIS)),
+                exit = shrinkVertically(tween(SEARCH_MILLIS)),
+            ) {
+                SearchRow(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    total = yours.size + catalog.size,
+                    focusOnAppear = searchAsked,
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -463,17 +501,33 @@ private fun RefreshControl(refreshing: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun LibraryTopBar(actions: LibraryActions) {
+private fun LibraryTopBar(
+    actions: LibraryActions,
+    searching: Boolean,
+    onToggleSearch: () -> Unit,
+) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
+    // No rule under it, and little space around it. The bar is the app's name
+    // and three icons over a plain ground; a line beneath draws more attention
+    // to the join than the join deserves, and the height it all takes is height
+    // the library does not have for machines.
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(start = spacing.screenEdge, end = spacing.screenEdge, top = 6.dp, bottom = 12.dp),
+            .padding(start = spacing.screenEdge, end = spacing.screenEdge, top = 2.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("TRS-80", style = Trs80Theme.type.wordmark, color = colors.text)
         Spacer(Modifier.weight(1f))
+        // Lit while the field is open, so the icon says which of its two states
+        // it is in rather than only what it does.
+        StrokeIcon(
+            Trs80Icon.Search,
+            color = if (searching) colors.accentText else colors.muted,
+            onClick = onToggleSearch,
+        )
+        Spacer(Modifier.width(14.dp))
         actions.onAdd?.let {
             StrokeIcon(Trs80Icon.Plus, color = colors.muted, onClick = it)
             Spacer(Modifier.width(14.dp))
@@ -482,11 +536,15 @@ private fun LibraryTopBar(actions: LibraryActions) {
             StrokeIcon(Trs80Icon.Settings, color = colors.muted, onClick = it)
         }
     }
-    Divider()
 }
 
 @Composable
-private fun SearchRow(query: String, onQueryChange: (String) -> Unit, total: Int) {
+private fun SearchRow(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    total: Int,
+    focusOnAppear: Boolean,
+) {
     val spacing = Trs80Theme.spacing
     Box(Modifier.fillMaxWidth().padding(horizontal = spacing.screenEdge, vertical = 12.dp)) {
         SearchField(
@@ -494,6 +552,7 @@ private fun SearchRow(query: String, onQueryChange: (String) -> Unit, total: Int
             onValueChange = onQueryChange,
             placeholder = stringResource(Res.string.search_entries, total),
             modifier = Modifier.fillMaxWidth(),
+            focusOnAppear = focusOnAppear,
         )
     }
 }
