@@ -120,6 +120,14 @@
     <string name="theme_dark">DARK</string>
     <string name="theme_hint">System follows the device. The emulated screen keeps its own colors either way — those belong to the machine.</string>
 
+    <!-- About -->
+    <string name="about">About</string>
+    <string name="community">Community</string>
+    <string name="community_detail">Other people running these machines.</string>
+    <string name="rate">Rate this app</string>
+    <string name="share_app">Share this app</string>
+    <string name="share_app_message">A free TRS-80 emulator: %1$s</string>
+
     <!-- ROM images -->
     <string name="rom_images">ROM images</string>
     <string name="get_all">GET ALL</string>

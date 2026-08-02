@@ -54,6 +54,12 @@ import trs_80.shared.generated.resources.share_failed
 import trs_80.shared.generated.resources.share_no_state
 import trs_80.shared.generated.resources.share_token
 import trs_80.shared.generated.resources.sharing_state
+import org.puder.trs80.shared.io.COMMUNITY_URL
+import org.puder.trs80.shared.io.openUrl
+import org.puder.trs80.shared.io.shareText
+import org.puder.trs80.shared.io.shareUrl
+import org.puder.trs80.shared.io.storeListingUrl
+import trs_80.shared.generated.resources.share_app_message
 import org.puder.trs80.shared.storage.appSettings
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -220,6 +226,14 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
                         onShareEnabledChange = {
                             experimental.setShareEnabled(it)
                             shareEnabled = experimental.isShareEnabled
+                        },
+                        onCommunity = { openUrl(COMMUNITY_URL) },
+                        // Absent while there is no listing: see storeListingUrl.
+                        onRate = storeListingUrl?.let { url -> { openUrl(url) } },
+                        onShareApp = {
+                            scope.launch {
+                                shareText(getString(Res.string.share_app_message, shareUrl))
+                            }
                         },
                         onVersionTap = {
                             // Only the tap that gets there says so. Carrying on

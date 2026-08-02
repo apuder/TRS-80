@@ -47,6 +47,11 @@ import trs_80.shared.generated.resources.roms_hint
 import trs_80.shared.generated.resources.experimental
 import trs_80.shared.generated.resources.share_state
 import trs_80.shared.generated.resources.share_state_detail
+import trs_80.shared.generated.resources.about
+import trs_80.shared.generated.resources.community
+import trs_80.shared.generated.resources.community_detail
+import trs_80.shared.generated.resources.rate
+import trs_80.shared.generated.resources.share_app
 import trs_80.shared.generated.resources.settings
 import trs_80.shared.generated.resources.theme
 import trs_80.shared.generated.resources.theme_hint
@@ -92,6 +97,17 @@ fun SettingsScreen(
     experimentalUnlocked: Boolean = false,
     shareEnabled: Boolean = false,
     onShareEnabledChange: ((Boolean) -> Unit)? = null,
+    /** Opens the community page. Absent where the host cannot open a link. */
+    onCommunity: (() -> Unit)? = null,
+    /**
+     * Opens this app's store listing.
+     *
+     * Absent where there is no listing to open — an app that has not shipped
+     * cannot be rated, and a Rate that opens something else is a lie.
+     */
+    onRate: (() -> Unit)? = null,
+    /** Offers the app to whatever the user shares with. */
+    onShareApp: (() -> Unit)? = null,
     /**
      * A tap on the version, which is how the experimental section is found.
      *
@@ -195,6 +211,26 @@ fun SettingsScreen(
                     color = colors.muted,
                     modifier = Modifier.padding(top = 10.dp),
                 )
+            }
+
+            if (onCommunity != null || onRate != null || onShareApp != null) {
+                SectionKicker(stringResource(Res.string.about))
+                onCommunity?.let {
+                    SettingRow(
+                        label = stringResource(Res.string.community),
+                        subtitle = stringResource(Res.string.community_detail),
+                        onClick = it,
+                    )
+                    Hairline()
+                }
+                onRate?.let {
+                    SettingRow(label = stringResource(Res.string.rate), onClick = it)
+                    Hairline()
+                }
+                onShareApp?.let {
+                    SettingRow(label = stringResource(Res.string.share_app), onClick = it)
+                    Hairline()
+                }
             }
 
             if (experimentalUnlocked && onShareEnabledChange != null) {

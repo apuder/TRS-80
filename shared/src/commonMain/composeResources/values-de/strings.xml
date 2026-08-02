@@ -121,6 +121,14 @@
     <string name="theme_dark">DUNKEL</string>
     <string name="theme_hint">System folgt dem Gerät. Der emulierte Bildschirm behält in beiden Fällen seine eigenen Farben — die gehören der Maschine.</string>
 
+    <!-- Über -->
+    <string name="about">Über</string>
+    <string name="community">Community</string>
+    <string name="community_detail">Andere, die diese Rechner betreiben.</string>
+    <string name="rate">Diese App bewerten</string>
+    <string name="share_app">Diese App teilen</string>
+    <string name="share_app_message">Ein kostenloser TRS-80-Emulator: %1$s</string>
+
     <!-- ROM images -->
     <string name="rom_images">ROM-Abbilder</string>
     <string name="get_all">ALLE LADEN</string>

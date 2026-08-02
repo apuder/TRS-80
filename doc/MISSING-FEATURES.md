@@ -15,10 +15,12 @@ one place, so that this stays a list of work rather than a list of achievements.
 
 ## 1. The library
 
-Every per-machine action Android had is now in the plate's overflow. What is left is the drawer:
-**Rate**, **Help**, **Community** and **Share the app** (`activity_main_drawer.xml`). Settings was
-the only part of it worth porting on its own, and it is done; these four are links out of the app
-and want somewhere to live that is not a navigation drawer, since this UI has none.
+Every per-machine action Android had is now in the plate's overflow, and the drawer's links are in
+settings. What is left of the drawer is **Help**, held back by decision rather than difficulty.
+
+**Rate** is written and not offered, because there is nothing to offer: an App Store listing has an
+id assigned when the record is created, and this app has never shipped. One constant in
+`AppLinks.kt` turns it on.
 
 ## 2. The running machine
 
@@ -82,9 +84,8 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **The drawer's four links** (§1) — the last of Android's own screens, and the smallest.
-2. The rest, by appetite. Chromecast is the biggest single piece and the least certain to still
-   work at all.
+1. By appetite. Chromecast is the biggest single piece left and the least certain to still work at
+   all.
 
 ---
 
@@ -145,6 +146,9 @@ were done differently from Android and it is worth recording that they were a ch
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.
+- **Community and Share the app** — in a new About section in settings rather than a drawer, since
+  this UI has none. Share offers the system sheet; on iOS it sends people to the project page until
+  there is a store listing to send them to.
 - **The screens viewer on a wide window** — it was opening inside the pane, so a full-screen
   picture covered half the screen with the list still beside it. The window draws it now. Its
   close button and page counter were also fixed at white, which is invisible on the light ground;
