@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -87,9 +88,9 @@ import trs_80.shared.generated.resources.store_unreachable
 import trs_80.shared.generated.resources.yours
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
-import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.ModalPanel
 import org.puder.trs80.shared.ui.theme.ProgressRing
+import org.puder.trs80.shared.ui.theme.MinimumTouchTarget
 import org.puder.trs80.shared.ui.theme.SearchField
 import org.puder.trs80.shared.ui.theme.SectionKicker
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
@@ -118,6 +119,9 @@ private const val COLLAPSED_PLATES = 3
 
 /** How long the search field takes to arrive; short enough not to be waited on. */
 private const val SEARCH_MILLIS = 140
+
+/** The height of the show-all row; see [ShowAll] for why it is not 44dp. */
+private val SHOW_ALL_HEIGHT = 32.dp
 
 /**
  * How wide the list stands once there is a pane beside it.
@@ -694,18 +698,26 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> U
 @Composable
 private fun ShowAll(expanded: Boolean, total: Int, onClick: () -> Unit) {
     val colors = Trs80Theme.colors
+    // The size of a plate's caption, in the same face: this belongs to the
+    // plates above it rather than to the section headings, and at kicker size
+    // it read as a label for them instead of something to tap.
+    //
+    // Short, and shorter than the usual touch target: it is a full-width strip
+    // between two things that are easy to hit and hard to hit by accident, and
+    // at 44dp the line sat in a hole -- the plate's own gap above it, its own
+    // centring, and the heading's space below, three sources of air for one
+    // line of text.
     Box(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = Trs80Theme.spacing.gap)
+            .heightIn(min = SHOW_ALL_HEIGHT)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             if (expanded) stringResource(Res.string.show_fewer) else stringResource(Res.string.show_all, total),
-            style = Trs80Theme.type.kicker,
+            style = Trs80Theme.type.titleSmall,
             color = colors.accentText,
-            modifier = Modifier.padding(vertical = 9.dp),
         )
     }
 }
