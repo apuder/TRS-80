@@ -8,52 +8,61 @@ Taken from the Android sources rather than from memory: `EmulatorActivity`'s men
 `MainActivity`'s options and drawer, `ConfigurationItemListener`, the `res/menu` and `res/xml`
 resources, and what `shared/` actually contains as of this writing.
 
+Anything that has since been ported is dropped from this file rather than ticked off — the point
+is what is left. The running machine's controls (reset, rewind, paste, sound, help) and all five
+keyboard layouts were here and are now done.
+
 ---
 
-## 1. The running machine
+## 1. The library
 
-Mostly done. The controls live behind the overflow in the emulator's bar.
+Plates offer Run and an overflow menu with Edit, Duplicate and Delete. Android offers two more
+actions per machine, and both now have somewhere obvious to go.
 
-| Feature | Android | Port | Notes |
-|---|---|---|---|
-| Pause / resume | `MENU_OPTION_PAUSE` | ✓ | Android's Pause is `finish()`; Back already is it |
-| Reset | `MENU_OPTION_RESET` | ✓ | |
-| Rewind cassette | `MENU_OPTION_REWIND` | ✓ | |
-| Paste | `MENU_OPTION_PASTE` | ✓ | Says so when the clipboard is empty |
-| Sound on/off while running | `MENU_OPTION_SOUND_ON/OFF` | ✓ | Session only; the editor is where it persists |
-| Help | `MENU_OPTION_HELP` | ✓ | Rewritten for this version, and translated |
-| Tutorial | `MENU_OPTION_TUTORIAL` | — | A hint framework, not a machine control; wants the tutorial app of §5 |
-| Chromecast | `CastMessageSender`, 16 refs | — | Deferred deliberately; whether it still works is unchecked |
-
-## 2. The library
-
-Plates offer Run and an overflow to the editor. Android offers more per machine.
-
-| Feature | Android | Port | Notes |
-|---|---|---|---|
-| Stop a running machine | `onConfigurationStop` | — | From the list, without entering it |
-| Share a machine | `onConfigurationShare` | — | Shown when it has a TRS-Xray state |
-| Rate / Help / Community / Share the app | drawer | — | `activity_main_drawer.xml` |
+| Feature | Android | Notes |
+|---|---|---|
+| Stop a running machine | `onConfigurationStop` | From the list, without entering it |
+| Share a machine | `onConfigurationShare` | Shown when it has a TRS-Xray state |
+| Rate / Help / Community / Share the app | drawer | `activity_main_drawer.xml` |
 
 Settings is ported. The rest of the drawer is not.
 
-## 3. Keyboards
-
-Done. All five choosable layouts work: Original and Compact as key grids, Joystick as an on-screen
-stick and fire button, Tilt as fire with the accelerometer steering, and Game controller as a
-physical gamepad with nothing on screen. External is not a gap: on Android it is never a choice
-either, it is what an attached hardware keyboard makes it.
-
-Two of those are unexercised in practice. There is no accelerometer in the simulator and no
-gamepad attached to it, so tilt and the gamepad have been verified only as far as their logic,
-which is tested, and their wiring, which compiles and starts cleanly.
-
-## 4. Screens that do not exist yet
+## 2. Screens that do not exist yet
 
 - **Create disk.** `Destination.CreateDisk` is declared and has no screen. Android has
   `CreateDiskActivity`, `CreateDiskFragment`, `res/xml/mkdisk.xml` and `menu_create_media.xml`.
 - **Legacy import.** The code is in `shared` and tested, and nothing on iOS calls it. An upgrading
   user's existing configurations are never picked up.
+
+## 3. The running machine
+
+Only two of `EmulatorActivity`'s options are left.
+
+- **Chromecast.** `CastMessageSender` and sixteen references to it. Deferred deliberately; whether
+  it still works at all is unchecked.
+- **Tutorial.** `MENU_OPTION_TUTORIAL` is a hint framework rather than a machine control, and it
+  wants the tutorial app below.
+
+## 4. Landscape
+
+Every screen is built as a portrait column and none of them respond to the device turning. This is
+not one screen's problem, so it is not filed under any of them:
+
+- **The library** puts plates at full width above a catalog list. In landscape the plates become
+  letterboxes and about two rows of catalog survive below the fold.
+- **The editor** and **settings** are single columns of rows with nothing to fill the width they
+  would gain.
+- **The emulator** is where it matters most: the machine's picture is 4:3 and a landscape phone is
+  the shape that fits it. The keyboard would have to move beside the screen rather than under it,
+  which is what Android does.
+- **The detail sheet** rises to a fixed inset from the top, which in landscape leaves it nearly
+  full-height with a sliver of list showing.
+- **The screens viewer** would gain the most for the least: the pictures are wider than they are
+  tall.
+
+One thing already exists and is dead until this lands: a configuration stores a *landscape*
+keyboard layout separately from its portrait one, the editor offers both, and nothing ever reads
+the landscape one. It is a setting that does nothing.
 
 ## 5. Smaller gaps
 
@@ -73,7 +82,11 @@ Not missing features — things that are there and imperfect.
   once those screens are ported.
 - RetroStore downloads report no progress: the store returns a whole program in one response, so
   there is nothing to report until the API offers a stream.
-- The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the new
+- Machines installed before configurations recorded their origin are linked back to their catalog
+  entry by name, once, on the first catalog load. A machine whose name does not match a catalog
+  program exactly — or matches a name two programs share — stays unlinked for good, and its entry
+  will offer to download a fresh copy alongside it. There is no way to link one by hand.
+- The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the
   joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
   their logic is tested, but no one has driven them.
 - **A saved emulator state can kill the app.** Entering a machine that has one makes the process
@@ -86,5 +99,9 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **Create disk** and **legacy import** (§4) — the second matters most to anyone upgrading.
-2. The rest, by appetite.
+1. **The saved-state crash** (§6) — it is the only thing here that loses a user's work.
+2. **Landscape** (§4) — it touches every screen, so it gets cheaper the sooner it is done and
+   dearer with every screen added before it.
+3. **Create disk** and **legacy import** (§2) — the second matters most to anyone upgrading.
+4. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
+5. The rest, by appetite.
