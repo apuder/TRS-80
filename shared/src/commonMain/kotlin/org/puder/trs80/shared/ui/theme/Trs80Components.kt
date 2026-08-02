@@ -66,7 +66,8 @@ import kotlin.math.sin
  */
 enum class Trs80Icon {
     Plus, Overflow, Search, Download, Play, Stop, Settings,
-    Trash, Eject, ChevronLeft, ChevronRight, DragHandle, Info, Copy, Refresh, Close,
+    Trash, Eject, ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
+    DragHandle, Info, Copy, Refresh, Close,
 }
 
 /**
@@ -242,6 +243,17 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
         Trs80Icon.ChevronRight -> {
             drawLine(color, Offset(w * 0.38f, h * 0.2f), Offset(w * 0.64f, h * 0.5f), stroke.width)
             drawLine(color, Offset(w * 0.64f, h * 0.5f), Offset(w * 0.38f, h * 0.8f), stroke.width)
+        }
+
+        // The same stroke turned a quarter, so a row of them reads as one set.
+        Trs80Icon.ChevronDown -> {
+            drawLine(color, Offset(w * 0.2f, h * 0.38f), Offset(w * 0.5f, h * 0.64f), stroke.width)
+            drawLine(color, Offset(w * 0.5f, h * 0.64f), Offset(w * 0.8f, h * 0.38f), stroke.width)
+        }
+
+        Trs80Icon.ChevronUp -> {
+            drawLine(color, Offset(w * 0.2f, h * 0.62f), Offset(w * 0.5f, h * 0.36f), stroke.width)
+            drawLine(color, Offset(w * 0.5f, h * 0.36f), Offset(w * 0.8f, h * 0.62f), stroke.width)
         }
 
         Trs80Icon.DragHandle -> {

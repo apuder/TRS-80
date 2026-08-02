@@ -123,6 +123,9 @@ private const val SEARCH_MILLIS = 140
 /** The height of the show-all row; see [ShowAll] for why it is not 44dp. */
 private val SHOW_ALL_HEIGHT = 32.dp
 
+/** Its arrows, drawn to the height of the words they flank. */
+private val SHOW_ALL_ARROW = 15.dp
+
 /**
  * How wide the list stands once there is a pane beside it.
  *
@@ -707,18 +710,27 @@ private fun ShowAll(expanded: Boolean, total: Int, onClick: () -> Unit) {
     // at 44dp the line sat in a hole -- the plate's own gap above it, its own
     // centring, and the heading's space below, three sources of air for one
     // line of text.
-    Box(
+    Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = SHOW_ALL_HEIGHT)
             .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        // One either side, pointing the way the list is about to move. A single
+        // arrow beside the words would read as ornament on one end; a pair
+        // reads as the direction the whole row means.
+        val arrow = if (expanded) Trs80Icon.ChevronUp else Trs80Icon.ChevronDown
+        StrokeIcon(arrow, color = colors.accentText, size = SHOW_ALL_ARROW)
+        Spacer(Modifier.width(10.dp))
         Text(
             if (expanded) stringResource(Res.string.show_fewer) else stringResource(Res.string.show_all, total),
             style = Trs80Theme.type.titleSmall,
             color = colors.accentText,
         )
+        Spacer(Modifier.width(10.dp))
+        StrokeIcon(arrow, color = colors.accentText, size = SHOW_ALL_ARROW)
     }
 }
 
