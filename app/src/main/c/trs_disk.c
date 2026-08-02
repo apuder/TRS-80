@@ -527,6 +527,30 @@ trs_disk_unimpl(unsigned char cmd, char* more)
   error("trs_disk_command(0x%02x) not implemented - %s", cmd, more);
 }
 
+/*
+ * Ends the command in progress because the drive turned out to be empty.
+ *
+ * A drive with no FILE* is what the rest of this file means by empty; see the
+ * report in trs_disk_debug and the first test in search(). Every command that
+ * moves bytes is meant to be refused where it is issued, by search() returning
+ * "not found" -- but a state loaded from a file arrives in the middle of a
+ * transfer, with bytecount set and DRQ already raised, and so never passes that
+ * check. The next IN or OUT then lands in the byte-shuffling path with no file
+ * to shuffle from, and getc(NULL) ends the process.
+ *
+ * Reported as a missing sector, because from the machine's side that is what
+ * has happened: it asked a drive for data and there is no disk in it.
+ */
+static void
+trs_disk_empty_drive(void)
+{
+  state.status = TRSDISK_NOTFOUND;
+  state.bytecount = state.format_bytecount = 0;
+  state.format = FMT_DONE;
+  trs_disk_drq_interrupt(0);
+  trs_schedule_event(trs_disk_done, 0, 0);
+}
+
 /* Sort first by track, second by side, third by position in emulated-disk
    sector array (i.e., physical sector order on track).  */
 static int
@@ -1474,6 +1498,11 @@ trs_disk_data_read(void)
 
   trs_disk_led(state.curdrive,1);
 
+  if (d->file == NULL) {
+    trs_disk_empty_drive();
+    return state.data;
+  }
+
   switch (state.currcommand & TRSDISK_CMDMASK) {
 
   case TRSDISK_READ:
@@ -1654,6 +1683,10 @@ trs_disk_data_write(unsigned char data)
 
   if (trs_disk_debug_flags & DISKDEBUG_FDCREG) {
     debug("data_write(0x%02x) pc 0x%04x\n", data, REG_PC);
+  }
+  if (d->file == NULL) {
+    trs_disk_empty_drive();
+    return;
   }
   switch (state.currcommand & TRSDISK_CMDMASK) {
   case TRSDISK_WRITE:
@@ -3350,11 +3383,49 @@ void trs_disk_save(FILE *file)
   }
 }
 
+/*
+ * Opens a drive's image, preferring read-write, and records which it got.
+ *
+ * @return whether the drive ended up with a file.
+ */
+static int
+reopen_disk(DiskState *d)
+{
+  d->file = fopen(d->filename, "rb+");
+  if (d->file != NULL) {
+    d->writeprot = 0;
+    return 1;
+  }
+  d->file = fopen(d->filename, "rb");
+  if (d->file != NULL) {
+    d->writeprot = 1;
+    return 1;
+  }
+  return 0;
+}
+
 void trs_disk_load(FILE *file)
 {
   int i;
+  /*
+   * What the host put in the drives when it booted this machine.
+   *
+   * A saved state records each drive's image by absolute path, and those go
+   * stale: on iOS the app's data directory is named after a UUID that is
+   * reissued whenever the app is reinstalled, so every path saved by a previous
+   * install points somewhere that no longer exists. The disk itself is still
+   * there and the host has just mounted it, under the name it has now -- so
+   * that is what to fall back on when the saved name does not open.
+   *
+   * Static rather than automatic: FILENAME_MAX is 4096 on Android, which would
+   * put 32K on the stack of whichever thread happens to be resuming a machine.
+   * Nothing here is reentrant in any case -- it is loading global state.
+   */
+  static char mounted[NDRIVES][FILENAME_MAX];
 
   for (i=0;i<NDRIVES;i++) {
+    strncpy(mounted[i], disk[i].filename, FILENAME_MAX - 1);
+    mounted[i][FILENAME_MAX - 1] = 0;
     if (disk[i].file != NULL)
       fclose(disk[i].file);
   }
@@ -3367,20 +3438,23 @@ void trs_disk_load(FILE *file)
   trs_fdc_load(file,&other_state);
   for (i=0;i<NDRIVES;i++) {
     trs_load_diskstate(file,&disk[i]);
-     if (disk[i].file != NULL) {
-      disk[i].file = fopen(disk[i].filename,"rb+");
-      if (disk[i].file == NULL) {
-        disk[i].file = fopen(disk[i].filename,"rb");
-        if (disk[i].file == NULL) {
-          disk[i].emutype = NONE;
-          disk[i].writeprot = 0;
-	      disk[i].filename[0] = 0;
-          continue;
-        }
-        disk[i].writeprot = 1;
-      } else {
-        disk[i].writeprot = 0;
-      }
+    /*
+     * The drive was empty when the state was written, and stays empty. Note
+     * that trs_load_diskstate leaves a placeholder rather than a usable handle,
+     * so nothing may touch disk[i].file until it has been reopened here.
+     */
+    if (disk[i].file == NULL) {
+      continue;
+    }
+    if (!reopen_disk(&disk[i]) && mounted[i][0] != 0) {
+      strncpy(disk[i].filename, mounted[i], FILENAME_MAX - 1);
+      disk[i].filename[FILENAME_MAX - 1] = 0;
+      reopen_disk(&disk[i]);
+    }
+    if (disk[i].file == NULL) {
+      disk[i].emutype = NONE;
+      disk[i].writeprot = 0;
+      disk[i].filename[0] = 0;
     }
   }
 }

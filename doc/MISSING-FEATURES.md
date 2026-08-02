@@ -89,19 +89,18 @@ Not missing features — things that are there and imperfect.
 - The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the
   joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
   their logic is tested, but no one has driven them.
-- **A saved emulator state can kill the app.** Entering a machine that has one makes the process
-  disappear about a second later, with no crash report and no exception on stderr. Deleting the
-  state file makes the same machine start normally. `trs_state_load` checks its banner and version
-  and returns quietly on a mismatch, so the fault is further in — most likely one of the
-  per-subsystem restores. Found while testing something else; not investigated further.
+- A saved state written before the app was last reinstalled resumes with whatever disk the
+  configuration names *now*, since the path in the state no longer exists. That is the right
+  answer when the image is the same one under a new name, which is the case this arises in. It
+  would be the wrong answer if the disk in that drive had genuinely been changed since — the
+  machine would carry on reading a disk it did not save against.
 
 ---
 
 ## Suggested order
 
-1. **The saved-state crash** (§6) — it is the only thing here that loses a user's work.
-2. **Landscape** (§4) — it touches every screen, so it gets cheaper the sooner it is done and
+1. **Landscape** (§4) — it touches every screen, so it gets cheaper the sooner it is done and
    dearer with every screen added before it.
-3. **Create disk** and **legacy import** (§2) — the second matters most to anyone upgrading.
-4. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
-5. The rest, by appetite.
+2. **Create disk** and **legacy import** (§2) — the second matters most to anyone upgrading.
+3. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
+4. The rest, by appetite.
