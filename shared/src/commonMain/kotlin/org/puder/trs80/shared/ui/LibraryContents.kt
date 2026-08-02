@@ -87,6 +87,43 @@ fun List<App>.asCatalog(
     }
 }
 
+/**
+ * What the wide layout's pane is showing.
+ *
+ * It is never empty, which is the rule the whole thing hangs on: a pane that
+ * blanks out whenever nothing is selected reads as a fault, and half the screen
+ * is too much to spend on saying nothing.
+ */
+sealed interface PaneContent {
+    /** The catalog entry the user picked. */
+    data class Entry(val id: String) : PaneContent
+
+    /** Nothing picked, but there is a machine to go back to. */
+    data class Resume(val card: ConfigurationCard) : PaneContent
+
+    /** Nothing picked and nothing played: a first run. */
+    data object FirstRun : PaneContent
+}
+
+/**
+ * Decides what the pane holds, in the order the user is most likely to want.
+ *
+ * A selection wins because it is the thing just asked for. Failing that, the
+ * machine last run — for anyone with any history at all that is the reason they
+ * opened the app, and it is worth the whole pane. Only someone who has never
+ * played anything sees the note.
+ */
+fun paneContentFor(selectedId: String?, yours: List<ConfigurationCard>): PaneContent {
+    if (selectedId != null) {
+        return PaneContent.Entry(selectedId)
+    }
+    // Never-run machines have no timestamp, so they are not "where you left
+    // off" -- a machine installed and never started is not somewhere to return
+    // to. Bundled samples are exactly this on a first run.
+    val lastRun = yours.filter { it.lastUsed > 0L }.maxByOrNull { it.lastUsed }
+    return if (lastRun != null) PaneContent.Resume(lastRun) else PaneContent.FirstRun
+}
+
 /** Keeps the catalog entries matching [query]; everything when it is blank. */
 fun List<CatalogEntry>.matchingEntries(query: String): List<CatalogEntry> {
     val trimmed = query.trim()

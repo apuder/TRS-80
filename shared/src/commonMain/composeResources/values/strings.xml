@@ -18,6 +18,14 @@
     <string name="show_fewer">Show fewer</string>
     <string name="show_all">Show all %1$d</string>
     <string name="never_run">Not run yet</string>
+    <!-- The pane beside the list, where the window is wide enough for one -->
+    <string name="where_you_left_off">Where you left off</string>
+    <string name="resume">RESUME</string>
+    <string name="saved_session">SAVED SESSION</string>
+    <string name="pane_hint">Pick anything on the left to see its record here. Catalog entries download when you play them.</string>
+    <string name="start_anywhere">Start anywhere</string>
+    <string name="first_run_note">%1$d programs are listed on the left. Choose one and it downloads and runs — nothing to install, nothing to set up first. What you play shows up under Yours.</string>
+
     <string name="duplicate">Duplicate</string>
     <string name="duplicate_detail">Makes a copy with disks of its own. Changing one leaves the other alone.</string>
     <string name="edit_entry_detail">Its name, model, disks and controls.</string>

@@ -40,26 +40,21 @@ Only two of `EmulatorActivity`'s options are left.
 - **Tutorial.** `MENU_OPTION_TUTORIAL` is a hint framework rather than a machine control, and it
   wants the tutorial app below.
 
-## 4. Landscape
+## 4. Wider windows
 
-Every screen is built as a portrait column and none of them respond to the device turning. This is
-not one screen's problem, so it is not filed under any of them:
+The emulator and the library handle them; the rest do not.
 
-- **The library** puts plates at full width above a catalog list. In landscape the plates become
-  letterboxes and about two rows of catalog survive below the fold.
 - **The editor** and **settings** are single columns of rows with nothing to fill the width they
-  would gain.
-- **The emulator** is where it matters most: the machine's picture is 4:3 and a landscape phone is
-  the shape that fits it. The keyboard would have to move beside the screen rather than under it,
-  which is what Android does.
-- **The detail sheet** rises to a fixed inset from the top, which in landscape leaves it nearly
-  full-height with a sliver of list showing.
+  would gain. The editor is the one that would benefit: the spec puts it in the library's pane so
+  a disk can be changed with the list in view, which means it stops being a navigation destination
+  at wide widths. Left alone deliberately — see §6 for why that is not free.
 - **The screens viewer** would gain the most for the least: the pictures are wider than they are
-  tall.
-
-One thing already exists and is dead until this lands: a configuration stores a *landscape*
-keyboard layout separately from its portrait one, the editor offers both, and nothing ever reads
-the landscape one. It is a setting that does nothing.
+  tall, and it still letterboxes them into whatever it is given.
+- **The detail sheet** on a phone in landscape rises to a fixed inset from the top, leaving it
+  nearly full height with a sliver of list showing. Wide windows do not use the sheet at all, so
+  this is now only a phone-sideways problem.
+- **The library on a phone in landscape** is still the portrait column, deliberately: two panes
+  need height as much as width, and a phone turned sideways has 440dp of it.
 
 ## 5. Smaller gaps
 
@@ -86,6 +81,13 @@ Not missing features — things that are there and imperfect.
 - The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the
   joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
   their logic is tested, but no one has driven them.
+- **The on-screen keyboard is close to invisible in the light theme.** Its keys are white at 20%
+  with white labels, drawn for the dark ground they have always had; on the light ground they wash
+  out almost completely. Found while testing on an iPad, which defaults to light. Predates the
+  overlay work — the overlay register has its own colours and is fine.
+- The editor stays a pushed screen at every width, so opening it on a tablet loses the list. Making
+  it a pane is not just layout: the editor holds its draft in `remember` until Save, so it cannot
+  survive being navigated away from, which is also why the blank-disk panel is a panel.
 - A saved state written before the app was last reinstalled resumes with whatever disk the
   configuration names *now*, since the path in the state no longer exists. That is the right
   answer when the image is the same one under a new name, which is the case this arises in. It
@@ -96,11 +98,9 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **Landscape** (§4) — it touches every screen, so it gets cheaper the sooner it is done and
-   dearer with every screen added before it.
-2. **Legacy import** (§2) — it matters most to anyone upgrading from the Android app.
-3. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
-4. The rest, by appetite.
+1. **Legacy import** (§2) — it matters most to anyone upgrading from the Android app.
+2. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
+3. The rest, by appetite.
 
 ---
 
@@ -119,6 +119,14 @@ were done differently from Android and it is worth recording that they were a ch
 - **Making a blank disk image** — as a panel over the editor rather than Android's own screen, and
   reached from the drive it will fill rather than from a file browser. `Destination.CreateDisk`
   went with it.
+- **The emulator sideways** — the picture takes the window and the keyboard lies on it as outlines,
+  which is what the Android app does. Landscape also reads the per-orientation keyboard layout that
+  had been stored, offered and never used since the Android app.
+- **The library on a wide window** — the list caps at 380dp and the sheet becomes a permanent pane
+  beside it, so browsing a 300-entry catalog no longer costs you your place. Gated on 840x600dp:
+  measured rather than proportioned, because a phone in landscape is the widest-aspect thing here
+  and the least suited to two panes, while a foldable's inner screen is nearly square and the best.
+  Not an Android feature — Android had one column at every size.
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §6 for what the fix chose.

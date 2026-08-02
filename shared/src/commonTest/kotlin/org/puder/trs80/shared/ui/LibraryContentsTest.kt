@@ -157,6 +157,41 @@ class LibraryContentsTest {
     }
 
     @Test
+    fun aSelectionIsWhatThePaneShows() {
+        val holding = paneContentFor("b", listOf(card("Breakdown", 500)))
+
+        assertEquals(PaneContent.Entry("b"), holding)
+    }
+
+    /** Nothing picked: the machine they were last in is why they opened the app. */
+    @Test
+    fun withNoSelectionThePaneOffersTheLastMachineRun() {
+        val holding = paneContentFor(
+            selectedId = null,
+            yours = listOf(card("Old", 100), card("Newest", 300), card("Middle", 200)),
+        )
+
+        assertEquals("Newest", (holding as PaneContent.Resume).card.name)
+    }
+
+    /**
+     * A machine that has never run is not somewhere to return to. The bundled
+     * sample is exactly this on a first run, and offering to "resume" it would
+     * be the app's first sentence to a new user.
+     */
+    @Test
+    fun aMachineNeverRunIsNotWhereYouLeftOff() {
+        val holding = paneContentFor(selectedId = null, yours = listOf(card("Bundled sample")))
+
+        assertEquals(PaneContent.FirstRun, holding)
+    }
+
+    @Test
+    fun anEmptyLibraryWithNoSelectionIsAFirstRun() {
+        assertEquals(PaneContent.FirstRun, paneContentFor(null, emptyList()))
+    }
+
+    @Test
     fun catalogMarksWhatIsDownloadingNow() {
         val entries = listOf(app("Breakdown", id = "b"))
             .asCatalog(installed = emptyList(), installing = setOf("b"))

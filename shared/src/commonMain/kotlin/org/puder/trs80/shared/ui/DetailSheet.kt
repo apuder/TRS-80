@@ -23,6 +23,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -95,6 +96,15 @@ private val LIST_LEFT_SHOWING = 112.dp
 /** Rising is slower than falling: arriving is the part worth watching. */
 private const val RISE_MILLIS = 300
 private const val FALL_MILLIS = 200
+
+/**
+ * How wide the record table stands when it sits beside the description.
+ *
+ * Narrow on purpose: it is label-and-value pairs, and pairs stretched across a
+ * tablet put the two halves so far apart that the eye has to travel to pair
+ * them up again.
+ */
+private val RECORD_COLUMN = 236.dp
 
 /** How far down it has to be dragged before letting go dismisses it. */
 private const val DISMISS_FRACTION = 0.33f
@@ -231,46 +241,18 @@ fun DetailSheet(
                 ),
         ) {
             GrabHandle { dismiss() }
-            Column(
-                Modifier
+            EntryDetail(
+                content = content,
+                action = action,
+                onPrimary = onPrimary,
+                versions = versions,
+                onPlayVersion = onPlayVersion,
+                onOpenScreen = { viewing = it },
+                modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = spacing.screenEdge)
                     // Only the bottom: the sheet's own top edge is its top.
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
-            ) {
-                Masthead(content)
-                Spacer(Modifier.height(14.dp))
-                PrimaryAction(action, onPrimary)
-                if (versions.isNotEmpty()) {
-                    SectionKicker(
-                        stringResource(Res.string.your_versions),
-                        count = versions.size.toString(),
-                    )
-                    versions.forEach { version ->
-                        VersionRow(version) { onPlayVersion(version.id) }
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                Hairline()
-                if (content.description.isNotEmpty()) {
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        content.description,
-                        style = Trs80Theme.type.body,
-                        color = colors.text,
-                    )
-                }
-                if (content.screenshotUrls.isNotEmpty()) {
-                    SectionKicker(stringResource(Res.string.screens))
-                    Screens(content.screenshotUrls) { viewing = it }
-                }
-                SectionKicker(stringResource(Res.string.record))
-                RecordRow(stringResource(Res.string.machine), content.machine)
-                content.media?.let { RecordRow(stringResource(Res.string.media), it) }
-                RecordRow(stringResource(Res.string.source), content.source)
-                Spacer(Modifier.height(28.dp))
-            }
+            )
         }
 
         // Over the sheet, because at this size the picture is the whole screen.
@@ -281,6 +263,85 @@ fun DetailSheet(
                 onDismiss = { viewing = null },
             )
         }
+    }
+}
+
+/**
+ * Everything the app knows about one catalog entry, as a scrolling column.
+ *
+ * Separated from the sheet because it outgrew it: on a wide window the same
+ * thing is a permanent pane beside the list rather than a surface that covers
+ * it. Nothing here knows which it is in — the difference is entirely the
+ * container, which is what keeps one description of an entry rather than two.
+ *
+ * The screens viewer is the caller's, not this one's. It wants to cover the
+ * whole window, and a viewer opened from inside a scrolling column would be
+ * clipped to it.
+ */
+@Composable
+fun EntryDetail(
+    content: DetailContent,
+    action: DetailAction,
+    onPrimary: () -> Unit,
+    onOpenScreen: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    versions: List<CatalogVersion> = emptyList(),
+    onPlayVersion: (Int) -> Unit = {},
+    twoColumn: Boolean = false,
+) {
+    val colors = Trs80Theme.colors
+    val body: @Composable ColumnScope.() -> Unit = {
+        PrimaryAction(action, onPrimary)
+        if (versions.isNotEmpty()) {
+            SectionKicker(
+                stringResource(Res.string.your_versions),
+                count = versions.size.toString(),
+            )
+            versions.forEach { version ->
+                VersionRow(version) { onPlayVersion(version.id) }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Hairline()
+        if (content.description.isNotEmpty()) {
+            Spacer(Modifier.height(14.dp))
+            Text(content.description, style = Trs80Theme.type.body, color = colors.text)
+        }
+        if (content.screenshotUrls.isNotEmpty()) {
+            SectionKicker(stringResource(Res.string.screens))
+            Screens(content.screenshotUrls, onOpenScreen)
+        }
+    }
+    val record: @Composable ColumnScope.() -> Unit = {
+        SectionKicker(stringResource(Res.string.record))
+        RecordRow(stringResource(Res.string.machine), content.machine)
+        content.media?.let { RecordRow(stringResource(Res.string.media), it) }
+        RecordRow(stringResource(Res.string.source), content.source)
+    }
+
+    Column(
+        modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Trs80Theme.spacing.screenEdge),
+    ) {
+        Masthead(content)
+        Spacer(Modifier.height(14.dp))
+        if (twoColumn) {
+            // The record goes beside what it describes rather than under it.
+            // Stacked, it would leave the pane's whole right half empty and the
+            // description running to a width nobody can read a line of; this
+            // spends the room on the one part that is a table and reads better
+            // narrow than wide.
+            Row(Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f), content = body)
+                Spacer(Modifier.width(28.dp))
+                Column(Modifier.width(RECORD_COLUMN), content = record)
+            }
+        } else {
+            body()
+            record()
+        }
+        Spacer(Modifier.height(28.dp))
     }
 }
 

@@ -49,6 +49,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.WindowInsets
+import org.puder.trs80.shared.ui.ScreensViewer
+import org.puder.trs80.shared.ui.EntryDetail
 import org.puder.trs80.shared.ui.Catalog
 import org.puder.trs80.shared.ui.CatalogEntry
 import org.puder.trs80.shared.ui.DetailAction
@@ -69,6 +78,11 @@ import org.puder.trs80.shared.ui.LibraryActions
 import org.puder.trs80.shared.ui.LibraryScreen
 import org.puder.trs80.shared.ui.LibrarySort
 import org.puder.trs80.shared.ui.asCatalog
+import org.puder.trs80.shared.ui.FirstRunPane
+import org.puder.trs80.shared.ui.PaneContent
+import org.puder.trs80.shared.ui.ResumePane
+import org.puder.trs80.shared.ui.isWideLayout
+import org.puder.trs80.shared.ui.paneContentFor
 import org.puder.trs80.shared.ui.matching
 import org.puder.trs80.shared.ui.matchingEntries
 import org.puder.trs80.shared.ui.sortedFor
@@ -110,6 +124,7 @@ private const val TAG = "IosApp"
 
 /** The glass behind the phosphor. The machine had one; it is not a choice. */
 private val SCREEN_COLOR = Color(0xFF444444)
+
 
 /**
  * The iOS app: the library, and a machine when one is running.
@@ -377,9 +392,15 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
         .map { it.copy(failed = it.id in failed) }
 
     val selectedEntry = selectedId?.let { id -> entries.firstOrNull { it.id == id } }
+    val selectedApp = listed.firstOrNull { it.id == selectedEntry?.id }
+    // Wide enough to hold the entry beside the list rather than over it. Asked
+    // once here so the sheet and the pane can never both be on screen.
+    val wide = isWideLayout()
+    val sorted = cards.matching(query).sortedFor(sort)
+
     Box(Modifier.fillMaxSize()) {
     LibraryScreen(
-        yours = cards.matching(query).sortedFor(sort),
+        yours = sorted,
         catalog = entries.matchingEntries(query),
         catalogState = catalog.state,
         refreshing = catalog.refreshing,
@@ -415,10 +436,42 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
             },
             onPlayEntry = ::playEntry,
         ),
+        selectedId = selectedId.takeIf { wide },
+        pane = if (!wide) {
+            null
+        } else {
+            {
+                when (val holding = paneContentFor(selectedId, sorted)) {
+                    is PaneContent.Entry ->
+                        if (selectedEntry != null && selectedApp != null) {
+                            Detail(
+                                entry = selectedEntry,
+                                app = selectedApp,
+                                onPlay = { playEntry(selectedEntry) },
+                                onRun = {
+                                    selectedId = null
+                                    navigator.goTo(Destination.Emulator(it))
+                                },
+                                onDismiss = { selectedId = null },
+                                asPane = true,
+                            )
+                        } else {
+                            // The catalog was reloaded out from under the
+                            // selection; the pane still has to hold something.
+                            FirstRunPane(entries.size)
+                        }
+
+                    is PaneContent.Resume -> ResumePane(holding.card) {
+                        navigator.goTo(Destination.Emulator(it))
+                    }
+
+                    PaneContent.FirstRun -> FirstRunPane(entries.size)
+                }
+            }
+        },
     )
 
-        val selectedApp = listed.firstOrNull { it.id == selectedEntry?.id }
-        if (selectedEntry != null && selectedApp != null) {
+        if (!wide && selectedEntry != null && selectedApp != null) {
             Detail(
                 entry = selectedEntry,
                 app = selectedApp,
@@ -444,6 +497,7 @@ private fun Detail(
     onPlay: () -> Unit,
     onRun: (Int) -> Unit,
     onDismiss: () -> Unit,
+    asPane: Boolean = false,
 ) {
     // The clean machine describes the program; failing that, the version the
     // user reached for most recently. Either is a copy of the same media.
@@ -462,28 +516,58 @@ private fun Detail(
         totalBytes = disks.sumOf { sizeOf(it) },
     )
 
-    DetailSheet(
-        content = DetailContent(
-            title = app.name,
-            author = app.author,
-            year = app.release_year,
-            coverUrl = app.screenshot_url.firstOrNull(),
-            screenshotUrls = app.screenshot_url,
-            description = app.description,
-            machine = modelLabel(modelOf(app.ext_trs80?.model)),
-            media = media,
-            source = "RetroStore",
-        ),
-        action = when {
-            entry.installing -> DetailAction.Downloading
-            entry.failed -> DetailAction.Failed
-            else -> DetailAction.Play
-        },
-        onPrimary = onPlay,
-        onDismiss = onDismiss,
-        versions = entry.versions,
-        onPlayVersion = onRun,
+    val detail = DetailContent(
+        title = app.name,
+        author = app.author,
+        year = app.release_year,
+        coverUrl = app.screenshot_url.firstOrNull(),
+        screenshotUrls = app.screenshot_url,
+        description = app.description,
+        machine = modelLabel(modelOf(app.ext_trs80?.model)),
+        media = media,
+        source = "RetroStore",
     )
+    val action = when {
+        entry.installing -> DetailAction.Downloading
+        entry.failed -> DetailAction.Failed
+        else -> DetailAction.Play
+    }
+
+    if (!asPane) {
+        DetailSheet(
+            content = detail,
+            action = action,
+            onPrimary = onPlay,
+            onDismiss = onDismiss,
+            versions = entry.versions,
+            onPlayVersion = onRun,
+        )
+        return
+    }
+
+    // The same entry, standing in a pane. No scrim, no sheet to dismiss: the
+    // list is beside it and stays live, which is the whole point of the layout.
+    var viewing by remember(entry.id) { mutableStateOf<Int?>(null) }
+    Box(Modifier.fillMaxSize()) {
+        EntryDetail(
+            content = detail,
+            action = action,
+            onPrimary = onPlay,
+            onOpenScreen = { viewing = it },
+            modifier = Modifier.fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+            twoColumn = true,
+            versions = entry.versions,
+            onPlayVersion = onRun,
+        )
+        viewing?.let { start ->
+            ScreensViewer(
+                urls = detail.screenshotUrls,
+                startIndex = start,
+                onDismiss = { viewing = null },
+            )
+        }
+    }
 }
 
 /** The size of a file on disk, or zero if it has gone. */

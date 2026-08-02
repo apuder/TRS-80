@@ -28,6 +28,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.height
@@ -105,6 +108,20 @@ private const val SPIN_MILLIS = 900
 
 private const val COLLAPSED_PLATES = 3
 
+/**
+ * How wide the list stands once there is a pane beside it.
+ *
+ * Fixed rather than proportional: the rows were drawn for a phone and they are
+ * the same rows here. Letting the column grow with the window would stretch a
+ * catalog row until its title and its play control were at opposite ends of a
+ * tablet with nothing in between.
+ */
+private val LIST_COLUMN = 380.dp
+
+/** The accent stripe and wash that say which row the pane is showing. */
+private val SELECTED_EDGE = 2.dp
+private const val SELECTED_WASH = 0.12f
+
 /** One of the user's own machines made from a catalog entry. */
 data class CatalogVersion(val id: Int, val name: String, val model: String)
 
@@ -181,6 +198,15 @@ fun LibraryScreen(
     onExpandedChange: (Boolean) -> Unit,
     actions: LibraryActions,
     modifier: Modifier = Modifier,
+    /** Which catalog row is showing in the pane, so the list can mark it. */
+    selectedId: String? = null,
+    /**
+     * What to draw beside the list where there is room for it.
+     *
+     * Null on a phone, and on any window too small to split -- there the entry
+     * arrives as a sheet over the list instead, which is the caller's business.
+     */
+    pane: (@Composable () -> Unit)? = null,
 ) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
@@ -195,67 +221,85 @@ fun LibraryScreen(
     val hasMenu = actions.onEdit != null || actions.onDuplicate != null ||
         actions.onDelete != null
 
-    Box(modifier.fillMaxSize().background(colors.ground)) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            // The ground runs edge to edge; the content does not. Without this
-            // the wordmark sits under the status bar.
-            .windowInsetsPadding(WindowInsets.safeDrawing),
-    ) {
-        LibraryTopBar(actions)
-        SearchRow(query, onQueryChange, yours.size + catalog.size)
+    // The pane is only offered where there is room for it; the caller decides
+    // what goes in it, because what an entry says is the host's business and
+    // not this screen's.
+    val twoPane = pane != null && isWideLayout()
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = spacing.screenEdge,
-                end = spacing.screenEdge,
-                bottom = 24.dp,
-            ),
-        ) {
-            item {
-                SectionHeader(label = stringResource(Res.string.yours), count = yours.size) {
-                    SegmentedToggle(
-                    options = listOf(stringResource(Res.string.sort_last_used), stringResource(Res.string.sort_alphabetical)),
-                    selected = if (sort == LibrarySort.LastUsed) 0 else 1,
-                    onSelect = {
-                        onSortChange(if (it == 0) LibrarySort.LastUsed else LibrarySort.Alphabetical)
-                    },
-                )
+    val list: @Composable (Modifier) -> Unit = { listModifier ->
+        Column(listModifier) {
+            LibraryTopBar(actions)
+            SearchRow(query, onQueryChange, yours.size + catalog.size)
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = spacing.screenEdge,
+                    end = spacing.screenEdge,
+                    bottom = 24.dp,
+                ),
+            ) {
+                item {
+                    SectionHeader(label = stringResource(Res.string.yours), count = yours.size) {
+                        SegmentedToggle(
+                        options = listOf(stringResource(Res.string.sort_last_used), stringResource(Res.string.sort_alphabetical)),
+                        selected = if (sort == LibrarySort.LastUsed) 0 else 1,
+                        onSelect = {
+                            onSortChange(if (it == 0) LibrarySort.LastUsed else LibrarySort.Alphabetical)
+                        },
+                    )
+                    }
                 }
-            }
-            items(shown, key = { it.id }) { card ->
-                Plate(
-                    card,
-                    onClick = { actions.onRun(card.id) },
-                    onMenu = if (hasMenu) {
-                        { menuFor = card; confirmingDelete = false }
-                    } else {
-                        null
-                    },
-                )
-            }
-            if (yours.size > COLLAPSED_PLATES) {
-                item { ShowAll(expanded, yours.size) { onExpandedChange(!expanded) } }
-            }
-            item {
-                SectionHeader(
-                    label = stringResource(Res.string.catalog),
-                    count = catalog.size.takeIf { it > 0 },
-                    trailing = actions.onRefresh?.let {
-                        { RefreshControl(refreshing = refreshing, onClick = it) }
-                    },
-                )
-            }
-            when (catalogState) {
-                is StoreState.Loading -> item { CatalogNote(stringResource(Res.string.loading)) }
-                is StoreState.Failed -> item { CatalogNote(stringResource(Res.string.store_unreachable)) }
-                is StoreState.Loaded -> items(catalog, key = { it.id }) { entry ->
-                    CatalogRow(entry, actions)
+                items(shown, key = { it.id }) { card ->
+                    Plate(
+                        card,
+                        onClick = { actions.onRun(card.id) },
+                        onMenu = if (hasMenu) {
+                            { menuFor = card; confirmingDelete = false }
+                        } else {
+                            null
+                        },
+                    )
+                }
+                if (yours.size > COLLAPSED_PLATES) {
+                    item { ShowAll(expanded, yours.size) { onExpandedChange(!expanded) } }
+                }
+                item {
+                    SectionHeader(
+                        label = stringResource(Res.string.catalog),
+                        count = catalog.size.takeIf { it > 0 },
+                        trailing = actions.onRefresh?.let {
+                            { RefreshControl(refreshing = refreshing, onClick = it) }
+                        },
+                    )
+                }
+                when (catalogState) {
+                    is StoreState.Loading -> item { CatalogNote(stringResource(Res.string.loading)) }
+                    is StoreState.Failed -> item { CatalogNote(stringResource(Res.string.store_unreachable)) }
+                    is StoreState.Loaded -> items(catalog, key = { it.id }) { entry ->
+                        CatalogRow(entry, actions, selected = entry.id == selectedId)
+                    }
                 }
             }
         }
+    }
+
+    Box(modifier.fillMaxSize().background(colors.ground)) {
+    if (twoPane) {
+        Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+            list(Modifier.width(LIST_COLUMN).fillMaxHeight())
+            Box(
+                Modifier
+                    .width(spacing.hairline)
+                    .fillMaxHeight()
+                    .background(colors.hairline)
+            )
+            Box(Modifier.weight(1f).fillMaxHeight()) { pane!!() }
+        }
+    } else {
+        // The ground runs edge to edge; the content does not. Without this
+        // the wordmark sits under the status bar.
+        list(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing))
     }
 
         menuFor?.let { card ->
@@ -560,13 +604,35 @@ private fun ShowAll(expanded: Boolean, total: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CatalogRow(entry: CatalogEntry, actions: LibraryActions) {
+private fun CatalogRow(
+    entry: CatalogEntry,
+    actions: LibraryActions,
+    selected: Boolean = false,
+) {
     val colors = Trs80Theme.colors
     val spacing = Trs80Theme.spacing
+    val accentEdge = colors.accent
     Row(
         Modifier
             .fillMaxWidth()
             .clickable { actions.onOpenEntry(entry) }
+            // Marked only where a pane exists to show what is selected. On a
+            // phone the sheet is the mark, and a row left highlighted under it
+            // would still be highlighted after it closed.
+            .then(
+                if (selected) {
+                    Modifier
+                        .background(colors.accent.copy(alpha = SELECTED_WASH))
+                        .drawBehind {
+                            drawRect(
+                                color = accentEdge,
+                                size = Size(SELECTED_EDGE.toPx(), size.height),
+                            )
+                        }
+                } else {
+                    Modifier
+                }
+            )
             .padding(vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
