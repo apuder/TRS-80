@@ -47,7 +47,6 @@ private val savedStateConfiguration = SavedStateConfiguration {
             subclass(Destination.Emulator::class, Destination.Emulator.serializer())
             subclass(Destination.EditConfiguration::class, Destination.EditConfiguration.serializer())
             subclass(Destination.Settings::class, Destination.Settings.serializer())
-            subclass(Destination.CreateDisk::class, Destination.CreateDisk.serializer())
         }
     }
 }

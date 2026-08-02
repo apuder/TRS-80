@@ -74,6 +74,22 @@
     <string name="empty_drive">Leeres Laufwerk</string>
     <string name="empty_drive_choose">Leeres Laufwerk — Diskette wählen</string>
 
+    <!-- Leere Diskette erstellen -->
+    <string name="new_disk">Neue Diskette</string>
+    <string name="new">NEU</string>
+    <string name="create">ERSTELLEN</string>
+    <string name="mkdisk_for_drive">Eine leere Diskette, direkt in Laufwerk %1$d.</string>
+    <string name="mkdisk_name_hint">z. B. scratch</string>
+    <string name="disk_format">Format</string>
+    <string name="sides">Seiten</string>
+    <string name="density">Dichte</string>
+    <string name="size_inches">Größe in Zoll</string>
+    <string name="ignore_density">Dichte ignorieren</string>
+    <string name="ignore_density_detail">Erlaubt das Lesen einer Spur in beiden Dichten. Manche kopiergeschützte Software benötigt das.</string>
+    <string name="mkdisk_bad_name">Nur Buchstaben, Ziffern, Punkt, Bindestrich und Unterstrich.</string>
+    <string name="mkdisk_name_taken">Dieser Rechner hat bereits eine Diskette dieses Namens.</string>
+    <string name="mkdisk_failed">Die Diskette konnte nicht geschrieben werden.</string>
+
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
     <string name="appearance">Darstellung</string>

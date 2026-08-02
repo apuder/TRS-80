@@ -53,6 +53,8 @@ import org.puder.trs80.shared.ui.CatalogEntry
 import org.puder.trs80.shared.ui.DetailAction
 import org.puder.trs80.shared.ui.DetailContent
 import org.puder.trs80.shared.ui.DetailSheet
+import org.puder.trs80.shared.ui.DiskCreation
+import org.puder.trs80.shared.ui.DiskImageSpec
 import org.jetbrains.compose.resources.stringResource
 import trs_80.shared.generated.resources.Res
 import trs_80.shared.generated.resources.disk_many
@@ -258,6 +260,7 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
                         ?.let { draft = draft.copy(cassettePath = it) }
                 }
             },
+            onCreateDisk = { spec -> createBlankDisk(manager, configurationId, spec) },
             onRevert = { draft = original },
             onDelete = {
                 manager.deleteConfigWithId(configurationId)
@@ -484,6 +487,35 @@ private fun Detail(
 /** The size of a file on disk, or zero if it has gone. */
 private fun sizeOf(path: String): Long =
     runCatching { appFileSystem.metadata(path.toPath()).size ?: 0L }.getOrDefault(0L)
+
+/**
+ * Writes a blank disk image into a machine's own folder.
+ *
+ * The folder rather than anywhere the user picks, for the same reason a chosen
+ * disk is copied into it: a configuration has to point at something that stays,
+ * and the machine's folder is what gets carried along when it is duplicated and
+ * removed when it is deleted.
+ *
+ * Refuses to write over an existing file. The alternative is a machine quietly
+ * losing a disk it was still using, and the drive it is in would not even be
+ * this one.
+ */
+private fun createBlankDisk(
+    manager: ConfigurationManager,
+    configurationId: Int,
+    spec: DiskImageSpec,
+): DiskCreation {
+    val filename = spec.filename ?: return DiskCreation.Failed
+    if (manager.hasMedia(configurationId, filename)) {
+        return DiskCreation.NameTaken
+    }
+    val path = manager.mediaPath(configurationId, filename) ?: return DiskCreation.Failed
+    if (!EmulatorCore.createBlankDisk(path, spec)) {
+        runCatching { appFileSystem.delete(path.toPath()) }
+        return DiskCreation.Failed
+    }
+    return DiskCreation.Created(path)
+}
 
 /**
  * A machine, booted for as long as this is on screen.

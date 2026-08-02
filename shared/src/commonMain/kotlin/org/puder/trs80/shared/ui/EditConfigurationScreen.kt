@@ -71,6 +71,7 @@ import trs_80.shared.generated.resources.keyboard_summary
 import trs_80.shared.generated.resources.landscape
 import trs_80.shared.generated.resources.machine
 import trs_80.shared.generated.resources.name
+import trs_80.shared.generated.resources.new
 import trs_80.shared.generated.resources.portrait
 import trs_80.shared.generated.resources.remove
 import trs_80.shared.generated.resources.revert
@@ -113,6 +114,13 @@ data class EditConfigurationActions(
     /** Puts a file in the given drive, replacing whatever is in it. */
     val onChooseDisk: ((drive: Int) -> Unit)? = null,
     val onChooseCassette: (() -> Unit)? = null,
+    /**
+     * Writes a blank disk image into this machine's own folder.
+     *
+     * Answers rather than reports, so the editor can put the new image straight
+     * into the drive and say what went wrong when it could not.
+     */
+    val onCreateDisk: ((DiskImageSpec) -> DiskCreation)? = null,
 )
 
 /**
@@ -140,6 +148,12 @@ fun EditConfigurationScreen(
     val spacing = Trs80Theme.spacing
     var controlsOpen by remember { mutableStateOf(false) }
     var confirmingDelete by remember { mutableStateOf(false) }
+    // Which drive the blank-disk panel is filling, and what it has been told to
+    // make. Held here rather than in the panel so that a failed attempt keeps
+    // the settings the user chose.
+    var creatingForDrive by remember { mutableStateOf(-1) }
+    var newDisk by remember { mutableStateOf(DiskImageSpec()) }
+    var newDiskError by remember { mutableStateOf<DiskCreation?>(null) }
 
     Box(modifier.fillMaxSize().background(colors.ground)) {
     Column(
@@ -221,7 +235,18 @@ fun EditConfigurationScreen(
                     draft.diskPaths.size,
                 ),
             )
-            Disks(draft, onChange, actions.onChooseDisk)
+            Disks(
+                draft,
+                onChange,
+                actions.onChooseDisk,
+                onNewDisk = actions.onCreateDisk?.let {
+                    { drive ->
+                        creatingForDrive = drive
+                        newDisk = DiskImageSpec()
+                        newDiskError = null
+                    }
+                },
+            )
 
             SectionKicker(stringResource(Res.string.cassette))
             SettingRow(
@@ -275,6 +300,27 @@ fun EditConfigurationScreen(
             Box(Modifier.padding(bottom = 24.dp))
         }
     }
+
+        val makeDisk = actions.onCreateDisk
+        if (creatingForDrive >= 0 && makeDisk != null) {
+            CreateDiskPanel(
+                drive = creatingForDrive,
+                spec = newDisk,
+                onChange = { newDisk = it; newDiskError = null },
+                onCreate = {
+                    when (val result = makeDisk(newDisk)) {
+                        is DiskCreation.Created -> {
+                            onChange(draft.withDiskIn(creatingForDrive, result.path))
+                            creatingForDrive = -1
+                        }
+                        // Stays open, holding what was chosen, and says why.
+                        else -> newDiskError = result
+                    }
+                },
+                onDismiss = { creatingForDrive = -1 },
+                error = newDiskError,
+            )
+        }
 
         if (confirmingDelete) {
             ConfirmDelete(
@@ -335,6 +381,7 @@ private fun Disks(
     draft: ConfigurationDraft,
     onChange: (ConfigurationDraft) -> Unit,
     onChooseDisk: ((Int) -> Unit)?,
+    onNewDisk: ((Int) -> Unit)?,
 ) {
     val colors = Trs80Theme.colors
     val rowHeightPx = with(LocalDensity.current) { DISK_ROW_HEIGHT.toPx() }
@@ -416,6 +463,15 @@ private fun Disks(
                     color = colors.muted,
                     size = 17.dp,
                     onClick = { onChange(draft.withDiskEjected(drive)) },
+                )
+            } else if (onNewDisk != null) {
+                // Only on an empty drive: a machine that already has a disk in
+                // this slot is being asked to swap it, and choosing the file is
+                // the way to do that. The row itself still opens the picker.
+                TextAction(
+                    stringResource(Res.string.new),
+                    onClick = { onNewDisk(drive) },
+                    style = Trs80Theme.type.kicker,
                 )
             }
         }

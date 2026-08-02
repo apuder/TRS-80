@@ -30,6 +30,11 @@ import org.puder.trs80.core.TRS80_KEY_UP
 import org.puder.trs80.core.TRS80_OK
 import org.puder.trs80.core.trs80_add_key_event
 import org.puder.trs80.core.trs80_config
+import org.puder.trs80.core.trs80_create_blank_dmk
+import org.puder.trs80.core.trs80_create_blank_jv1
+import org.puder.trs80.core.trs80_create_blank_jv3
+import org.puder.trs80.shared.ui.DiskFormat
+import org.puder.trs80.shared.ui.DiskImageSpec
 import org.puder.trs80.core.trs80_init
 import org.puder.trs80.core.trs80_is_expanded_mode
 import org.puder.trs80.core.trs80_cassette_position
@@ -214,6 +219,27 @@ object EmulatorCore {
     /** Queues a key release. */
     fun keyUp(sym: Int, key: Int) =
         trs80_add_key_event(TRS80_KEY_UP, sym, key)
+
+    /**
+     * Writes a blank disk image at [path].
+     *
+     * Independent of any running machine: it formats a file and touches nothing
+     * else, so it may be called while a machine is running or before one has
+     * ever been booted.
+     *
+     * @return whether the image was written.
+     */
+    fun createBlankDisk(path: String, spec: DiskImageSpec): Boolean = when (spec.format) {
+        DiskFormat.JV1 -> trs80_create_blank_jv1(path)
+        DiskFormat.JV3 -> trs80_create_blank_jv3(path)
+        DiskFormat.DMK -> trs80_create_blank_dmk(
+            path,
+            spec.sides,
+            spec.densityCode,
+            if (spec.eightInch) 1 else 0,
+            if (spec.ignoreDensity) 1 else 0,
+        )
+    } != 0
 
     /** The number of disk drives a machine has. */
     private const val DRIVE_COUNT = 4

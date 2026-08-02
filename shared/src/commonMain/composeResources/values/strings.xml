@@ -73,6 +73,22 @@
     <string name="empty_drive">Empty drive</string>
     <string name="empty_drive_choose">Empty drive — choose a disk</string>
 
+    <!-- Making a blank disk image -->
+    <string name="new_disk">New disk</string>
+    <string name="new">NEW</string>
+    <string name="create">CREATE</string>
+    <string name="mkdisk_for_drive">A blank image, put straight into drive %1$d.</string>
+    <string name="mkdisk_name_hint">e.g. scratch</string>
+    <string name="disk_format">Format</string>
+    <string name="sides">Sides</string>
+    <string name="density">Density</string>
+    <string name="size_inches">Size in inches</string>
+    <string name="ignore_density">Ignore density</string>
+    <string name="ignore_density_detail">Lets a track be read at either density. Some protected software wants this.</string>
+    <string name="mkdisk_bad_name">Letters, digits, dot, dash and underscore only.</string>
+    <string name="mkdisk_name_taken">This machine already has a disk of that name.</string>
+    <string name="mkdisk_failed">The image could not be written.</string>
+
     <!-- Settings -->
     <string name="settings">Settings</string>
     <string name="appearance">Appearance</string>

@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
@@ -98,6 +99,15 @@ fun StrokeIcon(
 
 /** The smallest thing a finger should be asked to hit. */
 val MinimumTouchTarget = 44.dp
+
+/**
+ * How far a control fades when it does not currently apply.
+ *
+ * Faded rather than removed: a control that comes and goes as another is
+ * changed makes the panel around it jump, and leaves the user guessing what
+ * the setting they just changed was for.
+ */
+private const val DISABLED_ALPHA = 0.38f
 
 /**
  * A word that is tapped rather than read — Back, Cancel, Show all.
@@ -407,9 +417,14 @@ fun SegmentedToggle(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     fill: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val colors = Trs80Theme.colors
-    Row(modifier.border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.18f))) {
+    Row(
+        modifier
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.18f))
+    ) {
         options.forEachIndexed { index, label ->
             val isSelected = index == selected
             Box(
@@ -418,7 +433,7 @@ fun SegmentedToggle(
                     // at the right-hand end of a row; a control given the full
                     // width shares it out instead.
                     .then(if (fill) Modifier.weight(1f) else Modifier)
-                    .clickable { onSelect(index) }
+                    .then(if (enabled) Modifier.clickable { onSelect(index) } else Modifier)
                     .background(
                         if (isSelected) colors.accent.copy(alpha = 0.16f) else Color.Transparent
                     )
@@ -517,10 +532,11 @@ fun SettingRow(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
     value: (@Composable () -> Unit)? = null,
 ) {
     val colors = Trs80Theme.colors
-    val clickable = if (onClick != null) {
+    val clickable = if (onClick != null && enabled) {
         modifier.heightIn(min = MinimumTouchTarget).clickable(onClick = onClick)
     } else {
         modifier
@@ -529,7 +545,7 @@ fun SettingRow(
         clickable.fillMaxWidth().padding(vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).alpha(if (enabled) 1f else DISABLED_ALPHA)) {
             Text(label, style = Trs80Theme.type.body, color = colors.text)
             if (subtitle != null) {
                 Text(subtitle, style = Trs80Theme.type.bodySmall, color = colors.muted)
@@ -558,12 +574,14 @@ fun Toggle(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val colors = Trs80Theme.colors
     Box(
         modifier
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .size(MinimumTouchTarget)
-            .clickable { onCheckedChange(!checked) },
+            .then(if (enabled) Modifier.clickable { onCheckedChange(!checked) } else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         Box(

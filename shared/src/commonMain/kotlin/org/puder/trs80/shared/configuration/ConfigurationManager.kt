@@ -223,6 +223,27 @@ class ConfigurationManager private constructor(
     }
 
     /**
+     * @return the path [filename] would be stored at for this configuration, or
+     * null if its directory could not be opened. Says nothing about whether
+     * anything is there already; ask [hasMedia] for that.
+     */
+    fun mediaPath(configurationId: Int, filename: String): String? = try {
+        fileManagerCreator.createForAppSubDir(configurationId)
+            .getAbsolutePathForFile(filename)
+    } catch (e: IOException) {
+        Log.e(TAG, "Could not open the configuration's directory.", e)
+        null
+    }
+
+    /** @return whether this configuration's directory already holds [filename]. */
+    fun hasMedia(configurationId: Int, filename: String): Boolean = try {
+        fileManagerCreator.createForAppSubDir(configurationId).hasFile(filename)
+    } catch (e: IOException) {
+        Log.e(TAG, "Could not open the configuration's directory.", e)
+        false
+    }
+
+    /**
      * Makes an independent copy of a configuration.
      *
      * The media is copied too, not shared: the point of a copy is that saving to

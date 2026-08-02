@@ -9,8 +9,8 @@ Taken from the Android sources rather than from memory: `EmulatorActivity`'s men
 resources, and what `shared/` actually contains as of this writing.
 
 Anything that has since been ported is dropped from this file rather than ticked off — the point
-is what is left. The running machine's controls (reset, rewind, paste, sound, help) and all five
-keyboard layouts were here and are now done.
+is what is left. The running machine's controls (reset, rewind, paste, sound, help), all five
+keyboard layouts, and making a blank disk image were here and are now done.
 
 ---
 
@@ -29,8 +29,6 @@ Settings is ported. The rest of the drawer is not.
 
 ## 2. Screens that do not exist yet
 
-- **Create disk.** `Destination.CreateDisk` is declared and has no screen. Android has
-  `CreateDiskActivity`, `CreateDiskFragment`, `res/xml/mkdisk.xml` and `menu_create_media.xml`.
 - **Legacy import.** The code is in `shared` and tested, and nothing on iOS calls it. An upgrading
   user's existing configurations are never picked up.
 
@@ -101,6 +99,6 @@ Not missing features — things that are there and imperfect.
 
 1. **Landscape** (§4) — it touches every screen, so it gets cheaper the sooner it is done and
    dearer with every screen added before it.
-2. **Create disk** and **legacy import** (§2) — the second matters most to anyone upgrading.
+2. **Legacy import** (§2) — it matters most to anyone upgrading from the Android app.
 3. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
 4. The rest, by appetite.

@@ -64,12 +64,6 @@ sealed interface Destination : NavKey {
     /** The app's own settings. */
     @Serializable
     data object Settings : Destination
-
-    /** One app in the RetroStore catalog. */
-
-    /** The blank-disk-image creator. */
-    @Serializable
-    data object CreateDisk : Destination
 }
 
 /**
