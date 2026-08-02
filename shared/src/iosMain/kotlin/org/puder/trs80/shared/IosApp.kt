@@ -696,7 +696,7 @@ private fun createBlankDisk(
 @OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class)
 @Composable
 private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: () -> Unit) {
-    val source = remember(configurationId) { IosEmulatorScreenSource() }
+    val source = remember(configurationId) { CoreScreenSource(IosEmulatorCore) }
     // Held so leaving can write to it. The session is put away on the way out
     // rather than in onDispose, because the list reloads the moment the back
     // stack pops -- writing afterwards means it reads the previous screenshot.
