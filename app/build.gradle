@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        google()
         mavenCentral()
     }
     dependencies {
@@ -11,6 +12,8 @@ plugins {
     id 'com.android.application'
     id 'com.google.protobuf' version '0.10.0'
 }
+
+
 
 // Pins the JDK that compiles, independently of the JDK that launches Gradle,
 // so local and CI builds agree.
@@ -39,6 +42,27 @@ dependencies {
 
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+
+    /*
+     * Crash reporting.
+     *
+     * The ndk artifact is the one that matters here: the emulator is C, and the
+     * crashes worth seeing are signals raised inside it rather than Java
+     * exceptions -- the disk bug that took the process out was getc(NULL) three
+     * frames below the CPU loop.
+     *
+     * Configured by string resources in src/main/res/values/firebase.xml, which
+     * is not in the repository. Without them Firebase initialises to nothing and
+     * this reports nowhere, which is what a fork, a contributor and CI need.
+     * There is no google-services plugin: as of 4.5.0 it still reads
+     * `applicationVariants`, which AGP 9 removed, so applying it fails the build
+     * outright. All it does is write those same resources.
+     *
+     * See doc/CRASH-REPORTING.md, including how native symbols get uploaded
+     * while that plugin is unusable.
+     */
+    implementation platform('com.google.firebase:firebase-bom:34.17.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.android.gms:play-services-cast:21.5.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0'
     implementation project(':retrostore')

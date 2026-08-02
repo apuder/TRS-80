@@ -45,7 +45,10 @@ The emulator and the library handle them; the rest do not.
 
 ## 4. Smaller gaps
 
-- **Crash reporting.** `crash_dialog_*` strings and the reporting path have no equivalent.
+- **Crash reporting on iOS.** Android reports; iOS cannot until there is an iOS app target to link
+  the Crashlytics binary. See `doc/CRASH-REPORTING.md`.
+- **Uploading Android native symbols automatically.** Blocked on the google-services plugin, which
+  AGP 9 breaks; done by hand from the Firebase CLI meanwhile. Same document.
 
 ## 5. Known rough edges in what *is* ported
 
@@ -146,6 +149,12 @@ were done differently from Android and it is worth recording that they were a ch
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.
+- **Crash reporting on Android** — Crashlytics, capturing native signals as well as Java
+  exceptions, which is the half that matters: the emulator is C. Configured by string resources
+  rather than the google-services plugin, because that plugin does not work on AGP 9. Reports
+  nowhere until the resources exist, so a fork and CI are unaffected. Android had no crash
+  reporting at all before this — the `crash_dialog_*` strings are ACRA's, from an integration
+  removed some time ago, and nothing referenced them.
 - **Community and Share the app** — in a new About section in settings rather than a drawer, since
   this UI has none. Share offers the system sheet; on iOS it sends people to the project page until
   there is a store listing to send them to.
