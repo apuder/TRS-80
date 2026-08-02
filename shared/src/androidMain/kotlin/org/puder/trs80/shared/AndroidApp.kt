@@ -27,6 +27,7 @@ import org.puder.trs80.shared.io.appDataDirectory
 import org.puder.trs80.shared.io.initAppDataDirectory
 import org.puder.trs80.shared.io.initPlatformIo
 import org.puder.trs80.shared.localstore.RomManager
+import org.puder.trs80.shared.storage.importLegacyData
 import org.puder.trs80.shared.storage.initAppSettings
 import org.puder.trs80.shared.ui.trs80KeyForCharacter
 
@@ -53,6 +54,9 @@ fun initSharedApp(context: Context) {
     initAppDataDirectory(context)
     initPlatformIo(context)
     val settings = initAppSettings(context)
+    // Before anything reads a configuration: someone upgrading has theirs in
+    // the preference files the old app wrote.
+    importLegacyData(context, settings)
     val creator = FileManager.Creator(appDataDirectory() / TRS80_DIRECTORY)
     ConfigurationManager.init(creator, settings)
     RomManager.init(creator, settings)

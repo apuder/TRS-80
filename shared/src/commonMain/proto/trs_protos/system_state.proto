@@ -1,22 +1,19 @@
 syntax = "proto3";
 
-// The TRS-Xray state dump, for the shared module.
+// The TRS-Xray state dump.
 //
-// A second copy of app/src/main/proto/system_state.proto, and deliberately so.
-// The wire format is what matters and both files describe the same one; what
-// differs is who generates from them. Android's copy is compiled by the
-// protobuf-lite plugin into org.puder.trs80.proto, and that package is baked
-// into the shipping app. Pointing Wire at the same file would put a second
-// NativeSystemState in the same package on Android's classpath, and moving
-// Android onto the Wire type means unpicking the protobuf plugin from the app
-// that is currently in the store.
+// The only copy: this used to be duplicated in app/src/main/proto, because the
+// old Android UI generated protobuf-lite classes from it and Wire would have
+// put a second NativeSystemState on the same classpath. Nothing generates from
+// that file any more, so it is gone and this is the schema.
 //
-// So: same schema, different generated package. If the dump format ever
-// changes, both files change together.
+// It is also what app/src/main/c/trs_xray_state_save.cpp writes by hand -- the
+// C side encodes the message itself rather than linking a protobuf runtime, so
+// a field number changed here has to be changed there too.
 option java_package = "org.puder.trs80.shared.xray";
 option java_multiple_files = true;
 
-package trs_protos_shared;
+package trs_protos;
 
 // The state of a TRS system, including registers and memory.
 message NativeSystemState {

@@ -17,68 +17,19 @@
 package org.puder.trs80
 
 import android.app.Application
-import android.content.Context
-import org.puder.trs80.cast.CastMessageSender
-import org.puder.trs80.cast.RemoteCastScreen
 import org.puder.trs80.shared.initSharedApp
-import org.puder.trs80.shared.storage.ImportResult
-import org.puder.trs80.storage.AppStorage
 
 /**
- * Application entry point. Publishes the application context, brings the stored
- * data up to date, and wires up the Cast singletons.
+ * The process starting up.
+ *
+ * One thing to do: hand the shared code a Context, which is how it reaches the
+ * app's directory, its settings and the clipboard — none of which Android lets
+ * anything have without one. Everything that follows is in `shared`.
  */
 class TRS80Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        appContext = applicationContext
-
-        // The shared code has no Context to find the app's directory, settings
-        // or clipboard with, so it is handed one here, before anything can ask.
-        initSharedApp(appContext)
-
-        // Before anything reads a configuration. Held so that MainActivity can
-        // tell the user if it failed — Application has nowhere to show that.
-        legacyImportResult = AppStorage.init(appContext).importLegacyDataIfNeeded()
-
-        CastMessageSender.initSingleton(getString(R.string.chromecast_app_id), appContext)
-        RemoteCastScreen.initSingleton(CastMessageSender.get())
-    }
-
-    companion object {
-        private lateinit var appContext: Context
-        private var crashed = false
-
-        /**
-         * What the startup import did, for whoever is in a position to report it.
-         *
-         * Cleared once read, so a failure is shown once rather than on every
-         * return to the configuration list.
-         */
-        private var legacyImportResult: ImportResult? = null
-
-        /** @return the startup import's outcome, the first time it is asked for. */
-        fun consumeLegacyImportResult(): ImportResult? =
-            legacyImportResult.also { legacyImportResult = null }
-
-        /**
-         * Returns the process-wide application context.
-         *
-         * Kept as a method rather than a property so the existing `getAppContext()` call sites in
-         * Java keep working.
-         */
-        @JvmStatic
-        fun getAppContext(): Context = appContext
-
-        /** Whether the emulator crashed since the flag was last cleared. */
-        @JvmStatic
-        fun hasCrashed(): Boolean = crashed
-
-        /** Records whether the emulator has crashed. */
-        @JvmStatic
-        fun setCrashedFlag(flag: Boolean) {
-            crashed = flag
-        }
+        initSharedApp(applicationContext)
     }
 }

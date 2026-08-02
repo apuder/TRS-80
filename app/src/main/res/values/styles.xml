@@ -1,31 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The window, before Compose fills it.
+
+    Nothing here styles the app: what the user sees is drawn by the shared UI,
+    which brings its own colors and its own dark mode. This is what the system
+    needs to open a window at all, and what it draws in the moment before the
+    first frame.
+-->
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <!-- Required by androidx.preference; PreferenceFragmentCompat resolves its layouts
-             through this attribute and throws without it. -->
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-    </style>
+    <style name="AppTheme" parent="Theme.AppCompat.Light" />
 
+    <!-- No title bar: the app draws its own, and one behind it is not a title. -->
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="AppThemeDark" parent="Theme.AppCompat">
-    </style>
-
-    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-    </style>
-
-    <style name="TableTextTheme" parent="TextAppearance.AppCompat.Medium">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/gray</item>
+        <!-- The app draws under the status bar, as it does on iOS. -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

@@ -11,7 +11,7 @@ buildscript {
         // Kotlin's window moves, not until AGP releases.
         classpath 'com.android.tools.build:gradle:9.1.0'
         // AGP 9 has a runtime dependency on KGP 2.2.10 and uses it for the app
-        // and retrostore modules, but putting a newer KGP on this classpath
+        // module, but putting a newer KGP on this classpath
         // overrides that for the whole build -- which is what keeps every module
         // on one Kotlin, and what lets :shared depend on libraries built with
         // anything up to 2.4.x.

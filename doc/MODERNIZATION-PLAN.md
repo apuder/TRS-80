@@ -485,6 +485,14 @@ with the shared ZIP and error handling unchanged either way.
 Configuration list, configuration editor, settings, disk creation, onboarding, and the scaffolding
 around the emulator surface §6 already draws.
 
+**Done, and Android now runs it.** The screens below all landed, and the app that used to draw them
+in views is deleted: `app/` is a host of four files — the JNI binding, the emulator core behind it,
+one activity and an Application — and everything on screen comes from `shared/commonMain`, on both
+platforms. That is what §1's diagram meant by "a few hundred lines each", reached from the Android
+side first because Android could be run and checked at every step. What the deletion cost is
+recorded in `doc/MISSING-FEATURES.md`; the biggest item is that Chromecast now has no
+implementation at all rather than an unported one.
+
 **The configuration list is ported**, and is what the iOS app now opens on: the cards, their two
 faces, the details and the actions, reading the shared domain and drawing the saved screenshot. The
 3D flip is gone — it was Android view animation with no multiplatform equivalent, and the spec

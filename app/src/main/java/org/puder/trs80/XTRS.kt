@@ -17,9 +17,6 @@
 package org.puder.trs80
 
 import android.util.Log
-import org.puder.trs80.shared.configuration.Configuration
-import org.puder.trs80.shared.configuration.EmulatorState
-import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.ScreenBuffer
 import java.nio.ByteBuffer
 
@@ -56,38 +53,6 @@ object XTRS {
     }
 
     /**
-     * The activity that receives the emulator's upcalls, or `null` while no emulator is
-     * on screen.
-     */
-    @JvmStatic
-    var emulatorActivity: EmulatorActivity? = null
-
-    /**
-     * Boots the native emulator for the given configuration.
-     *
-     * @return 0 on success, a negative error code otherwise.
-     */
-    @JvmStatic
-    fun init(configuration: Configuration, emulatorState: EmulatorState): Int {
-        val model = configuration.model
-        // Through RomManager, which resolves what is stored -- ROM paths are now
-        // kept relative to the app's own directory. Reading the setting raw
-        // would give the stored form, not a path.
-        val romFile = RomManager.get().romPath(model)
-
-        return initNative(
-            model,
-            romFile,
-            0, // entryAddr; a .cmd image supplies its own.
-            configuration.cassettePath ?: emulatorState.defaultCassettePath,
-            configuration.getDiskPath(0),
-            configuration.getDiskPath(1),
-            configuration.getDiskPath(2),
-            configuration.getDiskPath(3)
-        )
-    }
-
-    /**
      * The character buffer shared with the native emulator, one byte per screen cell. The
      * buffer is owned by the native side and written to as the emulated machine updates
      * its video RAM.
@@ -104,10 +69,12 @@ object XTRS {
      */
     @JvmStatic
     fun notImplemented(msg: String) {
-        // A null activity means the emulator was torn down while the CPU thread was still
-        // running. Dropping the message beats throwing back into native code, which would
-        // leave a pending JNI exception that native.c does not check for.
-        emulatorActivity?.notImplemented(msg)
+        // Logged rather than shown. It used to reach a dialog on the emulator
+        // activity, which no longer exists; nothing in the shared UI has asked
+        // for it yet, and returning quietly beats throwing back into native
+        // code, which would leave a pending JNI exception that native.c does
+        // not check for.
+        Log.w(TAG, "The emulator hit something it does not implement: $msg")
     }
 
     @JvmStatic

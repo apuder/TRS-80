@@ -4,6 +4,18 @@ A TRS-80 emulator: a C core, a Kotlin Multiplatform module holding the whole app
 hosts. `shared/commonMain` is where nearly everything lives — if a change can go there, it should.
 See `doc/MODERNIZATION-PLAN.md` for how it got this shape.
 
+| Where | What |
+| --- | --- |
+| `shared/commonMain` | the app: every screen, the domain, the emulator session |
+| `shared/androidMain`, `shared/iosMain` | only what a platform alone can answer — files, clipboard, links, input devices |
+| `app/` | the Android host: the JNI binding, one activity, an Application, and the C core it builds |
+| `app/src/main/c` | the emulator itself, shared by both platforms |
+
+The Android app module is deliberately four Kotlin files. A change that adds a fifth should be
+looked at twice: unless it is something only an activity or a `Context` can do, it belongs in
+`shared`. The same goes for a string or a layout — what the app says lives in the shared module's
+Compose resources, in both languages, because both platforms say it.
+
 ## The version number
 
 **Set it in `gradle.properties`, and nowhere else.**

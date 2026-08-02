@@ -8,7 +8,12 @@ redesign must respect.
 
 Nothing in this document is a design decision. It is the raw material for one.
 
-Written against version 0.49 (`versionCode` 49), July 2026.
+Written against version 0.99 (`versionCode` 49), July 2026.
+
+**This describes a UI that no longer exists.** The Android app it inventories was replaced by the
+shared Compose UI and deleted; this is kept as the record of what that app did, which is what the
+port was measured against. For what is still missing, see `doc/MISSING-FEATURES.md`; for the
+sources, git history.
 
 ---
 

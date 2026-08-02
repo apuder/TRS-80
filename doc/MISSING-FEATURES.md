@@ -8,6 +8,10 @@ Taken from the Android sources rather than from memory: `EmulatorActivity`'s men
 `MainActivity`'s options and drawer, `ConfigurationItemListener`, the `res/menu` and `res/xml`
 resources, and what `shared/` actually contains as of this writing.
 
+Those sources have since been deleted — the shared UI is the app on both platforms now — so what
+this compares against is the app as it shipped, which is in git history and on Play. Anything below
+that is still wanted has to be written against the shared UI rather than moved across.
+
 What is left is above the line; what has been done since the first audit is listed at the end, in
 one place, so that this stays a list of work rather than a list of achievements.
 
@@ -26,8 +30,12 @@ id assigned when the record is created, and this app has never shipped. One cons
 
 One of `EmulatorActivity`'s options is left.
 
-- **Chromecast.** `CastMessageSender` and sixteen references to it. Deferred deliberately; whether
-  it still works at all is unchecked.
+- **Chromecast.** There is now no implementation at all: `CastMessageSender`, `RemoteCastScreen`
+  and the character-buffer path that fed them went with the old Android UI, along with the
+  play-services-cast dependency. What is left is the receiver app in `var/googlecast-receiver` and
+  the app id that was in `res/values/strings.xml` (`E0F0F42C`) — both in git history. Whether any
+  of it still works was never checked, and re-doing it against the shared UI is a fresh piece of
+  work rather than a port.
 
 ## 3. Wider windows
 
@@ -47,6 +55,11 @@ The emulator and the library handle them; the rest do not.
 
 - **Crash reporting on iOS.** Android reports; iOS cannot until there is an iOS app target to link
   the Crashlytics binary. See `doc/CRASH-REPORTING.md`.
+- **Telling the user when something went wrong at startup.** Two messages the old UI showed and
+  nothing shows now: a failed import of pre-2026 data (logged in `LegacyImport.android.kt`), and
+  the emulator reporting through `XTRS.notImplemented` that it hit a code path it does not have.
+  Both are logged. Neither has anywhere to go in the shared UI yet — it has a toast, but nothing
+  that carries a message from start-up into the first composition.
 - **Uploading Android native symbols automatically.** Blocked on the google-services plugin, which
   AGP 9 breaks; done by hand from the Firebase CLI meanwhile. Same document.
 
@@ -97,9 +110,10 @@ Not missing features — things that are there and imperfect.
 Recorded because both were listed here for a while and one of them cost real time. Someone reading
 the Android sources will meet them again.
 
-- **Model 4 / 4P ROM settings.** `res/xml/settings_with_m4.xml` lists all four models and is never
-  loaded — `SettingsFragment` reads `R.xml.settings`, which has Model I and Model III only. Android
-  never shipped this, so it is not something the port is behind on. Nor does it leave a promise
+- **Model 4 / 4P ROM settings.** `res/xml/settings_with_m4.xml` listed all four models and was
+  never loaded — `SettingsFragment` read `R.xml.settings`, which had Model I and Model III only
+  (both files are in git history now). Android never shipped this, so it is not something the port
+  is behind on. Nor does it leave a promise
   unkept here: the editor offers a model only when `hasRom` finds an image for it, and without a
   way to supply one it never does.
 - **The tutorial**, both halves — the app Android installs on first run and the hint framework in
@@ -112,6 +126,10 @@ the Android sources will meet them again.
 Kept because the list above is otherwise hard to read progress from, and because a few of these
 were done differently from Android and it is worth recording that they were a choice.
 
+- **The old Android UI is gone.** Both apps are the shared Compose UI: `app/` is now four files
+  — the JNI binding, the emulator core behind it, one activity and an Application — plus the C.
+  About 7,000 lines of Kotlin, every layout, menu and old string resource, the `:retrostore`
+  module and six libraries went with it. What that cost is listed above, under §2 and §4.
 - **The running machine's controls** — reset, rewind cassette, paste, sound, help. Behind the
   overflow in the emulator's bar. Android's Pause is `finish()`, so the scaffold's Back already is
   it and there is no second control saying so.

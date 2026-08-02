@@ -1,18 +1,7 @@
 import javax.inject.Inject
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.10.0'
-    }
-}
-
 plugins {
     id 'com.android.application'
-    id 'com.google.protobuf' version '0.10.0'
 }
 
 
@@ -31,18 +20,9 @@ dependencies {
         mavenCentral()
     }
 
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.core:core:1.19.0'
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.mediarouter:mediarouter:1.8.1'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'com.google.android.material:material:1.14.0'
 
-    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
     /*
@@ -65,43 +45,11 @@ dependencies {
      */
     implementation platform('com.google.firebase:firebase-bom:34.17.0')
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
-    implementation 'com.google.android.gms:play-services-cast:21.5.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0'
-    implementation project(':retrostore')
     implementation project(':shared')
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.21.1"
-    }
-    plugins {
-        javalite {
-            // On Macs pin the Intel binary: protoc-gen-javalite was never
-            // published for Apple Silicon, but the Intel one runs via Rosetta.
-            def isMac = System.getProperty('os.name').toLowerCase().contains('mac')
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0' +
-                    (isMac ? ':osx-x86_64' : '')
-        }
-    }
-
-    // Java only. The native side no longer needs generated protobuf code:
-    // trs_xray_state_save.cpp encodes the one message it writes by hand.
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                remove java
-            }
-            task.plugins {
-                javalite { }
-            }
-        }
-    }
-}
 
 /*
  * The shared module's Compose resources -- its strings and its fonts.
@@ -151,7 +99,6 @@ android {
         // See gradle.properties; the shared code is told the same two values.
         versionCode trs80VersionCode.toInteger()
         versionName trs80VersionName
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11", "-frtti", "-fexceptions"

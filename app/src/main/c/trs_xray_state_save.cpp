@@ -8,7 +8,7 @@
  * serializer produced, and is still parsed on the Java side by the javalite
  * bindings generated from system_state.proto.
  *
- * Schema (see app/src/main/proto/system_state.proto):
+ * Schema (see shared/src/commonMain/proto/trs_protos/system_state.proto):
  *
  *   NativeSystemState { Registers registers = 2;
  *                       repeated MemoryRegion memoryRegions = 3; }
