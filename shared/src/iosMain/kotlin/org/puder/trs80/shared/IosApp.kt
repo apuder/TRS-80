@@ -16,6 +16,9 @@
 
 package org.puder.trs80.shared
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.ComposeUIViewController
 import kotlinx.cinterop.ExperimentalForeignApi
 import okio.Path.Companion.toPath
@@ -29,6 +32,24 @@ import org.puder.trs80.shared.storage.appSettings
 import platform.UIKit.UIViewController
 
 private const val TAG = "IosApp"
+
+/**
+ * How much smaller a point is drawn than iOS would draw it, so that the two
+ * apps come out the same size.
+ *
+ * They were never drawn differently: the wordmark measures 178x38 pixels on a
+ * Pixel 9 Pro and 176x37 on an iPhone 16 Pro, which is the same drawing at the
+ * same 3x. What differs is how much room each platform says those phones have.
+ * They are both 6.3 inches, and Android calls it 427dp across while iOS calls
+ * it 402pt — so the identical drawing covers 6% more of the iPhone, and reads
+ * as larger type and fewer rows on screen.
+ *
+ * A constant rather than a target width: scaling every iPhone to some reference
+ * number of points would leave a small one drawing everything at three quarters
+ * size. This is a deliberate step away from what other iOS apps do, taken
+ * because one app on two platforms is the point.
+ */
+private const val ANDROID_DP = 402f / 426.67f
 
 /**
  * The iOS host: storage, a Compose view controller, and the hardware keyboard.
@@ -47,7 +68,15 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
 
     val capture = KeyCapture()
     val compose = ComposeUIViewController {
-        Trs80AppUi(core = IosEmulatorCore, hardwareKeys = capture)
+        val platform = LocalDensity.current
+        CompositionLocalProvider(
+            LocalDensity provides Density(
+                density = platform.density * ANDROID_DP,
+                fontScale = platform.fontScale,
+            ),
+        ) {
+            Trs80AppUi(core = IosEmulatorCore, hardwareKeys = capture)
+        }
     }
 
     // A real keyboard has to be taken in UIKit, not in Compose; see
