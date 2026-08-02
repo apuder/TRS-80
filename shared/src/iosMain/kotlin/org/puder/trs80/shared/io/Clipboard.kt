@@ -19,4 +19,4 @@ package org.puder.trs80.shared.io
 import platform.UIKit.UIPasteboard
 
 /** What is on the clipboard, or null if it holds no text. */
-fun clipboardText(): String? = UIPasteboard.generalPasteboard.string
+actual fun clipboardText(): String? = UIPasteboard.generalPasteboard.string

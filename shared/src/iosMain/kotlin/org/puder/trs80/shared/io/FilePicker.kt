@@ -49,7 +49,7 @@ private var pending: PickerDelegate? = null
  * reference into someone else's document that would need its security scope
  * managed. [onPicked] is not called if the user backs out.
  */
-fun pickFile(onPicked: (name: String, content: ByteArray) -> Unit) {
+actual fun pickFile(onPicked: (name: String, content: ByteArray) -> Unit) {
     val host = topViewController()
     if (host == null) {
         Log.e(TAG, "No view controller to present the picker from.")

@@ -43,7 +43,7 @@ private const val DEAD_ZONE = 0.5f
  * the machine has one action, so asking which button it is would be a question
  * with no useful answer.
  */
-class GamepadInput(
+actual class GamepadInput actual constructor(
     private val onDirection: (Direction) -> Unit,
     private val onFire: (Boolean) -> Unit,
 ) {
@@ -51,7 +51,7 @@ class GamepadInput(
     private var disconnectObserver: NSObjectProtocol? = null
 
     /** @return whether a controller is connected right now. */
-    fun start(): Boolean {
+    actual fun start(): Boolean {
         val centre = NSNotificationCenter.defaultCenter
         connectObserver = centre.addObserverForName(
             name = GCControllerDidConnectNotification,
@@ -70,7 +70,7 @@ class GamepadInput(
         return GCController.controllers().isNotEmpty()
     }
 
-    fun stop() {
+    actual fun stop() {
         val centre = NSNotificationCenter.defaultCenter
         connectObserver?.let(centre::removeObserver)
         disconnectObserver?.let(centre::removeObserver)

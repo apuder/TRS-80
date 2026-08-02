@@ -28,6 +28,9 @@ private const val TAG = "MotionInput"
 /** How often the accelerometer is read; roughly a frame at 60Hz. */
 private const val INTERVAL_SECONDS = 1.0 / 60.0
 
+/** One g in m/s^2, the units the shared thresholds are in. */
+private const val GRAVITY = 9.80665f
+
 /**
  * The device's own tilt, as a direction.
  *
@@ -36,12 +39,12 @@ private const val INTERVAL_SECONDS = 1.0 / 60.0
  * moving the whole machine.
  */
 @OptIn(ExperimentalForeignApi::class)
-class MotionInput(private val onDirection: (Direction) -> Unit) {
+actual class MotionInput actual constructor(private val onDirection: (Direction) -> Unit) {
     private val manager = CMMotionManager()
     private val tilt = org.puder.trs80.shared.ui.TiltDirection()
 
     /** @return whether there is an accelerometer to listen to. */
-    fun start(): Boolean {
+    actual fun start(): Boolean {
         if (!manager.accelerometerAvailable) {
             Log.i(TAG, "No accelerometer on this device.")
             return false
@@ -54,13 +57,23 @@ class MotionInput(private val onDirection: (Direction) -> Unit) {
             data.acceleration.useContents {
                 // Gravity points down, so tipping the top away gives a negative
                 // y; the sign here is what makes that read as up.
-                onDirection(tilt.update(x = x.toFloat(), y = -y.toFloat()))
+                //
+                // Scaled to m/s^2, which is what the thresholds are written in:
+                // Core Motion reports in g and Android's sensor does not, so
+                // without this a press wanted a full 1g -- the device on its
+                // side -- and tilting did next to nothing.
+                onDirection(
+                    tilt.update(
+                        x = x.toFloat() * GRAVITY,
+                        y = -y.toFloat() * GRAVITY,
+                    )
+                )
             }
         }
         return true
     }
 
-    fun stop() {
+    actual fun stop() {
         manager.stopAccelerometerUpdates()
         tilt.reset()
         onDirection(Direction.NONE)

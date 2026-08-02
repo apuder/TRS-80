@@ -119,10 +119,10 @@ class KeyForwardingController(
  * The emulator screen turns this on while it is up. Off, the keys go where
  * UIKit would have sent them anyway, which is whatever text field has focus.
  */
-class KeyCapture {
+class KeyCapture : HardwareKeys {
     internal var onChanged: ((Boolean) -> Unit)? = null
 
-    var enabled: Boolean = false
+    override var enabled: Boolean = false
         set(value) {
             if (field != value) {
                 field = value

@@ -36,27 +36,10 @@ private const val TAG = "AppLinks"
  */
 private const val APP_STORE_ID = ""
 
-/** Where the app's community lives; the same place the Android app points at. */
-const val COMMUNITY_URL = "https://retrostore.org/community"
-
-/** Where to send someone who has no store listing to go to. */
-private const val PROJECT_URL = "https://retrostore.org"
-
-/**
- * The App Store listing, or null while there is not one.
- *
- * Null is not a failure to handle -- it is what decides whether Rate is offered
- * at all.
- */
-val storeListingUrl: String?
+actual val storeListingUrl: String?
     get() = APP_STORE_ID.takeIf { it.isNotEmpty() }?.let { "https://apps.apple.com/app/id$it" }
 
-/** What Share puts in the message: the store if there is one, the project if not. */
-val shareUrl: String
-    get() = storeListingUrl ?: PROJECT_URL
-
-/** Hands [url] to the system, which decides what opens it. */
-fun openUrl(url: String) {
+actual fun openUrl(url: String) {
     val target = NSURL.URLWithString(url)
     if (target == null) {
         Log.e(TAG, "Not a URL: $url")
@@ -71,7 +54,7 @@ fun openUrl(url: String) {
  * The system sheet rather than anything of the app's own: what is on it is the
  * user's business, and it changes with what they have installed.
  */
-fun shareText(text: String) {
+actual fun shareText(text: String) {
     val root = UIApplication.sharedApplication.keyWindow?.rootViewController
     if (root == null) {
         Log.e(TAG, "Nothing on screen to present the share sheet from.")
