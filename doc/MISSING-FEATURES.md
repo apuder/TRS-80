@@ -71,10 +71,6 @@ Not missing features — things that are there and imperfect.
 - The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the
   joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
   their logic is tested, but no one has driven them.
-- **The on-screen keyboard is close to invisible in the light theme.** Its keys are white at 20%
-  with white labels, drawn for the dark ground they have always had; on the light ground they wash
-  out almost completely. Found while testing on an iPad, which defaults to light. Predates the
-  overlay work — the overlay register has its own colours and is fine.
 - The editor stays a pushed screen at every width, so opening it on a tablet loses the list. Making
   it a pane is not just layout: the editor holds its draft in `remember` until Save, so it cannot
   survive being navigated away from, which is also why the blank-disk panel is a panel.
@@ -88,10 +84,8 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **The keyboard in the light theme** (§5) — the only thing here that is unusable rather than
-   imperfect, and every tablet defaults to light.
-2. **The screens viewer on a wide window** (§3) — the largest gain for the least work left.
-3. The rest, by appetite. Chromecast is the biggest single piece and the least certain to still
+1. **The screens viewer on a wide window** (§3) — the largest gain for the least work left.
+2. The rest, by appetite. Chromecast is the biggest single piece and the least certain to still
    work at all.
 
 ---
@@ -153,6 +147,10 @@ were done differently from Android and it is worth recording that they were a ch
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.
+- **The machine always draws dark** — its own screen is dark glass with phosphor on it and can be
+  nothing else, so the chrome around it stopped following the app's light register. That also fixed
+  the on-screen keyboard, whose keys are white at a fifth strength with white labels: on the light
+  ground a label sat at 1.00:1 against the key it was printed on, and now reads at 9.28:1.
 - **Where a machine came from** — configurations record the catalog program they were installed
   from, so an entry knows which machines are its own. Not an Android feature: Android had the same
   name-matching guess and the same ways of getting it wrong.

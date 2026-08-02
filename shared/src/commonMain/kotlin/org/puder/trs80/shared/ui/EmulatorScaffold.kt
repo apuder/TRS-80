@@ -53,6 +53,15 @@ import org.puder.trs80.shared.ui.theme.Trs80Theme
  * Drawn in the app's own palette. It was a Material scaffold with default
  * colors, and those follow a MaterialTheme this app never sets — so the bar
  * stayed light while the rest of the app went dark.
+ *
+ * And always the dark register, whatever the rest of the app is set to. A
+ * TRS-80's picture is dark glass with phosphor on it and cannot be anything
+ * else, so a near-white surround leaves it an island; the keyboard is the
+ * sharper case, since its keys are white at a fifth strength and its labels are
+ * white — over the light ground that is a contrast ratio of 1.08:1 for a key
+ * and 1.00:1 for its label, which is to say invisible. Making the machine's own
+ * screen dark fixes that by construction rather than by inventing a second set
+ * of key colors for a surface that is never light anyway.
  */
 @Composable
 fun EmulatorScaffold(
@@ -62,6 +71,20 @@ fun EmulatorScaffold(
     keyboard: (@Composable () -> Unit)? = null,
     /** What the machine can be asked to do while it runs; null offers nothing. */
     machine: MachineActions? = null,
+    screen: @Composable () -> Unit,
+) {
+    Trs80Theme(dark = true) {
+        MachineChrome(title, onBack, modifier, keyboard, machine, screen)
+    }
+}
+
+@Composable
+private fun MachineChrome(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier,
+    keyboard: (@Composable () -> Unit)?,
+    machine: MachineActions?,
     screen: @Composable () -> Unit,
 ) {
     val colors = Trs80Theme.colors
