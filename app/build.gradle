@@ -1,3 +1,5 @@
+import javax.inject.Inject
+
 buildscript {
     repositories {
         google()
@@ -101,6 +103,35 @@ protobuf {
     }
 }
 
+/*
+ * The shared module's Compose resources -- its strings and its fonts.
+ *
+ * They should arrive inside the .aar and do not. Compose Multiplatform hooks
+ * its asset-copying task up through AGP's variant API, which only the ordinary
+ * library plugin supports; :shared has to use AGP's Kotlin Multiplatform
+ * library plugin, whose variants have no assets source to hook into at all. So
+ * the resources are fetched from where that task leaves them and packaged from
+ * here. Without this the app launches and dies on the first string it asks for,
+ * which is on the first screen.
+ *
+ * Worth deleting the day Compose Multiplatform knows about that plugin.
+ */
+def sharedComposeResources = tasks.register('copySharedComposeResources', GatherAssets) {
+    dependsOn ':shared:copyAndroidMainComposeResourcesToAndroidAssets'
+    source.from("${rootProject.projectDir}/shared/build/androidComposeResources")
+    outputDirectory = layout.buildDirectory.dir('generated/sharedComposeResources')
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        // The variant API rather than sourceSets: AGP 9 refuses generated
+        // directories there, and this is what tells it the assets are made by a
+        // task rather than checked in.
+        variant.sources.assets.addGeneratedSourceDirectory(
+                sharedComposeResources, { it.outputDirectory })
+    }
+}
+
 android {
     compileSdk 37
     compileSdkMinor 1
@@ -117,8 +148,9 @@ android {
         applicationId "org.puder.trs80"
         minSdk 26
         targetSdk 36
-        versionCode 49
-        versionName "0.99"
+        // See gradle.properties; the shared code is told the same two values.
+        versionCode trs80VersionCode.toInteger()
+        versionName trs80VersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -166,5 +198,34 @@ android {
         // No baseline: the project currently has no lint errors, only warnings.
         // The old baseline referenced the pre-Kotlin .java paths and was stale.
         abortOnError = true
+    }
+}
+
+/**
+ * Gathers files a task in another project produced, as this project's own
+ * generated assets.
+ *
+ * A plain Copy would do the copying, but AGP's variant API wires to a
+ * DirectoryProperty and Copy has none -- so this is a Copy with the one
+ * property it wants.
+ */
+abstract class GatherAssets extends DefaultTask {
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getSource()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDirectory()
+
+    @Inject
+    abstract FileSystemOperations getFileOperations()
+
+    @TaskAction
+    void gather() {
+        fileOperations.sync {
+            it.from(source)
+            it.into(outputDirectory)
+        }
     }
 }

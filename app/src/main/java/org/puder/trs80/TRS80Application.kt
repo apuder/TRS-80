@@ -20,8 +20,7 @@ import android.app.Application
 import android.content.Context
 import org.puder.trs80.cast.CastMessageSender
 import org.puder.trs80.cast.RemoteCastScreen
-import org.puder.trs80.shared.initAppVersion
-import org.puder.trs80.shared.io.initAppDataDirectory
+import org.puder.trs80.shared.initSharedApp
 import org.puder.trs80.shared.storage.ImportResult
 import org.puder.trs80.storage.AppStorage
 
@@ -35,10 +34,9 @@ class TRS80Application : Application() {
         super.onCreate()
         appContext = applicationContext
 
-        // The shared file code has no Context to find the app's directory with,
-        // so it is handed it here, before anything can ask.
-        initAppDataDirectory(appContext)
-        initAppVersion(appContext)
+        // The shared code has no Context to find the app's directory, settings
+        // or clipboard with, so it is handed one here, before anything can ask.
+        initSharedApp(appContext)
 
         // Before anything reads a configuration. Held so that MainActivity can
         // tell the user if it failed — Application has nowhere to show that.

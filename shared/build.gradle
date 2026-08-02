@@ -97,6 +97,51 @@ def coreBuilds = iosTargets.collectEntries { name, spec ->
     [(name): registerCoreBuild(name, spec.sdk, spec.arch)]
 }
 
+/*
+ * The Compose resources -- strings, fonts -- as Android assets.
+ *
+ * The plugin makes the task but never gives it an output directory: it hooks
+ * that up through AGP's variant API, which it only does for the ordinary
+ * com.android.library plugin, and this module has to use
+ * com.android.kotlin.multiplatform.library instead (see the note at the top).
+ * So the destination is set here, and the app module adds it to its own assets;
+ * without that the app starts and dies on the first string it asks for.
+ *
+ * Worth removing the moment Compose Multiplatform knows about AGP's KMP library
+ * plugin, which is the same day this stops being needed at both ends.
+ */
+/*
+ * The version, as a constant the shared code can read.
+ *
+ * Generated rather than written down here, so that gradle.properties stays the
+ * only place it is set: Android's manifest takes it from there and so does
+ * this, and the two cannot drift.
+ */
+def generateBuildVersion = tasks.register('generateBuildVersion') {
+    def outputDir = layout.buildDirectory.dir('generated/version')
+    def name = providers.gradleProperty('trs80VersionName')
+    def code = providers.gradleProperty('trs80VersionCode')
+    inputs.property('versionName', name)
+    inputs.property('versionCode', code)
+    outputs.dir(outputDir)
+    doLast {
+        def file = outputDir.get().file('org/puder/trs80/shared/BuildVersion.kt').asFile
+        file.parentFile.mkdirs()
+        file.text = """// Generated from gradle.properties. Do not edit.
+package org.puder.trs80.shared
+
+internal const val VERSION_NAME = "${name.get()}"
+internal const val VERSION_CODE = ${code.get()}
+"""
+    }
+}
+
+// matching, not named: the plugin registers this task later than this file is
+// read, so asking for it by name here fails outright.
+tasks.matching { it.name == 'copyAndroidMainComposeResourcesToAndroidAssets' }.configureEach {
+    outputDirectory = layout.buildDirectory.dir('androidComposeResources')
+}
+
 // Gradle reports only "BUILD SUCCESSFUL" for test tasks by default, which is
 // indistinguishable from a run that found no tests at all. Name them.
 tasks.withType(AbstractTestTask).configureEach {
@@ -153,6 +198,7 @@ kotlin {
 
     sourceSets {
         commonMain {
+            kotlin.srcDir(generateBuildVersion)
             dependencies {
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
                 // The key-value store. Its Android implementation is

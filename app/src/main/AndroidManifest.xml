@@ -15,10 +15,19 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <!--
+            The app. Everything it draws is the shared Compose UI.
+
+            configChanges rather than letting the system recreate it: a running
+            machine lives in the composition, and being recreated would stop the
+            CPU and boot it again from its last save. Turning the device is not
+            supposed to cost the user their game.
+        -->
         <activity
-            android:name=".MainActivity"
+            android:name=".Trs80Activity"
             android:label="@string/app_name"
             android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,6 +36,10 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".EditConfigurationActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".EmulatorActivity"
