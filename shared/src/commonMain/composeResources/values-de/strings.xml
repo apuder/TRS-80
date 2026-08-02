@@ -98,6 +98,20 @@
     <string name="mkdisk_name_taken">Dieser Rechner hat bereits eine Diskette dieses Namens.</string>
     <string name="mkdisk_failed">Die Diskette konnte nicht geschrieben werden.</string>
 
+    <!-- Sitzung beenden und der experimentelle Bereich -->
+    <string name="stop">Beenden</string>
+    <string name="stop_detail">Verwirft die pausierte Sitzung, sodass neu gestartet wird.</string>
+    <string name="stop_question">%1$s beenden?</string>
+    <string name="stop_consequence">Die wartende Sitzung wird verworfen und das Band zurückgespult. Der Rechner und seine Disketten bleiben.</string>
+    <string name="share_state">Zustand teilen</string>
+    <string name="share_state_detail">Lädt den aktuellen Zustand zu RetroStore hoch und liefert ein Token.</string>
+    <string name="experimental">Experimentell</string>
+    <string name="experimental_unlocked">Experimentelle Funktionen sind in den Einstellungen verfügbar</string>
+    <string name="sharing_state">Wird geteilt…</string>
+    <string name="share_token">Hochgeladen. Token: %1$s</string>
+    <string name="share_failed">Zustand konnte nicht hochgeladen werden</string>
+    <string name="share_no_state">Dieser Rechner hat keinen TRS-Xray-Zustand zum Teilen</string>
+
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
     <string name="appearance">Darstellung</string>

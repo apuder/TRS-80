@@ -34,6 +34,9 @@ import trs_80.shared.generated.resources.cancel
 import trs_80.shared.generated.resources.delete
 import trs_80.shared.generated.resources.delete_consequence
 import trs_80.shared.generated.resources.delete_question
+import trs_80.shared.generated.resources.stop
+import trs_80.shared.generated.resources.stop_consequence
+import trs_80.shared.generated.resources.stop_question
 import trs_80.shared.generated.resources.this_entry
 
 /**
@@ -48,6 +51,42 @@ import trs_80.shared.generated.resources.this_entry
  * deserves the same words: what goes with the machine is what makes this worth
  * asking at all, and it should not be phrased two ways.
  */
+@Composable
+internal fun ConfirmStop(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
+    val colors = Trs80Theme.colors
+    ModalPanel(onDismiss = onCancel) {
+        Text(
+            stringResource(
+                Res.string.stop_question,
+                name.ifEmpty { stringResource(Res.string.this_entry) },
+            ),
+            style = Trs80Theme.type.title,
+        )
+        Spacer(Modifier.padding(top = 8.dp))
+        Text(
+            stringResource(Res.string.stop_consequence),
+            style = Trs80Theme.type.bodySmall,
+            color = colors.muted,
+        )
+        Spacer(Modifier.padding(top = 18.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextAction(
+                stringResource(Res.string.cancel),
+                onClick = onCancel,
+                color = colors.muted,
+                padding = 0.dp,
+            )
+            Spacer(Modifier.weight(1f))
+            DestructiveButton(
+                stringResource(Res.string.stop),
+                onClick = onConfirm,
+                filled = true,
+                icon = null,
+            )
+        }
+    }
+}
+
 @Composable
 internal fun ConfirmDelete(name: String, onCancel: () -> Unit, onConfirm: () -> Unit) {
     val colors = Trs80Theme.colors

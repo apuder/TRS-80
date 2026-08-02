@@ -71,6 +71,10 @@ import trs_80.shared.generated.resources.edit_entry
 import trs_80.shared.generated.resources.edit_entry_detail
 import trs_80.shared.generated.resources.loading
 import trs_80.shared.generated.resources.search_entries
+import trs_80.shared.generated.resources.share_state
+import trs_80.shared.generated.resources.share_state_detail
+import trs_80.shared.generated.resources.stop
+import trs_80.shared.generated.resources.stop_detail
 import trs_80.shared.generated.resources.show_all
 import trs_80.shared.generated.resources.show_fewer
 import trs_80.shared.generated.resources.sort_alphabetical
@@ -167,6 +171,16 @@ data class LibraryActions(
     val onDuplicate: ((Int) -> Unit)? = null,
     /** Deletes one of the user's machines, once the user has confirmed it. */
     val onDelete: ((Int) -> Unit)? = null,
+    /**
+     * Throws away a machine's paused session, once the user has confirmed it.
+     *
+     * Offered only for a machine that has one. This is Android's Stop: the
+     * machine is not running in the background -- leaving it wrote its state
+     * out -- so what there is to stop is the session waiting to be resumed.
+     */
+    val onStop: ((Int) -> Unit)? = null,
+    /** Uploads a machine's TRS-Xray state to the store. Experimental. */
+    val onShare: ((Int) -> Unit)? = null,
     /** Asks the store for the catalog again. */
     val onRefresh: (() -> Unit)? = null,
     val onOpenSettings: (() -> Unit)? = null,
@@ -218,8 +232,11 @@ fun LibraryScreen(
     // Whether the menu has given way to the question. Cancelling puts the menu
     // back, since that is where the user was.
     var confirmingDelete by remember { mutableStateOf(false) }
+    // Same shape as the delete question, and asked for the same reason: what it
+    // throws away cannot be got back.
+    var confirmingStop by remember { mutableStateOf(false) }
     val hasMenu = actions.onEdit != null || actions.onDuplicate != null ||
-        actions.onDelete != null
+        actions.onDelete != null || actions.onStop != null || actions.onShare != null
 
     // The pane is only offered where there is room for it; the caller decides
     // what goes in it, because what an entry says is the host's business and
@@ -255,7 +272,7 @@ fun LibraryScreen(
                         card,
                         onClick = { actions.onRun(card.id) },
                         onMenu = if (hasMenu) {
-                            { menuFor = card; confirmingDelete = false }
+                            { menuFor = card; confirmingDelete = false; confirmingStop = false }
                         } else {
                             null
                         },
@@ -305,7 +322,17 @@ fun LibraryScreen(
         menuFor?.let { card ->
             // One panel at a time: the question replaces the menu rather than
             // stacking on it, so there is never a scrim over a scrim.
-            if (confirmingDelete) {
+            if (confirmingStop) {
+                ConfirmStop(
+                    name = card.name,
+                    onCancel = { confirmingStop = false },
+                    onConfirm = {
+                        confirmingStop = false
+                        menuFor = null
+                        actions.onStop?.invoke(card.id)
+                    },
+                )
+            } else if (confirmingDelete) {
                 ConfirmDelete(
                     name = card.name,
                     onCancel = { confirmingDelete = false },
@@ -320,6 +347,7 @@ fun LibraryScreen(
                     card = card,
                     actions = actions,
                     onDelete = { confirmingDelete = true },
+                    onStop = { confirmingStop = true },
                     onDismiss = { menuFor = null },
                 )
             }
@@ -339,6 +367,7 @@ private fun PlateMenu(
     card: ConfigurationCard,
     actions: LibraryActions,
     onDelete: () -> Unit,
+    onStop: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalPanel(onDismiss = onDismiss) {
@@ -356,6 +385,25 @@ private fun PlateMenu(
                 label = stringResource(Res.string.duplicate),
                 subtitle = stringResource(Res.string.duplicate_detail),
                 onClick = { onDismiss(); duplicate(card.id) },
+            )
+            Hairline()
+        }
+        // Only for a machine with a session waiting: there is nothing to stop
+        // otherwise, and a control that does nothing is worse than none.
+        if (actions.onStop != null && card.hasSavedState) {
+            SettingRow(
+                label = stringResource(Res.string.stop),
+                subtitle = stringResource(Res.string.stop_detail),
+                onClick = { onDismiss(); onStop() },
+            )
+            Hairline()
+        }
+        // Likewise the X-ray dump, which only exists once the machine has run.
+        if (actions.onShare != null && card.hasXrayState) {
+            SettingRow(
+                label = stringResource(Res.string.share_state),
+                subtitle = stringResource(Res.string.share_state_detail),
+                onClick = { onDismiss(); actions.onShare.invoke(card.id) },
             )
             Hairline()
         }

@@ -20,8 +20,6 @@ actions per machine, and both now have somewhere obvious to go.
 
 | Feature | Android | Notes |
 |---|---|---|
-| Stop a running machine | `onConfigurationStop` | From the list, without entering it |
-| Share a machine | `onConfigurationShare` | Shown when it has a TRS-Xray state |
 | Rate / Help / Community / Share the app | drawer | `activity_main_drawer.xml` |
 
 Settings is ported. The rest of the drawer is not.
@@ -73,6 +71,14 @@ Not missing features — things that are there and imperfect.
   entry by name, once, on the first catalog load. A machine whose name does not match a catalog
   program exactly — or matches a name two programs share — stays unlinked for good, and its entry
   will offer to download a fresh copy alongside it. There is no way to link one by hand.
+- The TRS-Xray dump is described by two copies of one schema: Android's
+  `app/src/main/proto/system_state.proto`, compiled by protobuf-lite, and
+  `shared/src/commonMain/proto/trs_protos/system_state.proto`, compiled by Wire into a different
+  package. One file would put two `NativeSystemState` classes in the same package on Android's
+  classpath, and moving Android onto the Wire type means unpicking the protobuf plugin from the
+  app that is in the store. If the dump format changes, both files change.
+- Sharing a state has never been run against the live store — the upload path is exercised only as
+  far as building the request.
 - The document picker, disk drag-to-swap, tap-to-focus, the screens viewer's swipe and the
   joystick, tilt and gamepad inputs have never been exercised interactively — they compile and
   their logic is tested, but no one has driven them.
@@ -93,10 +99,9 @@ Not missing features — things that are there and imperfect.
 
 ## Suggested order
 
-1. **Stop and Share** (§1) — small, and the overflow menu they belong in now exists.
-2. **The keyboard in the light theme** (§5) — it is unusable rather than untidy, and a tablet
+1. **The keyboard in the light theme** (§5) — it is unusable rather than untidy, and a tablet
    defaults to light.
-3. The rest, by appetite.
+2. The rest, by appetite.
 
 ---
 
@@ -135,6 +140,10 @@ were done differently from Android and it is worth recording that they were a ch
   There was never anything for iOS to import: the legacy layout is Android SharedPreferences files,
   and there was no previous iOS app. Moving a library *between* the two platforms is a real gap and
   a different feature — an export both ends understand — and nobody has asked for it yet.
+- **Stop and Share** — both in the plate's overflow. Stop discards the paused session and rewinds
+  the tape, as Android's does, and asks first. Share is behind an experimental flag, found by
+  tapping the wordmark ten times and then switched on in settings: two gates, so finding the door
+  is not the same as walking through it.
 - **The saved-state crash** — a machine resuming mid-transfer read from a drive whose image could
   not be reopened, and `getc(NULL)` took the process with it. Both the crash and the stale path
   behind it are fixed; see §5 for what the fix chose.

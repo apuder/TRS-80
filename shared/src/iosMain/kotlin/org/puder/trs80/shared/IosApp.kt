@@ -44,6 +44,16 @@ import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.navigation.Destination
 import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
+import org.puder.trs80.shared.storage.ExperimentalFeatures
+import org.puder.trs80.shared.storage.TapRun
+import org.puder.trs80.shared.ui.Toast
+import trs_80.shared.generated.resources.experimental_unlocked
+import org.puder.trs80.shared.configuration.systemState
+import org.jetbrains.compose.resources.getString
+import trs_80.shared.generated.resources.share_failed
+import trs_80.shared.generated.resources.share_no_state
+import trs_80.shared.generated.resources.share_token
+import trs_80.shared.generated.resources.sharing_state
 import org.puder.trs80.shared.storage.appSettings
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -155,6 +165,14 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
         // The choice is read once and held here, so changing it repaints the
         // whole app rather than only the screen that changed it.
         var theme by remember { mutableStateOf(ThemePreference.from(appSettings())) }
+        val experimental = remember { ExperimentalFeatures(appSettings()) }
+        // Read into state so turning one on repaints what offers it, rather than
+        // waiting for whatever happens to recompose next.
+        var unlocked by remember { mutableStateOf(experimental.isUnlocked) }
+        var shareEnabled by remember { mutableStateOf(experimental.isShareEnabled) }
+        val taps = remember { TapRun() }
+        var message by remember { mutableStateOf<String?>(null) }
+        val unlockedMessage = stringResource(Res.string.experimental_unlocked)
         Trs80Theme(
             dark = when (theme) {
                 ThemePreference.Light -> false
@@ -165,7 +183,14 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
             Box(Modifier.fillMaxSize()) {
             Trs80App(
                 navigator = navigator,
-                library = { Library(navigator, catalog) },
+                library = {
+                    Library(
+                        navigator = navigator,
+                        catalog = catalog,
+                        shareEnabled = shareEnabled,
+                        onMessage = { message = it },
+                    )
+                },
                 emulator = {
                     RunningMachine(
                         it.configurationId,
@@ -190,6 +215,22 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
                         onRedownloadRom = { model ->
                             scope.launch { roms.redownload(model) }
                         },
+                        experimentalUnlocked = unlocked,
+                        shareEnabled = shareEnabled,
+                        onShareEnabledChange = {
+                            experimental.setShareEnabled(it)
+                            shareEnabled = experimental.isShareEnabled
+                        },
+                        onVersionTap = {
+                            // Only the tap that gets there says so. Carrying on
+                            // past ten, or coming back to a section already
+                            // open, announces nothing.
+                            if (taps.tap(currentTimeMillis()) && !unlocked) {
+                                experimental.unlock()
+                                unlocked = true
+                                message = unlockedMessage
+                            }
+                        },
                     )
                 },
                 editConfiguration = { Editor(it.configurationId, it.isNew, navigator) },
@@ -198,6 +239,8 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
             // Over whatever is on screen: nothing the app offers works until
             // these are here.
             val settingUp = roms.busy || (roms.attempted && roms.missing.isNotEmpty())
+            Toast(message, onDismissed = { message = null })
+
             if (settingUp && !setupDismissed) {
                 RomSetupPanel(
                     downloading = roms.busy,
@@ -295,7 +338,12 @@ private fun Editor(configurationId: Int, isNew: Boolean, navigator: Navigator) {
  * testable on their own, without a display.
  */
 @Composable
-private fun Library(navigator: Navigator, catalog: Catalog) {
+private fun Library(
+    navigator: Navigator,
+    catalog: Catalog,
+    shareEnabled: Boolean,
+    onMessage: (String) -> Unit,
+) {
     var cards by remember { mutableStateOf(emptyList<ConfigurationCard>()) }
     var query by remember { mutableStateOf("") }
     var sort by remember { mutableStateOf(LibrarySort.LastUsed) }
@@ -435,6 +483,15 @@ private fun Library(navigator: Navigator, catalog: Catalog) {
                 navigator.goTo(Destination.EditConfiguration(fresh.id, isNew = true))
             },
             onPlayEntry = ::playEntry,
+            onStop = { id ->
+                scope.launch {
+                    withContext(Dispatchers.Default) { stopMachine(id) }
+                    reload()
+                }
+            },
+            // Offered only while the flag is on, so the row is absent rather
+            // than present-and-refusing for everyone who has not asked for it.
+            onShare = if (!shareEnabled) null else { id -> shareState(id, scope, onMessage) },
         ),
         selectedId = selectedId.takeIf { wide },
         pane = if (!wide) {
@@ -816,3 +873,54 @@ private fun installIfNeeded(diskPath: String?) {
 
 /** @return the path of the ROM for [model], or null if there is none. */
 private fun romPathFor(model: Int): String? = RomManager.get().romPath(model)
+
+/**
+ * Throws away a machine's paused session.
+ *
+ * What Android's Stop does, and the same two steps: the saved state goes, and
+ * the tape is wound back. The machine, its disks and its settings stay — this
+ * ends a session, it does not remove anything the user set up.
+ */
+private fun stopMachine(configurationId: Int) {
+    val manager = ConfigurationManager.get()
+    runCatching { manager.getEmulatorState(configurationId).deleteSavedState() }
+        .onFailure { Log.e(TAG, "Could not clear the saved state.", it) }
+    manager.getConfigById(configurationId)?.cassettePosition = 0f
+}
+
+/**
+ * Uploads a machine's TRS-Xray state to the store and reports the token.
+ *
+ * Experimental, and reachable only once the user has turned it on. The token is
+ * the whole result — it is what someone else types in to fetch the state — so
+ * it is said rather than logged.
+ */
+private fun shareState(
+    configurationId: Int,
+    scope: CoroutineScope,
+    onMessage: (String) -> Unit,
+) {
+    scope.launch {
+        val state = withContext(Dispatchers.Default) {
+            runCatching {
+                ConfigurationManager.get().getEmulatorState(configurationId)
+                    .systemState(ConfigurationManager.get().getConfigById(configurationId)?.model ?: 0)
+            }.onFailure { Log.e(TAG, "Cannot read the machine's state.", it) }.getOrNull()
+        }
+        if (state == null) {
+            onMessage(getString(Res.string.share_no_state))
+            return@launch
+        }
+        onMessage(getString(Res.string.sharing_state))
+        val token = runCatching { retroStore.uploadState(state) }
+            .onFailure { Log.e(TAG, "Could not upload the state.", it) }
+            .getOrNull()
+        onMessage(
+            if (token == null) {
+                getString(Res.string.share_failed)
+            } else {
+                getString(Res.string.share_token, token.toString())
+            }
+        )
+    }
+}

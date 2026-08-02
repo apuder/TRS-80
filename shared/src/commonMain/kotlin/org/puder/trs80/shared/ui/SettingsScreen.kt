@@ -29,6 +29,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +44,9 @@ import trs_80.shared.generated.resources.get_all
 import trs_80.shared.generated.resources.not_installed
 import trs_80.shared.generated.resources.rom_images
 import trs_80.shared.generated.resources.roms_hint
+import trs_80.shared.generated.resources.experimental
+import trs_80.shared.generated.resources.share_state
+import trs_80.shared.generated.resources.share_state_detail
 import trs_80.shared.generated.resources.settings
 import trs_80.shared.generated.resources.theme
 import trs_80.shared.generated.resources.theme_hint
@@ -55,6 +61,7 @@ import org.puder.trs80.shared.ui.theme.SettingRow
 import org.puder.trs80.shared.ui.theme.SegmentedToggle
 import org.puder.trs80.shared.ui.theme.TextAction
 import org.puder.trs80.shared.ui.theme.Text
+import org.puder.trs80.shared.ui.theme.Toggle
 import org.puder.trs80.shared.ui.theme.ThemePreference
 import org.puder.trs80.shared.ui.theme.Trs80Theme
 
@@ -76,6 +83,23 @@ fun SettingsScreen(
     onDownloadRoms: (() -> Unit)? = null,
     onChooseRom: ((Int) -> Unit)? = null,
     onRedownloadRom: ((Int) -> Unit)? = null,
+    /**
+     * Whether the experimental section is shown at all.
+     *
+     * Off until the user has found it, which is the point: what is in here is
+     * unfinished, and someone who has not gone looking should not meet it.
+     */
+    experimentalUnlocked: Boolean = false,
+    shareEnabled: Boolean = false,
+    onShareEnabledChange: ((Boolean) -> Unit)? = null,
+    /**
+     * A tap on the version, which is how the experimental section is found.
+     *
+     * The version is the right place for it: it is the one thing on this screen
+     * that is already inert, so making it count taps takes nothing away, and it
+     * is where the same gesture lives on Android.
+     */
+    onVersionTap: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val colors = Trs80Theme.colors
@@ -172,12 +196,36 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 10.dp),
                 )
             }
+
+            if (experimentalUnlocked && onShareEnabledChange != null) {
+                SectionKicker(stringResource(Res.string.experimental))
+                SettingRow(
+                    label = stringResource(Res.string.share_state),
+                    subtitle = stringResource(Res.string.share_state_detail),
+                ) {
+                    Toggle(checked = shareEnabled, onCheckedChange = onShareEnabledChange)
+                }
+                Hairline()
+            }
         }
 
         // At the very foot, quiet: it is there to be read back when something
         // has gone wrong, not to be looked at.
         Box(
-            Modifier.fillMaxWidth().padding(vertical = 18.dp),
+            Modifier
+                .fillMaxWidth()
+                // No ripple: it has to keep reading as a version and not as a
+                // control, or it stops being something you have to be told about.
+                .then(
+                    onVersionTap?.let { tap ->
+                        Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = tap,
+                        )
+                    } ?: Modifier
+                )
+                .padding(vertical = 18.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

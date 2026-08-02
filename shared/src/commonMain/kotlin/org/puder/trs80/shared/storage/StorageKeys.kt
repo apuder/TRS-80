@@ -128,6 +128,12 @@ object StorageKeys {
     /** Which register the app draws in: see `ThemePreference`. */
     const val APP_THEME = APP_PREFIX + "theme"
 
+    /** Whether the user has found the experimental section; see `ExperimentalFeatures`. */
+    const val EXPERIMENTAL_UNLOCKED = APP_PREFIX + "experimental"
+
+    /** Whether sharing a machine's state is offered. Meaningless while locked. */
+    const val EXPERIMENTAL_SHARE = APP_PREFIX + "experimental_share"
+
     /**
      * The ROM image for an emulated model. The leaf keeps its legacy name for
      * the same reason as the per-configuration keys: the settings screen binds
