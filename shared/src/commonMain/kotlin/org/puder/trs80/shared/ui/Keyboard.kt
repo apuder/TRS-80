@@ -17,6 +17,7 @@
 package org.puder.trs80.shared.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -49,6 +50,19 @@ private val KEY_FACE_LATCHED = Color(0x66FFFFFF)
 private val KEY_LABEL = Color.White
 
 /**
+ * What a key is drawn as when it lies over the machine's picture.
+ *
+ * An outline and a label, with nothing filled in — the same thing the Android
+ * app draws in landscape, and for the same reason: the keyboard has to be over
+ * the screen because there is no room below it, and a key with a face would
+ * blank out the part of the picture it covers. Pressing one still fills, so the
+ * feedback that matters is the one thing that is opaque.
+ */
+private val KEY_EDGE = Color(0x66FFFFFF)
+private val KEY_LABEL_OVERLAY = Color(0xCCFFFFFF)
+private val KEY_EDGE_WIDTH = 1.dp
+
+/**
  * The on-screen keyboard.
  *
  * A port of the Android key grid, and faithful to how it *behaves* — the same
@@ -60,12 +74,15 @@ private val KEY_LABEL = Color.White
  *
  * @param keyHeight how tall one key is. The width follows from the widest row,
  * so the whole keyboard fits regardless of how many keys a row holds.
+ * @param overlay draws the keys as outlines over whatever is behind them, for
+ * when this sits on the machine's picture rather than below it.
  */
 @Composable
 fun Keyboard(
     state: KeyboardState,
     modifier: Modifier = Modifier,
     keyHeight: Dp = 44.dp,
+    overlay: Boolean = false,
 ) {
     val page = state.definition.pages.getOrNull(state.page) ?: return
     // Rows differ in how many key-widths they hold -- the space bar alone is ten
@@ -91,6 +108,7 @@ fun Keyboard(
                     KeyFace(
                         state = state,
                         key = key,
+                        overlay = overlay,
                         modifier = Modifier.weight(key.size.toFloat()).height(keyHeight),
                     )
                 }
@@ -103,19 +121,27 @@ fun Keyboard(
 }
 
 @Composable
-private fun KeyFace(state: KeyboardState, key: KeyboardKey, modifier: Modifier) {
+private fun KeyFace(
+    state: KeyboardState,
+    key: KeyboardKey,
+    overlay: Boolean,
+    modifier: Modifier,
+) {
     val isPressed = key.name in state.pressed
     val isLatched = state.isShift(key) && state.latchedShift == key.name
+    val shape = RoundedCornerShape(KEY_CORNER)
     val face = when {
         isPressed -> KEY_FACE_PRESSED
         isLatched -> KEY_FACE_LATCHED
+        overlay -> Color.Transparent
         else -> KEY_FACE
     }
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(KEY_CORNER))
+            .clip(shape)
             .background(face)
+            .then(if (overlay) Modifier.border(KEY_EDGE_WIDTH, KEY_EDGE, shape) else Modifier)
             // Not clickable(): a key has to send its down the moment it is
             // touched and its up when the finger lifts, because that is what the
             // emulated machine reads. A click arrives only after both, by which
@@ -132,7 +158,7 @@ private fun KeyFace(state: KeyboardState, key: KeyboardKey, modifier: Modifier) 
     ) {
         Text(
             text = state.labelFor(key),
-            color = KEY_LABEL,
+            color = if (overlay) KEY_LABEL_OVERLAY else KEY_LABEL,
             fontSize = 13.sp,
             textAlign = TextAlign.Center,
             maxLines = 1,

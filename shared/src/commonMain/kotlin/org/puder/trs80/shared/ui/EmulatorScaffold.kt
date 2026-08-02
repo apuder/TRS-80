@@ -66,42 +66,54 @@ fun EmulatorScaffold(
 ) {
     val colors = Trs80Theme.colors
     var controlsOpen by remember { mutableStateOf(false) }
+    val landscape = isLandscape()
 
     Box(modifier.fillMaxSize().background(colors.ground)) {
-        Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-            Row(
-                Modifier.fillMaxWidth().padding(end = Trs80Theme.spacing.screenEdge),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StrokeIcon(Trs80Icon.ChevronLeft, color = colors.accentText, onClick = onBack)
-                Text(
-                    title,
-                    style = Trs80Theme.type.wordmark,
-                    color = colors.text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                if (machine != null) {
-                    Spacer(Modifier.width(Trs80Theme.spacing.gap))
-                    MachineControlsButton(onClick = { controlsOpen = true })
+        if (landscape) {
+            LandscapeMachine(
+                title = title,
+                onBack = onBack,
+                hasControls = machine != null,
+                onControls = { controlsOpen = true },
+                keyboard = keyboard,
+                screen = screen,
+            )
+        } else {
+            Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(end = Trs80Theme.spacing.screenEdge),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    StrokeIcon(Trs80Icon.ChevronLeft, color = colors.accentText, onClick = onBack)
+                    Text(
+                        title,
+                        style = Trs80Theme.type.wordmark,
+                        color = colors.text,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (machine != null) {
+                        Spacer(Modifier.width(Trs80Theme.spacing.gap))
+                        MachineControlsButton(onClick = { controlsOpen = true })
+                    }
                 }
-            }
-            Hairline()
+                Hairline()
 
-            // What surrounds the picture is the app's ground, the same as the
-            // library's. The machine's own glass sits close enough to the colour
-            // the emulated screen draws itself that the two ran together and the
-            // picture had no edge. The display scales to whatever it is given,
-            // so this needs no arithmetic -- the core is told the size and
-            // rasterizes to it.
-            Box(
-                Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                screen()
+                // What surrounds the picture is the app's ground, the same as the
+                // library's. The machine's own glass sits close enough to the colour
+                // the emulated screen draws itself that the two ran together and the
+                // picture had no edge. The display scales to whatever it is given,
+                // so this needs no arithmetic -- the core is told the size and
+                // rasterizes to it.
+                Box(
+                    Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    screen()
+                }
+                keyboard?.invoke()
             }
-            keyboard?.invoke()
         }
 
         // At the root, so the scrim covers the machine and not just the bar.
@@ -110,3 +122,69 @@ fun EmulatorScaffold(
         }
     }
 }
+
+/**
+ * The machine turned sideways: picture everywhere, everything else on top of it.
+ *
+ * Stacked rather than stacked *up*. A TRS-80's picture is about two and a half
+ * times as wide as it is tall, so turning the phone is what finally lets it fill
+ * the width -- and then a keyboard laid out beneath it would take more than half
+ * the height and shrink the picture back to less than it had in portrait. The
+ * Android app reached the same conclusion and drew the keyboard over the screen;
+ * this does the same, with the keys as outlines so the picture reads through
+ * them.
+ *
+ * The bar goes with it. Android hides its action bar outright in landscape, but
+ * iOS has no system Back, so the two controls that matter stay as glyphs in the
+ * corners, dimmed to what they are: a way out and a menu, not part of the
+ * machine.
+ */
+@Composable
+private fun LandscapeMachine(
+    title: String,
+    onBack: () -> Unit,
+    hasControls: Boolean,
+    onControls: () -> Unit,
+    keyboard: (@Composable () -> Unit)?,
+    screen: @Composable () -> Unit,
+) {
+    val colors = Trs80Theme.colors
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            screen()
+        }
+
+        Row(
+            Modifier.fillMaxWidth().align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StrokeIcon(
+                Trs80Icon.ChevronLeft,
+                color = colors.accentText.copy(alpha = OVERLAY_CONTROL_ALPHA),
+                onClick = onBack,
+            )
+            Spacer(Modifier.weight(1f))
+            if (hasControls) {
+                MachineControlsButton(
+                    onClick = onControls,
+                    tint = colors.text.copy(alpha = OVERLAY_CONTROL_ALPHA),
+                    modifier = Modifier.padding(end = Trs80Theme.spacing.screenEdge),
+                )
+            }
+        }
+
+        keyboard?.let {
+            Box(Modifier.fillMaxWidth().align(Alignment.BottomCenter)) { it() }
+        }
+    }
+}
+
+/**
+ * How far the two chrome glyphs fade when they lie on the picture.
+ *
+ * Faint enough not to read as part of what the machine is drawing, solid enough
+ * to find without hunting. Android's own overlaid control sits at 0.4, but
+ * Android has a system Back behind it and iOS does not — the chevron here is the
+ * only way out of a running machine, so it is not something to hide.
+ */
+private const val OVERLAY_CONTROL_ALPHA = 0.7f

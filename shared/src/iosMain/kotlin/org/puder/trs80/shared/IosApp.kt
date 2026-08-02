@@ -46,6 +46,7 @@ import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.appSettings
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import org.puder.trs80.shared.ui.Catalog
@@ -100,6 +101,7 @@ import org.puder.trs80.shared.ui.MachineKeyboard
 import org.puder.trs80.shared.ui.Keyboard
 import org.puder.trs80.shared.ui.KeyboardState
 import org.puder.trs80.shared.ui.ORIGINAL_KEYBOARD
+import org.puder.trs80.shared.ui.isLandscape
 import org.puder.trs80.shared.ui.keyboardFor
 import org.puder.trs80.shared.ui.toCards
 import platform.UIKit.UIViewController
@@ -595,11 +597,19 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     val configuration = remember(configurationId) {
         ConfigurationManager.get().getConfigById(configurationId)
     }
-    // The layout the configuration asks for, falling back to the full keyboard.
-    // A machine with no way to type at it is not much use.
-    val definition = remember(configurationId) {
-        keyboardFor(configuration?.keyboardLayoutPortrait) ?: ORIGINAL_KEYBOARD
+    val landscape = isLandscape()
+    // Turning the phone can change which controls the machine offers: landscape
+    // has a layout of its own and falls back to the portrait one when the user
+    // has not chosen it, which is what the Android app does and what finally
+    // gives the editor's landscape setting something to do.
+    val layout = if (landscape) {
+        configuration?.keyboardLayoutLandscape ?: configuration?.keyboardLayoutPortrait
+    } else {
+        configuration?.keyboardLayoutPortrait
     }
+    // Falling back to the full keyboard: a machine with no way to type at it is
+    // not much use.
+    val definition = remember(layout) { keyboardFor(layout) ?: ORIGINAL_KEYBOARD }
     val keyboard = remember(definition) {
         KeyboardState(
             definition = definition,
@@ -607,7 +617,6 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
         )
     }
-    val layout = configuration?.keyboardLayoutPortrait
     val sender = remember(configurationId) {
         KeySender(
             onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
@@ -670,7 +679,18 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
                 EmulatorCore.setSoundMuted(it)
             },
         ),
-        keyboard = { MachineKeyboard(layout, keyboard, sender) },
+        keyboard = {
+            MachineKeyboard(
+                layout,
+                keyboard,
+                sender,
+                // Sideways the keys lie on the picture, so they are drawn as
+                // outlines and stand a little shorter -- height is what is
+                // scarce, and the picture is what the height is for.
+                overlay = landscape,
+                keyHeight = if (landscape) 38.dp else 44.dp,
+            )
+        },
     ) {
         EmulatorScreen(
             source = source,

@@ -30,6 +30,9 @@ private const val CONF_KEYBOARD_PORTRAIT = StorageKeys.CONFIG_KEYBOARD_PORTRAIT
 private const val CONF_KEYBOARD_LANDSCAPE = StorageKeys.CONFIG_KEYBOARD_LANDSCAPE
 private const val CONF_MUTE_SOUND = StorageKeys.CONFIG_MUTE_SOUND
 
+/** What a keyboard layout reads as when the user has never chosen one. */
+private const val UNSET_LAYOUT = -1
+
 private const val KEY_CASSETTE_POSITION = StorageKeys.CONFIG_CASSETTE_POSITION
 private const val CONF_LAST_USED = StorageKeys.CONFIG_LAST_USED
 private const val CONF_IS_CUSTOM = StorageKeys.CONFIG_IS_CUSTOM
@@ -111,9 +114,17 @@ class ConfigurationPersistence private constructor(
 
     internal fun setKeyboardLayoutPortrait(layout: Int) = setInt(CONF_KEYBOARD_PORTRAIT, layout)
 
-    /** The stored ID of the landscape keyboard layout, see [KeyboardLayout]. */
+    /**
+     * The stored ID of the landscape keyboard layout, or -1 if none is stored.
+     *
+     * Unlike the portrait one this has to be able to say "nothing chosen": a
+     * machine turned sideways falls back to its portrait layout, and defaulting
+     * to 0 would mean every machine claiming it had asked for the Original
+     * keyboard in landscape -- so a game set up with a joystick would show a
+     * typing keyboard the moment the phone was turned.
+     */
     val keyboardLayoutLandscape: Int
-        get() = getInt(CONF_KEYBOARD_LANDSCAPE, 0)
+        get() = getInt(CONF_KEYBOARD_LANDSCAPE, UNSET_LAYOUT)
 
     internal fun setKeyboardLayoutLandscape(layout: Int) = setInt(CONF_KEYBOARD_LANDSCAPE, layout)
 

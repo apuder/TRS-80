@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.puder.trs80.shared.ui.theme.Hairline
@@ -83,11 +84,15 @@ data class MachineActions(
  * so its scrim covers the bar and nothing else.
  */
 @Composable
-internal fun MachineControlsButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun MachineControlsButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = Trs80Theme.colors.text,
+) {
     StrokeIcon(
         Trs80Icon.Overflow,
         modifier = modifier,
-        color = Trs80Theme.colors.text,
+        color = tint,
         onClick = onClick,
     )
 }

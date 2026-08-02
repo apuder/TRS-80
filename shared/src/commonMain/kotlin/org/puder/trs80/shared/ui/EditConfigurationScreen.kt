@@ -263,12 +263,16 @@ fun EditConfigurationScreen(
             }
 
             SectionKicker(stringResource(Res.string.controls))
+            // Landscape shows what it would actually use rather than "not set",
+            // because falling back to the portrait layout is the answer, not
+            // the absence of one.
+            val landscapeLayout = draft.keyboardLandscape ?: draft.keyboardPortrait
             SettingRow(
                 label = stringResource(Res.string.keyboard),
                 subtitle = stringResource(
                     Res.string.keyboard_summary,
                     keyboardLabel(draft.keyboardPortrait),
-                    keyboardLabel(draft.keyboardLandscape),
+                    keyboardLabel(landscapeLayout),
                 ),
                 onClick = { controlsOpen = !controlsOpen },
             )
@@ -278,7 +282,7 @@ fun EditConfigurationScreen(
                     onChange(draft.copy(keyboardPortrait = it))
                 }
                 Hairline()
-                KeyboardChoice(stringResource(Res.string.landscape), draft.keyboardLandscape) {
+                KeyboardChoice(stringResource(Res.string.landscape), landscapeLayout) {
                     onChange(draft.copy(keyboardLandscape = it))
                 }
             }

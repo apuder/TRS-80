@@ -18,6 +18,8 @@ package org.puder.trs80.shared.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import org.puder.trs80.shared.KeyboardLayout
 
 /**
@@ -33,11 +35,15 @@ fun MachineKeyboard(
     grid: KeyboardState,
     sender: KeySender,
     modifier: Modifier = Modifier,
+    overlay: Boolean = false,
+    keyHeight: Dp = 44.dp,
 ) {
     when (layout) {
+        // The pads are already mostly holes -- a ring, a knob and a word -- so
+        // they need nothing doing to them to sit over the picture.
         KeyboardLayout.KEYBOARD_LAYOUT_JOYSTICK -> JoystickPad(sender, modifier)
         KeyboardLayout.KEYBOARD_TILT -> TiltPad(sender, modifier)
         KeyboardLayout.KEYBOARD_GAME_CONTROLLER -> Unit
-        else -> Keyboard(grid, modifier)
+        else -> Keyboard(grid, modifier, keyHeight = keyHeight, overlay = overlay)
     }
 }
