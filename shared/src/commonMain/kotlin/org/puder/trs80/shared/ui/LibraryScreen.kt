@@ -86,6 +86,7 @@ import trs_80.shared.generated.resources.sort_alphabetical
 import trs_80.shared.generated.resources.sort_last_used
 import trs_80.shared.generated.resources.store_unreachable
 import trs_80.shared.generated.resources.yours
+import trs_80.shared.generated.resources.yours_empty
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.ModalPanel
@@ -312,6 +313,12 @@ fun LibraryScreen(
                     )
                     }
                 }
+                if (yours.isEmpty()) {
+                    // Said rather than left blank: an empty section under a
+                    // heading looks like something that failed to load, and the
+                    // catalog underneath is the answer to it.
+                    item { Note(stringResource(Res.string.yours_empty)) }
+                }
                 items(shown, key = { it.id }) { card ->
                     Plate(
                         card,
@@ -336,8 +343,8 @@ fun LibraryScreen(
                     )
                 }
                 when (catalogState) {
-                    is StoreState.Loading -> item { CatalogNote(stringResource(Res.string.loading)) }
-                    is StoreState.Failed -> item { CatalogNote(stringResource(Res.string.store_unreachable)) }
+                    is StoreState.Loading -> item { Note(stringResource(Res.string.loading)) }
+                    is StoreState.Failed -> item { Note(stringResource(Res.string.store_unreachable)) }
                     is StoreState.Loaded -> items(catalog, key = { it.id }) { entry ->
                         CatalogRow(entry, actions, selected = entry.id == selectedId)
                     }
@@ -824,7 +831,7 @@ private fun CatalogRow(
 }
 
 @Composable
-private fun CatalogNote(text: String) {
+private fun Note(text: String) {
     Box(Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
         Text(text, style = Trs80Theme.type.body, color = Trs80Theme.colors.muted)
     }

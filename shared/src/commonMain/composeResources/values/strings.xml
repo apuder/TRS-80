@@ -13,6 +13,8 @@
     <string name="catalog">Catalog</string>
     <string name="loading">Loading…</string>
     <string name="store_unreachable">Could not reach the store.</string>
+    <!-- Under Yours, before anything has been played -->
+    <string name="yours_empty">Nothing yet. Play something from the catalog below and it appears here.</string>
     <string name="search_entries">Search %1$d entries</string>
     <string name="custom">CUSTOM</string>
     <string name="show_fewer">Show fewer</string>

@@ -14,6 +14,7 @@
     <string name="catalog">Katalog</string>
     <string name="loading">Wird geladen…</string>
     <string name="store_unreachable">Store nicht erreichbar.</string>
+    <string name="yours_empty">Noch nichts. Spielen Sie etwas aus dem Katalog unten, dann erscheint es hier.</string>
     <string name="search_entries">%1$d Einträge durchsuchen</string>
     <string name="custom">EIGEN</string>
     <string name="show_fewer">Weniger anzeigen</string>
