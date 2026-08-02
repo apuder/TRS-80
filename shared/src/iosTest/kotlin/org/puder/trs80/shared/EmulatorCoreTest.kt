@@ -48,7 +48,7 @@ class EmulatorCoreTest {
 
     @Test
     fun screenBufferIsTheSizeOfTheScreen() {
-        val buffer = EmulatorCore.screenBuffer
+        val buffer = IosEmulatorCore.screenBuffer
         // The core owns 2 KB; reading the last cell must not fault.
         buffer[SCREEN_BUFFER_SIZE - 1]
     }
@@ -57,8 +57,8 @@ class EmulatorCoreTest {
     fun screenBufferIsTheSameMemoryEachTime() {
         // The core hands back a pointer into its own memory rather than a copy,
         // so two reads of the same cell have to agree.
-        val first = EmulatorCore.screenBuffer
-        val second = EmulatorCore.screenBuffer
+        val first = IosEmulatorCore.screenBuffer
+        val second = IosEmulatorCore.screenBuffer
         assertEquals(first[0], second[0])
     }
 
@@ -66,8 +66,8 @@ class EmulatorCoreTest {
     fun keyEventsAreAcceptedBeforeBoot() {
         // Queued without needing a running CPU. This is the cinterop path that
         // carries arguments into the core.
-        EmulatorCore.keyDown(sym = 0x0D, key = 0x0D)
-        EmulatorCore.keyUp(sym = 0x0D, key = 0x0D)
+        IosEmulatorCore.keyDown(sym = 0x0D, key = 0x0D)
+        IosEmulatorCore.keyUp(sym = 0x0D, key = 0x0D)
     }
 
     @Test
@@ -76,7 +76,7 @@ class EmulatorCoreTest {
         // buffer rather than a fake: this is what the renderer will do 60 times
         // a second.
         val metrics = CellMetrics(columns = 64, rows = 16, cellWidth = 8, cellHeight = 24)
-        val dirty = DirtyRect(metrics, EmulatorCore.screenBuffer)
+        val dirty = DirtyRect(metrics, IosEmulatorCore.screenBuffer)
 
         dirty.isExpandedMode = false
         dirty.computeDirtyRect()
@@ -96,23 +96,23 @@ class EmulatorCoreTest {
     @Test
     fun renderingProducesTheGlyphFromTheCharacterRom() = runBlocking {
         val romPath = writeRom(SPIN_AT_VIDEO_RAM)
-        assertTrue(EmulatorCore.boot(model = 3, romPath = romPath), "The core refused to boot.")
+        assertTrue(IosEmulatorCore.boot(model = 3, romPath = romPath), "The core refused to boot.")
 
-        val cpu = launch(Dispatchers.Default) { EmulatorCore.run() }
+        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
         try {
             withTimeout(RUN_TIMEOUT_MILLIS) {
-                while (EmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
+                while (IosEmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
                     delay(POLL_INTERVAL_MILLIS)
                 }
             }
         } finally {
-            EmulatorCore.stop()
+            IosEmulatorCore.stop()
             cpu.join()
         }
 
-        assertTrue(EmulatorCore.render(), "Nothing was rasterized.")
-        assertEquals(512, EmulatorCore.pixelWidth)
-        assertEquals(192, EmulatorCore.pixelHeight)
+        assertTrue(IosEmulatorCore.render(), "Nothing was rasterized.")
+        assertEquals(512, IosEmulatorCore.pixelWidth)
+        assertEquals(192, IosEmulatorCore.pixelHeight)
 
         // The top-left cell should now hold 'A' exactly as the Model III
         // character generator ROM draws it, rather than merely being non-empty.
@@ -121,20 +121,20 @@ class EmulatorCoreTest {
 
         // Nothing has changed since, so a second pass reports no work and the
         // host can skip its upload.
-        assertFalse(EmulatorCore.render(), "An unchanged screen should report no change.")
+        assertFalse(IosEmulatorCore.render(), "An unchanged screen should report no change.")
 
         // Invalidating forces a full redraw, which is what a reattached surface
         // needs.
-        EmulatorCore.invalidateRender()
-        assertTrue(EmulatorCore.render(), "Invalidating should force a redraw.")
+        IosEmulatorCore.invalidateRender()
+        assertTrue(IosEmulatorCore.render(), "Invalidating should force a redraw.")
     }
 
     /** Reads one character cell out of the pixel buffer as rows of `#` and `.`. */
     private fun readCell(x: Int, y: Int): List<String> {
-        val pixels = EmulatorCore.pixelBuffer
+        val pixels = IosEmulatorCore.pixelBuffer
         return (0 until CELL_HEIGHT).map { row ->
             (0 until CELL_WIDTH).joinToString("") { col ->
-                val at = (y + row) * EmulatorCore.pixelWidth + x + col
+                val at = (y + row) * IosEmulatorCore.pixelWidth + x + col
                 if (pixels[at] != 0.toByte()) "#" else "."
             }
         }
@@ -143,24 +143,24 @@ class EmulatorCoreTest {
     @Test
     fun z80ExecutesAndWritesToVideoRam() = runBlocking {
         val romPath = writeRom(SPIN_AT_VIDEO_RAM)
-        assertTrue(EmulatorCore.boot(model = 1, romPath = romPath), "The core refused to boot.")
+        assertTrue(IosEmulatorCore.boot(model = 1, romPath = romPath), "The core refused to boot.")
 
         // trs80_run blocks until stopped, so it needs a thread of its own.
-        val cpu = launch(Dispatchers.Default) { EmulatorCore.run() }
+        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
         try {
             withTimeout(RUN_TIMEOUT_MILLIS) {
-                while (EmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
+                while (IosEmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
                     delay(POLL_INTERVAL_MILLIS)
                 }
             }
         } finally {
-            EmulatorCore.stop()
+            IosEmulatorCore.stop()
             cpu.join()
         }
 
         // Reached only if the CPU fetched from the ROM, executed the store, and
         // the memory write propagated into the host's screen buffer.
-        assertEquals(EXPECTED_CHAR, EmulatorCore.screenBuffer[0])
+        assertEquals(EXPECTED_CHAR, IosEmulatorCore.screenBuffer[0])
     }
 
     /** Writes [bytes] to a file the core can open, and returns its path. */

@@ -68,38 +68,38 @@ import org.puder.trs80.core.trs80_set_sound_muted
  * present it as Kotlin that the shared code can drive.
  */
 @OptIn(ExperimentalForeignApi::class)
-object EmulatorCore {
+object IosEmulatorCore : EmulatorCore {
 
     /** Whether the machine is drawing wide characters. */
-    val isExpandedMode: Boolean
+    override val isExpandedMode: Boolean
         get() = trs80_is_expanded_mode() != 0
 
     /**
      * The emulator's screen memory. The pointer is valid for the lifetime of
      * the process, so this can be held indefinitely.
      */
-    val screenBuffer: ScreenBuffer
+    override val screenBuffer: ScreenBuffer
         get() = NativeScreenBuffer(
             requireNotNull(trs80_screen_buffer()) { "The core has no screen buffer." }
         )
 
     /** The rasterized screen's dimensions, in pixels; see [setCellSize]. */
-    val pixelWidth: Int get() = trs80_pixel_width()
-    val pixelHeight: Int get() = trs80_pixel_height()
+    override val pixelWidth: Int get() = trs80_pixel_width()
+    override val pixelHeight: Int get() = trs80_pixel_height()
 
     /**
      * The character ROM's own cell size, which is what the core rasterizes at
      * until it is told otherwise. Not the current cell size — that is whatever
      * was last passed to [setCellSize], and a caller that needs it should keep it.
      */
-    val romCellWidth: Int get() = TRS80_CELL_WIDTH
-    val romCellHeight: Int get() = TRS80_CELL_HEIGHT
+    override val romCellWidth: Int get() = TRS80_CELL_WIDTH
+    override val romCellHeight: Int get() = TRS80_CELL_HEIGHT
 
     /**
      * Sets the size one character cell is drawn at, so the core rasterizes
      * straight to it and nothing has to be scaled afterwards.
      */
-    fun setCellSize(width: Int, height: Int) = trs80_set_cell_size(width, height)
+    override fun setCellSize(width: Int, height: Int) = trs80_set_cell_size(width, height)
 
     /**
      * Copies the rasterized screen into [destination], which must be at least
@@ -110,7 +110,7 @@ object EmulatorCore {
      * a fresh array made a megabyte of garbage per frame, which measured at 75%
      * of the process's CPU time. The copy itself is not the expensive part.
      */
-    fun copyPixelsInto(destination: ByteArray) {
+    override fun copyPixelsInto(destination: ByteArray) {
         val source = requireNotNull(trs80_pixel_buffer()) { "The core has no pixel buffer." }
         val bytes = pixelWidth * pixelHeight
         require(destination.size >= bytes) {
@@ -127,16 +127,16 @@ object EmulatorCore {
      *
      * @return whether anything changed, so an unchanged screen costs no upload.
      */
-    fun render(): Boolean = trs80_render() != 0
+    override fun render(): Boolean = trs80_render() != 0
 
     /** Makes the next [render] redraw the whole screen. */
-    fun invalidateRender() = trs80_invalidate_render()
+    override fun invalidateRender() = trs80_invalidate_render()
 
     /**
      * The rasterized screen: one coverage byte per pixel, which the host tints
      * and scales.
      */
-    val pixelBuffer: ScreenBuffer
+    override val pixelBuffer: ScreenBuffer
         get() = NativeScreenBuffer(
             requireNotNull(trs80_pixel_buffer()) { "The core has no pixel buffer." }
         )
@@ -151,12 +151,12 @@ object EmulatorCore {
      * and its entry point overrides [entryAddress].
      * @return whether the core accepted the configuration.
      */
-    fun boot(
+    override fun boot(
         model: Int,
         romPath: String,
-        diskPaths: List<String?> = emptyList(),
-        cassettePath: String? = null,
-        entryAddress: Int = 0,
+        diskPaths: List<String?>,
+        cassettePath: String?,
+        entryAddress: Int,
     ): Boolean = memScoped {
         val config = alloc<trs80_config>()
         config.model = model
@@ -177,26 +177,26 @@ object EmulatorCore {
      * so this sets it first. Calling the C function alone returns immediately
      * and looks indistinguishable from a machine that will not boot.
      */
-    fun run() {
+    override fun run() {
         trs80_set_running(1)
         trs80_run()
     }
 
     /** Asks [run] to return. Safe to call from any thread. */
-    fun stop() = trs80_set_running(0)
+    override fun stop() = trs80_set_running(0)
 
-    fun reset() = trs80_reset()
+    override fun reset() = trs80_reset()
 
     /**
      * Writes the machine's whole state to [path], so the session can be picked
      * up later exactly where it was left.
      */
-    fun saveState(path: String) = trs80_save_state(path)
+    override fun saveState(path: String) = trs80_save_state(path)
 
     /** Reads back a state written by [saveState]. */
-    fun loadState(path: String) = trs80_load_state(path)
+    override fun loadState(path: String) = trs80_load_state(path)
 
-    fun setSoundMuted(muted: Boolean) = trs80_set_sound_muted(if (muted) 1 else 0)
+    override fun setSoundMuted(muted: Boolean) = trs80_set_sound_muted(if (muted) 1 else 0)
 
     /**
      * Types [text] into the machine as if it had been typed at the keyboard.
@@ -204,20 +204,20 @@ object EmulatorCore {
      * The length is in bytes rather than characters, which is what the core
      * asks for and what a UTF-8 string actually occupies.
      */
-    fun paste(text: String) = trs80_paste(text, text.encodeToByteArray().size)
+    override fun paste(text: String) = trs80_paste(text, text.encodeToByteArray().size)
 
     /** Winds the tape back to the start, which CLOAD needs before it can read. */
-    fun rewindCassette() = trs80_rewind_cassette()
+    override fun rewindCassette() = trs80_rewind_cassette()
 
     /** How far through the tape the machine is, 0 to 1. */
-    fun cassettePosition(): Float = trs80_cassette_position()
+    override fun cassettePosition(): Float = trs80_cassette_position()
 
     /** Queues a key press. [sym] and [key] are the SDL codes the core expects. */
-    fun keyDown(sym: Int, key: Int) =
+    override fun keyDown(sym: Int, key: Int) =
         trs80_add_key_event(TRS80_KEY_DOWN, sym, key)
 
     /** Queues a key release. */
-    fun keyUp(sym: Int, key: Int) =
+    override fun keyUp(sym: Int, key: Int) =
         trs80_add_key_event(TRS80_KEY_UP, sym, key)
 
     /**
@@ -229,7 +229,7 @@ object EmulatorCore {
      *
      * @return whether the image was written.
      */
-    fun createBlankDisk(path: String, spec: DiskImageSpec): Boolean = when (spec.format) {
+    override fun createBlankDisk(path: String, spec: DiskImageSpec): Boolean = when (spec.format) {
         DiskFormat.JV1 -> trs80_create_blank_jv1(path)
         DiskFormat.JV3 -> trs80_create_blank_jv3(path)
         DiskFormat.DMK -> trs80_create_blank_dmk(

@@ -41,7 +41,7 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
 
     private var bitmap = Bitmap()
     private var image: ImageBitmap? = null
-    /** Reused every frame; see [EmulatorCore.copyPixelsInto]. */
+    /** Reused every frame; see [IosEmulatorCore.copyPixelsInto]. */
     private var pixels = ByteArray(0)
     private var cellWidth = 0
     private var cellHeight = 0
@@ -67,9 +67,9 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
     private fun setCellSize(cellWidth: Int, cellHeight: Int) {
         this.cellWidth = cellWidth
         this.cellHeight = cellHeight
-        EmulatorCore.setCellSize(cellWidth, cellHeight)
-        width = EmulatorCore.pixelWidth
-        height = EmulatorCore.pixelHeight
+        IosEmulatorCore.setCellSize(cellWidth, cellHeight)
+        width = IosEmulatorCore.pixelWidth
+        height = IosEmulatorCore.pixelHeight
 
         bitmap.close()
         // Not Bitmap().apply { ... }: inside that, width and height would resolve
@@ -78,19 +78,19 @@ class IosEmulatorScreenSource : EmulatorScreenSource {
         bitmap.allocPixels(ImageInfo(width, height, ColorType.ALPHA_8, ColorAlphaType.PREMUL))
         pixels = ByteArray(width * height)
         image = null
-        EmulatorCore.invalidateRender()
+        IosEmulatorCore.invalidateRender()
     }
 
     override fun refresh(): Boolean {
         if (width == 0 || height == 0) {
             // Before the first layout. Rasterizing at the ROM's own cell size
             // costs one frame at the wrong size rather than a blank one.
-            setCellSize(EmulatorCore.romCellWidth, EmulatorCore.romCellHeight)
+            setCellSize(IosEmulatorCore.romCellWidth, IosEmulatorCore.romCellHeight)
         }
-        if (!EmulatorCore.render()) {
+        if (!IosEmulatorCore.render()) {
             return false
         }
-        EmulatorCore.copyPixelsInto(pixels)
+        IosEmulatorCore.copyPixelsInto(pixels)
         bitmap.installPixels(pixels)
         image = bitmap.asComposeImageBitmap()
         return true

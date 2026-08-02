@@ -47,7 +47,7 @@ class BlankDiskTest {
         val path = NSTemporaryDirectory() + name
         FileSystem.SYSTEM.delete(path.toPath(), mustExist = false)
         written += path
-        assertTrue(EmulatorCore.createBlankDisk(path, spec), "The core refused to write $name.")
+        assertTrue(IosEmulatorCore.createBlankDisk(path, spec), "The core refused to write $name.")
         return path
     }
 
@@ -149,7 +149,7 @@ class BlankDiskTest {
     fun anUnwritablePathIsReportedRatherThanFatal() {
         val path = NSTemporaryDirectory() + "trs80-no-such-dir/blank.dsk"
 
-        assertFalse(EmulatorCore.createBlankDisk(path, DiskImageSpec(format = DiskFormat.JV3)))
+        assertFalse(IosEmulatorCore.createBlankDisk(path, DiskImageSpec(format = DiskFormat.JV3)))
     }
 
     private companion object {

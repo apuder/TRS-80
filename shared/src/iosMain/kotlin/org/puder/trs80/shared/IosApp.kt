@@ -272,8 +272,8 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
     return KeyForwardingController(
         content = compose,
         capture = capture,
-        onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
-        onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+        onKeyDown = { IosEmulatorCore.keyDown(it.sym, it.key) },
+        onKeyUp = { IosEmulatorCore.keyUp(it.sym, it.key) },
     )
 }
 
@@ -680,7 +680,7 @@ private fun createBlankDisk(
         return DiskCreation.NameTaken
     }
     val path = manager.mediaPath(configurationId, filename) ?: return DiskCreation.Failed
-    if (!EmulatorCore.createBlankDisk(path, spec)) {
+    if (!IosEmulatorCore.createBlankDisk(path, spec)) {
         runCatching { appFileSystem.delete(path.toPath()) }
         return DiskCreation.Failed
     }
@@ -736,7 +736,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
         if (configuration == null || rom == null) {
             Log.e(TAG, "Cannot run configuration $configurationId: no configuration or no ROM.")
         } else {
-            EmulatorCore.boot(
+            IosEmulatorCore.boot(
                 model = configuration.model,
                 romPath = rom,
                 // Not filtered: the core takes one path per drive, and dropping
@@ -745,7 +745,7 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             )
             // Pick the session up where it was left, if there is one.
             if (state?.hasState() == true) {
-                EmulatorCore.loadState(state.stateFilePath)
+                IosEmulatorCore.loadState(state.stateFilePath)
             }
         }
         // A thread of its very own, not Dispatchers.Default. trs80_run() does not
@@ -754,10 +754,10 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
         // dispatch queue, and taking a worker out of it for the life of the app
         // breaks things far away from here.
         val cpu = newSingleThreadContext("trs80-cpu")
-        CoroutineScope(cpu).launch { EmulatorCore.run() }
+        CoroutineScope(cpu).launch { IosEmulatorCore.run() }
         emulatorState = state
         onDispose {
-            EmulatorCore.stop()
+            IosEmulatorCore.stop()
             cpu.close()
         }
     }
@@ -781,14 +781,14 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
     val keyboard = remember(definition) {
         KeyboardState(
             definition = definition,
-            onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
-            onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+            onKeyDown = { IosEmulatorCore.keyDown(it.sym, it.key) },
+            onKeyUp = { IosEmulatorCore.keyUp(it.sym, it.key) },
         )
     }
     val sender = remember(configurationId) {
         KeySender(
-            onKeyDown = { EmulatorCore.keyDown(it.sym, it.key) },
-            onKeyUp = { EmulatorCore.keyUp(it.sym, it.key) },
+            onKeyDown = { IosEmulatorCore.keyDown(it.sym, it.key) },
+            onKeyUp = { IosEmulatorCore.keyUp(it.sym, it.key) },
         )
     }
 
@@ -824,9 +824,9 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             // Stop, then write. The CPU thread tests a flag rather than being
             // interrupted, so this keeps the same small race between the last
             // instruction and the snapshot that the Android app has always had.
-            EmulatorCore.stop()
+            IosEmulatorCore.stop()
             emulatorState?.let { state ->
-                EmulatorCore.saveState(state.stateFilePath)
+                IosEmulatorCore.saveState(state.stateFilePath)
                 source.snapshot(characterColor, SCREEN_COLOR)
                     ?.let(::encodePng)
                     ?.let(state::writeScreenshot)
@@ -834,17 +834,17 @@ private fun RunningMachine(configurationId: Int, capture: KeyCapture, onBack: ()
             onBack()
         },
         machine = MachineActions(
-            onReset = { EmulatorCore.reset() },
-            onRewindCassette = { EmulatorCore.rewindCassette() },
+            onReset = { IosEmulatorCore.reset() },
+            onRewindCassette = { IosEmulatorCore.rewindCassette() },
             onPaste = {
                 // The machine ends a line with a carriage return, which is what
                 // its own keyboard would have sent.
-                clipboardText()?.replace('\n', '\r')?.also(EmulatorCore::paste) != null
+                clipboardText()?.replace('\n', '\r')?.also(IosEmulatorCore::paste) != null
             },
             soundMuted = soundMuted,
             onSoundMutedChange = {
                 soundMuted = it
-                EmulatorCore.setSoundMuted(it)
+                IosEmulatorCore.setSoundMuted(it)
             },
         ),
         keyboard = {
