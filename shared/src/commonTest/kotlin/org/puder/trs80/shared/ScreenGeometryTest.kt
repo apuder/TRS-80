@@ -46,24 +46,38 @@ class ScreenGeometryTest {
     }
 
     /**
-     * The rounding is the whole point: block graphics split a cell into 2x3
-     * quadrants, so a cell that is not divisible by two across and three down
-     * puts those quadrant edges on fractions of a pixel.
+     * A cell's three bands have to be equal, or block graphics drawn as a solid
+     * block would show seams where one band is a row taller than another.
+     *
+     * The two halves across are allowed to differ by a pixel; see [fitCellSize]
+     * for why that is the cheaper of the two roundings.
      */
     @Test
-    fun cellsAlwaysDivideIntoWholeQuadrants() {
+    fun everyCellSplitsIntoThreeEqualBands() {
         for (width in 200..2600 step 7) {
             for (height in 200..2600 step 103) {
                 val metrics = fitCellSize(width, height)
-                assertEquals(
-                    0, metrics.cellWidth % 2,
-                    "cell width ${metrics.cellWidth} at ${width}x$height is not even",
-                )
                 assertEquals(
                     0, metrics.cellHeight % 3,
                     "cell height ${metrics.cellHeight} at ${width}x$height is not a multiple of 3",
                 )
             }
+        }
+    }
+
+    /**
+     * What the odd widths buy: the picture is never more than a cell short of
+     * the space it was given.
+     */
+    @Test
+    fun theScreenFillsTheSpaceToWithinOneCell() {
+        for (width in 200..2600 step 7) {
+            val metrics = fitCellSize(width, availableHeight = 4000)
+            val drawn = metrics.cellWidth * metrics.columns
+            assertTrue(
+                width - drawn < metrics.columns,
+                "$drawn of $width leaves ${width - drawn}px unused, more than one cell",
+            )
         }
     }
 

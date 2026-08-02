@@ -34,12 +34,20 @@ const val SCREEN_ASPECT_RATIO = 3f
  * either one output pixel or two depending where it happens to fall, so strokes
  * come out uneven and some columns vanish altogether.
  *
- * Hence the rounding: the cell is trimmed to a whole number of pixels, and to an
- * even width and a height divisible by three, so the block graphics — which
- * divide a cell into 2x3 quadrants — also land on whole pixels. Since the cell is
- * three times as tall as it is wide, that makes the height a multiple of six
- * either way round. The result is usually a little smaller than the area given;
- * centering it is the caller's business.
+ * Hence the rounding: the cell is trimmed to a whole number of pixels, and its
+ * height to a multiple of three, so that the three bands of the block graphics —
+ * which divide a cell into 2x3 quadrants — each get the same number of rows.
+ *
+ * The width is not rounded to even, though the same argument would suggest it.
+ * An odd cell splits into halves of n/2 and n/2+1 pixels, which is a one-pixel
+ * asymmetry repeated identically in every cell on screen, and the alternative
+ * costs a whole pixel per column: on a 1008-pixel screen, insisting on an even
+ * cell means 14 rather than 15 and throws away 64 pixels of picture — 56 pixels
+ * of black down each side, against 24. The asymmetry is not visible; the bars
+ * are.
+ *
+ * The result is usually a little smaller than the area given; centering it is
+ * the caller's business.
  */
 fun fitCellSize(
     availableWidth: Int,
@@ -55,22 +63,18 @@ fun fitCellSize(
     val cellHeight: Int
     if (availableWidth / columns * aspectRatio > availableHeight / rows) {
         // Too short to let the screen span the full width, so height decides.
-        // Trimming to a multiple of six, not three, is what keeps the width that
-        // follows from it even.
         var height = availableHeight / rows
-        while (height % 6 != 0) {
+        while (height % 3 != 0) {
             height--
         }
         cellHeight = height
         cellWidth = (height / aspectRatio).toInt()
     } else {
         // Too narrow to let the screen span the full height, so width decides.
-        var width = availableWidth / columns
-        while (width % 2 != 0) {
-            width--
-        }
-        cellWidth = width
-        cellHeight = (width * aspectRatio).toInt()
+        // The height follows from it and is three times it, so it is a multiple
+        // of three whatever the width turns out to be.
+        cellWidth = availableWidth / columns
+        cellHeight = (cellWidth * aspectRatio).toInt()
     }
     return CellMetrics(columns, rows, cellWidth, cellHeight)
 }
