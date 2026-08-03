@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    What the platform needs to launch the app.
+
+    The version is not here. CFBundleShortVersionString and CFBundleVersion are
+    written by a build phase from gradle.properties, because that is where every
+    other version comes from and iOS answering for itself is how it came to ship
+    0.1 for a year. See AGENTS.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>TRS-80</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0</string>
+	<key>CFBundleVersion</key>
+	<string>0</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!--
+	    The tilt keyboard steers by accelerometer. Without this string the
+	    system ends the app the moment CoreMotion is asked for a reading.
+	-->
+	<key>NSMotionUsageDescription</key>
+	<string>The tilt keyboard steers a game by tilting the device.</string>
+
+	<!--
+	    Everything the app fetches goes over HTTPS, which is exempt, so this
+	    answers export compliance once instead of on every upload.
+	-->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!--
+	    So a disk image can be put in through Files, and opened where it lies
+	    rather than copied somewhere the user cannot find.
+	-->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+
+	<!--
+	    Both ways up and both ways round. A machine held sideways gives its
+	    picture the whole screen, which is the point of supporting it.
+	-->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!--
+	    Compose insists on this, and says so by throwing at start-up: without
+	    it the app aborts before it draws anything. It lets the display run
+	    faster than 60Hz on a phone that can, which for an emulator sampling
+	    a machine with no frame rate of its own is the difference between the
+	    picture following the panel and beating against it.
+	-->
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<!-- No storyboard: the delegate makes the window itself. -->
+	<key>UILaunchScreen</key>
+	<dict/>
+</dict>
+</plist>

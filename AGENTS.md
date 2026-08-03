@@ -49,6 +49,37 @@ these properties too.
 A version quoted in a document — `doc/UI-SPEC.md` opens with one — is a note about when that
 document was written. It is not a place to update.
 
+## The iOS app
+
+`iosApp/TRS80.xcodeproj` is the app: a window, one view controller, and nothing
+else. Everything on screen is `Trs80ViewController` from the shared module, so a
+new screen never means a change here.
+
+```sh
+xcodebuild -project iosApp/TRS80.xcodeproj -scheme TRS80 \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
+```
+
+Two build phases do the work that is not Xcode's. The first runs
+`:shared:embedAndSignAppleFrameworkForXcode`, which builds the framework for
+whatever Xcode is building, embeds it, signs it, and syncs the Compose resources
+— every font and every string — into the bundle. The last writes
+`CFBundleShortVersionString` and `CFBundleVersion` from `gradle.properties`; it
+has to be last, because the app's `Info.plist` does not exist until Xcode has
+processed it, and signing happens afterwards.
+
+Things that are easy to lose and hard to diagnose:
+
+- **`CADisableMinimumFrameDurationOnPhone` must be `true`.** Compose checks for
+  it at start-up and throws if it is missing, so the app aborts before drawing.
+- **`NSMotionUsageDescription` must be present**, or the system ends the app the
+  moment the tilt keyboard asks CoreMotion for a reading.
+- The icon is `var/icons/playstore_high_res_icon.png`, recomposed: iOS refuses an
+  alpha channel and masks the corners itself, so the machine is lifted out of
+  its transparent bands, scaled to 86% and set on the app's light ground.
+- No disk image ships, so the first machine is a bare Model III. Drop a
+  `disk_0.dsk` into the target's resources and it is used instead.
+
 ## Building and checking
 
 The fast loop, about ten seconds, and enough for most changes:

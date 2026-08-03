@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    What the app does with a device's data, as Apple requires it declared.
+
+    It collects nothing and tracks nobody: there is no analytics, no advertising
+    identifier, no account, and nothing leaves the device except a request to
+    RetroStore for a program the user asked for. Crash reporting is not here yet
+    on iOS; when it arrives this file changes with it.
+
+    The two declarations below are "required reason" APIs — ordinary calls Apple
+    asks about because they have been used for fingerprinting elsewhere.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- The settings store is NSUserDefaults, read and written by this
+			     app alone: which theme, which ROMs, every machine's setup. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+		<dict>
+			<!-- File timestamps, through okio: the app reads and writes disk
+			     images, saved states and screenshots in its own container. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
