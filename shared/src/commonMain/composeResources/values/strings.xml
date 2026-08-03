@@ -17,6 +17,8 @@
     <string name="yours_empty">Nothing yet. Play something from the catalog below and it appears here.</string>
     <string name="search_entries">Search %1$d entries</string>
     <string name="custom">CUSTOM</string>
+    <!-- The opposite of CUSTOM: a machine exactly as the catalog installed it -->
+    <string name="unchanged">UNCHANGED</string>
     <string name="show_fewer">Show fewer</string>
     <string name="show_all">Show all %1$d</string>
     <string name="never_run">Not run yet</string>

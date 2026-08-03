@@ -20,9 +20,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -101,5 +103,19 @@ internal fun superellipsePoint(angle: Float, size: Size, exponent: Float): Offse
     )
 }
 
+/** How much comes off a screen's corners. */
+private val SCREEN_CORNER = 7.dp
+
 /** The shape a piece of cover art is cut to. */
 val CoverShape: Shape = SuperellipseShape()
+
+/**
+ * The shape a machine's screen is cut to: a rectangle with its corners taken
+ * off, and not much taken.
+ *
+ * Not the cover's curve. A superellipse is a shape for a picture that was drawn
+ * to be cut to one -- artwork, an icon -- and what a machine draws is a
+ * rectangle of text to its own edges. Rounded a little reads as a screen with a
+ * bezel; rounded like an icon reads as artwork, which it is not.
+ */
+val ScreenShape: Shape = RoundedCornerShape(SCREEN_CORNER)

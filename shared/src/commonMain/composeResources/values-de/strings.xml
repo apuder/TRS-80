@@ -180,4 +180,5 @@ Disketten, Kassette und Tastaturen werden im Eintrags-Editor geändert, nicht hi
     <string name="tutorial_step_6">Speichert das Programm zusätzlich auf Diskette.</string>
     <string name="tutorial_step_7">Verlässt den BASIC-Interpreter.</string>
     <string name="tutorial_step_8">Zeigt das Inhaltsverzeichnis erneut. Beachten Sie die Datei FIRST/BAS.</string>
+    <string name="unchanged">UNVERÄNDERT</string>
 </resources>

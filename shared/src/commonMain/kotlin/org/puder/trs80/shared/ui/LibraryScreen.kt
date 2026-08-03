@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -86,10 +87,12 @@ import trs_80.shared.generated.resources.show_fewer
 import trs_80.shared.generated.resources.sort_alphabetical
 import trs_80.shared.generated.resources.sort_last_used
 import trs_80.shared.generated.resources.store_unreachable
+import trs_80.shared.generated.resources.unchanged
 import trs_80.shared.generated.resources.yours
 import trs_80.shared.generated.resources.yours_empty
 import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.ui.theme.CoverShape
+import org.puder.trs80.shared.ui.theme.ScreenShape
 import org.puder.trs80.shared.ui.theme.cornerShine
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
@@ -127,6 +130,12 @@ private const val SEARCH_MILLIS = 140
 
 /** How tall a control in a section heading may be, before it starts spacing the heading out. */
 private val SECTION_CONTROL = 30.dp
+
+/** How wide a machine's screen is drawn in the library. */
+private val PLATE_SCREEN = 132.dp
+
+/** What a TRS-80 draws: 64 by 16 cells, each three times as tall as it is wide. */
+private const val SCREEN_RATIO = 4f / 3f
 
 /** The height of the show-all row; see [ShowAll] for why it is not 44dp. */
 private val SHOW_ALL_HEIGHT = 32.dp
@@ -614,30 +623,38 @@ private fun SectionHeader(
 }
 
 /**
- * A machine the user has, drawn as a framed screen.
+ * One of the user's machines: its screen, whole, and what it is.
  *
- * The picture is the last thing the machine showed, behind scanlines and under
- * a scrim carrying the name and the model — so the library is a shelf of
- * screens rather than a list of names.
+ * The screen keeps its own proportions -- a TRS-80's is four by three -- rather
+ * than being cropped to a band. A band showed a quarter of the picture and put
+ * the name on top of it; this shows all of it, big enough to recognise a game
+ * by, and says the rest beside it where nothing has to be read through a
+ * gradient.
+ *
+ * The same treatment as the catalog's art, which is the point: a machine made
+ * from an entry should look like a bigger version of the entry it came from.
  */
 @Composable
 private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> Unit)?) {
     val colors = Trs80Theme.colors
-    val spacing = Trs80Theme.spacing
-    Box(
+    Row(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = spacing.gap)
-            .border(spacing.hairline, colors.text.copy(alpha = 0.2f))
-            .padding(spacing.mat)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             Modifier
-                .fillMaxWidth()
-                .height(spacing.plateHeight)
+                .width(PLATE_SCREEN)
+                // What the machine actually draws, so nothing is cropped and
+                // nothing is stretched.
+                .aspectRatio(SCREEN_RATIO)
+                .cornerShine(ScreenShape)
+                .clip(ScreenShape)
                 .background(colors.crt)
                 .scanlines(),
+            contentAlignment = Alignment.Center,
         ) {
             val screenshot = card.screenshot
             if (screenshot != null) {
@@ -645,86 +662,67 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> U
                     bitmap = screenshot,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    // The middle of the screen, not the top of it. A plate is a
-                    // quarter as tall as the picture it shows, and a TRS-80
-                    // program puts its title in the middle and its status line
-                    // at the bottom -- the top band is the one most likely to be
-                    // empty.
-                    alignment = Alignment.Center,
+                    // Fit, not Crop: the box is four by three and so is what
+                    // the machine draws, so this changes nothing today -- but a
+                    // screenshot from some other geometry should be shown whole
+                    // and letterboxed rather than have its edges shaved.
+                    contentScale = ContentScale.Fit,
                     filterQuality = androidx.compose.ui.graphics.FilterQuality.None,
                 )
             } else {
-                // Never run: the machine has drawn nothing, so the plate says so
-                // in the machine's own voice rather than showing an empty frame.
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        card.name.uppercase(),
-                        style = Trs80Theme.type.screen,
-                        color = colors.phosphor.copy(alpha = 0.55f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                // Never run: the machine has drawn nothing, so it says so in its
+                // own voice rather than showing an empty frame.
+                Text(
+                    card.name.uppercase(),
+                    style = Trs80Theme.type.screen,
+                    color = colors.phosphor.copy(alpha = 0.55f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
             }
-
-            if (card.isCustom) {
-                Box(
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .background(colors.accent.copy(alpha = 0.9f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                ) {
-                    Text(stringResource(Res.string.custom), style = Trs80Theme.type.kickerSmall, color = Color.White)
-                }
-            }
-
-            Row(
-                Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color(0x00181917), Color(0xE0181917)),
-                        )
-                    )
-                    .padding(start = 10.dp, end = 4.dp, top = 12.dp),
-                // The caption keeps its own baseline while the overflow's touch
-                // target centers against it, rather than the target's height
-                // dragging the glyph up off the line.
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(
-                    Modifier.weight(1f).padding(bottom = 7.dp),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Text(
-                        card.name,
-                        style = Trs80Theme.type.titleSmall,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(Modifier.width(7.dp))
-                    Text(
-                        card.model.uppercase(),
-                        style = Trs80Theme.type.kickerSmall,
-                        color = Color.White.copy(alpha = 0.72f),
-                        modifier = Modifier.padding(bottom = 2.dp),
-                    )
-                }
-                if (onMenu != null) {
-                    StrokeIcon(
-                        Trs80Icon.Overflow,
-                        color = Color.White.copy(alpha = 0.72f),
-                        size = 17.dp,
-                        onClick = onMenu,
-                    )
-                }
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                card.name,
+                style = Trs80Theme.type.title,
+                color = colors.text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                card.model.uppercase(),
+                style = Trs80Theme.type.kickerSmall,
+                color = colors.muted,
+            )
+            // Whether this machine is still the program as the catalog has it.
+            // Not whether it has a saved session: nearly every machine in the
+            // library has one -- it gets a session the first time it is played
+            // -- so saying so on all of them says nothing about any of them.
+            //
+            // Green for the untouched one. The accent is what marks a change
+            // and what marks a deletion, and a machine that is exactly as it
+            // arrived is not a warning.
+            Text(
+                stringResource(
+                    if (card.isCustom) Res.string.custom else Res.string.unchanged
+                ),
+                style = Trs80Theme.type.kickerSmall,
+                color = if (card.isCustom) colors.accentText else colors.original,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+        onMenu?.let { menu ->
+            Spacer(Modifier.width(8.dp))
+            // Everything this machine can be asked, which is where its settings
+            // live: the same control the catalog rows carry, in the same place.
+            Box(Modifier.size(MinimumTouchTarget), contentAlignment = Alignment.Center) {
+                StrokeIcon(Trs80Icon.Overflow, color = colors.muted, size = ROW_CONTROL, onClick = menu)
             }
         }
     }
+    Divider()
 }
 
 @Composable

@@ -71,6 +71,14 @@ data class Trs80Colors(
     val crt: Color,
     /** The phosphor, for text drawn inside a plate. */
     val phosphor: Color,
+    /**
+     * For a state that is good news rather than a warning.
+     *
+     * The accent is a warning colour -- it marks what has been changed and what
+     * is about to be deleted -- so a machine that is exactly as the catalog has
+     * it cannot be marked in the same red without reading as a problem.
+     */
+    val original: Color,
     val isDark: Boolean,
 )
 
@@ -85,6 +93,7 @@ val LightColors = Trs80Colors(
     danger = Color(0xFFD22B1E),
     crt = Color(0xFF2E302D),
     phosphor = Color(0xFF5CE15C),
+    original = Color(0xFF3E7C4B),
     isDark = false,
 )
 
@@ -99,6 +108,7 @@ val DarkColors = Trs80Colors(
     danger = Color(0xFFFF6C5C),
     crt = Color(0xFF2E302D),
     phosphor = Color(0xFF5CE15C),
+    original = Color(0xFF7FC08E),
     isDark = true,
 )
 
