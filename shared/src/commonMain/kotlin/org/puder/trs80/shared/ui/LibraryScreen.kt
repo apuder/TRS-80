@@ -87,6 +87,7 @@ import trs_80.shared.generated.resources.sort_last_used
 import trs_80.shared.generated.resources.store_unreachable
 import trs_80.shared.generated.resources.yours
 import trs_80.shared.generated.resources.yours_empty
+import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.ModalPanel
@@ -121,6 +122,9 @@ private const val COLLAPSED_PLATES = 3
 /** How long the search field takes to arrive; short enough not to be waited on. */
 private const val SEARCH_MILLIS = 140
 
+/** How tall a control in a section heading may be, before it starts spacing the heading out. */
+private val SECTION_CONTROL = 30.dp
+
 /** The height of the show-all row; see [ShowAll] for why it is not 44dp. */
 private val SHOW_ALL_HEIGHT = 32.dp
 
@@ -151,6 +155,8 @@ data class CatalogEntry(
     val author: String,
     val year: Int,
     val artUrl: String?,
+    /** Which machine it is for, as [modelLabel] spells it. */
+    val model: Int = MODEL_NONE,
     /**
      * The unedited machine made from this entry, or null if there is none.
      *
@@ -487,8 +493,13 @@ private fun PlateMenu(
 private fun RefreshControl(refreshing: Boolean, onClick: () -> Unit) {
     val colors = Trs80Theme.colors
     // One reserved slot either way, so the control does not move or resize
-    // under the finger that pressed it.
-    Box(Modifier.size(MinimumTouchTarget), contentAlignment = Alignment.Center) {
+    // under the finger that pressed it. Full width to hit, but not full height:
+    // it is what decides how tall the heading is, and a heading built around a
+    // touch target is mostly air.
+    Box(
+        Modifier.width(MinimumTouchTarget).height(SECTION_CONTROL),
+        contentAlignment = Alignment.Center,
+    ) {
         if (refreshing) {
             // The spin is only composed while it is spinning: an infinite
             // transition redraws every frame for as long as it exists, and this
@@ -579,7 +590,10 @@ private fun SectionHeader(
 ) {
     val colors = Trs80Theme.colors
     Row(
-        Modifier.fillMaxWidth().padding(top = 9.dp, bottom = 11.dp),
+        // Little of its own: what sits on either side -- a plate, a row, the
+        // show-all strip -- brings padding with it, and three lots of air
+        // stacked up read as a gap rather than as a heading.
+        Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label.uppercase(), style = Trs80Theme.type.kicker, color = colors.accentText)
@@ -795,16 +809,32 @@ private fun CatalogRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                listOfNotNull(
-                    entry.author.takeIf { it.isNotEmpty() },
-                    entry.year.takeIf { it > 0 }?.toString(),
-                ).joinToString(" · "),
-                style = Trs80Theme.type.bodySmall,
-                color = colors.muted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            // Author on its own line, and the facts about the program on the
+            // one below it. Three short lines rather than two long ones: an
+            // author and a year on the same line is where the ellipsis used to
+            // fall, and it fell on the author.
+            entry.author.takeIf { it.isNotEmpty() }?.let { author ->
+                Text(
+                    author,
+                    style = Trs80Theme.type.bodySmall,
+                    color = colors.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            val facts = listOfNotNull(
+                entry.year.takeIf { it > 0 }?.toString(),
+                modelLabel(entry.model).takeIf { entry.model != MODEL_NONE },
+            ).joinToString(" · ")
+            if (facts.isNotEmpty()) {
+                Text(
+                    facts,
+                    style = Trs80Theme.type.bodySmall,
+                    color = colors.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Spacer(Modifier.width(10.dp))
         // One reserved slot for either state, so the glyph lands in the same

@@ -16,6 +16,7 @@
 
 package org.puder.trs80.shared.ui
 
+import org.puder.trs80.shared.store.modelOf
 import org.retrostore.client.common.proto.App
 
 /**
@@ -72,6 +73,7 @@ fun List<App>.asCatalog(
             author = app.author,
             year = app.release_year,
             artUrl = app.screenshot_url.firstOrNull(),
+            model = modelOf(app.ext_trs80?.model),
             // Normally there is at most one, since a clean machine is only ever
             // made when the entry has none. Adopting older installs can leave
             // two, so the most recently used wins rather than the first found.

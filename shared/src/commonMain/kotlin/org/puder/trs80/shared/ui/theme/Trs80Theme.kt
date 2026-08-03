@@ -143,7 +143,7 @@ data class Trs80Spacing(
     /** A plate's glass. */
     val plateHeight: Dp = 104.dp,
     /** Catalog row artwork. */
-    val rowArt: Dp = 42.dp,
+    val rowArt: Dp = 56.dp,
 )
 
 val LocalTrs80Colors: ProvidableCompositionLocal<Trs80Colors> =
