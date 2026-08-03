@@ -169,4 +169,15 @@ Disketten, Kassette und Tastaturen werden im Eintrags-Editor geändert, nicht hi
     <string name="keyboard_gamepad">Ctrl</string>
     <string name="keyboard_tilt">Neig</string>
     <string name="keyboard_external">Ext</string>
+    <string name="tutorial">Anleitung</string>
+    <string name="tutorial_detail">Tippt einige Befehle für Sie, Schritt für Schritt.</string>
+    <string name="tutorial_next">Weiter (%1$d/%2$d)</string>
+    <string name="tutorial_step_1">Zeigt das Inhaltsverzeichnis der zweiten Diskette. Pro Maschine lassen sich bis zu vier Disketten einlegen.</string>
+    <string name="tutorial_step_2">Startet den BASIC-Interpreter.</string>
+    <string name="tutorial_step_3">Schreibt „Hello World“ in BASIC.</string>
+    <string name="tutorial_step_4">Führt das BASIC-Programm aus.</string>
+    <string name="tutorial_step_5">Speichert das Programm auf Kassette. Vor dem Laden mit CLOAD muss die Kassette zurückgespult werden.</string>
+    <string name="tutorial_step_6">Speichert das Programm zusätzlich auf Diskette.</string>
+    <string name="tutorial_step_7">Verlässt den BASIC-Interpreter.</string>
+    <string name="tutorial_step_8">Zeigt das Inhaltsverzeichnis erneut. Beachten Sie die Datei FIRST/BAS.</string>
 </resources>

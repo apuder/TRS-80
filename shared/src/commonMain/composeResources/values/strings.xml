@@ -20,6 +20,19 @@
     <string name="show_fewer">Show fewer</string>
     <string name="show_all">Show all %1$d</string>
     <string name="never_run">Not run yet</string>
+    <!-- The guided tour, offered only by the machine the RetroStore tutorial installs -->
+    <string name="tutorial">Tutorial</string>
+    <string name="tutorial_detail">Types a handful of commands for you, one step at a time.</string>
+    <string name="tutorial_next">Next (%1$d/%2$d)</string>
+    <string name="tutorial_step_1">Display the directory of the second floppy disk. Up to four floppy images can be mounted per machine.</string>
+    <string name="tutorial_step_2">Enter the BASIC interpreter.</string>
+    <string name="tutorial_step_3">Write the BASIC version of &quot;Hello World&quot;.</string>
+    <string name="tutorial_step_4">Run the BASIC program.</string>
+    <string name="tutorial_step_5">Save the program to the cassette. The cassette needs to be rewound before loading it back with CLOAD.</string>
+    <string name="tutorial_step_6">Save the program to the floppy disk as well.</string>
+    <string name="tutorial_step_7">Exit the BASIC interpreter.</string>
+    <string name="tutorial_step_8">Display the directory again. Note the file FIRST/BAS.</string>
+
     <!-- The pane beside the list, where the window is wide enough for one -->
     <string name="where_you_left_off">Where you left off</string>
     <string name="resume">RESUME</string>

@@ -53,6 +53,8 @@ import trs_80.shared.generated.resources.reset_detail
 import trs_80.shared.generated.resources.rewind_cassette
 import trs_80.shared.generated.resources.rewind_cassette_detail
 import trs_80.shared.generated.resources.sound
+import trs_80.shared.generated.resources.tutorial
+import trs_80.shared.generated.resources.tutorial_detail
 
 /**
  * What can be done to a machine while it is running.
@@ -71,6 +73,14 @@ data class MachineActions(
     val onPaste: () -> Boolean,
     val soundMuted: Boolean,
     val onSoundMutedChange: (Boolean) -> Unit,
+    /**
+     * Starts the guided tour, on the one machine that has one.
+     *
+     * Null everywhere else, and the row is then not drawn at all: a tour of
+     * commands that assume disks this machine does not have would fail in a way
+     * that looks like the emulator is broken. See [TUTORIAL_APP_ID].
+     */
+    val onTutorial: (() -> Unit)? = null,
 )
 
 /**
@@ -148,6 +158,14 @@ internal fun MachinePanel(actions: MachineActions, onDismiss: () -> Unit) {
             // declines is indistinguishable from one that is broken.
             onClick = { if (actions.onPaste()) onDismiss() else pasteNote = true },
         )
+        actions.onTutorial?.let { start ->
+            Hairline()
+            SettingRow(
+                label = stringResource(Res.string.tutorial),
+                subtitle = stringResource(Res.string.tutorial_detail),
+                onClick = { start(); onDismiss() },
+            )
+        }
         Hairline()
         SettingRow(label = stringResource(Res.string.sound)) {
             Toggle(

@@ -103,6 +103,18 @@ import org.puder.trs80.shared.ui.Roms
 import org.puder.trs80.shared.ui.ScreensViewer
 import org.puder.trs80.shared.ui.SettingsScreen
 import org.puder.trs80.shared.ui.StoreState
+import org.puder.trs80.shared.ui.TUTORIAL_APP_ID
+import org.puder.trs80.shared.ui.TutorialPanel
+import org.puder.trs80.shared.ui.tutorialSteps
+import org.puder.trs80.shared.ui.tutorialKeyHold
+import org.puder.trs80.shared.ui.typeCommand
+import org.puder.trs80.shared.ui.trs80KeyForCharacter
+import kotlinx.coroutines.delay
+import org.puder.trs80.shared.ui.awaitPrompt
+import org.puder.trs80.shared.ui.awaitReady
+import org.puder.trs80.shared.ui.DOS_PROMPT
+import org.puder.trs80.shared.ui.BASIC_PROMPT
+import org.puder.trs80.shared.ui.asWritten
 import org.puder.trs80.shared.ui.Toast
 import org.puder.trs80.shared.ui.asCatalog
 import org.puder.trs80.shared.ui.encodePng
@@ -715,11 +727,53 @@ private fun RunningMachine(
             ConfigurationManager.get().getConfigById(configurationId)?.isSoundMuted == true
         )
     }
+    // Which tutorial step is on screen, or null when there is no tour running.
+    // Session-long state like the rest of this: leaving the machine ends it.
+    var tutorialStep by remember(configurationId) { mutableStateOf<Int?>(null) }
+    var typing by remember(configurationId) { mutableStateOf(false) }
+    val steps = tutorialSteps()
+
     val characterColor = remember(configurationId) {
         val argb = ConfigurationManager.get().getConfigById(configurationId)
             ?.characterColorAsRGB
             ?: ScreenColors.GREEN
         Color(argb)
+    }
+
+    LaunchedEffect(typing, tutorialStep) {
+        val at = tutorialStep
+        if (!typing || at == null) {
+            return@LaunchedEffect
+        }
+        val step = steps[at]
+        val press: suspend (Char) -> Unit = { character ->
+            trs80KeyForCharacter(character)?.let { key ->
+                core.keyDown(key.sym, key.key)
+                delay(tutorialKeyHold)
+                core.keyUp(key.sym, key.key)
+            }
+        }
+        // Nothing is typed until the machine is sitting where this command
+        // belongs. It may still be booting -- in which case it is asking for the
+        // time, and that gets answered -- or printing what the last one did.
+        if (!awaitReady(step.awaits, { core.screenBuffer }, answerBoot = { press('\n') })) {
+            Log.e(TAG, "The machine never reached ${step.awaits} for \"${step.asWritten()}\".")
+            typing = false
+            tutorialStep = null
+            return@LaunchedEffect
+        }
+        typeCommand(step.command, press)
+        // The next panel arrives when the machine is idle again, which is what
+        // "the command has finished" looks like from out here. Waiting a fixed
+        // time instead would cover the output of a slow one and interrupt a
+        // fast one.
+        val next = (at + 1).takeIf { it < steps.size }
+        val settled = awaitPrompt(
+            next?.let { steps[it].awaits } ?: listOf(DOS_PROMPT, BASIC_PROMPT),
+            { core.screenBuffer },
+        )
+        typing = false
+        tutorialStep = if (settled) next else null
     }
 
     // The machine takes the hardware keyboard for as long as it is on screen.
@@ -769,6 +823,15 @@ private fun RunningMachine(
     val configuration = remember(configurationId) {
         ConfigurationManager.get().getConfigById(configurationId)
     }
+    // Started rather than offered: this machine is a tutorial, and somebody who
+    // opened it came for the tour. Cancelling leaves them at the DOS prompt with
+    // the keyboard, and the panel's own entry starts it again.
+    LaunchedEffect(configurationId, configuration) {
+        if (configuration?.storeId == TUTORIAL_APP_ID && tutorialStep == null) {
+            tutorialStep = 0
+        }
+    }
+
     val landscape = isLandscape()
     // Turning the phone can change which controls the machine offers: landscape
     // has a layout of its own and falls back to the portrait one when the user
@@ -838,7 +901,13 @@ private fun RunningMachine(
             onBack()
         },
         machine = MachineActions(
-            onReset = { core.reset() },
+            onReset = {
+                core.reset()
+                if (configuration?.storeId == TUTORIAL_APP_ID) {
+                    typing = false
+                    tutorialStep = 0
+                }
+            },
             onRewindCassette = { core.rewindCassette() },
             onPaste = {
                 // The machine ends a line with a carriage return, which is what
@@ -850,8 +919,23 @@ private fun RunningMachine(
                 soundMuted = it
                 core.setSoundMuted(it)
             },
+            onTutorial = if (configuration?.storeId != TUTORIAL_APP_ID) {
+                null
+            } else {
+                {
+                    // From the top, as the old app did: the tour's first command
+                    // is a directory listing, and it reads the tape later on.
+                    core.reset()
+                    core.rewindCassette()
+                    tutorialStep = 0
+                    typing = false
+                }
+            },
         ),
-        keyboard = {
+        keyboard = if (tutorialStep != null) {
+            {}
+        } else {
+            {
             MachineKeyboard(
                 layout,
                 keyboard,
@@ -862,12 +946,25 @@ private fun RunningMachine(
                 overlay = landscape,
                 keyHeight = if (landscape) 38.dp else 44.dp,
             )
+            }
         },
     ) {
         EmulatorScreen(
             source = source,
             characterColor = characterColor,
             screenColor = SCREEN_COLOR,
+        )
+    }
+
+    // Between steps only: while a command is being typed there is nothing to
+    // read and everything to watch.
+    tutorialStep?.takeIf { !typing }?.let { at ->
+        TutorialPanel(
+            step = steps[at],
+            number = at + 1,
+            total = steps.size,
+            onNext = { typing = true },
+            onCancel = { tutorialStep = null; typing = false },
         )
     }
 }
