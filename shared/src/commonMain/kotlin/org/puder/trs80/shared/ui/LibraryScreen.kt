@@ -57,6 +57,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -88,6 +89,7 @@ import trs_80.shared.generated.resources.store_unreachable
 import trs_80.shared.generated.resources.yours
 import trs_80.shared.generated.resources.yours_empty
 import org.puder.trs80.shared.MODEL_NONE
+import org.puder.trs80.shared.ui.theme.CoverShape
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.ModalPanel
@@ -795,9 +797,14 @@ private fun CatalogRow(
     ) {
         RemoteImage(
             url = entry.artUrl,
+            // Cut to the icon shape rather than left square: these are covers
+            // and loading screens from a dozen sources at a dozen sizes, and the
+            // one thing that makes a column of them look like one list is a
+            // common outline.
             modifier = Modifier
                 .size(spacing.rowArt)
-                .border(spacing.hairline, colors.text.copy(alpha = 0.22f))
+                .clip(CoverShape)
+                .border(spacing.hairline, colors.text.copy(alpha = 0.22f), CoverShape)
                 .background(colors.crt),
         )
         Spacer(Modifier.width(12.dp))
