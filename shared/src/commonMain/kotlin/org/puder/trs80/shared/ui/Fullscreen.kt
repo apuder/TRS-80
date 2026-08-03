@@ -31,3 +31,15 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 expect fun Fullscreen(fullscreen: Boolean)
+
+/**
+ * Tells the platform which way round to draw the system bars' own contents:
+ * light on a dark app, dark on a light one.
+ *
+ * Android draws them in whatever it was last told, which by default is white --
+ * and white on this app's light ground is a clock nobody can read. It cannot
+ * work this out for itself: the bars are transparent and what is behind them is
+ * ours.
+ */
+@Composable
+expect fun SystemBarContents(light: Boolean)

@@ -19,6 +19,7 @@ package org.puder.trs80.shared.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import org.puder.trs80.shared.ui.SystemBarContents
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -232,6 +233,10 @@ fun Trs80Theme(
     dark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
+    // Whatever is behind the system bars is this app's ground, so this app is
+    // the only thing that knows what colour their contents have to be.
+    SystemBarContents(light = dark)
+
     CompositionLocalProvider(
         LocalTrs80Colors provides if (dark) DarkColors else LightColors,
         LocalTrs80Typography provides rememberTypography(),

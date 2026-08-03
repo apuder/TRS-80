@@ -28,3 +28,13 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 actual fun Fullscreen(fullscreen: Boolean) = Unit
+
+/**
+ * Nothing to do here either.
+ *
+ * iOS decides this from the view controller's own style, and the Compose one
+ * already follows the system's light and dark -- which is why the clock is
+ * readable there without anybody asking.
+ */
+@Composable
+actual fun SystemBarContents(light: Boolean) = Unit

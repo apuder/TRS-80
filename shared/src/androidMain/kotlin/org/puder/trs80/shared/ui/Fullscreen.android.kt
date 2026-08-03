@@ -48,6 +48,28 @@ actual fun Fullscreen(fullscreen: Boolean) {
     }
 }
 
+@Composable
+actual fun SystemBarContents(light: Boolean) {
+    val view = LocalView.current
+    val window = (view.context.activity())?.window ?: return
+    // Restored on the way out, not merely set on the way in. The themes nest --
+    // the machine puts a dark one inside the app's -- and the outer one does not
+    // recompose when the inner one goes, so without this the app came back from
+    // a machine wearing the machine's white clock on its light ground.
+    DisposableEffect(window, light) {
+        val bars = WindowCompat.getInsetsController(window, view)
+        // The properties are named for the *bar*, not for what is drawn in it:
+        // "light status bars" means a light background, so dark icons.
+        val was = bars.isAppearanceLightStatusBars
+        bars.isAppearanceLightStatusBars = !light
+        bars.isAppearanceLightNavigationBars = !light
+        onDispose {
+            bars.isAppearanceLightStatusBars = was
+            bars.isAppearanceLightNavigationBars = was
+        }
+    }
+}
+
 /** The activity a composable is drawn in, through however many wrappers. */
 private fun Context.activity(): Activity? {
     var context: Context? = this
