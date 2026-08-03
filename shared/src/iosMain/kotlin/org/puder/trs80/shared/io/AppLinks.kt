@@ -25,16 +25,15 @@ import platform.UIKit.popoverPresentationController
 private const val TAG = "AppLinks"
 
 /**
- * This app's page on the App Store, once it has one.
+ * This app's page on the App Store.
  *
- * Empty until the app ships: an iOS listing has a numeric id assigned when the
- * record is created, and there is no way to work one out in advance. While it is
- * empty the app offers no Rate, because a Rate that opens something else is a
- * lie, and Share sends people to the project's own page instead.
- *
- * Fill this in and both follow.
+ * The number is the Apple ID App Store Connect assigned the record; it is not
+ * the bundle id, and there is no way to work one out in advance. It is what Rate
+ * and Share both point at. Were it ever empty again the app would offer no Rate,
+ * because a Rate that opens something else is a lie, and Share would fall back
+ * to the project's own page.
  */
-private const val APP_STORE_ID = ""
+private const val APP_STORE_ID = "6797618793"
 
 actual val storeListingUrl: String?
     get() = APP_STORE_ID.takeIf { it.isNotEmpty() }?.let { "https://apps.apple.com/app/id$it" }
