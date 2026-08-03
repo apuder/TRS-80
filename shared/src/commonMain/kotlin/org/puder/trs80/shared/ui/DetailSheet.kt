@@ -52,6 +52,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.draggable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -188,6 +193,66 @@ fun DetailSheet(
         }
     }
 
+    /** Puts the sheet where it was let go: away, or back up. */
+    suspend fun settle(velocity: Float) {
+        if (slide.value > DISMISS_FRACTION || velocity > FLING_AWAY) {
+            slide.animateTo(1f, tween(FALL_MILLIS, easing = FastOutLinearInEasing))
+            onDismiss()
+        } else {
+            slide.animateTo(0f, tween(RISE_MILLIS, easing = LinearOutSlowInEasing))
+        }
+    }
+
+    /**
+     * Lets a drag that starts on the sheet's contents move the sheet.
+     *
+     * The contents scroll, and a scrolling child takes the whole gesture -- which
+     * is why dragging the sheet used to work on the handle and nowhere else. This
+     * gives the sheet what the list could not use: a drag downwards once the list
+     * is already at its top, and a drag upwards while the sheet is still pushed
+     * down. Anything the list can use is still the list's.
+     */
+    val fromContents = remember(heightPx) {
+        object : NestedScrollConnection {
+
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Upwards, and the sheet is not home yet: it goes back before the
+                // list moves, or the two would slide at once.
+                if (available.y >= 0f || slide.value <= 0f) {
+                    return Offset.Zero
+                }
+                return Offset(0f, moveBy(available.y))
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                // Downwards, and the list had nothing left to give with it.
+                if (available.y <= 0f) {
+                    return Offset.Zero
+                }
+                return Offset(0f, moveBy(available.y))
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (slide.value > 0f) {
+                    settle(available.y)
+                    return available
+                }
+                return Velocity.Zero
+            }
+
+            private fun moveBy(delta: Float): Float {
+                val target = (slide.value + delta / heightPx).coerceIn(0f, 1f)
+                val taken = (target - slide.value) * heightPx
+                scope.launch { slide.snapTo(target) }
+                return taken
+            }
+        }
+    }
+
     Box(modifier.fillMaxSize()) {
         // The scrim reaches to the top of the sheet only; what is above it is
         // the list, still legible, which is the point of a sheet. It fades with
@@ -224,15 +289,9 @@ fun DetailSheet(
                             slide.snapTo((slide.value + delta / heightPx).coerceIn(0f, 1f))
                         }
                     },
-                    onDragStopped = { velocity ->
-                        if (slide.value > DISMISS_FRACTION || velocity > FLING_AWAY) {
-                            slide.animateTo(1f, tween(FALL_MILLIS, easing = FastOutLinearInEasing))
-                            onDismiss()
-                        } else {
-                            slide.animateTo(0f, tween(RISE_MILLIS, easing = LinearOutSlowInEasing))
-                        }
-                    },
+                    onDragStopped = { velocity -> settle(velocity) },
                 )
+                .nestedScroll(fromContents)
                 // Taps inside the sheet are the sheet's, not the scrim's.
                 .clickable(
                     indication = null,
