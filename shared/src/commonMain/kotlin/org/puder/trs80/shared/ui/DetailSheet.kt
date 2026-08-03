@@ -67,6 +67,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import org.puder.trs80.shared.ui.theme.CoverShape
+import org.puder.trs80.shared.ui.theme.cornerShine
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -423,17 +425,24 @@ private fun GrabHandle(onDismiss: () -> Unit) {
     }
 }
 
+/** The cover on the entry's own page: a size up from the one in the list. */
+private val MASTHEAD_ART = 80.dp
+
 @Composable
 private fun Masthead(content: DetailContent) {
     val colors = Trs80Theme.colors
     Row(Modifier.fillMaxWidth().padding(top = 10.dp)) {
+        // The same treatment as a catalog row's art, a size up: the same shape,
+        // the same light on the same two corners, and no border under it. This
+        // is the picture that row was standing in for, so it should not be a
+        // different kind of object when it arrives.
         RemoteImage(
             url = content.coverUrl,
             modifier = Modifier
-                .size(64.dp)
-                .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.22f))
-                .background(colors.crt)
-                .scanlines(),
+                .size(MASTHEAD_ART)
+                .cornerShine(CoverShape)
+                .clip(CoverShape)
+                .background(colors.crt),
             contentScale = ContentScale.Crop,
         )
         Spacer(Modifier.width(14.dp))
@@ -446,14 +455,29 @@ private fun Masthead(content: DetailContent) {
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(3.dp))
-            Text(
-                listOfNotNull(
-                    content.author.takeIf { it.isNotEmpty() },
-                    content.year.takeIf { it > 0 }?.toString(),
-                ).joinToString(" · "),
-                style = Trs80Theme.type.bodySmall,
-                color = colors.muted,
-            )
+            content.author.takeIf { it.isNotEmpty() }?.let { author ->
+                Text(
+                    author,
+                    style = Trs80Theme.type.bodySmall,
+                    color = colors.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            // The year and the machine, as the row beside the list says them.
+            val facts = listOfNotNull(
+                content.year.takeIf { it > 0 }?.toString(),
+                content.machine.takeIf { it.isNotEmpty() },
+            ).joinToString(" · ")
+            if (facts.isNotEmpty()) {
+                Text(
+                    facts,
+                    style = Trs80Theme.type.bodySmall,
+                    color = colors.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Spacer(Modifier.height(6.dp))
             // A credit, not a link: it states where this came from and is not
             // something to press.
