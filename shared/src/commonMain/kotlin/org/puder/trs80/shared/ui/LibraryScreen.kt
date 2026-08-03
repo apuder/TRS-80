@@ -90,6 +90,7 @@ import trs_80.shared.generated.resources.yours
 import trs_80.shared.generated.resources.yours_empty
 import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.ui.theme.CoverShape
+import org.puder.trs80.shared.ui.theme.cornerShine
 import org.puder.trs80.shared.ui.theme.DestructiveButton
 import org.puder.trs80.shared.ui.theme.Hairline
 import org.puder.trs80.shared.ui.theme.ModalPanel
@@ -792,7 +793,12 @@ private fun CatalogRow(
                     Modifier
                 }
             )
-            .padding(vertical = 9.dp),
+            // Less than the art gained, so the row is no taller than it was.
+            // What is left has to fall equally above and below the art: the
+            // dividers are what the eye measures against, and one of them
+            // touching the picture while the other does not reads as a mistake
+            // even when the difference is two points.
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RemoteImage(
@@ -803,8 +809,17 @@ private fun CatalogRow(
             // common outline.
             modifier = Modifier
                 .size(spacing.rowArt)
+                // Before the clip, deliberately: the light straddles the
+                // outline, and the half of it that falls outside is what covers
+                // the picture's own antialiased edge. Inside the clip that half
+                // is cut off and the edge shows through as a hairline.
+                //
+                // There is no border under it either. That line drew over the
+                // outside of the light -- two pixels of 22% grey between the
+                // page and the shine, which is what makes a highlight look like
+                // a frame with a highlight in it.
+                .cornerShine(CoverShape)
                 .clip(CoverShape)
-                .border(spacing.hairline, colors.text.copy(alpha = 0.22f), CoverShape)
                 .background(colors.crt),
         )
         Spacer(Modifier.width(12.dp))

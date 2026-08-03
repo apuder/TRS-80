@@ -34,11 +34,13 @@ import kotlin.math.sin
  * How square the curve is: 2 is an ellipse, 4 is the icon shape, and the corner
  * keeps tightening from there towards a rectangle.
  *
- * Four is where a phone's icon mask sits, and it is the point of the shape --
- * the corner is round without the straight edges arriving suddenly, so a row of
- * these reads as one column of pictures rather than as a row of stickers.
+ * Four is where a phone's icon mask sits; five is a little tighter, which suits
+ * artwork -- an icon is drawn to be cut to its mask, and a screenshot is not, so
+ * a smaller corner takes less of the picture away. Either way the corner is
+ * round without the straight edges arriving suddenly, which is the point of the
+ * shape.
  */
-private const val ICON_EXPONENT = 4f
+private const val ICON_EXPONENT = 5f
 
 /**
  * How many points the outline is drawn with.
