@@ -60,15 +60,33 @@ xcodebuild -project iosApp/TRS80.xcodeproj -scheme TRS80 \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
 ```
 
-Two build phases do the work that is not Xcode's. The first runs
+Two build phases do the work that is not Xcode's. One runs
 `:shared:embedAndSignAppleFrameworkForXcode`, which builds the framework for
 whatever Xcode is building, embeds it, signs it, and syncs the Compose resources
-— every font and every string — into the bundle. The last writes
-`CFBundleShortVersionString` and `CFBundleVersion` from `gradle.properties`; it
-has to be last, because the app's `Info.plist` does not exist until Xcode has
-processed it, and signing happens afterwards.
+— every font and every string — into the bundle. The other copies
+`TRS80/Info.plist` to `$(TARGET_TEMP_DIR)/Info.plist` and writes
+`CFBundleShortVersionString` and `CFBundleVersion` into the copy from
+`gradle.properties`. `INFOPLIST_FILE` points at the copy, so what the phase
+writes is what Xcode then processes into the app.
+
+It stamps the copy rather than the finished bundle for a reason worth keeping:
+the build system orders work by the files each task reads and writes, not by the
+order of the phase list, so a phase that edits the built `Info.plist` is racing
+the task that puts it there. That phase was last in the list and still lost —
+`ProcessInfoPlistFile` ran after it and the build came out `0.0`, having said
+`note: version 0.99.2 (51)` on the way. Naming the generated file as the phase's
+output is what orders the two.
 
 Things that are easy to lose and hard to diagnose:
+
+- **The version is not in the Xcode project.** `MARKETING_VERSION` and
+  `CURRENT_PROJECT_VERSION` are deliberately absent; typing a version into
+  Xcode's General tab writes them and changes nothing about the build.
+- **What the General tab writes is mostly inert.** It saves display name and
+  category as `INFOPLIST_KEY_*` build settings, which only apply when
+  `GENERATE_INFOPLIST_FILE` is `YES`, and here it is `NO`. Put the key in
+  `TRS80/Info.plist` instead, and check it landed:
+  `PlistBuddy -c 'Print :CFBundleDisplayName' <built>.app/Info.plist`.
 
 - **`CADisableMinimumFrameDurationOnPhone` must be `true`.** Compose checks for
   it at start-up and throws if it is missing, so the app aborts before drawing.

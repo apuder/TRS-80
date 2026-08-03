@@ -45,3 +45,6 @@ app/src/debug
 
 # Kotlin build-session scratch, written by the Kotlin Gradle plugin.
 .kotlin/
+
+# Xcode's per-user state: which scheme was last picked, where the windows were.
+xcuserdata/

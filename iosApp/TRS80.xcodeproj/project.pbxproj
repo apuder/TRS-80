@@ -68,11 +68,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1000006000000000000002 /* Build configuration list for PBXNativeTarget "TRS80" */;
 			buildPhases = (
+				A1000007000000000000002 /* Write the version into the Info.plist */,
 				A1000007000000000000001 /* Build the shared framework */,
 				A1000008000000000000001 /* Sources */,
 				A1000003000000000000001 /* Frameworks */,
 				A1000009000000000000001 /* Resources */,
-				A1000007000000000000002 /* Stamp the version from gradle.properties */,
 			);
 			buildRules = (
 			);
@@ -148,24 +148,26 @@
 			shellPath = /bin/sh;
 			shellScript = "# Everything the app draws comes from here. Gradle builds the framework for\n# whatever Xcode is building, copies it into the app and signs it, and syncs\n# the Compose resources -- the fonts and every string -- into the bundle.\ncd \"$SRCROOT/..\"\n./gradlew --quiet :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
-		A1000007000000000000002 /* Stamp the version from gradle.properties */ = {
+		A1000007000000000000002 /* Write the version into the Info.plist */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/TRS80/Info.plist",
+				"$(SRCROOT)/../gradle.properties",
 			);
-			name = "Stamp the version from gradle.properties";
+			name = "Write the version into the Info.plist";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(TARGET_TEMP_DIR)/Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# The version comes from the two lines in gradle.properties that Android's\n# manifest and the shared BuildVersion.kt already read. Letting the bundle\n# carry its own is how iOS came to ship 0.1 for a year. See AGENTS.md.\n#\n# Last phase, deliberately: the Info.plist does not exist in the built app\n# until Xcode has processed it, and code signing happens after this.\nset -e\ncd \"$SRCROOT/..\"\nNAME=$(sed -n 's/^trs80VersionName=//p' gradle.properties)\nCODE=$(sed -n 's/^trs80VersionCode=//p' gradle.properties)\nPLIST=\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $NAME\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $CODE\" \"$PLIST\"\necho \"note: version $NAME ($CODE), from gradle.properties\"\n";
+			shellScript = "# The version comes from the two lines in gradle.properties that Android's\n# manifest and the shared BuildVersion.kt already read. Letting the bundle\n# carry its own is how iOS came to ship 0.1 for a year. See AGENTS.md.\n#\n# This writes the copy Xcode goes on to process -- INFOPLIST_FILE points at\n# it -- rather than editing the finished bundle. A phase that edits the\n# built plist is racing the build system, which orders work by what each\n# task reads and writes and not by the order of the phase list: it ran the\n# plist out to the app after this phase had already stamped it, and the\n# build came out 0.0. Declaring the file below as this phase's output is\n# what puts the two in the right order.\nset -e\ncd \"$SRCROOT/..\"\nNAME=$(sed -n 's/^trs80VersionName=//p' gradle.properties)\nCODE=$(sed -n 's/^trs80VersionCode=//p' gradle.properties)\nOUT=\"$SCRIPT_OUTPUT_FILE_0\"\nmkdir -p \"$(dirname \"$OUT\")\"\ncp \"$SRCROOT/TRS80/Info.plist\" \"$OUT\"\nchmod u+w \"$OUT\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $NAME\" \"$OUT\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $CODE\" \"$OUT\"\necho \"note: version $NAME ($CODE), from gradle.properties\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -214,8 +216,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
 				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -224,19 +226,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9597G999HW;
 				ENABLE_PREVIEWS = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = TRS80/Info.plist;
+				INFOPLIST_FILE = "$(TARGET_TEMP_DIR)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -254,19 +255,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9597G999HW;
 				ENABLE_PREVIEWS = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = TRS80/Info.plist;
+				INFOPLIST_FILE = "$(TARGET_TEMP_DIR)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",

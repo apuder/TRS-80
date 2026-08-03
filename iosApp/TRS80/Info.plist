@@ -2,10 +2,12 @@
 <!--
     What the platform needs to launch the app.
 
-    The version is not here. CFBundleShortVersionString and CFBundleVersion are
-    written by a build phase from gradle.properties, because that is where every
-    other version comes from and iOS answering for itself is how it came to ship
-    0.1 for a year. See AGENTS.md.
+    The version is not here. The two numbers below are placeholders: a build
+    phase copies this file, writes CFBundleShortVersionString and CFBundleVersion
+    into the copy from gradle.properties, and Xcode processes that -- because
+    that is where every other version comes from, and iOS answering for itself is
+    how it came to ship 0.1 for a year. Xcode's General tab is not where the
+    version lives either; what is typed there is ignored. See AGENTS.md.
 -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -20,6 +22,11 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>TRS-80</string>
+	<!-- What is written under the icon, and what the store shelves it under. -->
+	<key>CFBundleDisplayName</key>
+	<string>TRS-80</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.arcade-games</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
