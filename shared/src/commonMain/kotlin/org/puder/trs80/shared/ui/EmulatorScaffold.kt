@@ -91,6 +91,10 @@ private fun MachineChrome(
     var controlsOpen by remember { mutableStateOf(false) }
     val landscape = isLandscape()
 
+    // Sideways, the picture is as tall as the window allows, so a status bar
+    // across the top is picture the user does not get.
+    Fullscreen(landscape)
+
     Box(modifier.fillMaxSize().background(colors.ground)) {
         if (landscape) {
             LandscapeMachine(
