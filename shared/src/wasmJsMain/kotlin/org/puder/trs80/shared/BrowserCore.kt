@@ -23,6 +23,7 @@ import org.khronos.webgl.toInt8Array
 import okio.Path.Companion.toPath
 import org.puder.trs80.shared.io.appFileSystem
 import org.puder.trs80.shared.ui.DiskImageSpec
+import org.puder.trs80.shared.ui.trs80KeyForCharacter
 
 private const val TAG = "BrowserCore"
 
@@ -138,7 +139,40 @@ private fun jsRun(core: JsAny) {
     )
 }
 
-private fun jsPaste(core: JsAny, text: String) {
+/**
+ * Types [codes] -- "sym:key" pairs, comma separated -- as held key presses.
+ *
+ * The C's own paste cannot be called from here. ASYNCIFY instruments every
+ * function that can reach a sleep and the paste machine is on that path, so
+ * calling it from outside while the run loop is suspended between frames trips
+ * its state assertion and traps. Key events are leaves, uninstrumented, and
+ * demonstrably fine -- the keyboard is made of them.
+ *
+ * So a browser types the way a person does, on a timer: down, held long enough
+ * for the machine to poll its matrix, up, and the next one after a gap. The
+ * machine goes on running in between, which is the point.
+ */
+private fun jsTypeKeys(core: JsAny, codes: String) {
+    js(
+        """{
+        var keys = codes.split(',').filter(function (k) { return k.length > 0; });
+        var at = 0;
+        var next = function () {
+            if (at >= keys.length) return;
+            var parts = keys[at++].split(':');
+            var sym = parseInt(parts[0], 10), key = parseInt(parts[1], 10);
+            core._trs80_add_key_event(2, sym, key);
+            setTimeout(function () {
+                core._trs80_add_key_event(3, sym, key);
+                setTimeout(next, 60);
+            }, 90);
+        };
+        next();
+    }"""
+    )
+}
+
+private fun jsPasteUnused(core: JsAny, text: String) {
     js(
         """{
         var bytes = core._malloc(text.length + 1);
@@ -281,7 +315,18 @@ class BrowserCore(private val core: JsAny) : EmulatorCore {
 
     override fun setSoundMuted(muted: Boolean) = jsSetSoundMuted(core, if (muted) 1 else 0)
 
-    override fun paste(text: String) = jsPaste(core, text)
+    /**
+     * Typed rather than pasted; see [jsTypeKeys].
+     */
+    override fun paste(text: String) {
+        val codes = text.mapNotNull { character ->
+            val key = if (character == '\r') '\n' else character
+            trs80KeyForCharacter(key)?.let { "SYM:KEY".replace("SYM", it.sym.toString()).replace("KEY", it.key.toString()) }
+        }
+        if (codes.isNotEmpty()) {
+            jsTypeKeys(core, codes.joinToString(","))
+        }
+    }
 
     override fun rewindCassette() = jsRewindCassette(core)
 
