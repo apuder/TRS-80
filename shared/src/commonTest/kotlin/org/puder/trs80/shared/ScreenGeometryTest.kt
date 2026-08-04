@@ -104,4 +104,51 @@ class ScreenGeometryTest {
         assertEquals(CellMetrics(SCREEN_COLUMNS, SCREEN_ROWS, 0, 0), fitCellSize(0, 0))
         assertEquals(CellMetrics(SCREEN_COLUMNS, SCREEN_ROWS, 0, 0), fitCellSize(1080, 0))
     }
+
+    /**
+     * A picture too big to move cheaply is drawn smaller, and scaled up after.
+     *
+     * The browser's problem: the frame crosses from the emulator's memory into
+     * Kotlin's one array at a time, so a MacBook's full screen costs most of a
+     * frame moving bytes that were about to be scaled anyway.
+     */
+    @Test
+    fun aCellIsDividedDownUntilThePictureFitsTheBudget() {
+        val huge = fitCellSize(3400, 2000)
+
+        val capped = huge.withinBudget(256 * 1024)
+
+        assertTrue(
+            capped.cellWidth * capped.columns * capped.cellHeight * capped.rows <= 256 * 1024,
+            "the picture should fit the budget, and is ${capped.cellWidth}x${capped.cellHeight} a cell",
+        )
+        assertTrue(capped.cellWidth < huge.cellWidth, "it should have come down at all")
+    }
+
+    /** Divided by a whole number, so every emulated pixel scales to the same block. */
+    @Test
+    fun theCellComesDownByAWholeNumber() {
+        val fitted = fitCellSize(3400, 2000)
+
+        val capped = fitted.withinBudget(256 * 1024)
+
+        val factor = fitted.cellWidth / capped.cellWidth
+        assertEquals(fitted.cellWidth / factor, capped.cellWidth)
+    }
+
+    /** Every band of the block graphics keeps the same number of rows. */
+    @Test
+    fun theCappedCellStillSplitsIntoThreeBands() {
+        val capped = fitCellSize(3400, 2000).withinBudget(256 * 1024)
+
+        assertEquals(0, capped.cellHeight % 3)
+    }
+
+    /** A picture already small enough is left exactly as it was. */
+    @Test
+    fun aPictureWithinTheBudgetIsUntouched() {
+        val fitted = fitCellSize(480, 360)
+
+        assertEquals(fitted, fitted.withinBudget(256 * 1024))
+    }
 }

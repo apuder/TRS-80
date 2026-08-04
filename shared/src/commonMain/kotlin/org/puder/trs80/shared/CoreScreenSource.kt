@@ -55,7 +55,8 @@ class CoreScreenSource(
         private set
 
     override fun resize(availableWidth: Int, availableHeight: Int) {
-        val metrics = fitCellSize(availableWidth, availableHeight)
+        val fitted = fitCellSize(availableWidth, availableHeight)
+        val metrics = fitted.withinBudget(maxRasterPixels)
         if (metrics.cellWidth <= 0 || metrics.cellHeight <= 0) {
             return
         }

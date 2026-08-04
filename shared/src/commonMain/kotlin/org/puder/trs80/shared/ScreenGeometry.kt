@@ -87,3 +87,37 @@ fun fitCellSize(
     }
     return CellMetrics(columns, rows, cellWidth, cellHeight)
 }
+
+/**
+ * The same cell, divided down until the whole picture fits in [budget] pixels.
+ *
+ * Divided by a whole number rather than scaled to fit, so that the picture that
+ * comes back is the same shape and every emulated pixel becomes an identical
+ * block when it is drawn up to size. Anything else would put some glyph stems
+ * a pixel wider than others, which is the thing rasterizing at the drawn size
+ * exists to avoid.
+ *
+ * The height stays a multiple of three, for the same reason it starts as one:
+ * the block graphics divide a cell into three bands, and a band that is a row
+ * short of its neighbours is visible on any screen full of them.
+ */
+fun CellMetrics.withinBudget(budget: Int): CellMetrics {
+    if (budget <= 0 || cellWidth <= 0 || cellHeight <= 0) {
+        return this
+    }
+    var divisor = 1
+    while (true) {
+        val width = cellWidth / divisor
+        val height = (cellHeight / divisor) / 3 * 3
+        if (width < 1 || height < 3) {
+            // Smaller than a cell can be; the last one that was not is as far
+            // as this goes.
+            val last = (divisor - 1).coerceAtLeast(1)
+            return copy(cellWidth = cellWidth / last, cellHeight = (cellHeight / last) / 3 * 3)
+        }
+        if (width * columns * height * rows <= budget) {
+            return copy(cellWidth = width, cellHeight = height)
+        }
+        divisor++
+    }
+}
