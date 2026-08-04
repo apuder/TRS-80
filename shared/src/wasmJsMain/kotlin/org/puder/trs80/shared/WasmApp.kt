@@ -50,8 +50,11 @@ fun main() {
         val emulator = runCatching { loadEmulator().await() }
             .onFailure { Log.e(TAG, "The emulator would not load: $it") }
             .getOrNull()
+        val core = BrowserCore(emulator ?: return@launch)
+        // The page's keys, switched on by the emulator screen while it is up.
+        val keys = BrowserKeys().apply { this.core = core }
         ComposeViewport(viewportContainerId = "trs80") {
-            Trs80AppUi(core = BrowserCore(emulator ?: return@ComposeViewport))
+            Trs80AppUi(core = core, hardwareKeys = keys)
         }
     }
 }
