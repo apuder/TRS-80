@@ -80,6 +80,36 @@ if(ANDROID)
     find_library(log-lib log)
     find_library(OpenSLES-lib OpenSLES)
     target_link_libraries(xtrs ${log-lib} ${OpenSLES-lib})
+elseif(EMSCRIPTEN)
+    # A JavaScript module wrapping the core's WebAssembly, for the web app to
+    # load. Not a library: nothing else on this platform links C, so the linking
+    # happens here and what comes out is trs80core.js plus trs80core.wasm.
+    #
+    # No audio backend. A page cannot open one before the user has touched it,
+    # so the browser gets the silent sink and a machine that runs without sound.
+    add_executable(trs80core ${TRS80_CORE_SOURCES} audio_silent.c)
+
+    target_compile_features(trs80core PRIVATE cxx_std_11)
+    target_compile_options(trs80core PRIVATE
+            $<$<COMPILE_LANGUAGE:CXX>:-frtti -fexceptions>)
+
+    # ccall/cwrap and the heap views are how Kotlin reaches any of this: it
+    # cannot call another module's WebAssembly directly, so everything goes
+    # through the JavaScript this generates. MODULARIZE keeps it out of the
+    # global scope, and ALLOW_MEMORY_GROWTH is for the disk images.
+    set_target_properties(trs80core PROPERTIES
+            OUTPUT_NAME "trs80core"
+            SUFFIX ".js"
+            LINK_FLAGS "-sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=Trs80Core \
+-sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','HEAPU8','FS'] \
+-sEXPORTED_FUNCTIONS=['_trs80_init','_trs80_set_host','_trs80_screen_buffer',\
+'_trs80_pixel_buffer','_trs80_pixel_width','_trs80_pixel_height','_trs80_set_cell_size',\
+'_trs80_render','_trs80_invalidate_render','_trs80_run','_trs80_set_running','_trs80_reset',\
+'_trs80_is_expanded_mode','_trs80_add_key_event','_trs80_paste','_trs80_save_state',\
+'_trs80_load_state','_trs80_rewind_cassette','_trs80_cassette_position',\
+'_trs80_set_sound_muted','_trs80_create_blank_jv1','_trs80_create_blank_jv3',\
+'_trs80_create_blank_dmk','_malloc','_free'] \
+-sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sASYNCIFY=1 -sASYNCIFY_STACK_SIZE=65536")
 else()
     # Static, so Kotlin/Native can link it straight into the framework.
     add_library(trs80core STATIC ${TRS80_CORE_SOURCES} audio_audioqueue.c)

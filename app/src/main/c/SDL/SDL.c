@@ -15,6 +15,9 @@
  */
 
 #include <SDL.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include <pthread.h>
 #include <errno.h>
 #include "atrs.h"
@@ -226,6 +229,26 @@ Uint32 SDLCALL SDL_GetTicks(void)
 
 void SDLCALL SDL_Delay(Uint32 ms)
 {
+#ifdef __EMSCRIPTEN__
+    /*
+     * The whole of how a machine runs in a browser.
+     *
+     * A page has one thread and Compose is drawing on it, so trs80_run() -- a
+     * loop that does not return until the machine is stopped -- cannot simply
+     * be called. It does not have to be: the loop already pauses here, once per
+     * frame, to keep the emulated machine at the speed of a real one. With
+     * ASYNCIFY that pause is a yield, the browser gets its thread back to draw
+     * and handle input, and the loop resumes where it stopped.
+     *
+     * The alternatives were a worker with the framebuffer in a SharedArrayBuffer
+     * -- which needs COOP/COEP headers on whatever serves the app -- or cutting
+     * the C loop into slices, which would change code that Android and iOS also
+     * run. This changes nothing for them: it is inside an #ifdef, in a shim that
+     * is ours.
+     */
+    emscripten_sleep(ms);
+    return;
+#else
     int was_error;
 
 #if HAVE_NANOSLEEP
@@ -264,6 +287,7 @@ void SDLCALL SDL_Delay(Uint32 ms)
         was_error = select(0, NULL, NULL, NULL, &tv);
 #endif /* HAVE_NANOSLEEP */
     } while (was_error && (errno == EINTR));
+#endif
 }
 
 void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon)
