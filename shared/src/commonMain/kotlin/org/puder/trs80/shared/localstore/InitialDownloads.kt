@@ -24,10 +24,22 @@ import org.puder.trs80.shared.MODEL3
  */
 object InitialDownloads {
 
+    /*
+     * raw.githubusercontent.com, not github.com/.../raw/...
+     *
+     * The second is a redirect to the first, and a browser checks the CORS
+     * headers on every response in a redirect chain rather than only the last.
+     * GitHub's 302 carries an Access-Control-Allow-Origin that is present and
+     * empty, which is invalid, so a page is refused before it ever follows the
+     * redirect -- while curl, which follows first and reports the destination,
+     * sees a perfectly good `*` and says everything is fine. Asking for the
+     * destination directly is a redirect fewer on every platform.
+     */
+
     /** @return The ROMs and disk images to fetch when the app is started for the first time. */
     fun get(): Array<Download> = arrayOf(
             Download(true, MODEL1, null,
-                    "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model1-level2.rom",
+                    "https://raw.githubusercontent.com/lkesteloot/trs80/v2.3.0/packages/trs80-emulator/roms/model1-level2.rom",
                     null, "model1.rom"),
             // Defunct download:
             // Download(true, MODEL3, null,
@@ -35,7 +47,7 @@ object InitialDownloads {
             //         .org/cpmarchives/trs80/Miscellany/Emulatrs/trs80-62/model3.rom",
             //         null, "model3.rom"),
             Download(true, MODEL3, null,
-                    "https://github.com/lkesteloot/trs80/raw/v2.3.0/packages/trs80-emulator/roms/model3.rom",
+                    "https://raw.githubusercontent.com/lkesteloot/trs80/v2.3.0/packages/trs80-emulator/roms/model3.rom",
                     null, "model3.rom")
 
             // Download(false, MODEL1, "Model I - LDOS",
