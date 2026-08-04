@@ -13,6 +13,20 @@
 </head>
 <body>
     <div id="trs80"></div>
+    <!--
+        The emulator, fetched by the page rather than by the app.
+
+        A classic script, so it runs here in document order and the promise
+        exists before the app below starts looking for it. It is imported here
+        because the app is bundled: webpack resolves every import it can read,
+        and Emscripten's module is not its to resolve -- it is already complete
+        and it lives beside this file.
+    -->
+    <script>
+        window.trs80Core = import('./trs80core.js').then(function (module) {
+            return module.default();
+        });
+    </script>
     <script src="trs80.js"></script>
 </body>
 </html>

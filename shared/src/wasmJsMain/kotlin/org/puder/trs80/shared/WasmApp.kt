@@ -18,12 +18,14 @@ package org.puder.trs80.shared
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import org.puder.trs80.shared.configuration.ConfigurationManager
 import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.appDataDirectory
 import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.storage.appSettings
-import org.puder.trs80.shared.ui.DiskImageSpec
 
 /** Where the app's own files live inside the page's file system. */
 private const val TRS80_DIRECTORY = "trs80"
@@ -32,8 +34,8 @@ private const val TRS80_DIRECTORY = "trs80"
  * The web app: the same screens, on a canvas.
  *
  * The whole of the host, and it is short for the same reason the iOS one is --
- * everything drawn is [Trs80AppUi] from the shared module. What is missing here
- * is not screens but the machine: see [BrowserCore].
+ * everything drawn is [Trs80AppUi] from the shared module, and the machine is
+ * the same C the other two run, fetched as WebAssembly. See [BrowserCore].
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
@@ -41,125 +43,17 @@ fun main() {
     ConfigurationManager.init(creator, appSettings())
     RomManager.init(creator, appSettings())
 
-    ComposeViewport(viewportContainerId = "trs80") {
-        Trs80AppUi(core = BrowserCore)
+    // The emulator is fetched, so the app draws nothing until it is here. The
+    // other two platforms have theirs linked in and never wait; this is the one
+    // place a browser's app starts differently from a device's.
+    MainScope().launch {
+        val emulator = runCatching { loadEmulator().await() }
+            .onFailure { Log.e(TAG, "The emulator would not load: $it") }
+            .getOrNull()
+        ComposeViewport(viewportContainerId = "trs80") {
+            Trs80AppUi(core = BrowserCore(emulator ?: return@ComposeViewport))
+        }
     }
 }
 
-/**
- * A machine that does nothing, so that everything around one can be worked on.
- *
- * The emulator is C. A browser takes C only through Emscripten, as WebAssembly
- * with a JavaScript boundary either side, and that is a piece of work with its
- * own decisions in it -- where the run loop lives, how the framebuffer crosses
- * into Kotlin, what happens to the audio. None of that has to be answered to
- * find out whether the library, the catalog, the editor and the settings work
- * in a page, and this is what lets that question be asked first.
- *
- * Every member is the honest do-nothing: booting says it worked and nothing is
- * stored. The screen is the one exception -- it draws a test card, because a
- * blank canvas cannot be told from a broken one. When the real core lands, this
- * file is what it replaces.
- */
-private object BrowserCore : EmulatorCore {
-
-    override val isExpandedMode = false
-
-    override val screenBuffer = object : ScreenBuffer {
-        override fun get(index: Int): Byte = ' '.code.toByte()
-    }
-
-    override val pixelBuffer = object : ScreenBuffer {
-        override fun get(index: Int): Byte = 0
-    }
-
-    override var pixelWidth = 0
-        private set
-
-    override var pixelHeight = 0
-        private set
-
-    override val romCellWidth = 8
-    override val romCellHeight = 12
-
-    override fun setCellSize(width: Int, height: Int) {
-        pixelWidth = width * SCREEN_COLUMNS
-        pixelHeight = height * SCREEN_ROWS
-    }
-
-    /**
-     * Draws once, and what it draws is a test card.
-     *
-     * A blank screen and a broken screen look identical, and the difference
-     * matters while the core is missing: everything between a machine and the
-     * glass -- the cell geometry, the mask, Skia, the canvas -- is real code
-     * that can be wrong on its own. So the stand-in fills the frame it is asked
-     * for with a border and a cross, which is unmistakably not a TRS-80 and
-     * proves that a machine's picture would arrive if there were one.
-     */
-    private var drawn = false
-
-    override fun render(): Boolean {
-        if (drawn) {
-            return false
-        }
-        drawn = true
-        return true
-    }
-
-    override fun invalidateRender() {
-        drawn = false
-    }
-
-    /**
-     * The mask is one byte of coverage per pixel: 0 is glass, 255 is phosphor.
-     */
-    override fun copyPixelsInto(destination: ByteArray) {
-        destination.fill(0)
-        val width = pixelWidth
-        val height = pixelHeight
-        if (width <= 0 || height <= 0 || destination.size < width * height) {
-            return
-        }
-        val lit = 255.toByte()
-        for (x in 0 until width) {
-            destination[x] = lit
-            destination[(height - 1) * width + x] = lit
-            // The diagonals, drawn as two lines rather than a loop over both,
-            // so a non-square frame still meets in the middle.
-            val down = x * height / width
-            destination[down.coerceIn(0, height - 1) * width + x] = lit
-            destination[(height - 1 - down).coerceIn(0, height - 1) * width + x] = lit
-        }
-        for (y in 0 until height) {
-            destination[y * width] = lit
-            destination[y * width + width - 1] = lit
-        }
-    }
-
-    override fun boot(
-        model: Int,
-        romPath: String,
-        diskPaths: List<String?>,
-        cassettePath: String?,
-        entryAddress: Int,
-    ): Boolean {
-        Log.i(TAG, "Pretending to boot model $model; there is no core in the browser yet.")
-        return true
-    }
-
-    override fun run() = Unit
-    override fun stop() = Unit
-    override fun reset() = Unit
-    override fun saveState(path: String) = Unit
-    override fun loadState(path: String) = Unit
-    override fun setSoundMuted(muted: Boolean) = Unit
-    override fun paste(text: String) = Unit
-    override fun rewindCassette() = Unit
-    override fun cassettePosition() = 0f
-    override fun keyDown(sym: Int, key: Int) = Unit
-    override fun keyUp(sym: Int, key: Int) = Unit
-    override fun createBlankDisk(path: String, spec: DiskImageSpec) = false
-}
-
-private const val TAG = "BrowserCore"
+private const val TAG = "WasmApp"

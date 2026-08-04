@@ -97,6 +97,51 @@ def coreBuilds = iosTargets.collectEntries { name, spec ->
     [(name): registerCoreBuild(name, spec.sdk, spec.arch)]
 }
 
+// ---------------------------------------------------------------------------
+// The emulator core, built for the browser.
+//
+// The same CMakeLists, through Emscripten, which links rather than archives:
+// what comes out is a JavaScript module wrapping WebAssembly, and it is put
+// beside the app's own so a page can import it. Needs emcc on the PATH; without
+// it the task says so rather than failing halfway through a build.
+// ---------------------------------------------------------------------------
+
+def webCoreDir = layout.buildDirectory.dir('web-core')
+
+def buildWebCore = tasks.register('buildWebCore') {
+    description = 'Builds the TRS-80 emulator core as WebAssembly.'
+    inputs.dir(nativeSrcDir).withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir(webCoreDir)
+    outputs.cacheIf { true }
+    doLast {
+        def outputDir = webCoreDir.get().asFile
+        outputDir.mkdirs()
+        def emcmake = ['/opt/homebrew/bin/emcmake', 'emcmake'].find { new File(it).exists() || it == 'emcmake' }
+        def run = { List<String> command ->
+            providers.exec { commandLine(command) }.result.get().assertNormalExitValue()
+        }
+        run([emcmake, 'cmake',
+             '-S', nativeSrcDir.absolutePath,
+             '-B', outputDir.absolutePath,
+             '-DCMAKE_BUILD_TYPE=Release'])
+        run(['cmake', '--build', outputDir.absolutePath, '--parallel'])
+    }
+}
+
+// The module lands in the distribution beside index.html, and deliberately not
+// in the source set's resources: those go through webpack, which bundles what
+// it finds -- and Emscripten's JavaScript imports node:module for the
+// environments it also supports, which webpack cannot resolve for a browser and
+// stops on. It is already a complete module and wants no processing at all.
+def copyWebCore = tasks.register('copyWebCore', Copy) {
+    dependsOn(buildWebCore)
+    from(webCoreDir) {
+        include 'trs80core.js'
+        include 'trs80core.wasm'
+    }
+    into(layout.buildDirectory.dir('dist/wasmJs/productionExecutable'))
+}
+
 /*
  * The Compose resources -- strings, fonts -- as Android assets.
  *
@@ -138,6 +183,11 @@ internal const val VERSION_CODE = ${code.get()}
 
 // matching, not named: the plugin registers this task later than this file is
 // read, so asking for it by name here fails outright.
+// The emulator module is put into the distribution once the app's own is built.
+tasks.matching { it.name == 'wasmJsBrowserDistribution' }.configureEach {
+    finalizedBy(copyWebCore)
+}
+
 tasks.matching { it.name == 'copyAndroidMainComposeResourcesToAndroidAssets' }.configureEach {
     outputDirectory = layout.buildDirectory.dir('androidComposeResources')
 }
@@ -262,6 +312,9 @@ kotlin {
                 // An in-memory file system stands in for the one a browser does
                 // not have; see io/AppDirectory.wasmJs.kt.
                 implementation 'com.squareup.okio:okio-fakefilesystem:3.18.1'
+                // Typed arrays, for getting a frame out of the emulator's heap
+                // in one copy rather than a hundred thousand.
+                implementation 'org.jetbrains.kotlinx:kotlinx-browser:0.5.0'
             }
         }
 
