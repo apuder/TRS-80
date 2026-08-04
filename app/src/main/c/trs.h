@@ -206,6 +206,8 @@ extern int cassette_default_sample_rate;
 extern void trs_orch90_out(int chan, int value);
 extern void trs_cassette_reset(void);
 extern int assert_state(int dummy);
+/* assert_state with the signature trs_schedule_event calls through. */
+extern void assert_state_event(int state);
 extern void transition_out(int dummy);
 extern void trs_cassette_kickoff(int dummy);
 extern void orch90_flush(int dummy);

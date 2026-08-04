@@ -153,6 +153,11 @@ def copyWebCore = tasks.register('copyWebCore', Copy) {
     // Nothing to copy when the core was not built; the app still runs, with the
     // machine missing, which is what it did before there was a core at all.
     onlyIf { webCoreDir.get().asFile.exists() }
+    // The distribution task writes into this same directory, and two tasks
+    // sharing an output directory is a case Gradle will not track: this one
+    // reported itself up to date while the core beside it had been rebuilt, so
+    // the distribution kept shipping the previous one. It copies four files.
+    outputs.upToDateWhen { false }
     from(webCoreDir) {
         include 'trs80core.js'
         include 'trs80core.wasm'

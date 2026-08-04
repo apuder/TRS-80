@@ -616,6 +616,25 @@ void trs_set_cassette_position(int pos)
   cassette_position = pos;
 }
 
+/*
+ * assert_state, as something the event scheduler can call.
+ *
+ * The scheduler takes a void function and this one returns a status, so every
+ * call site here used to cast it. That is undefined behaviour, and a real
+ * machine's calling convention did not care -- but WebAssembly type-checks an
+ * indirect call against the signature at the call site and traps on a
+ * mismatch. So the cassette scheduled a closing event, the disk scheduled one
+ * of its own a moment later and ran the pending one on the way past, and the
+ * machine died with "function signature mismatch" before the browser had drawn
+ * a frame of it.
+ *
+ * The status is the caller's answer, and the scheduler is not asking.
+ */
+void assert_state_event(int state)
+{
+  (void) assert_state(state);
+}
+
 /* Return value: 1 = already that state; 0 = state changed; -1 = failed */
 int assert_state(int state)
 {
@@ -777,11 +796,11 @@ transition_out(int value)
         cassette_roundoff_error = 0.0;
       }
       if (trs_event_scheduled() == transition_out ||
-		  trs_event_scheduled() == (trs_event_func) assert_state) {
+		  trs_event_scheduled() == assert_state_event) {
         trs_cancel_event();
       }
       if (value == FLUSH) {
-        trs_schedule_event((trs_event_func)assert_state, CLOSE, 5000000);
+        trs_schedule_event(assert_state_event, CLOSE, 5000000);
       } else {
         trs_schedule_event(transition_out, FLUSH,
                            (int)(25000 * z80_state.clockMHz));
@@ -1228,11 +1247,11 @@ trs_orch90_out(int channels, int value)
   }
 
   if (trs_event_scheduled() == orch90_flush ||
-      trs_event_scheduled() == (trs_event_func) assert_state) {
+      trs_event_scheduled() == assert_state_event) {
     trs_cancel_event();
   }
   if (value == FLUSH) {
-    trs_schedule_event((trs_event_func)assert_state, CLOSE, 5000000);
+    trs_schedule_event(assert_state_event, CLOSE, 5000000);
   } else {
     trs_schedule_event(orch90_flush, FLUSH,
 		       (int)(250000 * z80_state.clockMHz));
