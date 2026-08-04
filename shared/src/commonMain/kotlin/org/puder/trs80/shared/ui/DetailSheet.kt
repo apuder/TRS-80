@@ -65,7 +65,9 @@ import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import org.puder.trs80.shared.SCREEN_PICTURE_RATIO
@@ -170,6 +172,7 @@ enum class DetailAction { Play, Downloading, Failed }
  * used first. Listed rather than folded into the primary control: choosing one
  * of your own variants is a deliberate act, and the user knows which one.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DetailSheet(
     content: DetailContent,
@@ -195,6 +198,20 @@ fun DetailSheet(
         scope.launch {
             slide.animateTo(1f, tween(FALL_MILLIS, easing = FastOutLinearInEasing))
             onDismiss()
+        }
+    }
+
+    // Back takes off one layer per press: a screen being looked at, then the
+    // sheet. Handled here rather than by whoever opened the sheet, because the
+    // viewer a phone opens belongs to the sheet -- it is the sheet that has the
+    // window to draw it in -- and a handler that cannot see it would close the
+    // sheet out from under the picture. Going out through dismiss() is what
+    // makes back slide the sheet away rather than blink it out of existence.
+    BackHandler {
+        if (viewing != null) {
+            viewing = null
+        } else {
+            dismiss()
         }
     }
 

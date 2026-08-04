@@ -227,6 +227,16 @@ kotlin {
                 // Fonts for the design system; see ui/theme.
                 implementation compose.components.resources
 
+                // The system's back, in common code: Android's button and
+                // gesture, and iOS's swipe from the left edge. Named outright
+                // because the compose extension has no accessor for it, and it
+                // arrives transitively on iOS but not on Android -- which shows
+                // up as commonMain compiling for one platform and not the
+                // other. The version follows the plugin's rather than being
+                // typed again here.
+                implementation "org.jetbrains.compose.ui:ui-backhandler:" +
+                        org.jetbrains.compose.ComposeBuildConfig.composeVersion
+
                 // Navigation 3. The back stack is ours (see the navigation
                 // package); this renders it and puts it away for us.
                 implementation 'org.jetbrains.androidx.navigation3:navigation3-ui:1.1.1'

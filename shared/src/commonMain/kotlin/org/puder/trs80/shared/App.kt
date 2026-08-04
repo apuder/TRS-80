@@ -34,6 +34,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -171,6 +173,7 @@ interface HardwareKeys {
  * Android's implementation lives in the app module, where the JNI entry points
  * are; nothing shared can name it.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
     val navigator = rememberNavigator()
@@ -212,6 +215,11 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
                     )
                 },
                 emulator = {
+                    // What the screen's own back control does. Registered per
+                    // destination rather than once around the app, because
+                    // leaving is not the same act on every screen -- see the
+                    // editor, which has something to undo on the way out.
+                    BackHandler { navigator.goBack() }
                     RunningMachine(
                         core = core,
                         configurationId = it.configurationId,
@@ -220,6 +228,7 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
                     )
                 },
                 settings = {
+                    BackHandler { navigator.goBack() }
                     SettingsScreen(
                         theme = theme,
                         onThemeChange = {
@@ -293,6 +302,7 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
  * here, because that is the only way it can have an id; deleting it on the way
  * back out is what makes Back behave as though it was never created.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Editor(
     core: EmulatorCore,
@@ -310,6 +320,24 @@ private fun Editor(
         return
     }
     var draft by remember(configurationId) { mutableStateOf(original) }
+
+    /**
+     * Leaves without saving, deleting a machine that only exists because the
+     * editor was opened to make one.
+     *
+     * Both the screen's back control and the system's back go through here. If
+     * the system's went straight to the navigator instead, backing out of a new
+     * machine would leave it in the library -- unnamed, unconfigured, and made
+     * by a press that meant "never mind".
+     */
+    fun leave() {
+        if (isNew) {
+            manager.deleteConfigWithId(configurationId)
+        }
+        navigator.goBack()
+    }
+    BackHandler { leave() }
+
     // The configuration's own model belongs on the control even if its ROM has
     // gone missing, or the editor would show nothing selected.
     val models = remember(original.model) {
@@ -326,12 +354,7 @@ private fun Editor(
                 manager.persistDraft(draft)
                 navigator.goBack()
             },
-            onBack = {
-                if (isNew) {
-                    manager.deleteConfigWithId(configurationId)
-                }
-                navigator.goBack()
-            },
+            onBack = { leave() },
             onChooseDisk = { drive ->
                 pickFile { name, content ->
                     manager.storeMedia(configurationId, name, content)
@@ -361,6 +384,7 @@ private fun Editor(
  * a drawing of what it is handed — which is what keeps the sorting and filtering
  * testable on their own, without a display.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Library(
     navigator: Navigator,
@@ -383,6 +407,19 @@ private fun Library(
     // half of it.
     var viewingScreen by remember(selectedId) { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
+
+    // Back takes off one layer at a time -- the picture, then the entry -- and
+    // the library itself is the bottom, where back leaves the app because there
+    // is nothing under it. Two layers rather than one: a screen is opened from
+    // an entry, so closing the entry as well would drop the user two steps back
+    // from one press.
+    BackHandler(enabled = viewingScreen != null || selectedId != null) {
+        if (viewingScreen != null) {
+            viewingScreen = null
+        } else {
+            selectedId = null
+        }
+    }
 
     suspend fun reload() {
         cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
