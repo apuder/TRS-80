@@ -30,42 +30,34 @@ import kotlin.test.assertTrue
  * Covers what the tutorial types.
  *
  * The steps themselves are strings and the panel is a drawing; what can go
- * wrong and stay unnoticed is the typing -- a pause typed as a character would
- * put an underscore into a BASIC line, and a missing Enter would leave every
- * command sitting on the prompt unexecuted.
+ * wrong and stay unnoticed is the typing -- a missing carriage return would
+ * leave every command sitting on the prompt unexecuted, and a character the
+ * machine has no key for would stop the line where it stood.
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class TutorialTest {
 
     private suspend fun typed(command: String): String {
-        val keys = StringBuilder()
-        typeCommand(command) { keys.append(it) }
-        return keys.toString()
+        val sent = StringBuilder()
+        typeCommand(command) { sent.append(it) }
+        return sent.toString()
     }
 
+    /**
+     * The command goes to the machine whole, and ends with a carriage return.
+     *
+     * A carriage return rather than a newline: it is what the machine's keyboard
+     * sends, and what the Paste control puts in for the same reason.
+     */
     @Test
-    fun everyCharacterIsTypedAndTheCommandIsEntered() = runTest {
-        assertEquals("BASIC\n", typed("BASIC"))
+    fun theCommandIsTypedWholeAndEntered() = runTest {
+        assertEquals("BASIC\r", typed("BASIC"))
     }
 
+    /** Quotes and spaces go through as they are; it is what the machine is told. */
     @Test
-    fun aPauseIsWaitedOutRatherThanTyped() = runTest {
-        // Two pauses and four characters: the underscores are time, not text.
-        assertEquals("SAVE\n", typed("__SAVE"))
-    }
-
-    @Test
-    fun aPauseCostsASecondAndAKeyCostsLess() = runTest {
-        val start = currentTime
-        typed("__")
-        val pauses = currentTime - start
-
-        val letters = currentTime
-        typed("AB")
-        val keys = currentTime - letters
-
-        assertEquals(2000L, pauses, "two pauses should be two seconds")
-        assertTrue(keys < pauses, "typing two letters ($keys ms) should be quicker than two pauses")
+    fun theCommandIsNotRewrittenOnItsWayThrough() = runTest {
+        assertEquals("10 PRINT \"HELLO WORLD\"\r", typed("10 PRINT \"HELLO WORLD\""))
     }
 
     /** The one machine it is offered on, by where it came from rather than its name. */
@@ -74,10 +66,10 @@ class TutorialTest {
         assertEquals("2420f832-a7aa-11e7-8132-7343fef39a1f", TUTORIAL_APP_ID)
     }
 
-    /** What the panel shows is the command without its waiting. */
+    /** What the panel shows is the command, tidied of nothing but its edges. */
     @Test
-    fun theCommandIsShownWithoutItsPauses() {
-        val step = TutorialStep("__SAVE \"FIRST/BAS:1\"", "Save it to disk too.", listOf(">"))
+    fun theCommandIsShownAsTheMachineGetsIt() {
+        val step = TutorialStep("SAVE \"FIRST/BAS:1\"", "Save it to disk too.", listOf(">"))
 
         assertEquals("SAVE \"FIRST/BAS:1\"", step.asWritten())
     }
@@ -212,9 +204,6 @@ class TutorialTest {
         assertEquals(8, tutorialCommands.size)
         for (command in tutorialCommands) {
             for (character in command) {
-                if (character == '_') {
-                    continue
-                }
                 assertNotNull(
                     trs80KeyForCharacter(character),
                     "the machine has no key for '$character' in \"$command\"",

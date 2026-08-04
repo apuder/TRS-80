@@ -92,20 +92,13 @@ private val COMMANDS = listOf(
 /** The commands alone, for anything that wants to check them. */
 val tutorialCommands: List<String> get() = COMMANDS.map { it.first }
 
-/** How long between two typed keys. Fast enough to watch, slow enough to read. */
-private const val KEY_MILLIS = 180L
-
-/** How long a key is held. The machine polls its keyboard; a tap it never sees is a key it never got. */
-private const val HOLD_MILLIS = 100L
-
 /**
- * A character that waits instead of typing.
+ * What ends a line, as the machine's keyboard would have sent it.
  *
- * Some commands have to let the one before them finish -- a DIR takes a moment,
- * and BASIC is not listening while it prints. Each of these is a second.
+ * A carriage return, not a newline: the same thing the Paste control puts in
+ * when it takes text off the clipboard.
  */
-private const val PAUSE = '_'
-private const val PAUSE_MILLIS = 1000L
+const val ENTER_KEY = "\r"
 
 /** What LDOS asks on the way up, before it will do anything else. */
 const val BOOT_PROMPT = "Time ?"
@@ -152,32 +145,33 @@ fun tutorialSteps(): List<TutorialStep> {
     }
 }
 
-/** What a command looks like written down: the pauses are not part of it. */
-fun TutorialStep.asWritten(): String = command.replace(PAUSE.toString(), "").trim()
+/** What a command looks like written down. */
+fun TutorialStep.asWritten(): String = command.trim()
 
 /**
- * Types [command] at the machine, a key at a time, and presses Enter after it.
+ * Types [command] at the machine and enters it.
  *
- * Key events rather than the core's own paste: paste replaces whatever it was
- * last given, so a second character arriving before the machine has read the
- * first would lose it. Events queue.
+ * Through the machine's own typing -- the core's paste -- and not by pressing
+ * keys. Pressing keys means sending a key down and, a tenth of a second later,
+ * a key up. Both are events on our clock; the machine applies them on its own,
+ * one per timer tick and only while the host is keeping up, and the moment those
+ * two drift apart the machine is looking at a key that is being held. It repeats
+ * it. That is what filled a line with `HEEEEEEEEEEEE` instead of HELLO WORLD,
+ * intermittently, and it is not fixable from this side: the release was sent
+ * every time and logged going out.
  *
- * @param press what to do with one key, held and released.
+ * The paste path has no clock of ours in it. It sends the next character only
+ * when the program is actually waiting for one, and it releases each key itself
+ * a tick later, inside the emulator. The whole command goes in one go, which is
+ * also why there are no pauses written into the commands any more: those were
+ * there to let the command before this one finish, and waiting for the machine
+ * to be ready is now the mechanism rather than something timed around it.
+ *
+ * @param type sends text to the machine as though it had been typed.
  */
-suspend fun typeCommand(command: String, press: suspend (Char) -> Unit) {
-    for (character in command) {
-        if (character == PAUSE) {
-            delay(PAUSE_MILLIS)
-            continue
-        }
-        press(character)
-        delay(KEY_MILLIS)
-    }
-    press('\n')
+suspend fun typeCommand(command: String, type: suspend (String) -> Unit) {
+    type(command + ENTER_KEY)
 }
-
-/** How long [typeCommand] holds each key before letting go. */
-val tutorialKeyHold: Long get() = HOLD_MILLIS
 
 /**
  * How long the machine is left alone after a command, before the next panel.

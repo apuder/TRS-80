@@ -104,7 +104,15 @@ class FakeEmulatorCore : EmulatorCore {
     override fun paste(text: String) = Unit
     override fun rewindCassette() = Unit
     override fun cassettePosition() = 0f
-    override fun keyDown(sym: Int, key: Int) = Unit
-    override fun keyUp(sym: Int, key: Int) = Unit
+    /** Every key event sent, in order: (down, sym, scancode). */
+    val keyEvents = mutableListOf<Triple<Boolean, Int, Int>>()
+
+    override fun keyDown(sym: Int, key: Int) {
+        keyEvents += Triple(true, sym, key)
+    }
+
+    override fun keyUp(sym: Int, key: Int) {
+        keyEvents += Triple(false, sym, key)
+    }
     override fun createBlankDisk(path: String, spec: DiskImageSpec) = true
 }

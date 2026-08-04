@@ -142,3 +142,27 @@ interface EmulatorCore {
      */
     fun createBlankDisk(path: String, spec: DiskImageSpec): Boolean
 }
+
+/**
+ * The scancode nothing is mapped to; see [releaseAllKeys].
+ *
+ * Every key in [KeyboardMapping] has a code of its own and none of them is
+ * zero, which is what makes zero usable as a scancode that was never pressed.
+ */
+private const val UNUSED_SCANCODE = 0
+
+/**
+ * Lets go of every key the machine believes is held down.
+ *
+ * The core releases whatever it last saw pressed at a given scancode, and for
+ * one it has never seen that works out to "all keys up" -- which is exactly the
+ * thing needed here, without a new call through the JNI and the cinterop both.
+ *
+ * Worth having because a held key survives being put away: what the machine has
+ * down is part of the saved session, so a key that was pressed and never
+ * released comes back held every time that session is resumed, and the machine
+ * repeats it forever. That is a state a person cannot get out of from inside
+ * the emulator -- the machine is busy typing E at itself -- so anything that
+ * restores a session clears the keyboard on the way in.
+ */
+fun EmulatorCore.releaseAllKeys() = keyUp(sym = 0, key = UNUSED_SCANCODE)

@@ -108,15 +108,14 @@ import org.puder.trs80.shared.ui.StoreState
 import org.puder.trs80.shared.ui.TUTORIAL_APP_ID
 import org.puder.trs80.shared.ui.TutorialPanel
 import org.puder.trs80.shared.ui.tutorialSteps
-import org.puder.trs80.shared.ui.tutorialKeyHold
 import org.puder.trs80.shared.ui.tutorialReadyWait
 import org.puder.trs80.shared.ui.tutorialSettle
 import org.puder.trs80.shared.ui.typeCommand
-import org.puder.trs80.shared.ui.trs80KeyForCharacter
 import kotlinx.coroutines.delay
 import org.puder.trs80.shared.ui.awaitPrompt
 import org.puder.trs80.shared.ui.awaitReady
 import org.puder.trs80.shared.ui.DOS_PROMPT
+import org.puder.trs80.shared.ui.ENTER_KEY
 import org.puder.trs80.shared.ui.BASIC_PROMPT
 import org.puder.trs80.shared.ui.asWritten
 import org.puder.trs80.shared.ui.Toast
@@ -785,13 +784,9 @@ private fun RunningMachine(
             return@LaunchedEffect
         }
         val step = steps[at]
-        val press: suspend (Char) -> Unit = { character ->
-            trs80KeyForCharacter(character)?.let { key ->
-                core.keyDown(key.sym, key.key)
-                delay(tutorialKeyHold)
-                core.keyUp(key.sym, key.key)
-            }
-        }
+        // The machine's own typing, which is what the Paste control uses. No
+        // key is pressed and held from out here, so none can be left down.
+        val type: suspend (String) -> Unit = { text -> core.paste(text) }
         // Nothing is typed until the machine is sitting where this command
         // belongs. It may still be booting -- in which case it is asking for the
         // time, and that gets answered -- or printing what the last one did.
@@ -804,7 +799,7 @@ private fun RunningMachine(
         // thing the menu's own Tutorial entry does -- rather than standing there
         // for twenty-five seconds and quietly giving up.
         val screen = { core.screenBuffer }
-        val answerBoot: suspend () -> Unit = { press('\n') }
+        val answerBoot: suspend () -> Unit = { type(ENTER_KEY) }
         var ready = if (at == 0) {
             awaitReady(step.awaits, screen, answerBoot, timeoutMillis = tutorialReadyWait)
         } else {
@@ -822,7 +817,11 @@ private fun RunningMachine(
             tutorialStep = null
             return@LaunchedEffect
         }
-        typeCommand(step.command, press)
+        // Nothing held over from the step before: a key the machine still
+        // thinks is down turns the next command into gibberish, and it only
+        // takes one to have been lost.
+        core.releaseAllKeys()
+        typeCommand(step.command, type)
         // The next panel arrives when the machine is idle again, which is what
         // "the command has finished" looks like from out here. Waiting a fixed
         // time instead would cover the output of a slow one and interrupt a
@@ -871,6 +870,11 @@ private fun RunningMachine(
             if (state?.hasState() == true) {
                 core.loadState(state.stateFilePath)
             }
+            // Nothing is being held down. A saved session remembers which keys
+            // were, so one put away mid-keystroke comes back with that key still
+            // pressed and the machine repeating it -- which no amount of tapping
+            // from the outside will stop, because the machine is busy.
+            core.releaseAllKeys()
         }
         // A thread of its very own, not Dispatchers.Default. trs80_run() does not
         // return until the machine is stopped, so on a shared pool it permanently
