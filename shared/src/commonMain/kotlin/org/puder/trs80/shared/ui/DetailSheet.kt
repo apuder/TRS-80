@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -67,7 +68,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import org.puder.trs80.shared.SCREEN_PICTURE_RATIO
 import org.puder.trs80.shared.ui.theme.CoverShape
+import org.puder.trs80.shared.ui.theme.ScreenShape
 import org.puder.trs80.shared.ui.theme.cornerShine
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -573,7 +576,19 @@ private fun VersionRow(version: CatalogVersion, onPlay: () -> Unit) {
     Hairline()
 }
 
-/** The screens, matted like the library's plates so they read as one thing. */
+/** How wide one of the entry's screens is drawn; a size up from a library row's. */
+private val SCREEN_SHOT = 176.dp
+
+/**
+ * The screens this entry was photographed on.
+ *
+ * The same object as a machine's screen in the library, so drawn the same way:
+ * four by three, cut to [ScreenShape], lit on the same two corners. They used to
+ * be 208 by 88 -- a band two and a third times as wide as it was tall, which a
+ * four-by-three picture can only be cropped into, so a third of every screen was
+ * cut away, and the part that went was the bottom, where a TRS-80 game puts its
+ * score and its prompt.
+ */
 @Composable
 private fun Screens(urls: List<String>, onOpen: (Int) -> Unit) {
     val colors = Trs80Theme.colors
@@ -581,22 +596,22 @@ private fun Screens(urls: List<String>, onOpen: (Int) -> Unit) {
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
     ) {
         urls.forEachIndexed { index, url ->
-            Box(
-                Modifier
+            RemoteImage(
+                url = url,
+                modifier = Modifier
                     .padding(end = Trs80Theme.spacing.gap)
-                    .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.2f))
+                    .width(SCREEN_SHOT)
+                    .aspectRatio(SCREEN_PICTURE_RATIO)
+                    .cornerShine(ScreenShape)
+                    .clip(ScreenShape)
                     .clickable { onOpen(index) }
-                    .padding(Trs80Theme.spacing.mat),
-            ) {
-                RemoteImage(
-                    url = url,
-                    modifier = Modifier
-                        .size(width = 208.dp, height = 88.dp)
-                        .background(colors.crt)
-                        .scanlines(),
-                    contentScale = ContentScale.Crop,
-                )
-            }
+                    .background(colors.crt)
+                    .scanlines(),
+                // Fit rather than Crop: the store's pictures are mostly whole
+                // screens and a few are not, and one that is not should arrive
+                // letterboxed against the phosphor rather than trimmed to fit.
+                contentScale = ContentScale.Fit,
+            )
         }
     }
 }

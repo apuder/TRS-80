@@ -91,6 +91,7 @@ import trs_80.shared.generated.resources.unchanged
 import trs_80.shared.generated.resources.yours
 import trs_80.shared.generated.resources.yours_empty
 import org.puder.trs80.shared.MODEL_NONE
+import org.puder.trs80.shared.SCREEN_PICTURE_RATIO
 import org.puder.trs80.shared.ui.theme.CoverShape
 import org.puder.trs80.shared.ui.theme.ScreenShape
 import org.puder.trs80.shared.ui.theme.cornerShine
@@ -133,9 +134,6 @@ private val SECTION_CONTROL = 30.dp
 
 /** How wide a machine's screen is drawn in the library. */
 private val PLATE_SCREEN = 132.dp
-
-/** What a TRS-80 draws: 64 by 16 cells, each three times as tall as it is wide. */
-private const val SCREEN_RATIO = 4f / 3f
 
 /** The height of the show-all row; see [ShowAll] for why it is not 44dp. */
 private val SHOW_ALL_HEIGHT = 32.dp
@@ -649,7 +647,7 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> U
                 .width(PLATE_SCREEN)
                 // What the machine actually draws, so nothing is cropped and
                 // nothing is stretched.
-                .aspectRatio(SCREEN_RATIO)
+                .aspectRatio(SCREEN_PICTURE_RATIO)
                 .cornerShine(ScreenShape)
                 .clip(ScreenShape)
                 .background(colors.crt)

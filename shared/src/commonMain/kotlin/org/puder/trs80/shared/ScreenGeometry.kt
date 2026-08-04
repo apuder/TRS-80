@@ -24,6 +24,15 @@ const val SCREEN_ROWS = 16
 const val SCREEN_ASPECT_RATIO = 3f
 
 /**
+ * How wide a whole screen is against its height: four to three.
+ *
+ * Derived rather than typed, because it is not an independent fact -- it is what
+ * the three numbers above come to -- and anywhere a picture of a screen is drawn
+ * has to agree with what the core rasterizes into it.
+ */
+const val SCREEN_PICTURE_RATIO = SCREEN_COLUMNS / (SCREEN_ROWS * SCREEN_ASPECT_RATIO)
+
+/**
  * Picks the size to draw one character cell at, to fill the given area as fully
  * as the screen's proportions allow.
  *
