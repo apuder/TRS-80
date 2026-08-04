@@ -261,10 +261,14 @@ class BrowserCore(private val core: JsAny) : EmulatorCore {
     /** Starts the machine; see [jsRun] for why this returns immediately. */
     override fun run() {
         jsSetRunning(core, 1)
+        startAudio(core)
         jsRun(core)
     }
 
-    override fun stop() = jsSetRunning(core, 0)
+    override fun stop() {
+        jsSetRunning(core, 0)
+        stopAudio(core)
+    }
 
     override fun reset() = jsReset(core)
 

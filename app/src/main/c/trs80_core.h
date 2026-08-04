@@ -148,6 +148,14 @@ void trs80_reset(void);
 /* True while the machine is in 32-column expanded mode. */
 int trs80_is_expanded_mode(void);
 
+/*
+ * Pulls the next audio samples, 16-bit signed and one channel.
+ *
+ * Only the browser build has this: there the page drives the audio and asks
+ * for samples, where a device's backend is called by its own audio thread.
+ */
+int trs80_audio_pull(short *dest, int samples);
+
 /* Queue a key event; event is TRS80_KEY_DOWN or TRS80_KEY_UP. */
 void trs80_add_key_event(int event, int sym, int key);
 

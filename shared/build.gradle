@@ -108,15 +108,30 @@ def coreBuilds = iosTargets.collectEntries { name, spec ->
 
 def webCoreDir = layout.buildDirectory.dir('web-core')
 
+// Emscripten is not a build dependency so much as one more toolchain someone
+// may or may not have, like Xcode. CI has neither it nor a browser to run the
+// result in, so the task skips rather than failing the build: what it produces
+// is only needed by whoever is actually opening the page.
+def emccPath = providers.provider {
+    ['/opt/homebrew/bin/emcc', '/usr/local/bin/emcc'].find { new File(it).exists() }
+}
+
 def buildWebCore = tasks.register('buildWebCore') {
     description = 'Builds the TRS-80 emulator core as WebAssembly.'
+    onlyIf {
+        def found = emccPath.getOrNull() != null
+        if (!found) {
+            logger.lifecycle('Skipping the WebAssembly core: emcc is not installed.')
+        }
+        found
+    }
     inputs.dir(nativeSrcDir).withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir(webCoreDir)
     outputs.cacheIf { true }
     doLast {
         def outputDir = webCoreDir.get().asFile
         outputDir.mkdirs()
-        def emcmake = ['/opt/homebrew/bin/emcmake', 'emcmake'].find { new File(it).exists() || it == 'emcmake' }
+        def emcmake = new File(emccPath.get()).parentFile.toPath().resolve('emcmake').toString()
         def run = { List<String> command ->
             providers.exec { commandLine(command) }.result.get().assertNormalExitValue()
         }
@@ -135,10 +150,17 @@ def buildWebCore = tasks.register('buildWebCore') {
 // stops on. It is already a complete module and wants no processing at all.
 def copyWebCore = tasks.register('copyWebCore', Copy) {
     dependsOn(buildWebCore)
+    // Nothing to copy when the core was not built; the app still runs, with the
+    // machine missing, which is what it did before there was a core at all.
+    onlyIf { webCoreDir.get().asFile.exists() }
     from(webCoreDir) {
         include 'trs80core.js'
         include 'trs80core.wasm'
     }
+    // The audio worklet goes the same way and for the same reason: it is loaded
+    // by URL at run time, by the browser's own audio thread, and webpack has
+    // nothing to do with it.
+    from('src/wasmJsMain/web')
     into(layout.buildDirectory.dir('dist/wasmJs/productionExecutable'))
 }
 
