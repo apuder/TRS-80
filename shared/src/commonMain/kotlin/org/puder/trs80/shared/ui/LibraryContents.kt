@@ -121,7 +121,8 @@ fun paneContentFor(selectedId: String?, yours: List<ConfigurationCard>): PaneCon
     }
     // Never-run machines have no timestamp, so they are not "where you left
     // off" -- a machine installed and never started is not somewhere to return
-    // to. Bundled samples are exactly this on a first run.
+    // to. A disk shipped with the app, or one taken in through Files, arrives
+    // exactly like this.
     val lastRun = yours.filter { it.lastUsed > 0L }.maxByOrNull { it.lastUsed }
     return if (lastRun != null) PaneContent.Resume(lastRun) else PaneContent.FirstRun
 }

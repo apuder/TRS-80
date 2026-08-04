@@ -90,7 +90,15 @@ fun Trs80ViewController(diskPath: String?): UIViewController {
 }
 
 /**
- * Seeds the bundled ROM and disk on first run.
+ * Opens the app's storage, and seeds a bundled disk into it on first run.
+ *
+ * Only if one ships. No disk ships today, and a first run then leaves the
+ * library empty, which is the right answer and the one Android has always
+ * given: the machines a person wants are in the catalog below, a tap away, and
+ * the empty section says so. It used to make a machine regardless and call it
+ * "Bundled sample" -- a Model III with no disk in it, named after the mechanism
+ * that made it, sitting at the top of a new install as though the user had put
+ * it there.
  *
  * Idempotent: on later runs the store already has the configuration and the
  * files are already there, so this finds them rather than copying again.
@@ -105,16 +113,17 @@ private fun installIfNeeded(diskPath: String?) {
         Log.i(TAG, "${manager.configCount} configuration(s) already installed.")
         return
     }
+    val disk = diskPath?.toPath() ?: return
 
-    val disks = diskPath?.let {
-        listOf(
-            ConfigurationManager.ConfigMedia(
-                filename = it.toPath().name,
-                data = appFileSystem.read(it.toPath()) { readByteArray() },
-            )
+    // Named for the disk, because that is what it is. A machine in the library
+    // is read as something the user made, and its name is how they will find it
+    // again.
+    val disks = listOf(
+        ConfigurationManager.ConfigMedia(
+            filename = disk.name,
+            data = appFileSystem.read(disk) { readByteArray() },
         )
-    }.orEmpty()
-
-    manager.addNewConfiguration(MODEL3, "Bundled sample", disks, cassette = null)
-        ?: Log.e(TAG, "Could not install the bundled configuration.")
+    )
+    manager.addNewConfiguration(MODEL3, disk.name.substringBeforeLast('.'), disks, cassette = null)
+        ?: Log.e(TAG, "Could not install the bundled disk ${disk.name}.")
 }

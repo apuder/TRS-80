@@ -175,13 +175,13 @@ class LibraryContentsTest {
     }
 
     /**
-     * A machine that has never run is not somewhere to return to. The bundled
-     * sample is exactly this on a first run, and offering to "resume" it would
-     * be the app's first sentence to a new user.
+     * A machine that has never run is not somewhere to return to. A disk
+     * dropped into the app arrives exactly like this, and offering to "resume"
+     * something the user has not yet started would be a strange first sentence.
      */
     @Test
     fun aMachineNeverRunIsNotWhereYouLeftOff() {
-        val holding = paneContentFor(selectedId = null, yours = listOf(card("Bundled sample")))
+        val holding = paneContentFor(selectedId = null, yours = listOf(card("Straight off a disk")))
 
         assertEquals(PaneContent.FirstRun, holding)
     }
