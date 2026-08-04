@@ -55,6 +55,17 @@ interface EmulatorScreenSource {
     val height: Int
 
     /**
+     * How many screen pixels one drawn pixel is worth.
+     *
+     * One, everywhere the picture is rasterized at the size it will be drawn --
+     * which is everywhere but a browser, where moving a big frame costs more
+     * than drawing one. There the picture comes back divided by a whole number
+     * and this is that number, so drawing it back up lands on the size that was
+     * asked for rather than somewhere between one multiple and the next.
+     */
+    val upscale: Int get() = 1
+
+    /**
      * Tells the source how large an area the screen will be drawn into, so the
      * core can rasterize at that size instead of the picture being scaled to it.
      *
@@ -155,10 +166,16 @@ private fun DrawScope.drawEmulatedScreen(
         return
     }
 
-    // One image pixel to one screen pixel. The source was told how much room
-    // there is and rasterized to fit it, so stretching the result over the few
-    // pixels left spare after the cell size was rounded down would undo exactly
-    // what that rounding was for.
+    // One image pixel to one screen pixel wherever that is what the picture is:
+    // the source is told how much room there is and rasterizes to fit, so
+    // stretching the result over the few pixels left spare after the cell size
+    // was rounded down would undo exactly what that rounding was for.
+    //
+    // Bigger than that only when the source could not draw at the size asked
+    // for -- the browser caps how large a picture it will move each frame, and
+    // then it comes back smaller on purpose, to be scaled up here. Whole
+    // numbers only: doubling every pixel is still the machine's picture, and
+    // a scale of 3.4 would put some glyph stems a pixel wider than others.
     var drawnWidth = image.width
     var drawnHeight = image.height
     if (drawnWidth > size.width || drawnHeight > size.height) {
@@ -167,6 +184,12 @@ private fun DrawScope.drawEmulatedScreen(
         val scale = minOf(size.width / image.width, size.height / image.height)
         drawnWidth = (image.width * scale).toInt()
         drawnHeight = (image.height * scale).toInt()
+    } else if (source.upscale > 1) {
+        // Back to the size the source was asked for. Not floor(box / image):
+        // a picture that is a little over half its box would come back at half
+        // size, which is the whole box empty around a postage stamp.
+        drawnWidth = (image.width * source.upscale).coerceAtMost(size.width.toInt())
+        drawnHeight = (image.height * source.upscale).coerceAtMost(size.height.toInt())
     }
     val left = ((size.width - drawnWidth) / 2).toInt()
     val top = ((size.height - drawnHeight) / 2).toInt()

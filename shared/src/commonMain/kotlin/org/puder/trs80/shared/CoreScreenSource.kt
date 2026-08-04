@@ -54,9 +54,14 @@ class CoreScreenSource(
     override var height: Int = 0
         private set
 
+    override var upscale: Int = 1
+        private set
+
     override fun resize(availableWidth: Int, availableHeight: Int) {
         val fitted = fitCellSize(availableWidth, availableHeight)
         val metrics = fitted.withinBudget(maxRasterPixels)
+        // What the budget cost, so the drawing can put it back.
+        upscale = (fitted.cellWidth / metrics.cellWidth.coerceAtLeast(1)).coerceAtLeast(1)
         if (metrics.cellWidth <= 0 || metrics.cellHeight <= 0) {
             return
         }
