@@ -48,3 +48,7 @@ app/src/debug
 
 # Xcode's per-user state: which scheme was last picked, where the windows were.
 xcuserdata/
+
+# Firebase deploy cache and logs
+.firebase/
+firebase-debug.log

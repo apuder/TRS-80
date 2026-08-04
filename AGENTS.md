@@ -100,34 +100,61 @@ Things that are easy to lose and hard to diagnose:
 
 ## The web app
 
-A third host, and the least finished: `shared/src/wasmJsMain` is a `main()`, a
-page, and a machine that does nothing. Compose draws to a canvas through the
-same Skia iOS uses, so every screen came across without a line of UI changing.
+A third host, and a whole one: `shared/src/wasmJsMain`. Compose draws to a canvas
+through the same Skia iOS uses, so every screen came across without a line of UI
+changing, and the emulator is the same C compiled by Emscripten.
 
 ```sh
 ./gradlew :shared:wasmJsBrowserDevelopmentRun   # serves it on localhost
 ./gradlew :shared:wasmJsBrowserDistribution     # writes shared/build/dist/wasmJs
 ```
 
-What is not there is the emulator. It is C, and C gets into a page only through
-Emscripten, so `BrowserCore` in `WasmApp.kt` is a stand-in that boots nothing and
-draws a blank screen. Everything around a machine — the library, the catalog, the
-editor, settings — is real.
+The core needs `emcc` on the path. `buildWebCore` skips when there is none —
+CI has no Emscripten and no browser to run the result in — and the app then
+loads with everything but a machine.
 
-Three things a browser cannot answer the way a device does, each marked in the
-file that stands in for it:
+Three things a browser answers differently, each in the file that says so:
 
-- **No thread for the machine.** `runMachine` is an expect for exactly this: on a
-  device it is a thread of its own, and here it is nothing yet. Whatever the core
-  turns out to be — a worker, or the C loop cut into slices driven by the frame
-  callback — that is where it goes.
-- **No file system.** okio has no browser backend, so `appFileSystem` is an
-  in-memory one and nothing survives the tab. The Origin Private File System is
-  the way in, and it is asynchronous where okio is not.
-- **No HTTP yet, and it may not be ours to fix.** `httpGetBytes` throws. Reaching
-  `retrostore.org` from a page needs CORS headers from *their* side; without them
-  the web app needs a proxy, which is a deployment decision. Until then the
-  catalog says the store is unreachable, which is true.
+- **No thread for the machine.** `runMachine` is an expect for exactly this. Here
+  there is no thread: the run loop's own frame pause is an `emscripten_sleep`,
+  ASYNCIFY turns that into a yield, and the machine hands the one thread a page
+  has back between frames so Compose can draw.
+- **A file system that is not a file system.** okio has no browser backend, so
+  `BrowserFileSystem` is an in-memory one mirrored into localStorage.
+- **HTTP through the page.** `httpGetBytes` is fetch; the ROMs and the catalog
+  both come across, so `retrostore.org` is serving the CORS headers it needs to.
+
+**An indirect call is type-checked here and nowhere else.** Casting a function
+pointer to a different signature costs nothing on a real calling convention, and
+in WebAssembly it traps — `RuntimeError: function signature mismatch`, thrown
+from wherever the call happened to be rather than from the cast. One such cast
+in the cassette code killed every machine at start-up. If that error appears,
+look for a pointer being called as something it is not before suspecting
+ASYNCIFY, whose frames are on every stack because the run loop lives in it.
+
+To read a trap, link the core with `--profiling-funcs` so the wasm keeps its
+name section; without it the stack is bare function indices.
+
+## Hosting the web app
+
+`https://trs-80-5ffa3.web.app` — Firebase Hosting, project `trs-80-5ffa3`.
+
+```sh
+./gradlew :shared:wasmJsBrowserDistribution
+firebase deploy --only hosting:web --project trs-80-5ffa3
+```
+
+The distribution is not in git, so the build has to happen first; what is
+deployed is whatever `shared/build/dist/wasmJs/productionExecutable` holds.
+
+Two hosting targets, because `firebase.json` already had one: `receiver` is the
+Chromecast receiver in a different project, left as it was, and `web` is this.
+Deploying without naming a target would try for both.
+
+Caching is set so that only the two content-hashed `.wasm` files — 12 MB of the
+15 — are held for a year. Everything else, `trs80core.wasm` included, is
+`no-cache`: those names do not change when their contents do, and a browser
+holding yesterday's core against today's page is a bug nobody can clear.
 
 ## Building and checking
 
