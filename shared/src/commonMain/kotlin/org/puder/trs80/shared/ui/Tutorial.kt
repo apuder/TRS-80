@@ -193,6 +193,22 @@ private const val SETTLE_MILLIS = 2_000L
 val tutorialSettle: Long get() = SETTLE_MILLIS
 
 /**
+ * How long the first command waits before deciding the machine is not where
+ * the tour begins but somewhere else entirely.
+ *
+ * Much shorter than [WAIT_MILLIS], because it is not waiting for a slow
+ * machine: a cold boot answers the time and reaches the prompt in about two
+ * seconds. Longer than that means the machine was resumed in the middle of
+ * something -- sitting in BASIC, or running a game -- and no amount of further
+ * waiting will move it, so the tour stops waiting and restarts the machine
+ * instead.
+ */
+private const val READY_MILLIS = 8_000L
+
+/** @see READY_MILLIS */
+val tutorialReadyWait: Long get() = READY_MILLIS
+
+/**
  * What the machine is saying: the last line of its screen with anything on it.
  *
  * The last line is the one that matters, because it is where the cursor is. A

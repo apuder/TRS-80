@@ -109,6 +109,7 @@ import org.puder.trs80.shared.ui.TUTORIAL_APP_ID
 import org.puder.trs80.shared.ui.TutorialPanel
 import org.puder.trs80.shared.ui.tutorialSteps
 import org.puder.trs80.shared.ui.tutorialKeyHold
+import org.puder.trs80.shared.ui.tutorialReadyWait
 import org.puder.trs80.shared.ui.tutorialSettle
 import org.puder.trs80.shared.ui.typeCommand
 import org.puder.trs80.shared.ui.trs80KeyForCharacter
@@ -794,7 +795,28 @@ private fun RunningMachine(
         // Nothing is typed until the machine is sitting where this command
         // belongs. It may still be booting -- in which case it is asking for the
         // time, and that gets answered -- or printing what the last one did.
-        if (!awaitReady(step.awaits, { core.screenBuffer }, answerBoot = { press('\n') })) {
+        //
+        // The first command is the one that has to worry about where the machine
+        // was left. Opening this machine resumes the session it was last in, and
+        // that can be anywhere: in BASIC, in a game, halfway through a listing.
+        // None of those become the DOS prompt by being waited at, so the tour
+        // gives the machine a few seconds and then power-cycles it -- the same
+        // thing the menu's own Tutorial entry does -- rather than standing there
+        // for twenty-five seconds and quietly giving up.
+        val screen = { core.screenBuffer }
+        val answerBoot: suspend () -> Unit = { press('\n') }
+        var ready = if (at == 0) {
+            awaitReady(step.awaits, screen, answerBoot, timeoutMillis = tutorialReadyWait)
+        } else {
+            awaitReady(step.awaits, screen, answerBoot)
+        }
+        if (!ready && at == 0) {
+            Log.i(TAG, "Restarting the machine: it was not where the tour begins.")
+            core.reset()
+            core.rewindCassette()
+            ready = awaitReady(step.awaits, screen, answerBoot)
+        }
+        if (!ready) {
             Log.e(TAG, "The machine never reached ${step.awaits} for \"${step.asWritten()}\".")
             typing = false
             tutorialStep = null
