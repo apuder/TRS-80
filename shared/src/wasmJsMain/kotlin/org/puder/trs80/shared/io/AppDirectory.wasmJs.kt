@@ -18,21 +18,17 @@ package org.puder.trs80.shared.io
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
-import okio.fakefilesystem.FakeFileSystem
 
 /**
- * In memory, for now, and gone when the tab closes.
+ * In memory to work in, and in localStorage to survive the tab.
  *
- * A browser has no file system to hand okio. What it has is the Origin Private
- * File System, which is asynchronous where okio is not, so bridging the two is
- * a piece of work in itself -- and until the emulator core is here there is
- * nothing to keep anyway. This makes the storage layer run unchanged, which is
- * what the rest of the app is written against; what it does not do is remember
- * anything.
+ * See [BrowserFileSystem] for the arrangement and what it costs. Everything
+ * above this line is the storage layer the other two platforms use, running
+ * here unchanged.
  */
 private val APP_DIRECTORY: Path = "/trs80".toPath()
 
-private val browserFileSystem = FakeFileSystem().apply { createDirectories(APP_DIRECTORY) }
+private val browserFileSystem = browserFiles.apply { createDirectories(APP_DIRECTORY) }
 
 actual fun appDataDirectory(): Path = APP_DIRECTORY
 

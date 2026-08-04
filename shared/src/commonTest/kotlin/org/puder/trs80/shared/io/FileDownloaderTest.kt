@@ -51,11 +51,25 @@ class FileDownloaderTest {
         val zip = zipOf("ld3-531.dsk" to byteArrayOf(9, 8, 7), "readme.txt" to byteArrayOf(1))
         val downloader = downloaderReturning(zip)
 
-        assertContentEquals(
-            byteArrayOf(9, 8, 7),
-            downloader.download("https://example.invalid/ld3-531.zip", "ld3-531.dsk"),
-        )
+        val extracted = downloader.download("https://example.invalid/ld3-531.zip", "ld3-531.dsk")
+
+        if (!readsArchives) {
+            // A browser's okio ships without ZIP support, and the downloader
+            // says so rather than pretending the archive was empty. Which of
+            // those two this is, is the platform's answer and not this test's.
+            assertNull(extracted)
+            return@runTest
+        }
+        assertContentEquals(byteArrayOf(9, 8, 7), extracted)
     }
+
+    /** Whether this platform can open an archive at all; see [openArchive]. */
+    private val readsArchives: Boolean
+        get() {
+            val probe = "/probe.zip".toPath()
+            fileSystem.write(probe) { write(zipOf("a" to byteArrayOf(1))) }
+            return fileSystem.openArchive(probe) != null
+        }
 
     @Test
     fun anAbsentZipEntryGivesNull() = runTest {

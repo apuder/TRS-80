@@ -52,7 +52,10 @@ class CoreScreenSourceTest {
     fun theCoreRasterizesAtTheSizeItWillBeDrawnAt() {
         layOut(width = 1080, height = 810)
 
-        val expected = fitCellSize(1080, 810)
+        // Within what the platform will move each frame: a browser draws the
+        // picture smaller on purpose and scales it up, so the cell it asks the
+        // core for is the fitted one divided down. See maxRasterPixels.
+        val expected = fitCellSize(1080, 810).withinBudget(maxRasterPixels)
         assertEquals(expected.cellWidth, core.cellWidth)
         assertEquals(expected.cellHeight, core.cellHeight)
         assertEquals(expected.cellWidth * SCREEN_COLUMNS, source.width)

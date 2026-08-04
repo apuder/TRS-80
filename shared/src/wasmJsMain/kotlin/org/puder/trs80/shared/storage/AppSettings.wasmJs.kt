@@ -19,25 +19,13 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.StorageSettings
 
 /**
- * In memory, and gone with the tab -- deliberately, for now.
+ * The page's own localStorage.
  *
- * localStorage is right here and would remember a machine perfectly. The
- * trouble is that it would remember it *alone*: the disk images that make a
- * machine a machine live in the file system, and the browser's is in memory
- * until something persists it. Remembering the configuration and losing its
- * disk gives a library full of machines that boot to `Cass?`, which is worse
- * than a library that starts empty, because it looks like the app is broken
- * rather than new.
- *
- * So the two agree, and both forget: the store is localStorage, which is where
- * this wants to be, and it is emptied on the way in. When the file system
- * persists -- OPFS, probably, or the images in IndexedDB -- deleting the clear()
- * below is the whole of what makes the library remember again.
+ * Per origin and per browser, like every other setting a site keeps, with the
+ * caveat that clearing site data clears the machines with it. It used to be
+ * emptied on the way in, because remembering a machine whose disk images had
+ * gone gave a library full of entries that booted to `Cass?` -- but the disks
+ * are kept now too, in the same store, so the two agree again and both
+ * remember. See BrowserFileSystem.
  */
-private val settings: Settings by lazy {
-    // Once, on the way in. Emptying it per call would wipe what the call before
-    // had just written -- this is asked for from half a dozen places.
-    StorageSettings().also { it.clear() }
-}
-
-actual fun appSettings(): Settings = settings
+actual fun appSettings(): Settings = StorageSettings()
