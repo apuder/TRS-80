@@ -17,14 +17,16 @@
 package org.puder.trs80.shared
 
 /**
- * Nothing runs yet.
+ * Starts the machine on the thread that is already here.
  *
- * The browser has one thread and Compose is drawing on it, so a call that does
- * not return cannot be made from here at all. When the core arrives -- built
- * with Emscripten, which is the only way C gets into a page -- it will run in a
- * worker and this will be what starts it, or the C loop will be cut into slices
- * driven by the frame callback and this will be what schedules the first one.
- * Either way the decision belongs here, which is why this file exists before
- * there is anything to put in it.
+ * The other platforms hand [EmulatorCore.run] a thread because it does not
+ * return until the machine stops. In a browser it returns immediately: the run
+ * loop's own frame pause is an emscripten_sleep, ASYNCIFY turns that into a
+ * yield, and what comes back is a promise that settles when the machine stops.
+ * So there is nothing to give it a thread for -- it hands this one straight
+ * back, between every frame, which is what lets Compose keep drawing.
  */
-actual fun runMachine(core: EmulatorCore): () -> Unit = {}
+actual fun runMachine(core: EmulatorCore): () -> Unit {
+    core.run()
+    return { core.stop() }
+}
