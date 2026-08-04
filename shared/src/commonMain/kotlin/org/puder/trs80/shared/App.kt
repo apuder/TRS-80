@@ -70,6 +70,7 @@ import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.ExperimentalFeatures
 import org.puder.trs80.shared.storage.TapRun
+import org.puder.trs80.shared.storage.TutorialHistory
 import org.puder.trs80.shared.storage.appSettings
 import org.puder.trs80.shared.store.AppInstaller
 import org.puder.trs80.shared.store.modelOf
@@ -765,6 +766,8 @@ private fun RunningMachine(
             ConfigurationManager.get().getConfigById(configurationId)?.isSoundMuted == true
         )
     }
+    // Which machines have already been through the tour; see startTour.
+    val tutorialHistory = remember { TutorialHistory(appSettings()) }
     // Which tutorial step is on screen, or null when there is no tour running.
     // Session-long state like the rest of this: leaving the machine ends it.
     var tutorialStep by remember(configurationId) { mutableStateOf<Int?>(null) }
@@ -906,12 +909,34 @@ private fun RunningMachine(
     val configuration = remember(configurationId) {
         ConfigurationManager.get().getConfigById(configurationId)
     }
-    // Started rather than offered: this machine is a tutorial, and somebody who
-    // opened it came for the tour. Cancelling leaves them at the DOS prompt with
-    // the keyboard, and the panel's own entry starts it again.
+    /**
+     * Takes it from the top: a machine as it comes up, and the first panel.
+     *
+     * The restart is the point. The tour types at a machine it expects to find
+     * at the DOS prompt with nothing done to it, and the second time somebody
+     * opens this machine it is neither -- it is where they left it, with a
+     * BASIC program in memory and the tour's own commands up the screen. Half
+     * the tour then types into the wrong place.
+     */
+    fun startTour() {
+        core.reset()
+        core.rewindCassette()
+        core.releaseAllKeys()
+        tutorialHistory.markRun(configurationId)
+        typing = false
+        tutorialStep = 0
+    }
+
+    // Started rather than offered, but only the first time: somebody opening
+    // this machine for the first time came for the tour, and somebody opening
+    // it again came back to their machine. After that it is in the menu, where
+    // asking for it is what says the machine may be restarted under it.
     LaunchedEffect(configurationId, configuration) {
-        if (configuration?.storeId == TUTORIAL_APP_ID && tutorialStep == null) {
-            tutorialStep = 0
+        if (configuration?.storeId == TUTORIAL_APP_ID &&
+            tutorialStep == null &&
+            !tutorialHistory.hasRun(configurationId)
+        ) {
+            startTour()
         }
     }
 
@@ -986,9 +1011,9 @@ private fun RunningMachine(
         machine = MachineActions(
             onReset = {
                 core.reset()
+                core.releaseAllKeys()
                 if (configuration?.storeId == TUTORIAL_APP_ID) {
-                    typing = false
-                    tutorialStep = 0
+                    startTour()
                 }
             },
             onRewindCassette = { core.rewindCassette() },
@@ -1004,14 +1029,7 @@ private fun RunningMachine(
             onTutorial = if (configuration?.storeId != TUTORIAL_APP_ID) {
                 null
             } else {
-                {
-                    // From the top, as the old app did: the tour's first command
-                    // is a directory listing, and it reads the tape later on.
-                    core.reset()
-                    core.rewindCassette()
-                    tutorialStep = 0
-                    typing = false
-                }
+                { startTour() }
             },
         ),
         keyboard = if (tutorialStep != null) {

@@ -73,6 +73,17 @@ object StorageKeys {
      */
     const val CONFIG_STORE_ID = "conf_store_id"
 
+    /**
+     * Whether the tour has been run on this machine.
+     *
+     * Set the first time it starts, not when it finishes: what it records is
+     * that the machine has been offered the tour, which is what decides whether
+     * opening it starts one. Somebody who cancelled halfway through has still
+     * seen it start, and starting it again over the top of what they went on to
+     * do is exactly the thing this avoids.
+     */
+    const val CONFIG_TUTORIAL_RUN = "conf_tutorial_run"
+
     /** The number of disk drives a configuration has. */
     const val DRIVE_COUNT = 4
 
