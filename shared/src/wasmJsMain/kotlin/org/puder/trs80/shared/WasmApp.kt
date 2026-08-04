@@ -56,9 +56,10 @@ fun main() {
  * find out whether the library, the catalog, the editor and the settings work
  * in a page, and this is what lets that question be asked first.
  *
- * Every member is the honest do-nothing: booting says it worked, the screen is
- * blank, and nothing is stored. When the real core lands this file is what it
- * replaces.
+ * Every member is the honest do-nothing: booting says it worked and nothing is
+ * stored. The screen is the one exception -- it draws a test card, because a
+ * blank canvas cannot be told from a broken one. When the real core lands, this
+ * file is what it replaces.
  */
 private object BrowserCore : EmulatorCore {
 
@@ -86,12 +87,55 @@ private object BrowserCore : EmulatorCore {
         pixelHeight = height * SCREEN_ROWS
     }
 
-    /** Nothing ever changes, so nothing is ever drawn. */
-    override fun render(): Boolean = false
+    /**
+     * Draws once, and what it draws is a test card.
+     *
+     * A blank screen and a broken screen look identical, and the difference
+     * matters while the core is missing: everything between a machine and the
+     * glass -- the cell geometry, the mask, Skia, the canvas -- is real code
+     * that can be wrong on its own. So the stand-in fills the frame it is asked
+     * for with a border and a cross, which is unmistakably not a TRS-80 and
+     * proves that a machine's picture would arrive if there were one.
+     */
+    private var drawn = false
 
-    override fun invalidateRender() = Unit
+    override fun render(): Boolean {
+        if (drawn) {
+            return false
+        }
+        drawn = true
+        return true
+    }
 
-    override fun copyPixelsInto(destination: ByteArray) = destination.fill(0)
+    override fun invalidateRender() {
+        drawn = false
+    }
+
+    /**
+     * The mask is one byte of coverage per pixel: 0 is glass, 255 is phosphor.
+     */
+    override fun copyPixelsInto(destination: ByteArray) {
+        destination.fill(0)
+        val width = pixelWidth
+        val height = pixelHeight
+        if (width <= 0 || height <= 0 || destination.size < width * height) {
+            return
+        }
+        val lit = 255.toByte()
+        for (x in 0 until width) {
+            destination[x] = lit
+            destination[(height - 1) * width + x] = lit
+            // The diagonals, drawn as two lines rather than a loop over both,
+            // so a non-square frame still meets in the middle.
+            val down = x * height / width
+            destination[down.coerceIn(0, height - 1) * width + x] = lit
+            destination[(height - 1 - down).coerceIn(0, height - 1) * width + x] = lit
+        }
+        for (y in 0 until height) {
+            destination[y * width] = lit
+            destination[y * width + width - 1] = lit
+        }
+    }
 
     override fun boot(
         model: Int,
