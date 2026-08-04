@@ -109,6 +109,7 @@ import org.puder.trs80.shared.ui.TUTORIAL_APP_ID
 import org.puder.trs80.shared.ui.TutorialPanel
 import org.puder.trs80.shared.ui.tutorialSteps
 import org.puder.trs80.shared.ui.tutorialKeyHold
+import org.puder.trs80.shared.ui.tutorialSettle
 import org.puder.trs80.shared.ui.typeCommand
 import org.puder.trs80.shared.ui.trs80KeyForCharacter
 import kotlinx.coroutines.delay
@@ -809,6 +810,12 @@ private fun RunningMachine(
             next?.let { steps[it].awaits } ?: listOf(DOS_PROMPT, BASIC_PROMPT),
             { core.screenBuffer },
         )
+        // A moment alone with what just happened. The panel is what the user
+        // reads next and it covers the screen, so it waits until there has been
+        // time to see the listing, or the reply, that the step was for.
+        if (settled && next != null) {
+            delay(tutorialSettle)
+        }
         typing = false
         tutorialStep = if (settled) next else null
     }
@@ -855,6 +862,19 @@ private fun RunningMachine(
             core.stop()
             cpu.close()
         }
+    }
+
+    // What the machine's sound actually does. The user's setting, except while
+    // the tour is running: it types a CSAVE, and a cassette write is a minute of
+    // square wave straight out of the speaker -- nobody chose to hear that by
+    // starting a tutorial. The setting is left alone rather than switched, so
+    // the machine goes back to whatever it was on when the last step is done.
+    //
+    // This is also where the configuration's own mute first reaches the core,
+    // which used to wait for somebody to touch the control.
+    val touring = tutorialStep != null
+    LaunchedEffect(soundMuted, touring) {
+        core.setSoundMuted(soundMuted || touring)
     }
 
     val configuration = remember(configurationId) {
@@ -952,10 +972,9 @@ private fun RunningMachine(
                 clipboardText()?.replace('\n', '\r')?.also(core::paste) != null
             },
             soundMuted = soundMuted,
-            onSoundMutedChange = {
-                soundMuted = it
-                core.setSoundMuted(it)
-            },
+            // Just the setting; the effect above is what tells the core, so
+            // that there is one place deciding whether the machine is audible.
+            onSoundMutedChange = { soundMuted = it },
             onTutorial = if (configuration?.storeId != TUTORIAL_APP_ID) {
                 null
             } else {

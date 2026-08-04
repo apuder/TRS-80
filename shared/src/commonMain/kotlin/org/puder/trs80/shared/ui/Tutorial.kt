@@ -180,6 +180,19 @@ suspend fun typeCommand(command: String, press: suspend (Char) -> Unit) {
 val tutorialKeyHold: Long get() = HOLD_MILLIS
 
 /**
+ * How long the machine is left alone after a command, before the next panel.
+ *
+ * The tour is about what the machine does, and the panel covers the machine. A
+ * DIR that has just listed a disk, or a RUN that has just printed HELLO WORLD,
+ * is the whole point of the step it belongs to -- so it gets a couple of
+ * seconds on its own before something is put in front of it.
+ */
+private const val SETTLE_MILLIS = 2_000L
+
+/** @see SETTLE_MILLIS */
+val tutorialSettle: Long get() = SETTLE_MILLIS
+
+/**
  * What the machine is saying: the last line of its screen with anything on it.
  *
  * The last line is the one that matters, because it is where the cursor is. A
