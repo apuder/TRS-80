@@ -507,6 +507,14 @@ int trs_keypad_joystick = TRUE;
 /* Avoid changing state too fast so keystrokes aren't lost. */
 static tstate_t key_stretch_timeout;
 int stretch_amount = STRETCH_AMOUNT;
+
+/*
+ * When the key the machine is holding went down.
+ *
+ * A release is not let through until this is far enough in the past; see
+ * release_is_too_soon.
+ */
+static tstate_t key_down_at;
 int trs_kb_bracket_state = 0;
 
 void trs_keyboard_save(FILE *file)
@@ -536,6 +544,7 @@ void trs_keyboard_init()
     force_shift = TK_Neutral;
     joystate = 0;
     bzero(&key_stretch_timeout, sizeof(tstate_t));
+    bzero(&key_down_at, sizeof(tstate_t));
     stretch_amount = STRETCH_AMOUNT;
     trs_kb_bracket_state = 0;
 }
@@ -544,6 +553,9 @@ void trs_keyboard_init()
 void trs_kb_reset()
 {
   key_stretch_timeout = z80_state.t_count;
+  /* Not saved with the session, so a resumed one starts with nothing held:
+     a press from before the state was written has long since been let go. */
+  key_down_at = z80_state.t_count;
 }
 
 int key_heartbeat = 0;
@@ -790,6 +802,7 @@ static void change_keystate(int action)
       default:
 	key_down = TK_DOWN(action);
 	if (key_down) {
+	    key_down_at = z80_state.t_count;
 	    keystate[TK_ADDR(action)] |= (1 << TK_DATA(action));
 	} else {
 	    keystate[TK_ADDR(action)] &= ~(1 << TK_DATA(action));
@@ -830,6 +843,38 @@ static int kb_mem_value(int address)
     return data;
 }
 
+/* How long the timer interrupt is apart, which is how often a driver that
+   scans on it looks at the keyboard.  Set by trs_interrupt.c. */
+extern unsigned int cycles_per_timer;
+
+/*
+ * Whether the next thing in the queue is a release that has not waited its turn.
+ *
+ * A key has to stay down long enough for the machine to notice it, and what
+ * counts as long enough is set by whoever is doing the looking: a driver that
+ * scans the matrix on the timer interrupt sees the keyboard once every
+ * cycles_per_timer, so a key held for less than that can fall between two scans
+ * and never be seen at all.  Two of them is the shortest hold that is certain
+ * to cross one.
+ *
+ * The press's own duration cannot be used for this, because by the time it gets
+ * here there is none left: a key tapped faster than the emulator polls for
+ * events -- 30 times a second -- arrives with its release already behind it, in
+ * the same batch, and the two are then applied a stretch apart no matter how
+ * long the finger was really down.  Which is why this is measured from when the
+ * machine was told, rather than from when the key was pressed.
+ */
+static int release_is_too_soon(void)
+{
+    int next;
+    if (key_queue_entries == 0) return 0;
+    next = key_queue[key_queue_head];
+    /* Only an actual key going up: the shift bookkeeping around it is not a
+       key the machine can miss, and holding it back would stall the queue. */
+    if ((next & 0x10000) == 0) return 0;
+    return z80_state.t_count - key_down_at < 2 * (tstate_t) cycles_per_timer;
+}
+
 int trs_kb_mem_read(int address)
 {
     int key = -1;
@@ -844,6 +889,7 @@ int trs_kb_mem_read(int address)
     /* Avoid delaying key state changes in queue for too long */
     if (key_heartbeat > 2) {
       do {
+	if (release_is_too_soon()) break;
 	key = trs_next_key(0);
 	if (key >= 0) {
 	  change_keystate(key);
@@ -883,8 +929,10 @@ int trs_kb_mem_read(int address)
 	  recursion = 0;
 	}
 	/* Get the next key */
-	key = trs_next_key(wait);
-	key_stretch_timeout = z80_state.t_count + stretch_amount;
+	if (!release_is_too_soon()) {
+	  key = trs_next_key(wait);
+	  key_stretch_timeout = z80_state.t_count + stretch_amount;
+	}
     }
 
     if (key >= 0) {
