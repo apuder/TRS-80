@@ -7,7 +7,22 @@
     <style>
         /* The canvas is the app; the page around it is only its ground. */
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1a1917; }
-        #trs80 { width: 100vw; height: 100vh; }
+        /*
+         * dvh, not vh, and it matters on a phone.
+         *
+         * A phone browser's vh is the height the page would have if the
+         * address bar and the toolbar were out of the way -- it does not
+         * change when they come and go, deliberately, so that a page does not
+         * reflow as you scroll. The app is not a page that scrolls: it is one
+         * screenful, laid out to the height it is given, and given a height
+         * taller than what can be seen it puts the bottom of itself behind the
+         * toolbar. The space bar is the bottom of itself, and body is
+         * overflow: hidden, so there was no scrolling down to it either.
+         *
+         * dvh is that same height as it actually is at the moment, toolbars
+         * counted. vh stays as the fallback for anything too old to know it.
+         */
+        #trs80 { width: 100vw; height: 100vh; height: 100dvh; }
         canvas { display: block; outline: none; }
     </style>
 </head>
