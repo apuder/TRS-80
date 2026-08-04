@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -335,7 +336,7 @@ fun LibraryScreen(
                     // catalog underneath is the answer to it.
                     item { Note(stringResource(Res.string.yours_empty)) }
                 }
-                items(shown, key = { it.id }) { card ->
+                itemsIndexed(shown, key = { _, card -> card.id }) { index, card ->
                     Plate(
                         card,
                         onClick = { actions.onRun(card.id) },
@@ -344,6 +345,7 @@ fun LibraryScreen(
                         } else {
                             null
                         },
+                        divider = index < shown.lastIndex,
                     )
                 }
                 if (yours.size > COLLAPSED_PLATES) {
@@ -631,9 +633,18 @@ private fun SectionHeader(
  *
  * The same treatment as the catalog's art, which is the point: a machine made
  * from an entry should look like a bigger version of the entry it came from.
+ *
+ * @param divider whether to draw the line under it. A line belongs between two
+ * rows; under the last one it separates the section from nothing, and reads as
+ * a rule under the machines rather than a gap between them.
  */
 @Composable
-private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> Unit)?) {
+private fun Plate(
+    card: ConfigurationCard,
+    onClick: () -> Unit,
+    onMenu: (() -> Unit)?,
+    divider: Boolean = true,
+) {
     val colors = Trs80Theme.colors
     Row(
         Modifier
@@ -720,7 +731,9 @@ private fun Plate(card: ConfigurationCard, onClick: () -> Unit, onMenu: (() -> U
             }
         }
     }
-    Divider()
+    if (divider) {
+        Divider()
+    }
 }
 
 @Composable
