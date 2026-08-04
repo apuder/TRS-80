@@ -40,10 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.getString
@@ -743,7 +741,6 @@ private fun createBlankDisk(
  * Boots on the way in and stops on the way out, so going back to the list stops
  * the CPU rather than leaving it running behind the list.
  */
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun RunningMachine(
     core: EmulatorCore,
@@ -879,18 +876,11 @@ private fun RunningMachine(
             // from the outside will stop, because the machine is busy.
             core.releaseAllKeys()
         }
-        // A thread of its very own, not Dispatchers.Default. trs80_run() does not
-        // return until the machine is stopped, so on a shared pool it permanently
-        // occupies one of a handful of threads -- on Darwin that pool is a global
-        // dispatch queue, and taking a worker out of it for the life of the app
-        // breaks things far away from here.
-        val cpu = newSingleThreadContext("trs80-cpu")
-        CoroutineScope(cpu).launch { core.run() }
+        // Somewhere that is not the thread that draws; see runMachine, which is
+        // where the platforms disagree about what that means.
+        val stopMachine = runMachine(core)
         emulatorState = state
-        onDispose {
-            core.stop()
-            cpu.close()
-        }
+        onDispose { stopMachine() }
     }
 
     // What the machine's sound actually does. The user's setting, except while

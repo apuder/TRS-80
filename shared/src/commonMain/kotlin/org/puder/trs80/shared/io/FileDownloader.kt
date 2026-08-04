@@ -20,7 +20,6 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 import okio.Path.Companion.toPath
-import okio.openZip
 import org.puder.trs80.shared.Log
 
 private const val TAG = "FileDownloader"
@@ -74,7 +73,11 @@ class FileDownloader(
         return try {
             fileSystem.createDirectories(scratchDir)
             fileSystem.write(tempFile) { write(archive) }
-            val zip = fileSystem.openZip(tempFile)
+            val zip = fileSystem.openArchive(tempFile)
+            if (zip == null) {
+                Log.e(TAG, "This platform cannot read archives; '$fileInZip' stays in the ZIP.")
+                return null
+            }
             val entry = zip.listRecursively("/".toPath())
                 .firstOrNull { it.name == fileInZip }
             if (entry == null) {

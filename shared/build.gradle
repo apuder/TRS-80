@@ -166,6 +166,20 @@ kotlin {
     iosArm64 { binaries.framework { baseName = 'Shared' } }
     iosSimulatorArm64 { binaries.framework { baseName = 'Shared' } }
 
+    // The browser. Compose draws to a canvas here exactly as it does on iOS,
+    // through the same Skia; what a browser cannot do is run the emulator, which
+    // is C and gets in only through Emscripten. So this target starts with the
+    // screens and a machine that does nothing -- see WasmApp.kt -- and the core
+    // is the next question, not this one.
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = 'trs80.js'
+            }
+        }
+        binaries.executable()
+    }
+
     targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget).configureEach { target ->
         def coreBuild = coreBuilds[target.name]
         if (coreBuild == null) {
@@ -243,6 +257,14 @@ kotlin {
                 implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0'
             }
         }
+        wasmJsMain {
+            dependencies {
+                // An in-memory file system stands in for the one a browser does
+                // not have; see io/AppDirectory.wasmJs.kt.
+                implementation 'com.squareup.okio:okio-fakefilesystem:3.18.1'
+            }
+        }
+
         commonTest {
             dependencies {
                 implementation kotlin('test')

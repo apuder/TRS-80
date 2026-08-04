@@ -98,6 +98,37 @@ Things that are easy to lose and hard to diagnose:
 - No disk image ships, so the first machine is a bare Model III. Drop a
   `disk_0.dsk` into the target's resources and it is used instead.
 
+## The web app
+
+A third host, and the least finished: `shared/src/wasmJsMain` is a `main()`, a
+page, and a machine that does nothing. Compose draws to a canvas through the
+same Skia iOS uses, so every screen came across without a line of UI changing.
+
+```sh
+./gradlew :shared:wasmJsBrowserDevelopmentRun   # serves it on localhost
+./gradlew :shared:wasmJsBrowserDistribution     # writes shared/build/dist/wasmJs
+```
+
+What is not there is the emulator. It is C, and C gets into a page only through
+Emscripten, so `BrowserCore` in `WasmApp.kt` is a stand-in that boots nothing and
+draws a blank screen. Everything around a machine — the library, the catalog, the
+editor, settings — is real.
+
+Three things a browser cannot answer the way a device does, each marked in the
+file that stands in for it:
+
+- **No thread for the machine.** `runMachine` is an expect for exactly this: on a
+  device it is a thread of its own, and here it is nothing yet. Whatever the core
+  turns out to be — a worker, or the C loop cut into slices driven by the frame
+  callback — that is where it goes.
+- **No file system.** okio has no browser backend, so `appFileSystem` is an
+  in-memory one and nothing survives the tab. The Origin Private File System is
+  the way in, and it is asynchronous where okio is not.
+- **No HTTP yet, and it may not be ours to fix.** `httpGetBytes` throws. Reaching
+  `retrostore.org` from a page needs CORS headers from *their* side; without them
+  the web app needs a proxy, which is a deployment decision. Until then the
+  catalog says the store is unreachable, which is true.
+
 ## Building and checking
 
 The fast loop, about ten seconds, and enough for most changes:

@@ -31,6 +31,12 @@ buildscript {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+// Deleting the root build directory, without claiming the name `clean`.
+//
+// It used to be `task clean(type: Delete)`, which is what every Android project
+// was given in 2015. The Kotlin browser target applies Gradle's own lifecycle
+// plugin to the root, and that plugin declares `clean` itself -- two tasks of
+// one name, and the build stops before it configures anything.
+tasks.register('cleanRootBuild', Delete) {
+    delete rootProject.layout.buildDirectory
 }
