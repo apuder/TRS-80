@@ -52,6 +52,26 @@ This project is on AGP 9.1.0, pinned by Kotlin 2.4's support window, so the plug
 usable yet. Writing the resources by hand is Firebase's own documented alternative and produces an
 identical result.
 
+### The build ID: the part that is not optional
+
+The Crashlytics plugin also generates a string resource named
+`com.crashlytics.android.build_id`, and the SDK does **not** degrade without it. It throws out of
+`FirebaseCrashlytics.init`, which runs inside `FirebaseInitProvider`, which runs before any of this
+app's own code — so the app dies before its first frame:
+
+```
+java.lang.RuntimeException: Unable to get provider com.google.firebase.provider.FirebaseInitProvider
+Caused by: java.lang.IllegalStateException: The Crashlytics build ID is missing.
+```
+
+Nothing shows this until Firebase is configured at all. Add `firebase.xml` and the app stops
+launching — the two halves are far apart, and the file that appears to be at fault only switched on
+a component that had been missing a resource all along.
+
+So `:app:generateCrashlyticsBuildId` writes that resource, and the variant API adds it as a
+generated resource directory. The value is derived from the version rather than random: two builds
+of one release agree, and an incremental build does not churn it.
+
 ### Native symbols: the manual step
 
 A native crash arrives as a hex address unless the unstripped libraries have been uploaded. The
