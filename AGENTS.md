@@ -137,11 +137,11 @@ name section; without it the stack is bare function indices.
 
 ## Hosting the web app
 
-`https://trs-80-5ffa3.web.app` — Firebase Hosting, project `trs-80-5ffa3`.
+`https://trs-80.web.app` — Firebase Hosting, project `trs-80`.
 
 ```sh
 ./gradlew :shared:wasmJsBrowserDistribution
-firebase deploy --only hosting:web --project trs-80-5ffa3
+firebase deploy --only hosting:web --project trs-80
 ```
 
 The distribution is not in git, so the build has to happen first; what is

@@ -8,7 +8,7 @@ A TRS-80 emulator — Model I, III, 4 and 4P — for Android, iOS and the web.
 | --- | --- |
 | Android | [Google Play](https://play.google.com/store/apps/details?id=org.puder.trs80) |
 | iOS | [App Store](https://apps.apple.com/app/id6797618793) |
-| Web | [trs-80-5ffa3.web.app](https://trs-80-5ffa3.web.app) |
+| Web | [trs-80.web.app](https://trs-80.web.app) |
 
 The emulator itself is [sdltrs][sdltrs], derived from [xtrs][xtrs], in C. Around
 it is one Kotlin Multiplatform module holding the entire app — every screen, the
@@ -145,11 +145,11 @@ does not have traps with `function signature mismatch`, reported from wherever
 the call happened rather than from the cast that caused it — and it is a real
 bug in the C, not something the browser is doing wrong.
 
-**Publishing.** Firebase Hosting, project `trs-80-5ffa3`:
+**Publishing.** Firebase Hosting, project `trs-80`:
 
 ```sh
 ./gradlew :shared:wasmJsBrowserDistribution
-firebase deploy --only hosting:web --project trs-80-5ffa3
+firebase deploy --only hosting:web --project trs-80
 ```
 
 The distribution is not in git, so the build has to come first; what ships is

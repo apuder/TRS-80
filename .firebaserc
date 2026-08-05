@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": "trs-80-chromecast-receiver",
-    "web": "trs-80-5ffa3"
+    "web": "trs-80"
   },
   "targets": {
     "trs-80-chromecast-receiver": {
@@ -11,10 +11,10 @@
         ]
       }
     },
-    "trs-80-5ffa3": {
+    "trs-80": {
       "hosting": {
         "web": [
-          "trs-80-5ffa3"
+          "trs-80"
         ]
       }
     }
