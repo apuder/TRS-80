@@ -59,3 +59,6 @@ app/src/main/res/values/firebase.xml
 
 # Working directory left behind by "firebase crashlytics:symbols:upload".
 .crashlytics/
+
+# Scratch left behind by a failed "crashlytics:mappingfile:upload".
+.crashlytics-mappings-tmp/
