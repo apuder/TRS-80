@@ -89,10 +89,21 @@ Could not create task ':app:uploadCrashlyticsSymbolFileRelease'.
 — which fails `assembleRelease`. So the plugin is not applied at all, and symbols are uploaded by
 hand after a release build:
 
+```sh
+./gradlew :app:assembleRelease
+firebase crashlytics:symbols:upload \
+  --app=1:760396810462:android:3c811f7b6decfe379c9a4f \
+  app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib
 ```
-firebase crashlytics:symbols:upload --app=<google_app_id> \
-  app/build/intermediates/merged_native_libs/release/out/lib
-```
+
+`merged_native_libs`, not `stripped_native_libs`: the merged ones still carry their debug
+information, which is the whole point. Check with `file` if a report ever comes back unsymbolicated
+— it should say `with debug_info, not stripped`. One directory covers every ABI at once.
+
+**Upload from the build that ships, not a later one.** Symbols are matched by the ELF build ID
+inside each `.so`, and a rebuild produces different ones, so symbols generated from a fresh build
+of the same version will not match an APK built earlier. `--dry-run` generates without uploading,
+which is a cheap way to check the path is right.
 
 Worth doing on every release, because without it a report from the emulator core is a hex address
 and nothing else. Worth revisiting the moment google-services supports AGP 9: both blockages go
