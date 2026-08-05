@@ -172,7 +172,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
             if (project.hasProperty('TRS80_KEYSTORE')) {
                 signingConfig signingConfigs.release

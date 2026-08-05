@@ -1,0 +1,25 @@
+# What R8 must not touch.
+#
+# Everything else in here is shrunk and renamed. Compose, coroutines,
+# serialization and okio all ship their own rules inside their artifacts, so the
+# only entries needed are the ones no library can know about: this app's own
+# boundary with the C emulator.
+
+# The JNI boundary, in both directions.
+#
+# The native library's entry points are named after the class that declares
+# them -- Java_org_puder_trs80_XTRS_render and twenty-one others -- so the class
+# and its methods have to keep the names the C was compiled against. Renaming
+# any of them leaves the symbol unresolved at run time rather than at build
+# time, which is a crash on the first machine somebody starts.
+#
+# The reverse direction matters too: native.c looks up "notImplemented" by name
+# with GetStaticMethodID, and a lookup that fails there aborts initialisation.
+-keep class org.puder.trs80.XTRS { *; }
+
+# The routes, which are serialized by name.
+#
+# Navigation writes a destination into the back stack as its serial name, and
+# kotlinx.serialization resolves it back through the generated serializer.
+# Renaming the classes changes what was written from what is read.
+-keep,includedescriptorclasses class org.puder.trs80.shared.navigation.** { *; }
