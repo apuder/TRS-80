@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        The advertising id, which this app does not want and never asked for.
+
+        firebase-analytics merges both of these in on its own. Play then reads
+        the manifest, sees an app that can read the advertising id, and refuses
+        the declaration that says it does not - answering "no" is rejected as
+        untrue however many times it is answered.
+
+        Removing them makes "no" true, and costs only what this app was never
+        doing: attributing installs to adverts and exporting audiences to ad
+        platforms. Ordinary analytics is unaffected.
+    -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID"
+        tools:node="remove" />
 
     <application
         android:name=".TRS80Application"
