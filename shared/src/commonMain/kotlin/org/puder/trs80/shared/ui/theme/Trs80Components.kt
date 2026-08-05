@@ -24,15 +24,18 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
@@ -759,6 +762,12 @@ fun ModalPanel(
     ) {
         Column(
             Modifier
+                // The scrim above covers the window, cutout and all, because a
+                // dimmed screen with an undimmed notch in it looks like a fault.
+                // The panel is what has to keep clear: held sideways, a camera
+                // sits in the middle of one long edge, and the panel is at its
+                // widest there -- the step number went underneath the pill.
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(28.dp)
                 .background(colors.ground)
                 .border(Trs80Theme.spacing.hairline, colors.text.copy(alpha = 0.25f))
