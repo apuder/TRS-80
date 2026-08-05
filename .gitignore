@@ -52,3 +52,7 @@ xcuserdata/
 # Firebase deploy cache and logs
 .firebase/
 firebase-debug.log
+
+# Firebase app config. Not secret -- it ships in every APK -- but a committed
+# copy points every fork and CI run at this project. See doc/CRASH-REPORTING.md.
+app/src/main/res/values/firebase.xml

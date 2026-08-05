@@ -69,8 +69,9 @@ adb logcat -s Trs80App PlayerInput FileManager
 
 The machine runs at full speed on the Android emulator, and `adb shell input
 text HELLO` reaches it through the same path a real keyboard does, which makes
-input bugs reproducible without a device. Crashes in the field come back through
-Crashlytics; see [doc/CRASH-REPORTING.md](doc/CRASH-REPORTING.md).
+input bugs reproducible without a device. Crashes and usage in the field come
+back through Firebase, which needs a `firebase.xml` that is deliberately not in
+the repository; see [doc/CRASH-REPORTING.md](doc/CRASH-REPORTING.md).
 
 **Publishing.** Play takes an app bundle:
 

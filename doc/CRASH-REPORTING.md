@@ -1,7 +1,7 @@
-# Crash reporting
+# Crash reporting, and analytics
 
-**What this is:** how Firebase Crashlytics is wired into this app, what is switched on, and what
-is blocked and why.
+**What this is:** how Firebase is wired into this app — Crashlytics and Analytics both, since they
+are the same wiring — what is switched on, and what is blocked and why.
 
 The crashes worth catching here are in the emulator core, not in Kotlin or Java. The one real
 crash found so far was `getc(NULL)` inside `trs_disk_data_read`, three frames below the CPU loop,
@@ -78,24 +78,49 @@ Worth doing on every release, because without it a report from the emulator core
 and nothing else. Worth revisiting the moment google-services supports AGP 9: both blockages go
 away together, and the whole thing becomes two plugin lines.
 
+### Analytics
+
+`com.google.firebase:firebase-analytics`, and nothing else. It reads the same four resources, so
+turning on Crashlytics turns on Analytics as well and vice versa; there is no separate switch and
+no code. Nothing was blocked here — the google-services plugin has nothing to do with Analytics.
+
+It is worth having next to Crashlytics rather than on its own: crash-free-users, and the trail of
+events leading up to a crash, both come from Analytics being present. Without it a crash report
+says how often, not to how many.
+
+To watch events arrive while testing, put the app in DebugView:
+
+```sh
+adb shell setprop debug.firebase.analytics.app org.puder.trs80
+adb shell setprop log.tag.FA VERBOSE     # and restart the app
+```
+
+`shared_prefs/com.google.android.gms.measurement.prefs.xml` appearing under the app's data
+directory is the quiet proof that it initialised; most of the logging happens in the Play services
+process rather than this one, so an empty `logcat -s FA` does not mean it is off.
+
+**Screens are not distinguished.** Automatic `screen_view` events name the Activity, and there is
+one Activity for the whole app, so every screen reports as `Trs80Activity`. Per-screen analytics
+would need the navigator to log it, which nothing does yet.
+
 ---
 
 ## iOS — not yet, and not for want of trying
 
-Two things have to exist first, and neither is in this repository.
-
-**There is no iOS app target.** The shared module builds a framework; what links it today is a
-hand-made harness in the scratchpad, built by calling `swiftc` directly. Crashlytics on iOS is a
-binary the *app* links and initialises, so there is nothing here to attach it to.
+**The thing that blocked this is gone.** There was no iOS app target when this was written — the
+shared framework was linked by a hand-made harness calling `swiftc` — and Crashlytics on iOS is a
+binary the *app* links and initialises, so there was nothing to attach it to.
+`iosApp/TRS80.xcodeproj` is now a real target, so what remains is to add the Firebase SDK to it and
+register an iOS app in the `trs-80` project, which today has only the Android one.
 
 **CrashKiOS needs that binary.** Touchlab's library
 (`co.touchlab.crashkios:crashlytics`, plus the `crashlyticslink` Gradle plugin) is what makes an
 uncaught Kotlin exception arrive as a Kotlin stack trace instead of an opaque termination. It works
 by referencing Crashlytics symbols and letting the app supply them at link time. Adding it to
-`shared` before an app links Firebase would leave every consumer of the framework — including the
-harness this app is tested with — failing to link.
+`shared` before the app links Firebase would leave every consumer of the framework failing to
+link — the iOS app, and anything else built against it.
 
-So the order is: iOS app target, Firebase SDK in it, then CrashKiOS in `shared` and
+So the order is: Firebase SDK in the iOS target, then CrashKiOS in `shared` and
 `setCrashlyticsUnhandledExceptionHook()` at startup. Not before.
 
 Note what is *not* blocked: the C core's crashes are native signals, and the Crashlytics iOS SDK

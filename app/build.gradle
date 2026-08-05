@@ -26,12 +26,16 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
     /*
-     * Crash reporting.
+     * Crash reporting, and analytics.
      *
      * The ndk artifact is the one that matters here: the emulator is C, and the
      * crashes worth seeing are signals raised inside it rather than Java
      * exceptions -- the disk bug that took the process out was getc(NULL) three
      * frames below the CPU loop.
+     *
+     * Analytics needs no code of its own -- it starts itself from the same
+     * resources -- and it is what tells Crashlytics which users are crashing
+     * rather than only how often, so the two are worth having together.
      *
      * Configured by string resources in src/main/res/values/firebase.xml, which
      * is not in the repository. Without them Firebase initialises to nothing and
@@ -45,6 +49,7 @@ dependencies {
      */
     implementation platform('com.google.firebase:firebase-bom:34.17.0')
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
+    implementation 'com.google.firebase:firebase-analytics'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.11.0'
     implementation project(':shared')
 
