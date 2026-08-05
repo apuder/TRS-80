@@ -24,7 +24,8 @@ few things only a platform can answer. The three apps are the same app.
 | `app/` | the Android host: the JNI binding, one activity, an Application |
 | `app/src/main/c` | the emulator, shared by all three |
 | `iosApp/` | the iOS host: a window and one view controller |
-| `doc/` | the modernization plan, the UI spec, what is still missing |
+| `docs/` | the modernization plan, the UI spec, what is still missing |
+| `docs/play-store`, `docs/app-store` | what each listing is built from, and the rules it has to obey |
 
 More on how it got this shape, and on the conventions worth keeping, in
 [AGENTS.md](AGENTS.md).
@@ -71,7 +72,7 @@ The machine runs at full speed on the Android emulator, and `adb shell input
 text HELLO` reaches it through the same path a real keyboard does, which makes
 input bugs reproducible without a device. Crashes and usage in the field come
 back through Firebase, which needs a `firebase.xml` that is deliberately not in
-the repository; see [doc/CRASH-REPORTING.md](doc/CRASH-REPORTING.md).
+the repository; see [docs/CRASH-REPORTING.md](docs/CRASH-REPORTING.md).
 
 **Publishing.** Play takes an app bundle:
 
@@ -181,8 +182,8 @@ platform, so keep the Android framework out of them.
 Set it in `gradle.properties`, and nowhere else:
 
 ```properties
-trs80VersionName=0.99.4
-trs80VersionCode=54
+trs80VersionName=1.0.0
+trs80VersionCode=60
 ```
 
 Android's manifest reads those properties. `:shared:generateBuildVersion` writes

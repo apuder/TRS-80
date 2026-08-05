@@ -12,7 +12,7 @@ Written against version 0.99 (`versionCode` 49), July 2026.
 
 **This describes a UI that no longer exists.** The Android app it inventories was replaced by the
 shared Compose UI and deleted; this is kept as the record of what that app did, which is what the
-port was measured against. For what is still missing, see `doc/MISSING-FEATURES.md`; for the
+port was measured against. For what is still missing, see `docs/MISSING-FEATURES.md`; for the
 sources, git history.
 
 ---
@@ -621,5 +621,7 @@ Every cell marked in bold is a gap a redesign should fill.
 
 ## 9. Reference
 
-Screenshots of the current app are in `doc/screenshots/`. The app is on Google Play as
-`org.puder.trs80`. RetroStore is at [retrostore.org](https://retrostore.org).
+The screenshots this document was written against showed the app before the redesign, and have
+been removed now that it no longer looks like that; `docs/play-store/screenshots/` holds the
+current ones. The app is on Google Play as `org.puder.trs80`. RetroStore is at
+[retrostore.org](https://retrostore.org).

@@ -10,7 +10,7 @@ submission pays for itself on Android alone. The UI is ported to Compose Multipl
 indistinguishable — and it is fully redesigned by the end, not merely carried across.
 
 This document says what has to happen, in what order, and what has to be decided along the way.
-It is grounded in an audit of the current code — see `doc/UI-SPEC.md` for the UI inventory.
+It is grounded in an audit of the current code — see `docs/UI-SPEC.md` for the UI inventory.
 
 ---
 
@@ -490,7 +490,7 @@ in views is deleted: `app/` is a host of four files — the JNI binding, the emu
 one activity and an Application — and everything on screen comes from `shared/commonMain`, on both
 platforms. That is what §1's diagram meant by "a few hundred lines each", reached from the Android
 side first because Android could be run and checked at every step. What the deletion cost is
-recorded in `doc/MISSING-FEATURES.md`; the biggest item is that Chromecast now has no
+recorded in `docs/MISSING-FEATURES.md`; the biggest item is that Chromecast now has no
 implementation at all rather than an unported one.
 
 **The configuration list is ported**, and is what the iOS app now opens on: the cards, their two
@@ -897,7 +897,7 @@ discipline in §1.1: if a phase cannot ship, it is too big.
 
 ## 12. Parallel track: design
 
-Design work does not block on any of this and should start now — `doc/UI-SPEC.md` is the brief.
+Design work does not block on any of this and should start now — `docs/UI-SPEC.md` is the brief.
 Phases 0 through 4 are invisible to users, or deliberately identical to what shipped before, and all
 of them can run underneath it. Nothing before Phase 5 (§9) needs a single design decision, which is
 the main practical reason the port was split out of the redesign.

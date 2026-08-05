@@ -54,7 +54,7 @@ The emulator and the library handle them; the rest do not.
 ## 4. Smaller gaps
 
 - **Crash reporting on iOS.** Android reports; iOS cannot until there is an iOS app target to link
-  the Crashlytics binary. See `doc/CRASH-REPORTING.md`.
+  the Crashlytics binary. See `docs/CRASH-REPORTING.md`.
 - **Telling the user when something went wrong at startup.** Two messages the old UI showed and
   nothing shows now: a failed import of pre-2026 data (logged in `LegacyImport.android.kt`), and
   the emulator reporting through `XTRS.notImplemented` that it hit a code path it does not have.

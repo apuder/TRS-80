@@ -2,7 +2,7 @@
 
 A TRS-80 emulator: a C core, a Kotlin Multiplatform module holding the whole app, and two thin
 hosts. `shared/commonMain` is where nearly everything lives — if a change can go there, it should.
-See `doc/MODERNIZATION-PLAN.md` for how it got this shape.
+See `docs/MODERNIZATION-PLAN.md` for how it got this shape.
 
 | Where | What |
 | --- | --- |
@@ -46,7 +46,7 @@ long time was `0.1`, because nothing in the build ever set it. Two sources of tr
 is how that happens. An iOS app target, when there is one, should generate its `Info.plist` from
 these properties too.
 
-A version quoted in a document — `doc/UI-SPEC.md` opens with one — is a note about when that
+A version quoted in a document — `docs/UI-SPEC.md` opens with one — is a note about when that
 document was written. It is not a place to update.
 
 ## The iOS app

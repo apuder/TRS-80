@@ -44,7 +44,7 @@ dependencies {
      * `applicationVariants`, which AGP 9 removed, so applying it fails the build
      * outright. All it does is write those same resources.
      *
-     * See doc/CRASH-REPORTING.md, including how native symbols get uploaded
+     * See docs/CRASH-REPORTING.md, including how native symbols get uploaded
      * while that plugin is unusable.
      */
     implementation platform('com.google.firebase:firebase-bom:34.17.0')
@@ -80,7 +80,7 @@ def sharedComposeResources = tasks.register('copySharedComposeResources', Gather
  *
  * The Crashlytics Gradle plugin generates a string resource under exactly this
  * name, and that plugin cannot be applied here: it refuses to configure without
- * google-services, which AGP 9 broke. See doc/CRASH-REPORTING.md.
+ * google-services, which AGP 9 broke. See docs/CRASH-REPORTING.md.
  *
  * Without the resource the SDK does not degrade quietly. FirebaseCrashlytics
  * throws out of its initialiser, that runs inside FirebaseInitProvider, and the
