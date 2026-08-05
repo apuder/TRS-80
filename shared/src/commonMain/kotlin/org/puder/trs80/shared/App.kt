@@ -67,6 +67,7 @@ import org.puder.trs80.shared.navigation.Navigator
 import org.puder.trs80.shared.navigation.Trs80App
 import org.puder.trs80.shared.navigation.rememberNavigator
 import org.puder.trs80.shared.storage.ExperimentalFeatures
+import org.puder.trs80.shared.storage.StorageKeys
 import org.puder.trs80.shared.storage.TapRun
 import org.puder.trs80.shared.storage.TutorialHistory
 import org.puder.trs80.shared.storage.appSettings
@@ -106,6 +107,7 @@ import org.puder.trs80.shared.ui.SettingsScreen
 import org.puder.trs80.shared.ui.StoreState
 import org.puder.trs80.shared.ui.TUTORIAL_APP_ID
 import org.puder.trs80.shared.ui.TutorialPanel
+import org.puder.trs80.shared.ui.WhatsNewPanel
 import org.puder.trs80.shared.ui.tutorialSteps
 import org.puder.trs80.shared.ui.tutorialReadyWait
 import org.puder.trs80.shared.ui.tutorialSettle
@@ -195,6 +197,12 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
     var shareEnabled by remember { mutableStateOf(experimental.isShareEnabled) }
     val taps = remember { TapRun() }
     var message by remember { mutableStateOf<String?>(null) }
+    // A word owed to somebody whose app has just changed under them. The
+    // legacy import raises this when it brings machines across, which is
+    // something only an update can do, and reading it is what puts it down.
+    var whatsNew by remember {
+        mutableStateOf(appSettings().getBoolean(StorageKeys.WHATS_NEW_PENDING, false))
+    }
     val unlockedMessage = stringResource(Res.string.experimental_unlocked)
     Trs80Theme(
         dark = when (theme) {
@@ -285,6 +293,17 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
                     missing = roms.missing,
                     onRetry = { scope.launch { roms.downloadMissing() } },
                     onDismiss = { setupDismissed = true },
+                )
+            } else if (whatsNew) {
+                // Behind the ROM panel rather than beside it: an app that
+                // cannot run anything yet has something more urgent to say.
+                // In practice they never collide, because the only people who
+                // see this brought their ROMs with them.
+                WhatsNewPanel(
+                    onDismiss = {
+                        whatsNew = false
+                        appSettings().putBoolean(StorageKeys.WHATS_NEW_PENDING, false)
+                    },
                 )
             }
         }

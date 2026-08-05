@@ -40,6 +40,16 @@ object StorageKeys {
     /** Why the last import attempt failed, so Settings can show it. */
     const val IMPORT_ERROR = "import.error"
 
+    /**
+     * Whether there is a word owed to somebody who updated.
+     *
+     * Set when an import actually brought machines across, which only happens
+     * to a user who had the previous app; a new install imports nothing and
+     * never sets it. Cleared when the panel it is for has been read, so it
+     * shows once.
+     */
+    const val WHATS_NEW_PENDING = "app.whats_new_pending"
+
     // ---- Per-configuration -------------------------------------------------
 
     const val CONFIG_NAME = "conf_name"

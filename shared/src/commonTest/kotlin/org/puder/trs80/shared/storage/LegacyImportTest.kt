@@ -113,6 +113,40 @@ class LegacyImportTest {
         assertEquals("3,,x, ", target.getStringOrNull(StorageKeys.CONFIGURATION_IDS))
     }
 
+    // ---- The word owed to somebody who updated -------------------------------
+
+    @Test
+    fun raisesTheWhatsNewFlagForSomebodyWhoseMachinesCameAcross() {
+        val target = MapSettings()
+
+        importer(target, global("1"), MapSettings(), config(1, "First")).runIfNeeded()
+
+        assertTrue(target.getBoolean(StorageKeys.WHATS_NEW_PENDING, false))
+    }
+
+    @Test
+    fun leavesTheWhatsNewFlagDownOnAFreshInstall() {
+        // The whole point of the flag: a panel about the app having changed is
+        // meaningless to somebody who has never seen the old one.
+        val target = MapSettings()
+
+        importer(target, MapSettings(), MapSettings(), emptyMap()).runIfNeeded()
+
+        assertFalse(target.getBoolean(StorageKeys.WHATS_NEW_PENDING, false))
+    }
+
+    @Test
+    fun leavesTheWhatsNewFlagDownWhenThereWereNoMachines() {
+        // An install of the old app that never had a configuration in it. The
+        // settings still import; there is just nothing to reassure anyone about.
+        val target = MapSettings()
+
+        importer(target, global(""), MapSettings("conf_first_time" to false), emptyMap())
+            .runIfNeeded()
+
+        assertFalse(target.getBoolean(StorageKeys.WHATS_NEW_PENDING, false))
+    }
+
     // ---- Running once, and the status ---------------------------------------
 
     @Test

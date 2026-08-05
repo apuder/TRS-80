@@ -168,6 +168,12 @@ class LegacyImport(
             }
             written++
         }
+        // Somebody who had the old app, and machines in it. That is the only
+        // audience for the panel about the new look: a new install imports
+        // nothing and gets here with nothing to say.
+        if (prepared.configurations > 0) {
+            target.putBoolean(StorageKeys.WHATS_NEW_PENDING, true)
+        }
         recordSuccess()
         return ImportResult.Imported(prepared.configurations, written)
     }

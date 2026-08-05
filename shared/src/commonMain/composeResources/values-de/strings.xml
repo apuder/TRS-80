@@ -181,4 +181,10 @@ Disketten, Kassette und Tastaturen werden im Eintrags-Editor geändert, nicht hi
     <string name="tutorial_step_7">Verlässt den BASIC-Interpreter.</string>
     <string name="tutorial_step_8">Zeigt das Inhaltsverzeichnis erneut. Beachten Sie die Datei FIRST/BAS.</string>
     <string name="unchanged">UNVERÄNDERT</string>
+
+    <!-- Shown once to somebody whose app has just changed under them. -->
+    <string name="whats_new">NEU</string>
+    <string name="ok">OK</string>
+    <string name="whats_new_title">Ein neuer Anstrich</string>
+    <string name="whats_new_body">Diese App ist vor langer Zeit entstanden, und ihr Aussehen hatte sich nie wirklich verändert. Jetzt schon: derselbe Emulator darunter, alles ringsum neu gezeichnet, und nichts weggelassen.\n\nIhre Maschinen sind mitgekommen. Die Disketten, die Einstellungen und die Stelle, an der Sie aufgehört haben, sind alle noch da, nur besser gekleidet.\n\nWenn etwas fehlt oder verrutscht aussieht, würden wir gern davon hören.</string>
 </resources>

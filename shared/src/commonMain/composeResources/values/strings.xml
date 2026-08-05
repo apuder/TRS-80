@@ -184,4 +184,10 @@ Disks, the cassette and the keyboards are changed in the entry editor, not here.
     <string name="keyboard_gamepad">Ctrl</string>
     <string name="keyboard_tilt">Tilt</string>
     <string name="keyboard_external">Ext</string>
+
+    <!-- Shown once to somebody whose app has just changed under them. -->
+    <string name="whats_new">NEW</string>
+    <string name="ok">OK</string>
+    <string name="whats_new_title">A new coat of paint</string>
+    <string name="whats_new_body">This app was built a long time ago, and the way it looked had never really changed. It has now: the same emulator underneath, everything around it redrawn, and nothing taken away.\n\nYour machines came across with it. Their disks, their settings and wherever you left off are all still here, just better dressed.\n\nIf anything is missing or looks out of place, we would like to hear about it.</string>
 </resources>
