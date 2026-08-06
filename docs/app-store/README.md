@@ -25,15 +25,18 @@ saving: two sets rather than eight.
 
 ### What is here
 
-| File | Size | |
-| --- | --- | --- |
-| `screenshots/phone-1-library.png` | 1242×2688 | The library: your machines, then the catalog |
-| `screenshots/ipad-1-library.png` | 2752×2064 | The two-pane layout, and what you were last playing |
+Seven, English. `phone-*` are 1242×2688, `ipad-*` are 2752×2064.
 
-**Two of a possible twenty**, and both English. Still wanted, in rough order of
-what a listing gains from it: a machine mid-game; a machine sideways with the
-screen to itself; a catalog entry with its description and screens; settings.
-Then the same again in German.
+| | Phone | iPad |
+| --- | --- | --- |
+| `-1-library` | your machines, then the catalog | the same, two-pane, beside what you were last playing |
+| `-2-playing` | a machine mid-game with the keyboard | a machine with the screen to itself |
+| `-3-catalog-entry` | an entry, its description and its screens | the same, in the pane beside the list |
+| `-4-settings` | settings | — |
+
+Ten per family per language is the allowance, and the app speaks two, so
+there is room for roughly three times this. German is the obvious next
+addition: the strings are longer and the screens differ.
 
 ### Taking them
 
@@ -57,11 +60,26 @@ afterwards and the result is 2752×2064, which is an accepted size. Lossless, an
 it catches people out — check which way up it landed rather than assuming, the
 rotation direction depends on which way the device was turned.
 
-**Driving the simulator is the hard part.** `simctl` cannot inject taps, `idb`
-is a separate install, and AppleScript against the Simulator window needs
-Accessibility permission that a shell does not have by default. Without one of
-those, screenshots can only be taken of whatever screen somebody else has
-navigated to.
+**Driving the simulator needs idb.** `simctl` cannot inject taps and AppleScript
+against the Simulator window needs an Accessibility grant a shell does not have.
+`brew install idb-companion` plus `pip install fb-idb` in a virtualenv gets
+there, with one catch: fb-idb 1.1.7 calls `asyncio.get_event_loop()`, which
+Python 3.12 removed, so on a modern Python it dies before doing anything. The
+fix is to return the running loop when there is one and a new loop otherwise —
+substituting `new_event_loop()` everywhere instead trades the crash for
+"attached to a different loop", which is the same bug wearing a hat.
+
+**Ask the screen where things are** rather than measuring a screenshot:
+
+```sh
+idb ui describe-all --udid <udid>     # every element, with its frame
+idb ui tap --udid <udid> <x> <y>      # points, not pixels
+```
+
+On a landscape iPad the two disagree about which way is up: `describe-all`
+answers in the app's landscape space, `tap` wants the portrait framebuffer.
+Convert with `x = landscapeY`, `y = deviceHeightInPoints - landscapeX` — 1376
+for the 13-inch. A tap that silently does nothing is usually this.
 
 ## App icon
 
