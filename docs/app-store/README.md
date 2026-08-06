@@ -25,7 +25,8 @@ saving: two sets rather than eight.
 
 ### What is here
 
-Seven, English. `phone-*` are 1242×2688, `ipad-*` are 2752×2064.
+Fourteen: seven English in `screenshots/`, seven German in `screenshots-de/`.
+`phone-*` are 1242×2688, `ipad-*` are 2752×2064.
 
 | | Phone | iPad |
 | --- | --- | --- |
@@ -34,9 +35,12 @@ Seven, English. `phone-*` are 1242×2688, `ipad-*` are 2752×2064.
 | `-3-catalog-entry` | an entry, its description and its screens | the same, in the pane beside the list |
 | `-4-settings` | settings | — |
 
-Ten per family per language is the allowance, and the app speaks two, so
-there is room for roughly three times this. German is the obvious next
-addition: the strings are longer and the screens differ.
+A catalog entry's description comes from RetroStore and is English in both
+sets; only the app's own chrome around it is translated. That is what the app
+shows, not something to fix here.
+
+Ten per family per language is the allowance, so there is still room for more
+of each.
 
 ### Taking them
 
@@ -68,6 +72,16 @@ Python 3.12 removed, so on a modern Python it dies before doing anything. The
 fix is to return the running loop when there is one and a new loop otherwise —
 substituting `new_event_loop()` everywhere instead trades the crash for
 "attached to a different loop", which is the same bug wearing a hat.
+
+**A language is a launch argument**, so a German set needs no reboot and no
+second simulator:
+
+```sh
+xcrun simctl launch <udid> com.trs80app -AppleLanguages '(de)' -AppleLocale de_DE
+```
+
+It lasts for that launch only. Anything that restarts the app drops back to
+English, and the screenshot looks perfectly fine until you read it.
 
 **Ask the screen where things are** rather than measuring a screenshot:
 
