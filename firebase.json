@@ -17,6 +17,10 @@
         {
           "source": "/privacy-ios",
           "destination": "/privacy-ios.html"
+        },
+        {
+          "source": "/privacy-android",
+          "destination": "/privacy-android.html"
         }
       ],
       "headers": [
