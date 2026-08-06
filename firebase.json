@@ -13,6 +13,12 @@
       "ignore": [
         "**/.*"
       ],
+      "rewrites": [
+        {
+          "source": "/privacy-ios",
+          "destination": "/privacy-ios.html"
+        }
+      ],
       "headers": [
         {
           "source": "**",
