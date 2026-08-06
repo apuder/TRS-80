@@ -8,7 +8,7 @@
 -->
 <resources>
     <!-- Library -->
-    <string name="yours">Ihre</string>
+    <string name="yours">Eigene</string>
     <string name="sort_last_used">ZULETZT</string>
     <string name="sort_alphabetical">A–Z</string>
     <string name="catalog">Katalog</string>
@@ -26,7 +26,7 @@
     <string name="saved_session">SITZUNG GESICHERT</string>
     <string name="pane_hint">Wählen Sie links einen Eintrag, um hier seine Angaben zu sehen. Katalogeinträge werden beim Starten geladen.</string>
     <string name="start_anywhere">Fangen Sie irgendwo an</string>
-    <string name="first_run_note">Links sind %1$d Programme aufgeführt. Wählen Sie eines — es wird geladen und startet sofort, ohne Installation und ohne Einrichtung. Was Sie spielen, erscheint unter „Ihre“.</string>
+    <string name="first_run_note">Links sind %1$d Programme aufgeführt. Wählen Sie eines — es wird geladen und startet sofort, ohne Installation und ohne Einrichtung. Was Sie spielen, erscheint unter „Eigene“.</string>
 
     <string name="duplicate">Duplizieren</string>
     <string name="duplicate_detail">Erstellt eine Kopie mit eigenen Disketten. Änderungen an der einen lassen die andere unberührt.</string>
