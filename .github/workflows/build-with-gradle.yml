@@ -15,20 +15,29 @@ on:
 permissions:
   contents: read
 
+# Every action here is held at its newest major with one exception. All of the
+# v4s ran on Node 20, which the runner now refuses to start -- it substitutes
+# Node 24 and says so three times a build -- so they had to move regardless.
+#
+# setup-gradle stops at v5. Its v6 moves caching into a component that is no
+# longer open source, and upgrading to it is written up as accepting Gradle's
+# Terms of Use; that is a decision about what this project agrees to, not a
+# version bump. v5 is the same action under the same license, on Node 24.
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '21'
         distribution: 'temurin'
     - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v5
     - name: Build with Gradle
       run: ./gradlew build
 
@@ -41,22 +50,22 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '21'
         distribution: 'temurin'
     # The Kotlin/Native toolchain is a large download and is not covered by the
     # Gradle cache.
     - name: Cache Kotlin/Native toolchain
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.konan
         key: konan-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', '**/build.gradle') }}
         restore-keys: konan-${{ runner.os }}-
     - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@v5
     # Linking a framework proves the artifact an Xcode project would consume,
     # and pulls in the C emulator core: the linker is what catches a missing
     # platform implementation of trs80_audio.h.
