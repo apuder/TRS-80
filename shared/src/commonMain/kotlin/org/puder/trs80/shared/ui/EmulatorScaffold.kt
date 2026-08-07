@@ -100,7 +100,7 @@ private fun MachineChrome(
             LandscapeMachine(
                 title = title,
                 onBack = onBack,
-                hasControls = machine != null,
+                machine = machine,
                 onControls = { controlsOpen = true },
                 keyboard = keyboard,
                 screen = screen,
@@ -121,6 +121,7 @@ private fun MachineChrome(
                         modifier = Modifier.weight(1f),
                     )
                     if (machine != null) {
+                        MuteButton(machine)
                         Spacer(Modifier.width(Trs80Theme.spacing.gap))
                         MachineControlsButton(onClick = { controlsOpen = true })
                     }
@@ -170,7 +171,7 @@ private fun MachineChrome(
 private fun LandscapeMachine(
     title: String,
     onBack: () -> Unit,
-    hasControls: Boolean,
+    machine: MachineActions?,
     onControls: () -> Unit,
     keyboard: (@Composable () -> Unit)?,
     screen: @Composable () -> Unit,
@@ -191,7 +192,8 @@ private fun LandscapeMachine(
                 onClick = onBack,
             )
             Spacer(Modifier.weight(1f))
-            if (hasControls) {
+            if (machine != null) {
+                MuteButton(machine, tint = colors.text.copy(alpha = OVERLAY_CONTROL_ALPHA))
                 MachineControlsButton(
                     onClick = onControls,
                     tint = colors.text.copy(alpha = OVERLAY_CONTROL_ALPHA),

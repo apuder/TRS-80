@@ -107,6 +107,34 @@ internal fun MachineControlsButton(
     )
 }
 
+/**
+ * Sound on or off, one tap, in the bar.
+ *
+ * The panel has the same switch and keeps it -- that is where a setting is
+ * looked for. But muting is the one thing on that list done in a hurry and
+ * often, usually because someone walked in, and a program's noise is not
+ * something to sit through three taps of a panel. Both write the same setting,
+ * so whichever is used the other shows it.
+ *
+ * The glyph says what is true now rather than what tapping would do: a crossed
+ * speaker means the machine is silent. That is how a mute control reads
+ * everywhere else, and the opposite convention leaves someone unsure whether
+ * they already tapped it.
+ */
+@Composable
+internal fun MuteButton(
+    actions: MachineActions,
+    modifier: Modifier = Modifier,
+    tint: Color = Trs80Theme.colors.text,
+) {
+    StrokeIcon(
+        if (actions.soundMuted) Trs80Icon.SoundOff else Trs80Icon.SoundOn,
+        modifier = modifier,
+        color = tint,
+        onClick = { actions.onSoundMutedChange(!actions.soundMuted) },
+    )
+}
+
 @Composable
 internal fun MachinePanel(actions: MachineActions, onDismiss: () -> Unit) {
     val colors = Trs80Theme.colors

@@ -52,6 +52,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
@@ -70,7 +71,7 @@ import kotlin.math.sin
 enum class Trs80Icon {
     Plus, Overflow, Search, Download, Play, Stop, Settings,
     Trash, Eject, ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-    DragHandle, Info, Copy, Refresh, Close,
+    DragHandle, Info, Copy, Refresh, Close, SoundOn, SoundOff,
 }
 
 /**
@@ -144,6 +145,32 @@ fun TextAction(
     ) {
         Text(label, style = style, color = color)
     }
+}
+
+/**
+ * A speaker cone: a small rectangle with a triangle flared out of it.
+ *
+ * Filled, not stroked, which is the one place this set departs from outlines --
+ * see [Trs80Icon.Play], whose triangle is filled inside a stroked ring for the
+ * same reason. A cone is a small shape with two acute corners, and outlined at
+ * this size it is mostly the hole in the middle: it went thin and papery next to
+ * the solid dots of the menu beside it. Filled, it has the mass the glyph is
+ * supposed to carry.
+ *
+ * The path is the outline the stroked version reached, half a stroke width out
+ * on every side, so the cone occupies exactly the space it did before.
+ */
+private fun DrawScope.speaker(color: Color, w: Float, h: Float) {
+    val path = androidx.compose.ui.graphics.Path().apply {
+        moveTo(w * 0.10f, h * 0.34f)
+        lineTo(w * 0.26f, h * 0.34f)
+        lineTo(w * 0.50f, h * 0.16f)
+        lineTo(w * 0.50f, h * 0.84f)
+        lineTo(w * 0.26f, h * 0.66f)
+        lineTo(w * 0.10f, h * 0.66f)
+        close()
+    }
+    drawPath(path, color)
 }
 
 private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
@@ -328,6 +355,45 @@ private fun DrawScope.drawIcon(icon: Trs80Icon, color: Color) {
         Trs80Icon.Close -> {
             drawLine(color, Offset(w * 0.24f, h * 0.24f), Offset(w * 0.76f, h * 0.76f), stroke.width)
             drawLine(color, Offset(w * 0.76f, h * 0.24f), Offset(w * 0.24f, h * 0.76f), stroke.width)
+        }
+
+        // A speaker with sound coming out of it, and the same speaker with a
+        // cross where the sound was.
+        //
+        // The cone is identical in both and only what sits beside it changes,
+        // so pressing the button does not make the glyph jump. A diagonal
+        // struck across the whole icon is the more usual way to say muted, and
+        // it was tried: on a filled speaker it reads, but on a stroked one it
+        // runs down the inside of the cone and the two outlines tangle into a
+        // knot at this size. The cross keeps to the empty half.
+        Trs80Icon.SoundOn, Trs80Icon.SoundOff -> {
+            // What sits beside the cone is heavier than the rest of the set and
+            // rounded at the ends, so it holds its own against a solid cone
+            // instead of trailing off it.
+            val mark = Stroke(width = w * 0.105f, cap = StrokeCap.Round)
+            speaker(color, w, h)
+            if (icon == Trs80Icon.SoundOff) {
+                val (l, r) = w * 0.62f to w * 0.92f
+                val (t, b) = h * 0.35f to h * 0.65f
+                drawLine(color, Offset(l, t), Offset(r, b), mark.width, cap = mark.cap)
+                drawLine(color, Offset(r, t), Offset(l, b), mark.width, cap = mark.cap)
+            } else {
+                // Two arcs rather than three, opening to the right of the cone.
+                // Their radii are more than two stroke widths apart: at the
+                // weight above, a nearer pair closed the gap between them and
+                // the two waves fused into one thick bracket.
+                for (r in listOf(0.17f, 0.34f)) {
+                    drawArc(
+                        color,
+                        startAngle = -46f,
+                        sweepAngle = 92f,
+                        useCenter = false,
+                        topLeft = Offset(w * (0.56f - r), h * (0.5f - r)),
+                        size = Size(w * r * 2, h * r * 2),
+                        style = mark,
+                    )
+                }
+            }
         }
 
         Trs80Icon.Stop -> {
