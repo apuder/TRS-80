@@ -17,8 +17,8 @@
 import UIKit
 
 // Written out rather than @UIApplicationMain on the delegate, because the app
-// has no storyboard and no scene manifest: this is the whole of the launch
-// path, and it is easier to read than the attribute that hides it.
+// has no storyboard: this and the scene manifest in Info.plist are the whole of
+// the launch path, and they are easier to read than the attribute that hides it.
 UIApplicationMain(
     CommandLine.argc,
     CommandLine.unsafeArgv,

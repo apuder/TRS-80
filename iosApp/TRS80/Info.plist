@@ -92,8 +92,32 @@
 	<array>
 		<string>arm64</string>
 	</array>
-	<!-- No storyboard: the delegate makes the window itself. -->
+	<!-- No storyboard: the scene delegate makes the window itself. -->
 	<key>UILaunchScreen</key>
 	<dict/>
+
+	<!--
+	    One scene, and the class that makes its window. Built against the
+	    iOS 27 SDK, an app without a scene manifest is not launched at all:
+	    UIKit traps before the first frame. One window is all there is, so
+	    the system is told not to offer a second.
+	-->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 </dict>
 </plist>

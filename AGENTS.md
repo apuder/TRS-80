@@ -92,6 +92,11 @@ Things that are easy to lose and hard to diagnose:
   it at start-up and throws if it is missing, so the app aborts before drawing.
 - **`NSMotionUsageDescription` must be present**, or the system ends the app the
   moment the tilt keyboard asks CoreMotion for a reading.
+- **The window is made by `SceneDelegate`, not `AppDelegate`.** Built against the
+  iOS 27 SDK, an app without `UIApplicationSceneManifest` traps at launch in
+  `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`, before it
+  draws anything. Apple applies this by SDK, so a build from an older Xcode
+  still launches — which is how it went unnoticed.
 - The icon is `var/icons/playstore_high_res_icon.png`, recomposed: iOS refuses an
   alpha channel and masks the corners itself, so the machine is lifted out of
   its transparent bands, scaled to 86% and set on the app's light ground.

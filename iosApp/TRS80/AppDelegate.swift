@@ -23,23 +23,34 @@ import Shared
 /// app draws — so there is deliberately nothing here to change when a screen is
 /// added. This is the counterpart of `Trs80Activity` on Android, and it is
 /// smaller only because iOS asks for less.
+///
+/// The window itself belongs to `SceneDelegate`. Built against the iOS 27 SDK, an
+/// app that makes its window here instead traps in UIKit before it draws
+/// anything — `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption` —
+/// so the delegate is left with nothing to do.
 class AppDelegate: UIResponder, UIApplicationDelegate {
+}
+
+/// The app's one window, named by the scene manifest in `Info.plist`.
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+
         // A disk image to seed the first machine with, if one is shipped. Nil is
         // a supported answer: the app then starts with a bare Model III and the
         // catalog, which is where the programs are anyway.
         let disk = Bundle.main.path(forResource: "disk_0", ofType: "dsk")
 
-        let window = UIWindow(frame: UIScreen.main.bounds)
+        let window = UIWindow(windowScene: windowScene)
         window.rootViewController = IosAppKt.Trs80ViewController(diskPath: disk)
         window.makeKeyAndVisible()
         self.window = window
-        return true
     }
 }
