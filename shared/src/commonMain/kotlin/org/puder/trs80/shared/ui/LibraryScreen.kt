@@ -276,6 +276,12 @@ fun LibraryScreen(
     // space the field takes.
     var searchAsked by rememberSaveable { mutableStateOf(false) }
     val searching = searchAsked || query.isNotEmpty()
+    // Whether the field is appearing because it was tapped for just now, which
+    // is the one time it should take the keyboard. Not saved, unlike the field
+    // itself: this screen is rebuilt on the way back from a game or the editor,
+    // and a field that took the keyboard again then would bury the list under
+    // it every time, for a user who had not asked to type.
+    var searchJustAsked by remember { mutableStateOf(false) }
     val hasMenu = actions.onEdit != null || actions.onDuplicate != null ||
         actions.onDelete != null || actions.onStop != null || actions.onShare != null
 
@@ -296,6 +302,7 @@ fun LibraryScreen(
                         onQueryChange("")
                     }
                     searchAsked = !searching
+                    searchJustAsked = searchAsked
                 },
             )
             AnimatedVisibility(
@@ -307,7 +314,7 @@ fun LibraryScreen(
                     query = query,
                     onQueryChange = onQueryChange,
                     total = yours.size + catalog.size,
-                    focusOnAppear = searchAsked,
+                    focusOnAppear = searchJustAsked,
                 )
             }
 
