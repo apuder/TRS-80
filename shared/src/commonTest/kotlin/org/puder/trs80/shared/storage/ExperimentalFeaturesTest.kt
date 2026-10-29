@@ -25,7 +25,10 @@ import kotlin.test.assertTrue
 class ExperimentalFeaturesTest {
 
     private val settings = MapSettings()
-    private val features = ExperimentalFeatures(settings)
+
+    // Offered explicitly: these describe a platform that has the section, and
+    // they run on one that does not.
+    private val features = ExperimentalFeatures(settings, offered = true)
 
     @Test
     fun everythingIsClosedUntilItIsFound() {
@@ -60,6 +63,25 @@ class ExperimentalFeaturesTest {
         features.setShareEnabled(true)
 
         assertFalse(features.isShareEnabled)
+    }
+
+    /**
+     * Where there is no section, nothing opens one -- including a flag an
+     * earlier build stored, which would otherwise bring back a feature the
+     * platform no longer shows.
+     */
+    @Test
+    fun nothingOpensWhereNothingIsOffered() {
+        ExperimentalFeatures(settings, offered = true).apply {
+            unlock()
+            setShareEnabled(true)
+        }
+        val absent = ExperimentalFeatures(settings, offered = false)
+
+        absent.unlock()
+
+        assertFalse(absent.isUnlocked)
+        assertFalse(absent.isShareEnabled)
     }
 
     @Test

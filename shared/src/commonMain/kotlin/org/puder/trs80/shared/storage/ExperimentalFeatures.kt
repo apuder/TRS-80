@@ -36,6 +36,15 @@ const val TAPS_TO_UNLOCK = 10
 const val TAP_RUN_TIMEOUT_MILLIS = 3000L
 
 /**
+ * Whether this platform has an experimental section at all.
+ *
+ * Not on iOS. Nothing in it is finished, and Share state would make the iOS
+ * privacy policy untrue: it says nothing leaves the device except requests for
+ * what the user asked to fetch.
+ */
+expect val offersExperimentalFeatures: Boolean
+
+/**
  * The features that are not finished, and how they are reached.
  *
  * Two gates, not one. Tapping the wordmark reveals that experimental settings
@@ -45,12 +54,18 @@ const val TAP_RUN_TIMEOUT_MILLIS = 3000L
  *
  * Both gates persist, because a setting that resets on relaunch is a setting the
  * user has to keep re-finding.
+ *
+ * @property offered whether there is a door to find. Where there is not, nothing
+ * unlocks, and a flag stored by an earlier build is ignored rather than obeyed.
  */
-class ExperimentalFeatures(private val settings: Settings) {
+class ExperimentalFeatures(
+    private val settings: Settings,
+    val offered: Boolean = offersExperimentalFeatures,
+) {
 
     /** Whether the experimental section is shown in settings at all. */
     val isUnlocked: Boolean
-        get() = settings.getBoolean(StorageKeys.EXPERIMENTAL_UNLOCKED, false)
+        get() = offered && settings.getBoolean(StorageKeys.EXPERIMENTAL_UNLOCKED, false)
 
     /**
      * Whether sharing a machine's state to RetroStore is offered.
@@ -64,8 +79,12 @@ class ExperimentalFeatures(private val settings: Settings) {
     fun setShareEnabled(enabled: Boolean) =
         settings.putBoolean(StorageKeys.EXPERIMENTAL_SHARE, enabled)
 
-    /** Opens the section. Idempotent. */
-    fun unlock() = settings.putBoolean(StorageKeys.EXPERIMENTAL_UNLOCKED, true)
+    /** Opens the section, where there is one. Idempotent. */
+    fun unlock() {
+        if (offered) {
+            settings.putBoolean(StorageKeys.EXPERIMENTAL_UNLOCKED, true)
+        }
+    }
 }
 
 /**

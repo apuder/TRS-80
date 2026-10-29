@@ -267,14 +267,19 @@ fun Trs80AppUi(core: EmulatorCore, hardwareKeys: HardwareKeys? = null) {
                                 shareText(getString(Res.string.share_app_message, shareUrl))
                             }
                         },
-                        onVersionTap = {
-                            // Only the tap that gets there says so. Carrying on
-                            // past ten, or coming back to a section already
-                            // open, announces nothing.
-                            if (taps.tap(currentTimeMillis()) && !unlocked) {
-                                experimental.unlock()
-                                unlocked = true
-                                message = unlockedMessage
+                        // Absent where there is no section to find: see
+                        // offersExperimentalFeatures. The version is then only
+                        // a version.
+                        onVersionTap = if (!experimental.offered) null else {
+                            {
+                                // Only the tap that gets there says so. Carrying
+                                // on past ten, or coming back to a section
+                                // already open, announces nothing.
+                                if (taps.tap(currentTimeMillis()) && !unlocked) {
+                                    experimental.unlock()
+                                    unlocked = true
+                                    message = unlockedMessage
+                                }
                             }
                         },
                     )
