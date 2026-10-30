@@ -29,6 +29,7 @@ import android.view.WindowManager
 import org.puder.trs80.shared.Log
 import org.puder.trs80.shared.ui.Direction
 import org.puder.trs80.shared.ui.TiltDirection
+import org.puder.trs80.shared.ui.screenTilt
 
 private const val TAG = "PlayerInput"
 
@@ -179,20 +180,6 @@ private fun Int.isPadKey(): Boolean = when (this) {
     else -> false
 }
 
-/**
- * How the accelerometer's device axes map onto screen axes, per display
- * rotation: negate x, negate y, which reading is x, which reading is y.
- *
- * Taken from the old EmulatorActivity unchanged. The accelerometer reports in
- * the device's own frame, which does not turn when the screen does.
- */
-private val AXIS_SWAP = arrayOf(
-    intArrayOf(1, -1, 0, 1),  // ROTATION_0
-    intArrayOf(-1, -1, 1, 0), // ROTATION_90
-    intArrayOf(-1, 1, 0, 1),  // ROTATION_180
-    intArrayOf(1, 1, 1, 0),   // ROTATION_270
-)
-
 actual class MotionInput actual constructor(private val onDirection: (Direction) -> Unit) {
 
     private val tilt = TiltDirection()
@@ -201,13 +188,9 @@ actual class MotionInput actual constructor(private val onDirection: (Direction)
 
     private val listener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
-            val axes = AXIS_SWAP[rotation]
-            onDirection(
-                tilt.update(
-                    x = axes[0] * event.values[axes[2]],
-                    y = axes[1] * event.values[axes[3]],
-                )
-            )
+            // The ROTATION_* constants are the quarter turns screenTilt counts.
+            val (x, y) = screenTilt(event.values[0], event.values[1], rotation)
+            onDirection(tilt.update(x, y))
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit

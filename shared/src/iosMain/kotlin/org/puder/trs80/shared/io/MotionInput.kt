@@ -20,8 +20,14 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import org.puder.trs80.shared.Log
 import org.puder.trs80.shared.ui.Direction
+import org.puder.trs80.shared.ui.TiltDirection
+import org.puder.trs80.shared.ui.screenTilt
 import platform.CoreMotion.CMMotionManager
 import platform.Foundation.NSOperationQueue
+import platform.UIKit.UIApplication
+import platform.UIKit.UIInterfaceOrientationLandscapeLeft
+import platform.UIKit.UIInterfaceOrientationLandscapeRight
+import platform.UIKit.UIInterfaceOrientationPortraitUpsideDown
 
 private const val TAG = "MotionInput"
 
@@ -41,7 +47,7 @@ private const val GRAVITY = 9.80665f
 @OptIn(ExperimentalForeignApi::class)
 actual class MotionInput actual constructor(private val onDirection: (Direction) -> Unit) {
     private val manager = CMMotionManager()
-    private val tilt = org.puder.trs80.shared.ui.TiltDirection()
+    private val tilt = TiltDirection()
 
     /** @return whether there is an accelerometer to listen to. */
     actual fun start(): Boolean {
@@ -55,19 +61,8 @@ actual class MotionInput actual constructor(private val onDirection: (Direction)
                 return@startAccelerometerUpdatesToQueue
             }
             data.acceleration.useContents {
-                // Gravity points down, so tipping the top away gives a negative
-                // y; the sign here is what makes that read as up.
-                //
-                // Scaled to m/s^2, which is what the thresholds are written in:
-                // Core Motion reports in g and Android's sensor does not, so
-                // without this a press wanted a full 1g -- the device on its
-                // side -- and tilting did next to nothing.
-                onDirection(
-                    tilt.update(
-                        x = x.toFloat() * GRAVITY,
-                        y = -y.toFloat() * GRAVITY,
-                    )
-                )
+                val (screenX, screenY) = coreMotionTilt(x, y, screenQuarterTurns())
+                onDirection(tilt.update(screenX, screenY))
             }
         }
         return true
@@ -79,3 +74,35 @@ actual class MotionInput actual constructor(private val onDirection: (Direction)
         onDirection(Direction.NONE)
     }
 }
+
+/**
+ * A Core Motion reading, put into the terms [TiltDirection] takes.
+ *
+ * Core Motion reports the pull of gravity, in g; the shared mapping takes
+ * Android's reading, the push holding the device up, in m/s^2. Same axes,
+ * opposite sign -- flat on a table this reads z = -1 where Android reads
+ * +9.81. Passing the reading through with Android's signs, as this once did,
+ * steered every direction backwards.
+ *
+ * Scaled as well as turned round: the thresholds are in m/s^2, and in g a
+ * press wanted the device on its side.
+ */
+internal fun coreMotionTilt(x: Double, y: Double, quarterTurns: Int): Pair<Float, Float> =
+    screenTilt(-x.toFloat() * GRAVITY, -y.toFloat() * GRAVITY, quarterTurns)
+
+/**
+ * How far the screen is turned, counted the way [screenTilt] counts it.
+ *
+ * Asked at every reading rather than once at the start: the device can be
+ * turned from one landscape to the other while the machine runs, and with the
+ * same keyboard both ways nothing else would notice.
+ */
+private fun screenQuarterTurns(): Int =
+    when (UIApplication.sharedApplication.keyWindow?.windowScene?.interfaceOrientation) {
+        // UIKit names these for where the home button would be, so its
+        // landscape right is the device turned anticlockwise, top to the left.
+        UIInterfaceOrientationLandscapeRight -> 1
+        UIInterfaceOrientationPortraitUpsideDown -> 2
+        UIInterfaceOrientationLandscapeLeft -> 3
+        else -> 0
+    }

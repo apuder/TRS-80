@@ -89,7 +89,11 @@ private const val TILT_RELEASE = 0.3f
 class TiltDirection {
     private var current = Direction.NONE
 
-    /** @param x tilt to the right, [y] tilt away from the holder. */
+    /**
+     * @param x across the screen, as Android's accelerometer reads it: positive
+     * with the left edge down. [y] is positive with the top tipped away. See
+     * [screenTilt], which is how a reading gets into these terms.
+     */
     fun update(x: Float, y: Float): Direction {
         current = Direction(
             left = hold(current.left, x, TILT_PRESS, TILT_RELEASE),
@@ -107,4 +111,37 @@ class TiltDirection {
     /** Once held, a direction stays held until it falls back past [release]. */
     private fun hold(held: Boolean, value: Float, press: Float, release: Float): Boolean =
         if (held) value > release else value > press
+}
+
+/**
+ * How the accelerometer's device axes map onto screen axes, per quarter turn of
+ * the screen: negate x, negate y, which reading is x, which reading is y.
+ *
+ * Taken from the old EmulatorActivity unchanged.
+ */
+private val AXIS_SWAP = arrayOf(
+    intArrayOf(1, -1, 0, 1),  // ROTATION_0
+    intArrayOf(-1, -1, 1, 0), // ROTATION_90
+    intArrayOf(-1, 1, 0, 1),  // ROTATION_180
+    intArrayOf(1, 1, 1, 0),   // ROTATION_270
+)
+
+/**
+ * Puts an accelerometer reading into the terms [TiltDirection.update] takes.
+ *
+ * The accelerometer reports in the device's own frame, which does not turn when
+ * the screen does, so on its side the device's top is the screen's left or
+ * right. The reading is Android's: m/s^2, and the push holding the device up
+ * rather than the pull of gravity, so a device lying flat reads +9.81 on z. A
+ * platform that reports otherwise converts to that first -- one table, so that
+ * a game steers the same on both.
+ *
+ * @param quarterTurns how far the screen is turned from the device's natural
+ * way up, counted as Android's `Surface.ROTATION_*` count it: 1 is the device
+ * turned a quarter anticlockwise, its top to the left.
+ */
+fun screenTilt(x: Float, y: Float, quarterTurns: Int): Pair<Float, Float> {
+    val axes = AXIS_SWAP[quarterTurns and 3]
+    val reading = floatArrayOf(x, y)
+    return axes[0] * reading[axes[2]] to axes[1] * reading[axes[3]]
 }
