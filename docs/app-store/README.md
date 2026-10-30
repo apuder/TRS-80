@@ -15,6 +15,15 @@ saving: two sets rather than eight.
 | --- | --- | --- |
 | 6.5-inch iPhone | 1242×2688, 2688×1242, 1284×2778, 2778×1284 | iPhone 11 Pro Max → **1242×2688** |
 | 13-inch iPad | 2064×2752, 2752×2064, 2048×2732, 2732×2048 | iPad Pro 13-inch (M4) → **2064×2752** |
+| iPhone Duo, outer display | 1398×2034, 2034×1398 | iPhone Duo, folded → **1398×2034** |
+| iPhone Duo, inner display | 2007×2853, 2853×2007 | iPhone Duo, unfolded → **2007×2853** |
+
+**iPhone Duo screenshots are what earn the badge.** A build made with the iOS
+27.1 SDK or later, plus Duo screenshots, puts "optimized for iPhone Duo" on the
+product page. They are optional for now. From April 2027 they are required for
+any app built with the 27.1 SDK. Before the app has an approved version, they
+can only go in with an app version's submission: the Asset Library will take
+the upload, but it will not submit it on its own.
 
 - **Up to 10 per family, per localisation.** Two is not a listing; the slots are
   the pitch.
@@ -25,15 +34,19 @@ saving: two sets rather than eight.
 
 ### What is here
 
-Fourteen: seven English in `screenshots/`, seven German in `screenshots-de/`.
-`phone-*` are 1242×2688, `ipad-*` are 2752×2064.
+Sixteen: nine English in `screenshots/` and seven German in `screenshots-de/`.
+`phone-*` are 1242×2688 and `ipad-*` are 2752×2064. `duo-outer-*` is 1398×2034
+(folded). `duo-inner-*` is 2853×2007 (unfolded and turned sideways, which is
+where the inner display is wide enough for two panes).
 
-| | Phone | iPad |
-| --- | --- | --- |
-| `-1-library` | your machines, then the catalog | the same, two-pane, beside what you were last playing |
-| `-2-playing` | a machine mid-game with the keyboard | a machine with the screen to itself |
-| `-3-catalog-entry` | an entry, its description and its screens | the same, in the pane beside the list |
-| `-4-settings` | settings | — |
+| | Phone | iPad | iPhone Duo |
+| --- | --- | --- | --- |
+| `-1-library` | your machines, then the catalog | the same, two-pane, beside what you were last playing | outer: as on the phone; inner: two-pane, as on the iPad |
+| `-2-playing` | a machine mid-game with the keyboard | a machine with the screen to itself | — |
+| `-3-catalog-entry` | an entry, its description and its screens | the same, in the pane beside the list | — |
+| `-4-settings` | settings | — | — |
+
+The Duo set is English only so far.
 
 A catalog entry's description comes from RetroStore and is English in both
 sets; only the app's own chrome around it is translated. That is what the app
@@ -94,6 +107,41 @@ On a landscape iPad the two disagree about which way is up: `describe-all`
 answers in the app's landscape space, `tap` wants the portrait framebuffer.
 Convert with `x = landscapeY`, `y = deviceHeightInPoints - landscapeX` — 1376
 for the 13-inch. A tap that silently does nothing is usually this.
+
+### The iPhone Duo
+
+The Duo simulator needs Xcode 27.1 and the iOS 27.1 runtime: its device type
+refuses anything older. `xcodebuild -downloadPlatform iOS` fetches the runtime,
+which takes about 8 GB of free space to download and install.
+
+```sh
+xcrun simctl create "iPhone Duo" \
+  com.apple.CoreSimulator.SimDeviceType.iPhone-Duo \
+  com.apple.CoreSimulator.SimRuntime.iOS-27-1
+```
+
+**Simulator.app is gone in Xcode 27.1.** Its replacement is Device Hub, at
+`Xcode.app/Contents/Applications/DeviceHub.app`. Folding, unfolding and turning
+the Duo happen there: `simctl` has no way to fold it.
+
+**It has two displays, and a screenshot takes the inner one unless told
+otherwise.** When folded, that is a black frame. `simctl io <udid> enumerate`
+lists the displays: the inner is 2007×2853 and the outer 1398×2034. Name one by
+its UUID:
+
+```sh
+xcrun simctl io <udid> screenshot --mask=ignored --display=<display-uuid> out.png
+ffmpeg -i out.png -pix_fmt rgb24 flat.png    # drops the alpha, lossless
+```
+
+Unlike the iPad's, these come out the right way up in either orientation. The
+status bar was set to 9:41 with full battery and signal first
+(`simctl status_bar <udid> override ...`). On the Duo it runs down the right
+edge, so check that nothing on screen sits under it.
+
+A build for the simulator from the command line wants `ARCHS=arm64`. The generic
+simulator destination also asks for x86_64, which the shared module does not
+build, and Gradle fails with `Unknown iOS simulator arch: 'x86_64'`.
 
 ## App icon
 
