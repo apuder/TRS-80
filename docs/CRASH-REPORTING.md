@@ -109,6 +109,33 @@ Worth doing on every release, because without it a report from the emulator core
 and nothing else. Worth revisiting the moment google-services supports AGP 9: both blockages go
 away together, and the whole thing becomes two plugin lines.
 
+### Kotlin mappings: the other manual step
+
+R8 renames the Kotlin and Java classes in a release build, so their stack traces arrive as `a.b.c`
+unless the mapping R8 wrote is uploaded. The plugin would do this too, and is out for the same
+reason, so this is by hand as well, after the same build:
+
+```sh
+./gradlew :app:assembleRelease
+firebase crashlytics:mappingfile:upload \
+  --app=1:760396810462:android:3c811f7b6decfe379c9a4f \
+  --resource-file=app/build/generated/crashlyticsBuildId/values/com_crashlytics_build_id.xml \
+  app/build/outputs/mapping/release/mapping.txt
+```
+
+The resource file is where the upload reads the mapping file id from, and it is the same id the app
+reports with each crash; that is how the two are matched. `:app:generateCrashlyticsBuildId` writes
+it, derived from the version.
+
+**The id has to be in Crashlytics' own shape**: thirty-two hex digits with no dashes, as
+`firebase crashlytics:mappingfile:generateid` writes them. A UUID as Java prints one, dashes and
+all, is refused with `400 Bad Request` and nothing better than "check network" from the CLI — the
+server's own reason, `Invalid URL: Not a valid uuid`, only shows if the request is repeated with
+curl. Until 1.0.4 the id was written that way and no mapping upload went through, which is why
+`.gitignore` has a line for the scratch a failed one leaves behind. 1.0.4's was the first.
+
+Like the symbols: **from the build that ships.** A mapping matches only the build R8 wrote it for.
+
 ### Analytics
 
 `com.google.firebase:firebase-analytics`, and nothing else. It reads the same four resources, so
