@@ -29,6 +29,7 @@ package org.puder.trs80.shared
  * and not four lines in the screen that starts a machine.
  *
  * @return what to call when the machine is finished with: it stops the core and
- * lets go of whatever was running it.
+ * lets go of whatever was running it. Where there is a thread, it also waits for
+ * the run loop to come back, so that the next machine can boot.
  */
 expect fun runMachine(core: EmulatorCore): () -> Unit

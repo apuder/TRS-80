@@ -28,6 +28,14 @@
 /* Polled by the CPU thread, written by the host thread. */
 static volatile int isRunning = 0;
 
+/*
+ * Which boot is current, counted up by trs80_init(). A run loop leaves as soon
+ * as it is not running the current one, whatever isRunning says: the next boot
+ * raises that flag again, and a loop from the machine before that had not yet
+ * noticed it go down would otherwise carry on beside the new one.
+ */
+static volatile int session = 0;
+
 static jmp_buf ex_buf;
 static int reset_required = 0;
 
@@ -211,6 +219,13 @@ int trs80_init(const trs80_config *config)
     trs_disk_init(1);
     z80_state.pc.word = (unsigned short) entry_addr;
     clear_paste_string();
+    /*
+     * Raised here, on the host's thread, rather than by the thread that will
+     * run the loop. Raised there, it could land after a stop the host had
+     * already asked for, and the machine would never stop.
+     */
+    session++;
+    isRunning = 1;
     return TRS80_OK;
 }
 
@@ -218,10 +233,12 @@ int trs80_init(const trs80_config *config)
 
 void trs80_run(void)
 {
+    const int machine = session;
+
     clear_paste_string();
     if (!setjmp(ex_buf)) {
         reset_required = 0;
-        while (isRunning) {
+        while (isRunning && session == machine) {
             z80_run(0);
             if (reset_required) {
                 reset_required = 0;
@@ -235,10 +252,10 @@ void trs80_run(void)
     }
     /*
      * Through SDL_CloseAudio rather than straight to the backend, so this takes
-     * the same lock as every other open and close. The host does not wait for
-     * this thread to finish, so another thread can be opening the next
-     * machine's audio, or muting it, while this one is still closing -- and two
-     * threads destroying the same player crashes inside the backend.
+     * the same lock as every other open and close. Those happen on more than
+     * one thread -- the host mutes from its own, and the browser cannot wait for
+     * this loop before booting the next machine -- and two threads destroying
+     * the same player crashes inside the backend.
      */
     SDL_CloseAudio();
 }

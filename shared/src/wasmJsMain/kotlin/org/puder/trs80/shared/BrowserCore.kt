@@ -292,9 +292,11 @@ class BrowserCore(private val core: JsAny) : EmulatorCore {
         jsWriteFile(core, path, bytes.toInt8Array())
     }
 
-    /** Starts the machine; see [jsRun] for why this returns immediately. */
+    /**
+     * Starts the machine; see [jsRun] for why this returns immediately. The
+     * flag the loop tests was raised by [boot].
+     */
     override fun run() {
-        jsSetRunning(core, 1)
         startAudio(core)
         jsRun(core)
     }

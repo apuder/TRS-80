@@ -173,14 +173,11 @@ object IosEmulatorCore : EmulatorCore {
      * Runs the CPU. Blocks until [stop] is called from another thread, so this
      * must not be called on the main thread.
      *
-     * The core's run loop tests a flag that `trs80_run()` does not itself set,
-     * so this sets it first. Calling the C function alone returns immediately
-     * and looks indistinguishable from a machine that will not boot.
+     * The flag the loop tests is raised by [boot], not here: raised on this
+     * thread, it could land after a [stop] already asked for, and the machine
+     * would never stop.
      */
-    override fun run() {
-        trs80_set_running(1)
-        trs80_run()
-    }
+    override fun run() = trs80_run()
 
     /** Asks [run] to return. Safe to call from any thread. */
     override fun stop() = trs80_set_running(0)

@@ -85,16 +85,11 @@ object AndroidEmulatorCore : EmulatorCore {
     /**
      * Runs the CPU, returning only once [stop] is called.
      *
-     * The flag is set before the loop starts, not after. `trs80_run()` tests a
-     * flag it does not itself set, so a caller that starts the thread first and
-     * raises the flag afterwards is racing the thread — and losing that race
-     * looks exactly like a machine that will not boot. The old EmulatorActivity
-     * set it after and got away with it because thread start-up is slower.
+     * The flag the loop tests is raised by [boot], on the caller's thread, not
+     * here. Raised on the thread that runs the loop, it races the caller: lose
+     * one way and the machine never starts, the other and it never stops.
      */
-    override fun run() {
-        XTRS.setRunning(true)
-        XTRS.run()
-    }
+    override fun run() = XTRS.run()
 
     override fun stop() = XTRS.setRunning(false)
 

@@ -70,7 +70,14 @@ typedef struct {
 /* Install host callbacks. Call before trs80_init(). */
 void trs80_set_host(const trs80_host *host);
 
-/* Boot a machine. Returns TRS80_OK or a TRS80_ERR_* value. */
+/*
+ * Boot a machine, ready to run. Returns TRS80_OK or a TRS80_ERR_* value.
+ *
+ * Stop the previous machine's trs80_run() and wait for it to return first:
+ * this resets the state that loop is executing against. A loop that is still
+ * going leaves at its next instruction, but it still executes that
+ * instruction.
+ */
 int trs80_init(const trs80_config *config);
 
 /*
@@ -138,6 +145,10 @@ void trs80_invalidate_render(void);
 /*
  * Run the CPU. Blocks until trs80_set_running(0) is called from another
  * thread, so the host must call this on a dedicated thread.
+ *
+ * trs80_init() leaves the machine ready to run, so a stop asked for before
+ * this is called is kept, and this returns at once. It also returns once
+ * another machine has booted.
  */
 void trs80_run(void);
 void trs80_set_running(int running);

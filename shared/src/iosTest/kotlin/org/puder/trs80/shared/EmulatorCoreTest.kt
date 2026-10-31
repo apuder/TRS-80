@@ -143,6 +143,44 @@ class EmulatorCoreTest {
         assertEquals(FULL_BLOCK.joinToString("\n"), readCell(x = 0, y = 0).joinToString("\n"))
     }
 
+    @Test
+    fun aStopAskedForBeforeRunIsKept() = runBlocking {
+        assertTrue(IosEmulatorCore.boot(model = 1, romPath = writeRom(SPIN_AT_VIDEO_RAM)))
+        IosEmulatorCore.stop()
+
+        // When run raised the flag itself, on its own thread, it overrode a stop
+        // that came first, and never returned.
+        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
+        try {
+            withTimeout(RUN_TIMEOUT_MILLIS) { cpu.join() }
+        } finally {
+            IosEmulatorCore.stop()
+            cpu.join()
+        }
+    }
+
+    @Test
+    fun aLoopLeavesOnceAnotherMachineBoots() = runBlocking {
+        assertTrue(IosEmulatorCore.boot(model = 1, romPath = writeRom(SPIN_AT_VIDEO_RAM)))
+        val first = launch(Dispatchers.Default) { IosEmulatorCore.run() }
+        try {
+            withTimeout(RUN_TIMEOUT_MILLIS) {
+                while (IosEmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
+                    delay(POLL_INTERVAL_MILLIS)
+                }
+            }
+
+            // What the browser does, having no thread to wait for: boot the next
+            // machine while the last loop is still going. The boot raises the
+            // flag that loop watches, so the loop has to notice the boot itself.
+            assertTrue(IosEmulatorCore.boot(model = 1, romPath = writeRom(SPIN_AT_VIDEO_RAM)))
+            withTimeout(RUN_TIMEOUT_MILLIS) { first.join() }
+        } finally {
+            IosEmulatorCore.stop()
+            first.join()
+        }
+    }
+
     /** Boots [model] on [rom] and runs it until it has stored [char] in the first cell. */
     private suspend fun runUntilFirstCellIs(char: Byte, model: Int, rom: UByteArray) = coroutineScope {
         val romPath = writeRom(rom)
