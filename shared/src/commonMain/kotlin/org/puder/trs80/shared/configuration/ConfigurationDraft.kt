@@ -17,6 +17,8 @@
 package org.puder.trs80.shared.configuration
 
 import org.puder.trs80.shared.KeyboardLayout
+import org.puder.trs80.shared.MODEL3
+import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.storage.StorageKeys
 
 /**
@@ -104,6 +106,17 @@ data class ConfigurationDraft(
      */
     fun isForkedFrom(original: ConfigurationDraft): Boolean =
         !wasCustom && this != original
+
+    /**
+     * This draft, with a model if it has none.
+     *
+     * A machine without a model has no ROM and cannot boot, so the editor never
+     * offers "none" and never saves it. A new entry starts without one, as do
+     * entries saved before the editor insisted on it; they open as a Model III,
+     * which is what most of the catalog is.
+     */
+    fun withBootableModel(): ConfigurationDraft =
+        if (model == MODEL_NONE) copy(model = MODEL3) else this
 }
 
 /** Reads a configuration into an editable draft. */

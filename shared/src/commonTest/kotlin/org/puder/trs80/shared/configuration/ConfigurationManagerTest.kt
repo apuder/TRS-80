@@ -22,6 +22,7 @@ import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
 import org.puder.trs80.shared.KeyboardLayout
 import org.puder.trs80.shared.MODEL3
+import org.puder.trs80.shared.MODEL_NONE
 import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.storage.StorageKeys
 import kotlin.test.Test
@@ -255,6 +256,20 @@ class ConfigurationManagerTest {
 
         manager.persistDraft(config.toDraft().copy(name = "Breakdown, my way"))
         assertTrue(configuration(config.id).isCustom)
+    }
+
+    /**
+     * A new machine has no model until the editor gives it one. Saving it
+     * without touching anything has to give it one too, or it cannot boot.
+     */
+    @Test
+    fun aNewMachineSavedUntouchedIsAModelIII() {
+        val manager = ConfigurationManager.create(creator, settings)
+        val fresh = manager.newConfiguration()
+        assertEquals(MODEL_NONE, fresh.model)
+
+        manager.persistDraft(fresh.toDraft().withBootableModel())
+        assertEquals(MODEL3, configuration(fresh.id).model)
     }
 
     @Test

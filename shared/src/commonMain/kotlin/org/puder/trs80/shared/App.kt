@@ -336,7 +336,7 @@ private fun Editor(
 ) {
     val manager = ConfigurationManager.get()
     val original = remember(configurationId) {
-        manager.getConfigById(configurationId)?.toDraft()
+        manager.getConfigById(configurationId)?.toDraft()?.withBootableModel()
     }
     if (original == null) {
         // The configuration went away underneath us; there is nothing to edit.
@@ -449,6 +449,23 @@ private fun Library(
         cards = withContext(Dispatchers.Default) { ConfigurationManager.get().toCards() }
     }
 
+    /**
+     * Starts the machine with [id], or opens its editor if it has no model.
+     *
+     * Older versions of the editor could save a machine without a model, and
+     * there is nothing to boot until it has one.
+     */
+    fun startMachine(id: Int) {
+        val model = ConfigurationManager.get().getConfigById(id)?.model
+        navigator.goTo(
+            if (model == MODEL_NONE) {
+                Destination.EditConfiguration(id, isNew = false)
+            } else {
+                Destination.Emulator(id)
+            }
+        )
+    }
+
     /** Fetches [app] and, if [thenRun], starts the machine it becomes. */
     fun install(app: App, thenRun: Boolean) {
         installing = installing + app.id
@@ -469,7 +486,7 @@ private fun Library(
             reload()
             if (thenRun) {
                 selectedId = null
-                navigator.goTo(Destination.Emulator(configuration.id))
+                startMachine(configuration.id)
             }
         }
     }
@@ -488,7 +505,7 @@ private fun Library(
         val clean = entry.cleanId
         if (clean != null) {
             selectedId = null
-            navigator.goTo(Destination.Emulator(clean))
+            startMachine(clean)
             return
         }
         (catalog.state as? StoreState.Loaded)?.apps?.firstOrNull { it.id == entry.id }
@@ -548,7 +565,7 @@ private fun Library(
         onSortChange = { sort = it },
         onExpandedChange = { expanded = it },
         actions = LibraryActions(
-            onRun = { navigator.goTo(Destination.Emulator(it)) },
+            onRun = ::startMachine,
             onOpenEntry = { selectedId = it.id },
             onOpenSettings = { navigator.goTo(Destination.Settings) },
             onRefresh = { scope.launch { catalog.refresh() } },
@@ -596,7 +613,7 @@ private fun Library(
                                 onPlay = { playEntry(selectedEntry) },
                                 onRun = {
                                     selectedId = null
-                                    navigator.goTo(Destination.Emulator(it))
+                                    startMachine(it)
                                 },
                                 onDismiss = { selectedId = null },
                                 asPane = true,
@@ -608,9 +625,7 @@ private fun Library(
                             FirstRunPane(entries.size)
                         }
 
-                    is PaneContent.Resume -> ResumePane(holding.card) {
-                        navigator.goTo(Destination.Emulator(it))
-                    }
+                    is PaneContent.Resume -> ResumePane(holding.card, ::startMachine)
 
                     PaneContent.FirstRun -> FirstRunPane(entries.size)
                 }
@@ -623,7 +638,7 @@ private fun Library(
                 entry = selectedEntry,
                 app = selectedApp,
                 onPlay = { playEntry(selectedEntry) },
-                onRun = { selectedId = null; navigator.goTo(Destination.Emulator(it)) },
+                onRun = { selectedId = null; startMachine(it) },
                 onDismiss = { selectedId = null },
             )
         }

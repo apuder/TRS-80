@@ -53,9 +53,17 @@ class RomManager private constructor(
         return fileManager.writeFile(filename, content)
     }
 
-    /** @return the absolute path of the ROM for [model], or null if there is none. */
-    fun romPath(model: Int): String? =
-        settings.getStringOrNull(StorageKeys.romKey(model))?.let(::resolveStoredPath)
+    /**
+     * @return the absolute path of the ROM for [model], or null if there is none.
+     * A machine with no model has none: there is no ROM to look for, so asking
+     * is an answer rather than a mistake.
+     */
+    fun romPath(model: Int): String? {
+        if (model !in StorageKeys.romModels) {
+            return null
+        }
+        return settings.getStringOrNull(StorageKeys.romKey(model))?.let(::resolveStoredPath)
+    }
 
     /** @return Whether the ROMs for both model I and model III are present. */
     fun hasAllRoms(): Boolean = hasRom(MODEL1) && hasRom(MODEL3)

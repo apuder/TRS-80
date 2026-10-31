@@ -16,6 +16,7 @@
 
 package org.puder.trs80.shared.configuration
 
+import org.puder.trs80.shared.MODEL1
 import org.puder.trs80.shared.MODEL3
 import org.puder.trs80.shared.ScreenColor
 import kotlin.test.Test
@@ -47,6 +48,12 @@ class ConfigurationDraftTest {
             listOf(ScreenColor.Green, ScreenColor.Amber, ScreenColor.White),
             ScreenColor.entries,
         )
+    }
+
+    /** Only a machine with no model is given one; any other keeps its own. */
+    @Test
+    fun aModelIsKeptWhenThereIsOne() {
+        assertEquals(MODEL1, draft().copy(model = MODEL1).withBootableModel().model)
     }
 
     private fun draft(
