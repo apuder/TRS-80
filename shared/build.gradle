@@ -275,9 +275,11 @@ kotlin {
         }
 
         // cinterop resolves the .def's staticLibraries when it runs, so the
-        // archive has to have been built already.
+        // archive has to have been built already. And it copies the archive into
+        // the klib, so the archive is an input too: tracking only the headers,
+        // a change to the C alone left every binary linking the old core.
         tasks.named("cinteropTrs80core${target.name.capitalize()}") {
-            dependsOn(coreBuild)
+            inputs.files(coreBuild).withPathSensitivity(PathSensitivity.NONE)
         }
 
         // The core's audio sink is AudioQueue on iOS. The archive records the
