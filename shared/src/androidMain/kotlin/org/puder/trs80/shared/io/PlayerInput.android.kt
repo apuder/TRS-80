@@ -21,11 +21,12 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.hardware.display.DisplayManager
+import android.view.Display
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.Surface
-import android.view.WindowManager
 import org.puder.trs80.shared.Log
 import org.puder.trs80.shared.ui.Direction
 import org.puder.trs80.shared.ui.TiltDirection
@@ -225,19 +226,13 @@ actual class MotionInput actual constructor(private val onDirection: (Direction)
  *
  * Read when the tilt starts rather than watched: the layout that steers by
  * tilting is rebuilt when the device turns, which stops and starts this.
+ *
+ * Asked of the display manager rather than the context. The context is the
+ * application's, which has no display of its own, and from Android 11 asking
+ * it for one throws rather than answering. The default display is the one a
+ * phone being tilted in the hand is showing.
  */
-@Suppress("DEPRECATION")
 private fun displayRotation(context: Context): Int {
-    val display = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-        // Null on a context with no display of its own, which the application
-        // context is; the window manager below answers for those.
-        context.display
-    } else {
-        null
-    }
-    val rotation = display?.rotation
-        ?: (context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)
-            ?.defaultDisplay
-            ?.rotation
-    return rotation ?: Surface.ROTATION_0
+    val displays = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+    return displays?.getDisplay(Display.DEFAULT_DISPLAY)?.rotation ?: Surface.ROTATION_0
 }
