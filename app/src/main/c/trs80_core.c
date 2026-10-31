@@ -23,7 +23,6 @@
 #include <SDL/SDL.h>
 
 #include "atrs.h"
-#include "trs80_audio.h"
 #include "trs80_core.h"
 
 /* Polled by the CPU thread, written by the host thread. */
@@ -234,7 +233,14 @@ void trs80_run(void)
     } else {
         // Unwound by not_implemented().
     }
-    trs80_audio_shutdown();
+    /*
+     * Through SDL_CloseAudio rather than straight to the backend, so this takes
+     * the same lock as every other open and close. The host does not wait for
+     * this thread to finish, so another thread can be opening the next
+     * machine's audio, or muting it, while this one is still closing -- and two
+     * threads destroying the same player crashes inside the backend.
+     */
+    SDL_CloseAudio();
 }
 
 void trs80_set_running(int running)
