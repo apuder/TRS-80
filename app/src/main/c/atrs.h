@@ -19,6 +19,7 @@ void pause_audio(int pause_on);
 void flush_audio_queue();
 void trigger_screen_update(int force_update);
 int is_expanded_mode();
+int is_alternate_mode();
 
 void trs_main_init();
 void trs_cassette_init();

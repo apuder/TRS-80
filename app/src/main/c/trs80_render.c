@@ -58,6 +58,9 @@ extern unsigned char *trs_screen;
 
 int trs80_is_expanded_mode(void);
 
+/* In trs_sdl_interface.c: whether port 0xec has switched in the alternate set. */
+int is_alternate_mode(void);
+
 #define CELLS (TRS80_SCREEN_COLS * TRS80_SCREEN_ROWS)
 
 /*
@@ -68,6 +71,18 @@ int trs80_is_expanded_mode(void);
  */
 #define FIRST_GRAPHICS_CHAR 128
 #define LAST_GRAPHICS_CHAR 191
+
+/*
+ * The Model III and 4 ROMs keep 64 more glyphs at 128..191, behind the block
+ * graphics: the symbols -- card suits, faces, Greek letters -- that codes
+ * 192..255 show. What the ROM stores at 192..255 itself is the alternate set,
+ * Katakana or accented letters depending on the ROM, which a program has to
+ * switch in through port 0xec. Games draw with the symbols, so getting this
+ * backwards turns their sprites into Katakana. The cache holds the symbols as a
+ * bank of their own after the 256 codes.
+ */
+#define SYMBOLS MAXCHARS
+#define GLYPHS (MAXCHARS + 64)
 
 #define FOREGROUND 0xff
 #define BACKGROUND 0x00
@@ -92,15 +107,19 @@ static int cell_width = TRS80_CELL_WIDTH;
 static int cell_height = TRS80_CELL_HEIGHT;
 
 /*
- * Every character pre-scaled to the cell size, so drawing one is a row-by-row
- * copy. Rebuilt only when the cell size changes, which is on rotation or a new
- * session rather than per frame.
+ * Every glyph pre-scaled to the cell size, so drawing one is a row-by-row copy.
+ * Rebuilt only when the cell size or the character ROM changes, which is on
+ * rotation or a new session rather than per frame.
  */
 static unsigned char *glyph_cache = NULL;
+
+/* The character ROM the cache was built from, or -1 before the first build. */
+static int cached_charset = -1;
 
 /* The cells the mask was last built from, for diffing. */
 static unsigned char rendered_cells[CELLS];
 static int rendered_expanded = -1;
+static int rendered_alternate = -1;
 
 /* Forces a full rasterize on the first call and after a mode change. */
 static int mask_valid = 0;
@@ -203,12 +222,33 @@ static void cache_graphics_char(unsigned char *dest, int code)
     }
 }
 
+/* Rasterizes every glyph of the current character ROM at the current cell size. */
+static void build_glyph_cache(void)
+{
+    for (int glyph = 0; glyph < GLYPHS; glyph++) {
+        unsigned char *dest = glyph_cache + (size_t) glyph * cell_width * cell_height;
+        if (glyph >= FIRST_GRAPHICS_CHAR && glyph <= LAST_GRAPHICS_CHAR) {
+            cache_graphics_char(dest, glyph);
+            continue;
+        }
+        const int code = (glyph < SYMBOLS) ? glyph : glyph - SYMBOLS + FIRST_GRAPHICS_CHAR;
+        const char *rom = trs_char_data[trs_charset][code];
+        for (int dy = 0; dy < cell_height; dy++) {
+            for (int dx = 0; dx < cell_width; dx++) {
+                dest[dy * cell_width + dx] = glyph_coverage(rom, dx, dy);
+            }
+        }
+    }
+    cached_charset = trs_charset;
+    mask_valid = 0;
+}
+
 /*
  * Sets the size a character cell is drawn at, rebuilding the glyph cache and the
  * mask for it. Pass the host's cell size so nothing has to be scaled afterwards.
  *
  * Call before reading trs80_pixel_buffer(), and again whenever the cell size
- * changes. Cheap enough to call on rotation: it rasterizes 256 glyphs once.
+ * changes. Cheap enough to call on rotation: it rasterizes 320 glyphs once.
  */
 void trs80_set_cell_size(int width, int height)
 {
@@ -227,22 +267,8 @@ void trs80_set_cell_size(int width, int height)
     free(pixels);
     free(glyph_cache);
     pixels = calloc((size_t) pixel_width * pixel_height, 1);
-    glyph_cache = calloc((size_t) MAXCHARS * cell_width * cell_height, 1);
-
-    for (int code = 0; code < MAXCHARS; code++) {
-        unsigned char *dest = glyph_cache + (size_t) code * cell_width * cell_height;
-        if (code >= FIRST_GRAPHICS_CHAR && code <= LAST_GRAPHICS_CHAR) {
-            cache_graphics_char(dest, code);
-            continue;
-        }
-        const char *glyph = trs_char_data[trs_charset][code];
-        for (int dy = 0; dy < cell_height; dy++) {
-            for (int dx = 0; dx < cell_width; dx++) {
-                dest[dy * cell_width + dx] = glyph_coverage(glyph, dx, dy);
-            }
-        }
-    }
-    mask_valid = 0;
+    glyph_cache = calloc((size_t) GLYPHS * cell_width * cell_height, 1);
+    build_glyph_cache();
 }
 
 void trs80_invalidate_render(void)
@@ -257,10 +283,10 @@ void trs80_invalidate_render(void)
  * row-by-row copy. In expanded mode each column is doubled, which is an exact
  * 2x and so introduces none of the unevenness a fractional scale would.
  */
-static void draw_cell(int code, int column, int row, int scale)
+static void draw_cell(int glyph_index, int column, int row, int scale)
 {
     const unsigned char *glyph =
-            glyph_cache + (size_t) code * cell_width * cell_height;
+            glyph_cache + (size_t) glyph_index * cell_width * cell_height;
     const int x = column * cell_width * scale;
     const int y = row * cell_height;
 
@@ -280,13 +306,31 @@ static void draw_cell(int code, int column, int row, int scale)
 }
 
 /*
- * The Radio Shack lowercase modification: on a Model I the codes below 0x20
- * displayed as uppercase letters.
+ * The glyph a code in video RAM shows, which is not always the one stored at
+ * that code. This follows trs_screen_write_char in trs_sdl_interface.c, which
+ * drew the screen before the core did.
  */
-static int adjust_for_model(int code)
+static int glyph_for_code(int code, int alternate)
 {
-    if (trs_model == 1 && code < 0x20) {
-        return code + 0x40;
+    if (trs_model == 1) {
+        /*
+         * The Radio Shack lowercase modification: codes below 0x20 displayed
+         * as uppercase letters.
+         */
+        if (code < 0x20) {
+            return code + 0x40;
+        }
+        /*
+         * The Model I's graphics ignore bit 6, so 192..255 repeat 128..191. Its
+         * ROM stops at 127, so reading 192..255 from it draws nothing.
+         */
+        if (code > LAST_GRAPHICS_CHAR) {
+            return code - 0x40;
+        }
+        return code;
+    }
+    if (code > LAST_GRAPHICS_CHAR && !alternate) {
+        return SYMBOLS + code - (LAST_GRAPHICS_CHAR + 1);
     }
     return code;
 }
@@ -298,6 +342,10 @@ int trs80_render(void)
     if (pixels == NULL) {
         trs80_set_cell_size(cell_width, cell_height);
     }
+    /* A new session can be another model, and so another character ROM. */
+    if (trs_charset != cached_charset) {
+        build_glyph_cache();
+    }
 
     /*
      * The only place the CPU thread is raced, and deliberately so: a cell read
@@ -308,6 +356,7 @@ int trs80_render(void)
     memcpy(snapshot, trs_screen, sizeof(snapshot));
 
     const int expanded = trs80_is_expanded_mode() ? 1 : 0;
+    const int alternate = is_alternate_mode() ? 1 : 0;
     const int scale = expanded ? 2 : 1;
     /* Expanded mode shows 32 double-width characters, taking every other cell. */
     const int columns = TRS80_SCREEN_COLS / scale;
@@ -316,6 +365,11 @@ int trs80_render(void)
     if (expanded != rendered_expanded) {
         mask_valid = 0;
         rendered_expanded = expanded;
+    }
+    /* Switching sets redraws 192..255 without a byte of video RAM changing. */
+    if (alternate != rendered_alternate) {
+        mask_valid = 0;
+        rendered_alternate = alternate;
     }
 
     int changed = 0;
@@ -326,7 +380,7 @@ int trs80_render(void)
             if (mask_valid && rendered_cells[index] == code) {
                 continue;
             }
-            draw_cell(adjust_for_model(code), column, row, scale);
+            draw_cell(glyph_for_code(code, alternate), column, row, scale);
             rendered_cells[index] = code;
             changed = 1;
         }

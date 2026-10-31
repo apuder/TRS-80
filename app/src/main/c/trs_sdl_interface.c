@@ -2112,6 +2112,11 @@ int is_expanded_mode()
 {
   return currentmode & EXPANDED;
 }
+
+int is_alternate_mode()
+{
+  return currentmode & ALTERNATE;
+}
 #endif
 
 void trs_screen_inverse(int flag)

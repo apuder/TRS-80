@@ -20,6 +20,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -95,20 +96,7 @@ class EmulatorCoreTest {
 
     @Test
     fun renderingProducesTheGlyphFromTheCharacterRom() = runBlocking {
-        val romPath = writeRom(SPIN_AT_VIDEO_RAM)
-        assertTrue(IosEmulatorCore.boot(model = 3, romPath = romPath), "The core refused to boot.")
-
-        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
-        try {
-            withTimeout(RUN_TIMEOUT_MILLIS) {
-                while (IosEmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
-                    delay(POLL_INTERVAL_MILLIS)
-                }
-            }
-        } finally {
-            IosEmulatorCore.stop()
-            cpu.join()
-        }
+        runUntilFirstCellIs(EXPECTED_CHAR, model = 3, rom = SPIN_AT_VIDEO_RAM)
 
         assertTrue(IosEmulatorCore.render(), "Nothing was rasterized.")
         assertEquals(512, IosEmulatorCore.pixelWidth)
@@ -129,6 +117,50 @@ class EmulatorCoreTest {
         assertTrue(IosEmulatorCore.render(), "Invalidating should force a redraw.")
     }
 
+    @Test
+    fun theHighCodesShowTheSymbolsOnAModelIII() = runBlocking {
+        // What games draw their sprites with: the smiley the ROM keeps at 0x84,
+        // behind the block graphics, rather than what it stores at 0xC4.
+        runUntilFirstCellIs(SMILEY_CODE, model = 3, rom = SMILEY_AT_VIDEO_RAM)
+
+        IosEmulatorCore.render()
+        assertEquals(SMILEY_GLYPH.joinToString("\n"), readCell(x = 0, y = 0).joinToString("\n"))
+    }
+
+    @Test
+    fun theAlternateSetShowsOnceAProgramSwitchesItIn() = runBlocking {
+        runUntilFirstCellIs(SMILEY_CODE, model = 3, rom = ALTERNATE_SMILEY_AT_VIDEO_RAM)
+
+        IosEmulatorCore.render()
+        assertEquals(ALTERNATE_C4_GLYPH.joinToString("\n"), readCell(x = 0, y = 0).joinToString("\n"))
+    }
+
+    @Test
+    fun theHighCodesRepeatTheGraphicsOnAModelI() = runBlocking {
+        runUntilFirstCellIs(FULL_BLOCK_CODE, model = 1, rom = FULL_BLOCK_AT_VIDEO_RAM)
+
+        IosEmulatorCore.render()
+        assertEquals(FULL_BLOCK.joinToString("\n"), readCell(x = 0, y = 0).joinToString("\n"))
+    }
+
+    /** Boots [model] on [rom] and runs it until it has stored [char] in the first cell. */
+    private suspend fun runUntilFirstCellIs(char: Byte, model: Int, rom: UByteArray) = coroutineScope {
+        val romPath = writeRom(rom)
+        assertTrue(IosEmulatorCore.boot(model = model, romPath = romPath), "The core refused to boot.")
+
+        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
+        try {
+            withTimeout(RUN_TIMEOUT_MILLIS) {
+                while (IosEmulatorCore.screenBuffer[0] != char) {
+                    delay(POLL_INTERVAL_MILLIS)
+                }
+            }
+        } finally {
+            IosEmulatorCore.stop()
+            cpu.join()
+        }
+    }
+
     /** Reads one character cell out of the pixel buffer as rows of `#` and `.`. */
     private fun readCell(x: Int, y: Int): List<String> {
         val pixels = IosEmulatorCore.pixelBuffer
@@ -142,21 +174,8 @@ class EmulatorCoreTest {
 
     @Test
     fun z80ExecutesAndWritesToVideoRam() = runBlocking {
-        val romPath = writeRom(SPIN_AT_VIDEO_RAM)
-        assertTrue(IosEmulatorCore.boot(model = 1, romPath = romPath), "The core refused to boot.")
-
-        // trs80_run blocks until stopped, so it needs a thread of its own.
-        val cpu = launch(Dispatchers.Default) { IosEmulatorCore.run() }
-        try {
-            withTimeout(RUN_TIMEOUT_MILLIS) {
-                while (IosEmulatorCore.screenBuffer[0] != EXPECTED_CHAR) {
-                    delay(POLL_INTERVAL_MILLIS)
-                }
-            }
-        } finally {
-            IosEmulatorCore.stop()
-            cpu.join()
-        }
+        // trs80_run blocks until stopped, so this runs it on a thread of its own.
+        runUntilFirstCellIs(EXPECTED_CHAR, model = 1, rom = SPIN_AT_VIDEO_RAM)
 
         // Reached only if the CPU fetched from the ROM, executed the store, and
         // the memory write propagated into the host's screen buffer.
@@ -199,6 +218,43 @@ class EmulatorCoreTest {
             0x18u, 0xFEu,
         )
 
+        /** A smiley among the Model III's symbols, and a Katakana mark in its alternate set. */
+        const val SMILEY_CODE: Byte = 0xC4.toByte()
+
+        /** Stores [SMILEY_CODE] in the first cell, as [SPIN_AT_VIDEO_RAM] stores 'A'. */
+        val SMILEY_AT_VIDEO_RAM = ubyteArrayOf(
+            0x3Eu, 0xC4u,
+            0x32u, 0x00u, 0x3Cu,
+            0x18u, 0xFEu,
+        )
+
+        /**
+         * The same, after switching in the alternate set. The switch comes first,
+         * so by the time the cell holds the code the set has changed:
+         *
+         *     AF           XOR  A            ; bit 3 clear picks the alternate set
+         *     D3 EC        OUT  (0xEC), A
+         *     3E C4        LD   A, 0xC4
+         *     32 00 3C     LD   (0x3C00), A
+         *     18 FE        JR   -2
+         */
+        val ALTERNATE_SMILEY_AT_VIDEO_RAM = ubyteArrayOf(
+            0xAFu,
+            0xD3u, 0xECu,
+            0x3Eu, 0xC4u,
+            0x32u, 0x00u, 0x3Cu,
+            0x18u, 0xFEu,
+        )
+
+        /** Every block lit, with bit 6 set, which the Model I's graphics ignore. */
+        const val FULL_BLOCK_CODE: Byte = 0xFF.toByte()
+
+        val FULL_BLOCK_AT_VIDEO_RAM = ubyteArrayOf(
+            0x3Eu, 0xFFu,
+            0x32u, 0x00u, 0x3Cu,
+            0x18u, 0xFEu,
+        )
+
         const val RUN_TIMEOUT_MILLIS = 10_000L
         const val POLL_INTERVAL_MILLIS = 20L
 
@@ -225,5 +281,40 @@ class EmulatorCoreTest {
             "........",
             "........",
         )
+
+        /** The smiley, CG 4's glyph 0x84. */
+        val SMILEY_GLYPH = listOf(
+            "..####..",
+            ".#....#.",
+            "#.#..#.#",
+            "#......#",
+            "#.#..#.#",
+            "#..##..#",
+            ".#....#.",
+            "..####..",
+            "........",
+            "........",
+            "........",
+            "........",
+        )
+
+        /** CG 4's glyph 0xC4, a Katakana comma. */
+        val ALTERNATE_C4_GLYPH = listOf(
+            "........",
+            "........",
+            "........",
+            ".#......",
+            "..#.....",
+            "...#....",
+            "....#...",
+            "........",
+            "........",
+            "........",
+            "........",
+            "........",
+        )
+
+        /** Block graphics fill the whole cell, leading included. */
+        val FULL_BLOCK = List(CELL_HEIGHT) { "#".repeat(CELL_WIDTH) }
     }
 }
