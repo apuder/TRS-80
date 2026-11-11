@@ -338,12 +338,9 @@ float trs80_cassette_position(void)
 
 void trs80_set_sound_muted(int muted)
 {
-    if (muted) {
-        sdl_audio_muted = 1;
-        SDL_CloseAudio();
-    }
+    /* What piled up while nothing was playing it is not worth hearing late. */
     flush_audio_queue();
-    sdl_audio_muted = muted;
+    sdl_set_audio_muted(muted);
 }
 
 /* ------------------------------------------------------------ disk images */

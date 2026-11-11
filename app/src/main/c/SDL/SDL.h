@@ -55,10 +55,9 @@ typedef struct{
   void *userdata;
 } SDL_AudioSpec;
 
-extern int sdl_audio_muted;
-
 int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
 void SDL_CloseAudio(void);
+void sdl_set_audio_muted(int muted);
 void SDL_PauseAudio(int pause_on);
 void SDL_LockAudio(void);
 void SDL_UnlockAudio(void);

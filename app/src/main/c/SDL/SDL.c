@@ -302,9 +302,14 @@ int SDLCALL SDL_ShowCursor(int toggle)
 
 /* Audio */
 
-int sdl_audio_muted = 0;
+static int sdl_audio_muted = 0;
 
 static SDL_AudioSpec audioSpec;
+/*
+ * Whether the core has audio open, muted or not. Muting closes the backend
+ * behind the core's back, so this is what says to open it again on unmute.
+ */
+static int audio_open = 0;
 static pthread_mutex_t mutex_snd = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mutex_engine = PTHREAD_MUTEX_INITIALIZER;
 
@@ -321,11 +326,12 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
     obtained->channels = 1;
     obtained->silence = 0;
     memcpy(&audioSpec, obtained, sizeof(SDL_AudioSpec));
-    if (sdl_audio_muted) {
-        return 0;
-    }
     pthread_mutex_lock(&mutex_engine);
-    int result = trs80_audio_init(fillBuffer) == 1 ? 0 : -1;
+    int result = 0;
+    if (!sdl_audio_muted) {
+        result = trs80_audio_init(fillBuffer) == 1 ? 0 : -1;
+    }
+    audio_open = result == 0;
     pthread_mutex_unlock(&mutex_engine);
     return result;
 }
@@ -334,7 +340,31 @@ void SDL_CloseAudio(void)
 {
     // Can be called from different threads
     pthread_mutex_lock(&mutex_engine);
+    audio_open = 0;
     trs80_audio_shutdown();
+    pthread_mutex_unlock(&mutex_engine);
+}
+
+/*
+ * Not SDL's: mutes by closing the backend while the core carries on as though
+ * it were open, and unmutes by opening it again.
+ *
+ * The core only opens audio when a sound starts out of silence. Unmuting by
+ * clearing the flag alone left a sound already under way playing to nobody,
+ * until the machine had been quiet long enough for the core to close it --
+ * about two and a half seconds, which in a game that talks is the rest of the
+ * sentence, and in one that hums is never.
+ */
+void sdl_set_audio_muted(int muted)
+{
+    pthread_mutex_lock(&mutex_engine);
+    int was_muted = sdl_audio_muted;
+    sdl_audio_muted = muted;
+    if (muted) {
+        trs80_audio_shutdown();
+    } else if (was_muted && audio_open) {
+        trs80_audio_init(fillBuffer);
+    }
     pthread_mutex_unlock(&mutex_engine);
 }
 
