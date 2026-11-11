@@ -92,6 +92,10 @@ Things that are easy to lose and hard to diagnose:
   it at start-up and throws if it is missing, so the app aborts before drawing.
 - **`NSMotionUsageDescription` must be present**, or the system ends the app the
   moment the tilt keyboard asks CoreMotion for a reading.
+- **The audio session's category must be Playback.** `SoundOutput.kt` sets it at
+  start-up. Without it the app gets the default category, which Silent mode
+  mutes, so every machine is quiet on a phone set to silent. The simulator has
+  no Silent mode and plays regardless, so only a real device shows this.
 - **The window is made by `SceneDelegate`, not `AppDelegate`.** Built against the
   iOS 27 SDK, an app without `UIApplicationSceneManifest` traps at launch in
   `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`, before it

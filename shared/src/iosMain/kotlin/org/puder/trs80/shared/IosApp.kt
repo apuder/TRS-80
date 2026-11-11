@@ -27,6 +27,7 @@ import org.puder.trs80.shared.io.FileManager
 import org.puder.trs80.shared.io.TRS80_DIRECTORY
 import org.puder.trs80.shared.io.appDataDirectory
 import org.puder.trs80.shared.io.appFileSystem
+import org.puder.trs80.shared.io.playSoundInSilentMode
 import org.puder.trs80.shared.localstore.RomManager
 import org.puder.trs80.shared.storage.appSettings
 import platform.UIKit.UIViewController
@@ -55,8 +56,9 @@ private const val ANDROID_DP = 402f / 426.67f
  * The iOS host: storage, a Compose view controller, and the hardware keyboard.
  *
  * Everything on screen is [Trs80AppUi], which is shared. What is left here is
- * the three things only this platform can answer — where the app's data lives,
- * what draws a Compose tree, and how a real keyboard reaches the machine.
+ * the four things only this platform can answer — where the app's data lives,
+ * what draws a Compose tree, how a real keyboard reaches the machine, and what
+ * kind of sound the app makes.
  *
  * @param diskPath a disk image in the app bundle, seeded into the app's own
  * storage on first run. The ROMs are no longer among them: the app downloads
@@ -65,6 +67,7 @@ private const val ANDROID_DP = 402f / 426.67f
 @OptIn(ExperimentalForeignApi::class)
 fun Trs80ViewController(diskPath: String?): UIViewController {
     installIfNeeded(diskPath)
+    playSoundInSilentMode()
 
     val capture = KeyCapture()
     val compose = ComposeUIViewController {
